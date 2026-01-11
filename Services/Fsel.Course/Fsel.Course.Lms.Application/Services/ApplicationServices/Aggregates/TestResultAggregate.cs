@@ -34,7 +34,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             var testResultComposite = TestResultComposites.FirstOrDefault(t => t.IsBelongTo(id));
             if (testResultComposite != null)
             {
-                await testResultComposite.SubmitTest(new SubmitContext { Id = id, ScoringFormulaType = TestResult.Test?.ScoringFormulaType });
+                await testResultComposite.SubmitTest(new SubmitContext { Id = id, ScoringFormulaType = testResultComposite.Test?.ScoringFormulaType });
                 if (TestResult.Status == EnumResultStatus.Done)
                 {
                     SingleTestResult.Status = EnumResultStatus.Done;
@@ -269,6 +269,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                         HighestStreak = skill.HighestStreak,
                         PercentResult = skill.Percent,
                         CurrentSectionTimeCodeId = skill.CurrentSectionTimeCodeId,
+                        ScoringFormulaConfigs = skill.TestSection?.ScoringFormulaConfigs,
+                        ScoreModule = skill.ScoreModule,
                         SkillScores = skill.SkillScores,
                         SectionResultId = skill.Id,
                         CorrectCount = skill.CorrectCount,

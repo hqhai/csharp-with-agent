@@ -53,6 +53,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
         private readonly IRepository<TestAnswer> _testAnswerRepository;
         private readonly QuestionConverter _questionConverter;
         private readonly ITestSectionResultRepository _testSectionResultRepository;
+        private readonly IContinuousPronunciationAssessmentService _continuousPronunciation;
 
         public TestService(ITestCachingService testCachingService,
             ITestRepository testRepository,
@@ -65,7 +66,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             ISpeakingEvaluationAIService evaluationAIService,
             IRepository<TestAnswer> testAnswerRepository,
             QuestionConverter questionConverter,
-            ITestSectionResultRepository testSectionResultRepository)
+            ITestSectionResultRepository testSectionResultRepository,
+            IContinuousPronunciationAssessmentService continuousPronunciation)
         {
             _testCachingService = testCachingService;
             _testRepository = testRepository;
@@ -79,6 +81,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             _testAnswerRepository = testAnswerRepository;
             _questionConverter = questionConverter;
             _testSectionResultRepository = testSectionResultRepository;
+            _continuousPronunciation = continuousPronunciation;
         }
 
         public async Task<Test> GetHierachicalTestFirstOrDefault(Expression<Func<Test, bool>> predicate)
@@ -473,7 +476,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                         return;
                     }
 
-                    double pronScore = await _evaluationAIService.EvaluationSpeakingV1(testSection.Name, item.Answer?.ToString() ?? default);
+                    var pronunciation = await _continuousPronunciation.AssessPronunciationFromFileContinuousAsync(item.Answer?.ToString() ?? string.Empty, item.SpeechTextAnswer ?? string.Empty);
                     var testAnswer = testAnswers.FirstOrDefault(x => x.TestSectionId == testSection.Id);
                     if (testAnswer == null)
                     {
@@ -487,7 +490,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                         _testAnswerRepository.Add(testAnswer);
                     }
                     testAnswer.SpeechTextAnswer = item.SpeechTextAnswer;
-                    testAnswer.PronunciationScore = pronScore;
+                    testAnswer.PronunciationScore = pronunciation.PronunciationScore;
                     testAnswer.Answer = item.Answer;
                     testAnswer.Status = EnumAnswerStatus.Done;
                     if (!testAnswer.IsValid())

@@ -54,7 +54,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
 
         public double PercentResult { get; set; }
 
-        public List<BaseTestStateModel> Children { get; set; } = new List<BaseTestStateModel>();
+        public IList<BaseTestStateModel> Children { get; set; } = new List<BaseTestStateModel>();
 
         public void UpdateDetailInfo(Test? test)
         {
@@ -108,6 +108,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
         public double? ScoreModule { get; set; }
         public Guid? CurrentSectionTimeCodeId { get; set; }
         public IList<BaseTestStateModel> Children { get; set; } = new List<BaseTestStateModel>();
+        public IList<ScoringFormulaConfig>? ScoringFormulaConfigs { get; set; }
         public IList<SkillScores>? SkillScores { get; set; }
 
         public Guid? TestAnswerId { get; set; }
@@ -126,6 +127,8 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
             Name = section.Name ?? section.Skill?.Name;
             FilePath = section.Skill?.FilePath;
             Config = section.Config;
+            ScoringFormulaConfigs = section.ScoringFormulaConfigs;
+            TestLayoutType = section.LayoutType;
             foreach (var sectionResult in Children)
             {
                 if (sectionResult is not SectionStateModel sectionStateModel)

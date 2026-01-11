@@ -105,7 +105,12 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             {
                 foreach (var testAnswer in TestSectionResult.TestAnswers)
                 {
-                    Children.Add(new TestAnswerLeaf { Result = testAnswer, Parent = this, ServiceProvider = ServiceProvider });
+                    Children.Add(new TestAnswerLeaf
+                    {
+                        Result = testAnswer,
+                        Parent = this,
+                        ServiceProvider = ServiceProvider
+                    });
                 }
             }
             else if (TestSectionResult.SectionResults.Any())
