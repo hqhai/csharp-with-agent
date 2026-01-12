@@ -20,10 +20,12 @@ namespace Fsel.Course.Application.Commands.LessonCmd.V1i1
     public class DeleteLessonCommandHandler : IRequestHandler<DeleteLessonCommand, MethodResult<bool>>
     {
         private readonly ILessonRepository _lessonRepository;
+        private readonly ILessonResultRepository _lessonResultRepository;
 
-        public DeleteLessonCommandHandler(ILessonRepository lessonRepository)
+        public DeleteLessonCommandHandler(ILessonRepository lessonRepository, ILessonResultRepository lessonResultRepository)
         {
             _lessonRepository = lessonRepository;
+            _lessonResultRepository = lessonResultRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(DeleteLessonCommand request, CancellationToken cancellationToken)
@@ -41,6 +43,12 @@ namespace Fsel.Course.Application.Commands.LessonCmd.V1i1
             if (lesson.Status != Shared.Enums.EnumStatus.InActive)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.StatusLessonNotInActive), nameof(lesson.Status), lesson.Status);
+                return methodResult;
+            }
+
+            if (await _lessonResultRepository.ReadQueryable.AnyAsync(p => p.LessonId == lesson.Id, cancellationToken))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonUsed), nameof(lesson), lesson.Id);
                 return methodResult;
             }
 
