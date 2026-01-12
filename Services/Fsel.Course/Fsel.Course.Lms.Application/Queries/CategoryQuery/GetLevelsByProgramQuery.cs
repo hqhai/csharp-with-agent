@@ -149,7 +149,7 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
             }).ToList();
 
             var availableCourses = await _courseCachingService.GetAllAvailableCoursesAsync();
-            suggestLevels = suggestLevels.Where(x => availableCourses.Any(c => c.LevelId == x.Id)).ToList();
+            suggestLevels.ForEach(x => x.IsAvailableCourse = availableCourses.Any(c => c.LevelId == x.Id));
 
             return new MethodResult<List<SelectionLevelModel>> { Result = suggestLevels, StatusCode = 200 };
         }
