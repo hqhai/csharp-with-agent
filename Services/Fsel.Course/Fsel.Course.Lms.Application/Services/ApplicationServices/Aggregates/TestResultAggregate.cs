@@ -272,6 +272,12 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                         ScoringFormulaConfigs = skill.TestSection?.ScoringFormulaConfigs,
                         ScoreModule = skill.ScoreModule,
                         SkillScores = skill.SkillScores,
+                        TestScores = skill.TestScores.OrderBy(x => x.CreatedDate).Select(x => new TestScoreModel
+                        {
+                            Criteria = x.Criteria,
+                            Feedback = x.Feedback,
+                            Score = x.Score
+                        }).ToList(),
                         SectionResultId = skill.Id,
                         CorrectCount = skill.CorrectCount,
                         TotalCount = skill.CorrectTotal,

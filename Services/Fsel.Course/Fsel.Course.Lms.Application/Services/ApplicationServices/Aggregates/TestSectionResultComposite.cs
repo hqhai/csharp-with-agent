@@ -9,6 +9,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
     using Fsel.Course.Domain.Entities.TestConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Models.EntityModels.PlacementTestModels;
+    using Fsel.Course.Domain.Models.EntityModels.TestModels;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
@@ -39,6 +40,12 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 PercentResult = TestSectionResult.Percent,
                 SkillScores = TestSectionResult.SkillScores,
                 ScoreModule = TestSectionResult.ScoreModule,
+                TestScores = TestSectionResult.TestScores.OrderBy(x => x.CreatedDate).Select(x => new TestScoreModel
+                {
+                    Score = x.Score,
+                    Feedback = x.Feedback,
+                    Criteria = x.Criteria,
+                }).ToList(),
                 FilePath = TestSection?.Skill?.FilePath,
                 UpdatedDate = TestSectionResult?.UpdatedDate ?? TestSectionResult?.CreatedDate
             };
@@ -65,6 +72,12 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 WorkingTime = TestSectionResult.WorkingTime,
                 Children = new List<BaseTestStateModel>(),
                 FilePath = TestSection?.Skill?.FilePath,
+                TestScores = TestSectionResult.TestScores.OrderBy(x => x.CreatedDate).Select(x => new TestScoreModel
+                {
+                    Score = x.Score,
+                    Feedback = x.Feedback,
+                    Criteria = x.Criteria,
+                }).ToList(),
                 CorrectTotal = TestSectionResult.CorrectTotal,
                 CurrentSectionTimeCodeId = TestSectionResult.CurrentSectionTimeCodeId,
                 HighestStreak = TestSectionResult.HighestStreak,
