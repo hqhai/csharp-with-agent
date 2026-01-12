@@ -221,7 +221,13 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
             if (scoringFormulaType == EnumScoringFormulaType.Percent)
             {
                 var percent = testSectionResult.TestSection?.Percent ?? default;
-                testSectionResult.PercentModule = NumberHelper.ConvertDoublePercent(sectionResults.Sum(x => x.PercentModule) * percent);
+                testSectionResult.PercentModule = NumberHelper.ConvertDoublePercent(sectionResults.Sum(x => x.PercentModule) * percent, 2);
+            }
+            else if (scoringFormulaType == EnumScoringFormulaType.BandScore)
+            {
+                var scores = testSectionResult.SkillScores[0].Scores;
+                var percent = testSectionResult.TestSection?.Percent ?? default;
+                testSectionResult.ScoreModule = NumberHelper.ConvertDoublePercent(scores * percent, 2);
             }
 
             // 7) Persist
@@ -262,7 +268,11 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
             // =========================
             if (testResult.Test?.ScoringFormulaType == EnumScoringFormulaType.Percent)
             {
-                testResult.PercentModule = NumberHelper.ConvertDoublePercent(rootSectionResults.Sum(x => x.PercentModule));
+                testResult.PercentModule = rootSectionResults.Sum(x => x.PercentModule);
+            }
+            else if (testResult.Test?.ScoringFormulaType == EnumScoringFormulaType.BandScore)
+            {
+                testResult.Score = rootSectionResults.Sum(x => x.ScoreModule);
             }
 
             // Persist TestResult

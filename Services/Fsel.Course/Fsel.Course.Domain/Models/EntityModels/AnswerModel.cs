@@ -8,7 +8,9 @@ namespace Fsel.Course.Domain.Models.EntityModels
     {
         public int CorrectCount { get; set; }
         public object? Answer { get; set; }
+        public string? GradingAlFeedback { get; set; }
         public bool? IsCorrect { get; set; }
+        public string? SpeechTextAnswer { get; set; }
 
         public EnumCorrectStatus? CorrectStatus
         {
