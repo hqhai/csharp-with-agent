@@ -10,6 +10,8 @@ namespace Fsel.Course.Domain.Models.EntityModels.V1i1
     {
         public string? Name { get; set; }
 
+        public string? Code { get; set; }
+
         public EnumStatus Status { get; set; }
 
         public Guid? LevelId { get; set; }
@@ -28,12 +30,14 @@ namespace Fsel.Course.Domain.Models.EntityModels.V1i1
 
         public Guid OriginalId { get; set; }
     }
+
     public class SkillDTO
     {
         public string Name { get; set; }
 
         public string FilePath { get; set; }
     }
+
     public class VideoSearchModel
     {
         public Guid? TeacherId { get; set; }
