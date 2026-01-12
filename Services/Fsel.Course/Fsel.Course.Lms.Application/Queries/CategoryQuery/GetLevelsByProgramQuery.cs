@@ -13,10 +13,9 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
     using Domain.Enums;
     using Domain.IRepositories;
     using Domain.Models.EntityModels;
-    using Fsel.Course.Infrastructure.Repositories;
+    using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
-    using Services.ApplicationServices;
     using Services.UserServices;
     using Shared.Helpers;
 
@@ -29,34 +28,33 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
     {
         private readonly IMapper _mapper;
         private readonly ILevelRepository _levelRepository;
-        private readonly ICategoryService _categoryService;
+        private readonly ICourseCachingService _courseCachingService;
         private readonly IRepository<TestGroupResult> _testGroupResult;
         private readonly ICategoryRepository _categoryRepository;
         private readonly ISubjectConditionRepository _subjectConditionRepository;
         private readonly IUserService _userService;
 
         public GetLevelsByProgramQueryHandler(
-            ICategoryService categoryService,
             ICategoryRepository categoryRepository,
             IRepository<TestGroupResult> testGroupResult,
             ISubjectConditionRepository subjectConditionRepository,
             IUserService userService,
             ILevelRepository levelRepository,
+            ICourseCachingService courseCachingService,
             IMapper mapper)
         {
-            _categoryService = categoryService;
             _categoryRepository = categoryRepository;
             _testGroupResult = testGroupResult;
             _subjectConditionRepository = subjectConditionRepository;
             _userService = userService;
             _mapper = mapper;
             _levelRepository = levelRepository;
+            _courseCachingService = courseCachingService;
         }
 
         public async Task<MethodResult<List<SelectionLevelModel>>> Handle(GetLevelsByProgramQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-
             var studentResult = await _userService.GetStudentByUserIdAsync(request.UserId);
             if (!studentResult.IsSuccessStatusCode)
             {
@@ -149,6 +147,9 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
 
                 return selectionLevel;
             }).ToList();
+
+            var availableCourses = await _courseCachingService.GetAllAvailableCoursesAsync();
+            suggestLevels = suggestLevels.Where(x => availableCourses.Any(c => c.LevelId == x.Id)).ToList();
 
             return new MethodResult<List<SelectionLevelModel>> { Result = suggestLevels, StatusCode = 200 };
         }
