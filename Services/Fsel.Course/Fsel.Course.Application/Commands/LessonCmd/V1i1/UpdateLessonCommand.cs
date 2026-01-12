@@ -85,6 +85,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd.V1i1
                 async (oldEntity, newEntity) =>
                 {
                     oldEntity.Name = newEntity.Name;
+                    oldEntity.Code = newEntity.Code;
                     oldEntity.InstructionContent = newEntity.InstructionContent;
                     oldEntity.VideoCount = newEntity.VideoCount;
                     oldEntity.ClassForumCount = newEntity.ClassForumCount;

@@ -6,6 +6,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
     using Entities.TestConfigs;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
+    using Fsel.Course.Domain.Models.EntityModels.TestModels;
     using Newtonsoft.Json;
     using Shared.Enums;
 
@@ -37,6 +38,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
     {
         public EnumResultStatus Status { get; set; }
         public DateTime? UpdatedDate { get; set; }
+        public IList<TestScoreModel>? TestScores { get; set; }
     }
 
     public class TestStateModel : BaseTestStateModel
@@ -54,7 +56,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
 
         public double PercentResult { get; set; }
 
-        public List<BaseTestStateModel> Children { get; set; } = new List<BaseTestStateModel>();
+        public IList<BaseTestStateModel> Children { get; set; } = new List<BaseTestStateModel>();
 
         public void UpdateDetailInfo(Test? test)
         {
@@ -108,8 +110,8 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
         public double? ScoreModule { get; set; }
         public Guid? CurrentSectionTimeCodeId { get; set; }
         public IList<BaseTestStateModel> Children { get; set; } = new List<BaseTestStateModel>();
+        public IList<ScoringFormulaConfig>? ScoringFormulaConfigs { get; set; }
         public IList<SkillScores>? SkillScores { get; set; }
-
         public Guid? TestAnswerId { get; set; }
         public AnswerModel? Answer { get; set; }
 
@@ -126,6 +128,9 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
             Name = section.Name ?? section.Skill?.Name;
             FilePath = section.Skill?.FilePath;
             Config = section.Config;
+            ScoringFormulaConfigs = section.ScoringFormulaConfigs;
+            TestLayoutType = section.LayoutType;
+
             foreach (var sectionResult in Children)
             {
                 if (sectionResult is not SectionStateModel sectionStateModel)

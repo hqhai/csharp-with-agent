@@ -280,6 +280,8 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
                     Answer = sectionAns.Answer,
                     CorrectCount = sectionAns.CorrectCount,
                     IsCorrect = sectionAns.IsCorrect,
+                    GradingAlFeedback = sectionAns.GradingAlFeedback,
+                    SpeechTextAnswer = sectionAns.SpeechTextAnswer,
                     Status = model.Status == EnumResultStatus.Done ? sectionAns.Status : EnumAnswerStatus.Process
                 };
             }
@@ -307,6 +309,8 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
                 {
                     Answer = ans.Answer,
                     CorrectCount = ans.CorrectCount,
+                    SpeechTextAnswer = ans.SpeechTextAnswer,
+                    GradingAlFeedback = ans.GradingAlFeedback,
                     IsCorrect = ans.IsCorrect,
                     Status = ans.Status
                 };

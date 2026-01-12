@@ -15,6 +15,6 @@ namespace Fsel.Course.Domain.Models.EntityModels.TestModels
 
         public EnumResultStatus? Status { get; set; }
 
-        public List<BaseTestStateModel> TestStates { get; set; } = new List<BaseTestStateModel>();
+        public IList<BaseTestStateModel> TestStates { get; set; } = new List<BaseTestStateModel>();
     }
 }

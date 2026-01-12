@@ -8,7 +8,6 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i2
     using Common.ActionResults;
     using Common.Attributes;
     using Common.Constants;
-    using Domain.Enums;
     using Domain.Models.EntityModels.PlacementTestModels;
     using Domain.Models.EntityModels.TestModels;
     using MediatR;

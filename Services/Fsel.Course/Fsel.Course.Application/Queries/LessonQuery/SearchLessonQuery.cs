@@ -51,6 +51,7 @@ namespace Fsel.Course.Application.Queries.LessonQuery
                      {
                          Id = x.Id,
                          Name = x.Name,
+                         Code = x.Code,
                          CourseLevel = x.CourseLevel,
                          TeacherId = x.LessonVideos.Where(y => y.Video != null)
                                                       .Select(y => y.Video).Select(x => x!.TeacherId).FirstOrDefault(),

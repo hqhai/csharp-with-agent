@@ -19,6 +19,14 @@ namespace Fsel.Course.Domain.Entities
         public string? Name { get; set; }
 
         /// <summary>
+        /// Code bài test
+        /// </summary>
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        [MaxLength(200, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [RegularExpression(@"^[^<>]*$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
+        public string? Code { get; set; }
+
+        /// <summary>
         /// Nội dung hướng dẫn bài test
         /// </summary>
         [MaxLength(2000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]

@@ -83,7 +83,10 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
                 Answers = request.Answers,
                 IsSubmit = request.IsSubmit,
             });
-            await _submitAiTestLayOutPublisher.Publish(new BaseQueueModel { QueueId = request.SectionResultId.ToString() }, cancellationToken);
+            if (request.IsSubmit)
+            {
+                await _submitAiTestLayOutPublisher.Publish(new BaseQueueModel { QueueId = request.SectionResultId.ToString() }, cancellationToken);
+            }
 
             methodResult.Result = await aggregate.ExpotStateData();
             return methodResult;
