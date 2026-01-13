@@ -455,7 +455,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             // Group theo CourseSkill (lấy từ timeCodeQuestions)
             var groupedBySkill = timeCodeQuestions
                 .Where(x => x.Question != null)
-                .GroupBy(x => new { x.CourseSkill, x.Skill });     // nếu property tên khác thì sửa lại chỗ này
+                .GroupBy(x => new { x.CourseSkill, x.Skill.Id });     // nếu property tên khác thì sửa lại chỗ này
 
             var ungradedScores = new List<SkillScores>();
             var gradedScores = new List<SkillScores>();
@@ -463,7 +463,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             foreach (var skillGroup in groupedBySkill)
             {
                 var courseSkill = skillGroup.Key.CourseSkill;
-                var skill = skillGroup.Key.Skill;
+                var skill = skillGroup.First().Skill;
 
                 // Câu hỏi chưa chấm (Ungraded)
                 var ungradedQuestions = skillGroup
