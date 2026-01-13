@@ -148,7 +148,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                 IsCourseCompleted = courseResult?.Status == EnumResultStatus.Done,
                 StartDate = courseResult != null && courseResult.ProcessDate.HasValue ? courseResult.ProcessDate.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam) : null,
                 TotalActiveDuration = featureAccessTime?.AccessTime,
-                LastAccessedDate = lastDate.HasValue ? lastDate.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam) : default,
+                LastAccessedDate = lastDate.HasValue ? lastDate.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam) : null,
                 ProgramName = course?.Program?.Name,
                 SubjectName = course?.Program?.CategoryParent?.Name,
                 LevelName = course?.Level?.Name,

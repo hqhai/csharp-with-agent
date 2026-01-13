@@ -288,6 +288,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             var video = await _videoRepository.ReadQueryable
                                                   .Where(x => x.Id == id)
                                                   .Include(v => v.VideoTimeCodes)
+                                                  .Include(v => v.VideoSubFilePaths)
                                                   .FirstOrDefaultAsync();
             return video;
         }
