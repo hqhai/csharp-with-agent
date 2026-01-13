@@ -243,7 +243,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
             {
                 await PublishAIClassForumResponseAsync(classForumDetailResult, classForum, request, cancellationToken);
 
-                if (classForum.CourseSkill == EnumCourseSkill.Speaking)
+                if (classForum.Layout == EnumClassForumLayout.Speaking)
                 {
                     await _classForumPronunciationPublisher.Publish(new ClassForumPronunciationConsumerModel { ClassForumDetailResultId = classForumDetailResult.Id }, cancellationToken);
                 }
