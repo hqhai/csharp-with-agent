@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Infrastructure.ValueSettings;
@@ -46,10 +47,10 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
         private readonly AppSetting _appSetting;
         private readonly ILogger<AggregateDataWeeklyReportCommandHandler> _logger;
         private readonly IWeeklyReportRepository _weeklyReportRepository;
-
+        private readonly ISkillRepository _skillRepository;
         private const int ChunkSize = 10000;
 
-        public AggregateDataWeeklyReportCommandHandler(IUserService userService, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, ISystemService systemService, ILessonResultRepository lessonResultRepository, IUnitResultRepository unitResultRepository, IMediator mediator, AppSetting appSetting, ILogger<AggregateDataWeeklyReportCommandHandler> logger, IWeeklyReportRepository weeklyReportRepository)
+        public AggregateDataWeeklyReportCommandHandler(IUserService userService, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, ISystemService systemService, ILessonResultRepository lessonResultRepository, IUnitResultRepository unitResultRepository, IMediator mediator, AppSetting appSetting, ILogger<AggregateDataWeeklyReportCommandHandler> logger, IWeeklyReportRepository weeklyReportRepository, ISkillRepository skillRepository)
         {
             _userService = userService;
             _finalTestResultRepository = finalTestResultRepository;
@@ -61,6 +62,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
             _appSetting = appSetting;
             _logger = logger;
             _weeklyReportRepository = weeklyReportRepository;
+            _skillRepository = skillRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(AggregateDataWeeklyReportCommand request, CancellationToken cancellationToken)
@@ -149,6 +151,8 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
 
             var weeklyReportEntities = new List<WeeklyReport>();
 
+            var skills = await _skillRepository.Queryable.ToListAsync(cancellationToken);
+
             foreach (var item in students)
             {
                 _logger.LogInformation("Index {index} of {total}, Email: {email}", students.IndexOf(item) + 1, students.Count, item.User.Email);
@@ -193,7 +197,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
 
                 AddTimeIntoTemplate(weeklyReport, featureAccessTimes, previousFeatureAccessTimes);
 
-                var unitsResult = await _unitResultRepository.Queryable.Include(un => un.Unit).Include(co => co.Course).Where(p => p.Status != EnumResultStatus.Unfinished && p.Status != EnumResultStatus.New && p.StudentId == item.Id).OrderBy(n => n.UpdatedDate).ToListAsync(cancellationToken);
+                var unitsResult = await _unitResultRepository.Queryable.Include(un => un.Unit).Include(co => co.Course).ThenInclude(p => p.Program).Where(p => p.Status != EnumResultStatus.Unfinished && p.Status != EnumResultStatus.New && p.StudentId == item.Id).OrderBy(n => n.UpdatedDate).ToListAsync(cancellationToken);
 
                 //var unitDoneCount = unitsResult.Where(p => p.Status == EnumResultStatus.Done).Count();
                 var courseType = unitsResult.FirstOrDefault()?.Course?.CourseType;
@@ -214,8 +218,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                 foreach (var unit in unitsResult)
                 {
                     var lessonResultsDone = await _lessonResultRepository.Queryable.Include(p => p.VideoResult).Include(x => x.ClassForumResults)
-                        .Include(x => x.Lesson)
-                        .ThenInclude(x => x.UnitLessons.Where(x => x.UnitId == unit.UnitId))
+                        .Include(x => x.UnitModule)
                         .Where(p => p.StudentId == item.Id && p.Status == EnumResultStatus.Done && p.UnitId == unit.UnitId)
                         .Where(p => p.UpdatedDate.HasValue && p.UpdatedDate.Value.Date >= lastFridayAt13.Date && p.UpdatedDate.Value.Date < currentDate.Date)
                         .Where(x => x.ClassForumResults.Any(x => x.Status.HasValue))
@@ -227,9 +230,11 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
 
                         for (var i = 0; i < lessonResultsDone.Count; i++)
                         {
-                            unitName += string.Format(CultureInfo.InvariantCulture, lessonNameHtml, lessonResultsDone[i].Lesson?.UnitLessons.FirstOrDefault(x => x.UnitId == unit.UnitId)?.DisplayOrder, lessonResultsDone[i].VideoResult?.CreatedDate.Date.ToString("dd-MM-yyyy", CultureInfo.CurrentCulture), lessonResultsDone[i].UpdatedDate!.Value.ToString("dd-MM-yyyy", CultureInfo.CurrentCulture));
+                            unitName += string.Format(CultureInfo.InvariantCulture, lessonNameHtml, lessonResultsDone[i].UnitModule?.DisplayOrder, lessonResultsDone[i].VideoResult?.CreatedDate.Date.ToString("dd-MM-yyyy", CultureInfo.CurrentCulture), lessonResultsDone[i].UpdatedDate!.Value.ToString("dd-MM-yyyy", CultureInfo.CurrentCulture));
 
-                            foreach (var ls in lessonResultsDone[i].SkillScores!.OrderBy(x => x.Skill))
+                            var skillScores = lessonResultsDone[i].SkillScores?.OrderBy(x => x.Skill).ToList();
+
+                            foreach (var ls in skillScores ?? new List<SkillScores>())
                             {
                                 //if (i > 0)
                                 //{
@@ -253,8 +258,9 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                                 //    var html = string.Format(CultureInfo.InvariantCulture, HtmlSetting.CompareSkill1, icon, skillName, ls.Percent, 100 - ls.Percent, ls.Percent);
                                 //    unitName += html;
                                 //}
-                                var (color, skillName, icon) = SendMailHelper.ConvertEnum(ls.Skill);
-                                var html = string.Format(CultureInfo.InvariantCulture, skillScoresHtml, icon, skillName, ls.Percent, ls.Percent < 100 ? SendMailSetting.NoBorderRight : SendMailSetting.Border, color, 100 - ls.Percent, ls.Percent > 0 ? SendMailSetting.NoBorderLeft : SendMailSetting.Border, ls.Percent + "%");
+
+                                var skill = skills.FirstOrDefault(x => x.Id == ls.SkillId);
+                                var html = string.Format(CultureInfo.InvariantCulture, skillScoresHtml, skill?.FilePath, skill?.Name, ls.Percent, ls.Percent < 100 ? SendMailSetting.NoBorderRight : SendMailSetting.Border, "rgb(189,134,227)", 100 - ls.Percent, ls.Percent > 0 ? SendMailSetting.NoBorderLeft : SendMailSetting.Border, ls.Percent + "%");
                                 unitName += html;
                             }
                         }
@@ -380,7 +386,6 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                         Param = weeklyReport
                     });
                 }
-
             }
 
             await _weeklyReportRepository.ExecuteTransactionAsync(async () =>
