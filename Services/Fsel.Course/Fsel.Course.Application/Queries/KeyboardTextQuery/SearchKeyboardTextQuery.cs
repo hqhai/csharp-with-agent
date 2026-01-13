@@ -35,7 +35,6 @@ namespace Fsel.Course.Application.Queries.KeyboardTextQuery
             if (request.Text.HasValue)
             {
                 int unicode = request.Text.Value;
-
                 querys = querys.Where(x => x.Unicode == unicode);
             }
 

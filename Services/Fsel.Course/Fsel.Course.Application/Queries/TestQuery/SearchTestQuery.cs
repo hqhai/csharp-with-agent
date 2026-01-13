@@ -58,7 +58,10 @@ namespace Fsel.Course.Application.Queries.TestQuery
                     query = queryCode.Union(queryName);
                 }
             }
-
+            if (request.Version.HasValue)
+            {
+                query = query.Where(x => x.VersionType == request.Version.Value);
+            }
             if (request.LevelId.HasValue)
             {
                 query = query.Where(m => m.LevelId == request.LevelId);
@@ -84,8 +87,8 @@ namespace Fsel.Course.Application.Queries.TestQuery
                                 UpdatedDate = baseQ.UpdatedDate,
                                 UpdatedFullName = baseQ.UpdatedFullName,
                                 UpdatedUserId = baseQ.UpdatedUserId,
-                                LevelName = program.Name,
-                                ProgramName = level.Name,
+                                LevelName = level.Name,
+                                ProgramName = program.Name,
                                 Name = baseQ.Name,
                                 Code = baseQ.Code,
                                 OriginalId = baseQ.OriginalId,

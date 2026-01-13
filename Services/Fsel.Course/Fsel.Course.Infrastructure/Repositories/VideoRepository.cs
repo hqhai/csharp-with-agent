@@ -1,8 +1,10 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using AutoMapper;
+using Fsel.Common.Enums;
 using Fsel.Core.Base;
 using Fsel.Course.Domain.Entities;
+using Fsel.Course.Domain.Entities.V1i1;
 using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.EntityModels;
@@ -18,23 +20,105 @@ namespace Fsel.Course.Infrastructure.Repositories
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly IMapper _mapper;
         private readonly ILessonRepository _lessonRepository;
+        private readonly IVideoResultRepository _videoResultRepository;
         private readonly ILogger<VideoRepository> _logger;
         private readonly ILessonModuleRepository _lessonModuleRepository;
 
-        public VideoRepository(CourseDbContext dbContext,
+        public VideoRepository(
+            ILessonResultRepository lessonResultRepository,
+            ILessonRepository lessonRepository,
+            IVideoResultRepository videoResultRepository,
+            ILogger<VideoRepository> logger,
+            ILessonModuleRepository lessonModuleRepository,
+            CourseDbContext dbContext,
             CourseReadDbContext courseReadDbContext,
             AuthContext authContext,
-            ILessonResultRepository lessonResultRepository,
-            AutoMapper.IMapper mapper,
-            ILessonRepository lessonRepository,
-            ILogger<VideoRepository> logger,
-            ILessonModuleRepository lessonModuleRepository) : base(dbContext, courseReadDbContext, authContext, mapper)
+            IMapper mapper) : base(dbContext, courseReadDbContext, authContext, mapper)
         {
             _lessonResultRepository = lessonResultRepository;
             _mapper = mapper;
             _lessonRepository = lessonRepository;
+            _videoResultRepository = videoResultRepository;
             _logger = logger;
             _lessonModuleRepository = lessonModuleRepository;
+        }
+
+        public async Task<(IDictionary<Guid, (Video, LessonModule, VideoResult)>, IDictionary<Guid, Video>)> BuildVideoLookupsAsync(LessonResult? lessonResult, IList<LessonModule> lessonModules)
+        {
+            var videoOriginalIds = lessonModules
+                .Where(x => x.LessonConfigType == EnumLessonConfigType.Video)
+                .Select(x => new { x.OriginalId, x.Id })
+                .Distinct()
+                .ToHashSet();
+
+            if (!videoOriginalIds.Any())
+            {
+                return (new Dictionary<Guid, (Video, LessonModule, VideoResult)>(),
+                        new Dictionary<Guid, Video>());
+            }
+            var videoResultsByOriginalId = new Dictionary<Guid, (Video, LessonModule, VideoResult)>();
+            var pendingVideoOriginalIds = new List<Guid>();
+            if (lessonResult != null)
+            {
+                var videoResults = await (from baseQ in _videoResultRepository.ReadQueryable
+                                          where baseQ.LessonResultId == lessonResult.Id
+                                          join lessonModule in _lessonModuleRepository.ReadQueryable on baseQ.LessonModuleId equals lessonModule.Id
+                                          join video in ReadQueryable on baseQ.VideoId equals video.Id
+                                          select new
+                                          {
+                                              Video = video,
+                                              LessonModule = lessonModule,
+                                              VideoResult = baseQ
+                                          }).ToListAsync();
+
+                var videoOriginalIdsHasResult = videoResults
+                          .Where(x => x.Video != null)
+                          .Select(x => new
+                          {
+                              OriginalId = x.Video.OriginalId,
+                              Id = x.LessonModule.Id
+                          }).ToHashSet();
+
+                videoResultsByOriginalId = videoResults
+                          .Where(x => x.Video != null)
+                          .ToDictionary(
+                              x => x.LessonModule.Id,
+                              x => (Video: x.Video!, LessonModule: x.LessonModule, VideoResult: x.VideoResult));
+
+                pendingVideoOriginalIds = videoOriginalIds
+                            .Where(x => !videoOriginalIdsHasResult.Contains(
+                                new
+                                {
+                                    x.OriginalId,
+                                    x.Id
+                                }))
+                            .Select(x => x.OriginalId)   // <- chọn ra Guid
+                            .Distinct()
+                            .ToList();
+            }
+            else
+            {
+                pendingVideoOriginalIds = videoOriginalIds.Select(x => x.OriginalId)   // <- chọn ra Guid
+                            .Distinct()
+                            .ToList();
+            }
+
+            var videoDics = await GetVideoDicAsync(pendingVideoOriginalIds);
+            return (videoResultsByOriginalId, videoDics);
+        }
+
+        public async Task<IDictionary<Guid, Video>> GetVideoDicAsync(IList<Guid>? originalIds)
+        {
+            if (originalIds == null || originalIds.Count == 0)
+            {
+                return new Dictionary<Guid, Video>();
+            }
+
+            var videos = await ReadQueryable.WhereBulkContains(originalIds, x => x.OriginalId)
+                                            .Where(x => x.VersionStatus == EnumVersionStatus.LastVersion)
+                                            .ToListAsync();
+
+            return videos.ToDictionary(x => x.OriginalId);
         }
 
         public async Task<bool> IsVideoUsed(Guid? id)
@@ -65,21 +149,29 @@ namespace Fsel.Course.Infrastructure.Repositories
 
         public async Task<double> GetPercent(Guid courseId, Guid unitId, Guid? studentId)
         {
-            var lessonResults = await _lessonResultRepository.Queryable.Include(x => x.Lesson).Include(x => x.VideoResult).Where(x => x.CourseId == courseId && x.UnitId == unitId && x.StudentId == studentId).ToListAsync();
+            var lessonResults = await _lessonResultRepository.ReadQueryable.Include(x => x.Lesson)
+                                                             .Include(x => x.VideoResults)
+                                                             .Where(x => x.CourseId == courseId && x.UnitId == unitId && x.StudentId == studentId)
+                                                             .ToListAsync();
 
-            var lessonIds = lessonResults.Select(x => x.Lesson!.Id).ToList();
+            var lessonIds = lessonResults.Where(x => x.Lesson != null).Select(x => x.Lesson!.Id).ToList();
+            if (!lessonIds.Any())
+            {
+                return default;
+            }
+
             var videoResultIds = lessonResults.Where(x => x.VideoResult != null).Select(x => x.VideoResult!.Id).ToList();
 
-            var videoIds = await _lessonRepository.Queryable.Include(x => x.LessonVideos)
+            var videoIds = await _lessonRepository.ReadQueryable.Include(x => x.LessonVideos)
                                                 .WhereBulkContains(lessonIds, x => x.Id)
                                                 .SelectMany(x => x.LessonVideos)
                                                 .Select(x => x.VideoId)
                                                 .ToListAsync();
 
             var videos = await Queryable.Include(x => x.VideoTimeCodes)
-                                    .ThenInclude(x => x.VideoTimeCodeResults.Where(x => videoResultIds.Contains(x.VideoResultId)))
-                                    .Where(x => videoIds.Contains(x.Id))
-                                    .ToListAsync();
+                                        .ThenInclude(x => x.VideoTimeCodeResults.Where(x => videoResultIds.Contains(x.VideoResultId)))
+                                        .Where(x => videoIds.Contains(x.Id))
+                                        .ToListAsync();
 
             var videoTimeCodes = videos.SelectMany(x => x.VideoTimeCodes).Where(x => x.TimeCodeType == EnumTimeCodeType.UnitTest).ToList();
             var videoTimeCodeResults = videoTimeCodes.SelectMany(x => x.VideoTimeCodeResults).Where(x => videoResultIds.Contains(x.VideoResultId)).Where(x => x.Status == EnumResultStatus.Done).ToList();
@@ -94,6 +186,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                             .ThenInclude(x => x.Exercise)
                             .ThenInclude(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted))
                             .ThenInclude(x => x.Question)
+                            .Include(p => p.VideoSubFilePaths)
                             .Where(x => x.Id == id)
                             .Select(i => new VideoModel
                             {
@@ -109,6 +202,8 @@ namespace Fsel.Course.Infrastructure.Repositories
                                 Program = _mapper.Map<ProgramModel>(i.Program),
                                 Level = _mapper.Map<LevelModel>(i.Level),
                                 IsUseStudent = i.VideoResults.Any(),
+                                VersionType = i.VersionType,
+                                VideoPercentConfigs = i.VideoPercentConfigs,
                                 VideoTimeCodes = i.VideoTimeCodes.Where(x => !x.IsDeleted).OrderBy(x => x!.DisplayTime).Select(x => new VideoTimeCodeModel
                                 {
                                     Id = x.Id,
@@ -136,6 +231,11 @@ namespace Fsel.Course.Infrastructure.Repositories
                                         }).ToList()
                                     }).ToList(),
                                 }).ToList(),
+                                VideoSubFilePaths = i.VideoSubFilePaths.Where(o => !o.IsDeleted).Select(vs => new VideoSubFilePathModel()
+                                {
+                                    Language = vs.Language,
+                                    SubFilePath = vs.SubFilePath
+                                }).ToList()
                             }).FirstOrDefaultAsync();
         }
 

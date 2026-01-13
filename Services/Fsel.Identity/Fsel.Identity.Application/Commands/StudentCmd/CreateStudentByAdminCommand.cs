@@ -16,6 +16,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.Students;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using MediatR;
 
     public class CreateStudentByAdminCommand : CreateStudentByAdminCommandModel, IRequest<MethodResult<User>>
@@ -76,22 +77,17 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             {
                 UserName = request.Email,
                 Email = request.Email,
-                FullName = request.FullName,
+                FirstName = request.FullName.ParseFullName().FirstName,
+                LastName = request.FullName.ParseFullName().LastName,
+                Birthday = request.DateOfBirth,
                 PhoneNumber = request.PhoneNumber,
                 EmailConfirmed = true,
-                Human = new Human()
+                Student = new Student()
                 {
-                    FullName = request.FullName,
-                    PhoneNumber = request.PhoneNumber,
-                    Birthday = request.DateOfBirth,
-                    Email = request.Email,
-                    Student = new Student()
-                    {
-                        CreatedByParent = false,
-                        Occupation = "Student",
-                        School = request.School,
-                        SchoolId = request.SchoolId,
-                    }
+                    CreatedByParent = false,
+                    Occupation = "Student",
+                    School = request.School,
+                    SchoolId = request.SchoolId,
                 },
                 UserPlatforms = new List<UserPlatform>()
                 {
@@ -110,15 +106,15 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 methodResult.AddErrorBadRequest(user.ErrorMessages);
                 return methodResult;
             }
-            if (user.Human != null && !user.Human.IsValid())
+            if (user != null && !user.IsValid())
             {
-                methodResult.AddErrorBadRequest(user.Human.ErrorMessages);
+                methodResult.AddErrorBadRequest(user.ErrorMessages);
                 return methodResult;
             }
 
-            if (user.Human?.Student != null && !user.Human.Student.IsValid())
+            if (user?.Student != null && !user.Student.IsValid())
             {
-                methodResult.AddErrorBadRequest(user.Human.Student.ErrorMessages);
+                methodResult.AddErrorBadRequest(user.Student.ErrorMessages);
                 return methodResult;
             }
 
@@ -130,7 +126,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             }
             await _userManager.AddToRoleAsync(user, EnumRole.Student.ToString());
 
-            var updateCode = await _mediator.Send(new UpdateCodeStudentCommand { UserId = user.Id, Gender = EnumGender.Male, Birthday = user.Human.Birthday, SchoolName = user.Human.Student.School }, cancellationToken);
+            var updateCode = await _mediator.Send(new UpdateCodeStudentCommand { UserId = user.Id, Gender = EnumGender.Male, Birthday = user.Birthday, SchoolName = user.Student.School }, cancellationToken);
             if (!updateCode.IsOK)
             {
                 methodResult.AddErrorBadRequest(updateCode.ErrorMessages);

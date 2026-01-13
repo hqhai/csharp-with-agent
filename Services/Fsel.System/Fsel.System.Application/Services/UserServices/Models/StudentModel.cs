@@ -17,6 +17,7 @@ namespace Fsel.System.Application.Services.UserServices.Models
         public Guid? DistrictId { get; set; }
         public Guid? SchoolId { get; set; }
         public double NumberOfToken { get; set; }
-        public HumanModel? Human { get; set; }
+        public Guid UserId { get; set; }
+        public UserModel? User { get; set; }
     }
 }

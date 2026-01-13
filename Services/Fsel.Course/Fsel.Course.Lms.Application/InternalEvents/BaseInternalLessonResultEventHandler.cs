@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.InternalEvents
 {
+    using System.Linq.Dynamic.Core;
     using System.Threading;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
@@ -15,7 +16,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Helpers;
     using MediatR;
-    using Microsoft.AspNetCore.Cors.Infrastructure;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Logging;
 
@@ -25,6 +25,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         private const int PercentOccupyVideo = 40;
         private const int PercentOccupyClassForum = 30;
         private readonly ILessonResultRepository _lessonResultRepository;
+        private readonly IStudentGoalAggregateRepository _studentGoalAggregateRepository;
+        private readonly IStudentGoalSummaryRepository _studentGoalSummaryRepository;
         private readonly ILogger<BaseInternalLessonResultEventHandler> _logger;
 
         public BaseInternalLessonResultEventHandler(ISystemService systemService,
@@ -46,9 +48,14 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             IHomeWorkResultRepository homeWorkResultRepository,
             QuestBoardPublisher questBoardPublisher,
             IOrderService orderService,
-            ILessonNoteRepository lessonNoteRepository, NotificationMessagePublisher notificationMessagePublisher) : base(systemService, appSetting, courseUnitMockTestRepository, mediator, userService, logger, saveUserCourseSettingPublisher, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher, orderService, lessonNoteRepository, lessonResultRepository, notificationMessagePublisher)
+            ILessonNoteRepository lessonNoteRepository,
+            NotificationMessagePublisher notificationMessagePublisher,
+            IStudentGoalAggregateRepository studentGoalAggregateRepository,
+            IStudentGoalSummaryRepository studentGoalSummaryRepository) : base(systemService, appSetting, courseUnitMockTestRepository, mediator, userService, logger, saveUserCourseSettingPublisher, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher, orderService, lessonNoteRepository, lessonResultRepository, notificationMessagePublisher)
         {
             _lessonResultRepository = lessonResultRepository;
+            _studentGoalAggregateRepository = studentGoalAggregateRepository;
+            _studentGoalSummaryRepository = studentGoalSummaryRepository;
             _logger = logger;
         }
 
@@ -66,7 +73,9 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     // await DoQuestBoard(userId, courseId, cancellationToken);
 
                     lessonResult.Status = EnumResultStatus.Done;
+                    lessonResult.CompletionDate = DateTime.UtcNow;
                     await UpdateAsync(lessonResult, cancellationToken).ConfigureAwait(false);
+                    await UpdateStudentAggregateAsync(lessonResult).ConfigureAwait(false);
                     await _mediator.Send(new CreateLuckyTicketCommand() { LessonResultId = lessonResult.Id }, cancellationToken).ConfigureAwait(false);
                 }
                 else if (lessonResult.Status == EnumResultStatus.Done)
@@ -101,12 +110,55 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 {
                     bulk.IgnoreOnUpdateExpression = c => new { c.CourseId, c.StudentId, c.UnitId, c.LessonId };
                 });
-                await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
                 _logger.LogWarning($"Log Trigger Save LessonResult : {ex.Message} ");
             }
+        }
+
+        private async Task UpdateStudentAggregateAsync(LessonResult lessonResult)
+        {
+            var todayUtc = DateTime.UtcNow.Date;
+            var studentAggregate = await _studentGoalAggregateRepository.Queryable.Include(x => x.StudentGoalSummaries)
+                                    .FirstOrDefaultAsync(x => x.StudentId == lessonResult.StudentId && x.CourseId == lessonResult.CourseId);
+            if (studentAggregate == null)
+            {
+                return;
+            }
+            var studentSummary = studentAggregate.StudentGoalSummaries
+                                    .Where(x => x.StartDate.Date <= todayUtc.Date && x.EndDate.Date >= todayUtc.Date)
+                                    .FirstOrDefault();
+
+            if (studentSummary == null)
+            {
+                return;
+            }
+            studentSummary.TotalCompletedLessons += 1;
+            studentSummary.CompletedLessons += 1;
+            studentSummary.LastCompletedAt = DateTime.UtcNow;
+            studentSummary.ProgressStatus = EnumCombinedProgressHelper.GetProgressStatusFromCounts(studentSummary.CompletedLessons, studentSummary.LessonsPerWeek);
+
+            await _studentGoalSummaryRepository.BulkUpdateList(new List<StudentGoalSummary> { studentSummary }, bulk =>
+            {
+                bulk.ColumnInputExpression = c => new { c.TotalCompletedLessons, c.CompletedLessons, c.LastCompletedAt, c.ProgressStatus };
+            });
+
+            // các tuần trước tuần hiện tại
+            var pastSummaries = studentAggregate.StudentGoalSummaries
+                                                .Where(x => x.EndDate.Date < studentSummary.StartDate.Date)
+                                                .ToList();
+
+            var totalDone = pastSummaries.Sum(x => x.CompletedLessons);
+            var totalPlan = pastSummaries.Sum(x => x.LessonsPerWeek);
+
+            studentAggregate.TotalCompletedLessons += 1;
+            studentAggregate.CombinedProgress = EnumCombinedProgressHelper.GetCurrentCombineProgress(totalDone, totalPlan, studentSummary.ProgressStatus);
+            await _studentGoalAggregateRepository.BulkUpdateList(new List<StudentGoalAggregate> { studentAggregate }, bulk =>
+            {
+                bulk.ColumnInputExpression = c => new { c.TotalCompletedLessons, c.CombinedProgress };
+            });
         }
 
         private async Task<BaseScoreResultModule> GetLessonResult(LessonResult lessonResult, CancellationToken cancellationToken)

@@ -19,6 +19,14 @@ namespace Fsel.Course.Domain.Entities
         public string? Name { get; set; }
 
         /// <summary>
+        /// Code bài test
+        /// </summary>
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        [MaxLength(200, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [RegularExpression(@"^[^<>]*$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
+        public string? Code { get; set; }
+
+        /// <summary>
         /// Nội dung hướng dẫn bài test
         /// </summary>
         [MaxLength(2000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
@@ -53,6 +61,18 @@ namespace Fsel.Course.Domain.Entities
         /// số bài doc
         /// </summary>
         public int DocumentCount { get; set; }
+
+        /// <summary>
+        /// Mô tả ngắn về bài học
+        /// </summary>
+        [MaxLength(2000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? Description { get; set; }
+
+        /// <summary>
+        /// Ảnh cho bài học
+        /// </summary>
+        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? Thumbnail { get; set; }
 
         public EnumStatus Status { get; set; }
 

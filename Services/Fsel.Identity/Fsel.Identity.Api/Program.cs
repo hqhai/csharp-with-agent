@@ -1,19 +1,21 @@
 // Copyright (c) Atlantic. All rights reserved.
 
+using Fsel.Core.Entities;
 using Fsel.Core.Extensions;
 using Fsel.Identity.Application.Queries.IntegrationQuery;
 using Fsel.Identity.Application.Queues.Consumers;
 using Fsel.Identity.Application.Queues.Publishers;
-using Fsel.Identity.Application.Services;
 using Fsel.Identity.Application.Services.InteractionService;
 using Fsel.Identity.Application.Services.LmsCourseService;
 using Fsel.Identity.Application.Services.OrderService;
+using Fsel.Identity.Application.Services.SenderService;
 using Fsel.Identity.Application.Services.SystemService;
 using Fsel.Identity.Application.Services.TrainingService;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Infrastructure;
 using Fsel.Identity.Infrastructure.Common;
+using Fsel.Identity.Infrastructure.Providers;
 using Fsel.Identity.Infrastructure.Repositories;
 using Fsel.Identity.Infrastructure.ValueSettings;
 using Fsel.Shared.Constants;
@@ -23,17 +25,16 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 var appSetting = builder.AddAppSettings<AppSetting>();
 builder.AddServices(appSetting);
-builder.AddSwaggerGens(appSetting);
-builder.AddAuthenticationJwtBearers(appSetting);
-builder.AddDbContexts<UserDbContext, UserReadDbContext>();
+builder.AddOpenIdSwaggerGens(appSetting);
+builder.AddOpenIdAuthenticationJwtBearers(appSetting);
+builder.AddDbContexts<UserDbContext, UserReadDbContext, User, Role, UserClaimEntity, UserRole, UserLoginEntity, UserToken, RoleClaim>();
 
-builder.AddIdentity<User, Role, UserDbContext>();
-builder.AddAuthenticationIdentity();
+builder.AddConfigureIdentityOptions();
+builder.AddIdentity<User, Role, UserDbContext>().AddTotpProvider();
 
 //Repository
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserTokenRepository, UserTokenRepository>();
-builder.Services.AddScoped<IHumanRepository, HumanRepository>();
 builder.Services.AddScoped<ITeacherRepository, TeacherRepository>();
 builder.Services.AddScoped<IParentRepository, ParentRepository>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
@@ -68,6 +69,9 @@ builder.Services.AddScoped<IEventManagerRepository, EventManagerRepository>();
 builder.Services.AddScoped<IStudentEventLearningRecordRepository, StudentEventLearningRecordRepository>();
 builder.Services.AddScoped<IStudentEditHistoryRepository, StudentEditHistoryRepository>();
 builder.Services.AddScoped<IMenuRepository, MenuRepository>();
+builder.Services.AddScoped<ISchoolClassRepository, SchoolClassRepository>();
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddScoped<ISystemConfigRepository, SystemConfigRepository>();
 
 //Publisher
 builder.Services.AddScoped<QuestBoardPublisher>();
@@ -76,6 +80,7 @@ builder.Services.AddScoped<NotificationMessagePublisher>();
 builder.Services.AddScoped<CreateTokenHistoryPublisher>();
 builder.Services.AddScoped<CreateStudentsFromFilePublisher>();
 builder.Services.AddScoped<SendStudentsFromFilePublisher>();
+builder.Services.AddScoped<CreateStudentsAndParentsFromFilePublisher>();
 
 //Common
 builder.Services.AddScoped<SaveOtpCodeConverter>();
@@ -109,7 +114,8 @@ queues: new Dictionary<string, Type>
     { QueueSettings.UserQueue.NameQueue.JobRunEvents, typeof(JobRunEventsConsumer) },
     { QueueSettings.UserQueue.NameQueue.CheckUserDeletion, typeof(CheckUserDeletionConsumer) },
     { QueueSettings.UserQueue.NameQueue.CreateStudentsFromFile, typeof(CreateStudentsFromFileConsumer) },
-    { QueueSettings.UserQueue.NameQueue.AggregateDataStudentsInEvent, typeof(AggregateDataStudentsInEventConsumer) }
+    { QueueSettings.UserQueue.NameQueue.AggregateDataStudentsInEvent, typeof(AggregateDataStudentsInEventConsumer) },
+    { QueueSettings.UserQueue.NameQueue.CreateStudentsAndParentsFromFile, typeof(CreateStudentsAndParentsFromFileConsumer) }
 });
 var app = builder.Build();
 app.UseServices();

@@ -2,7 +2,6 @@
 
 namespace Fsel.Identity.Application.Queries.ManagerReportQuery
 {
-    using System.Diagnostics;
     using System.Globalization;
     using System.Text.RegularExpressions;
     using Fsel.Common.ActionResults;
@@ -34,21 +33,18 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
         private readonly AuthContext _authContext;
         private readonly ISystemService _systemService;
         private readonly UserManager<User> _userManager;
-        private readonly IHumanRepository _humanRepository;
 
         public SearchStudentQueryHandler(IStudentRepository studentRepository,
             IUserSchoolRepository userSchoolRepository,
             AuthContext authContext,
             ISystemService systemService,
-            UserManager<User> userManager,
-            IHumanRepository humanRepository)
+            UserManager<User> userManager)
         {
             _studentRepository = studentRepository;
             _userSchoolRepository = userSchoolRepository;
             _authContext = authContext;
             _systemService = systemService;
             _userManager = userManager;
-            _humanRepository = humanRepository;
         }
 
         public async Task<MethodResult<PagingItemsModel<StudentDtoModel>>> Handle(SearchStudentQuery request, CancellationToken cancellationToken)
@@ -69,30 +65,30 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
             {
                 queryStudent = queryStudent.WhereBulkContains(request.SchoolClasses, x => x.SchoolClass);
             }
-            if (!string.IsNullOrEmpty(request.SchoolGrade))
-            {
-                request.SchoolGrade = request.SchoolGrade.Trim().ToLower(CultureInfo.CurrentCulture);
-                queryStudent = queryStudent.Where(x => x.SchoolGrade == request.SchoolGrade);
-            }
-            if (!string.IsNullOrEmpty(request.SchoolClass))
-            {
-                request.SchoolClass = request.SchoolClass.Trim().ToLower(CultureInfo.CurrentCulture);
-                queryStudent = queryStudent.Where(x => x.SchoolClass == request.SchoolClass);
-            }
-            if (_authContext.Roles != null && _authContext.Roles.Contains(EnumRole.AdminSchool.ToString()))
+
+            var targetRoles = new List<string> { EnumRole.AdminSchool.ToString(), EnumRole.TeacherCampus.ToString(), EnumRole.AdminCampus.ToString() };
+            var hasMatchedRole = _authContext.Roles != null && _authContext.Roles.Any(r => targetRoles.Contains(r));
+            if (hasMatchedRole)
             {
                 var schoolId = await _userSchoolRepository.GetSchoolIdAsync();
                 queryStudent = queryStudent.Where(x => x.SchoolId.HasValue && x.SchoolId == schoolId);
             }
-            if (request.LearningStatus.HasValue)
+            if (request.LearningStatuses?.Any() == true)
             {
-                if (request.LearningStatus.Value == EnumLearningStatus.InProgress)
+                var hasInProgress = request.LearningStatuses.Contains(EnumLearningStatus.InProgress);
+                var hasExpired = request.LearningStatuses.Contains(EnumLearningStatus.Expired);
+
+                if (hasInProgress && !hasExpired)
                 {
                     queryStudent = queryStudent.Where(x => x.ExpiredDate.HasValue && x.ExpiredDate.Value > DateTime.UtcNow);
                 }
-                else
+                else if (!hasInProgress && hasExpired)
                 {
                     queryStudent = queryStudent.Where(x => x.ExpiredDate.HasValue && x.ExpiredDate.Value <= DateTime.UtcNow);
+                }
+                else if (hasInProgress && hasExpired)
+                {
+                    queryStudent = queryStudent.Where(x => x.ExpiredDate.HasValue);
                 }
             }
             if (request.IsLearning.HasValue)
@@ -114,20 +110,19 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
             }
 
             var query = from u in _userManager.Users
-                        join h in _humanRepository.Queryable on u.Id equals h.UserId
-                        join s in queryStudent on h.Id equals s.HumanId
-                        select new { User = u, Human = h, Student = s };
+                        join s in queryStudent on u.Id equals s.UserId
+                        select new { User = u, Student = s };
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 request.Keyword = request.Keyword.Trim().ToLower(CultureInfo.CurrentCulture);
                 if (request.Keyword.IsValidEmail())
                 {
-                    query = query.Where(m => m.Human != null && m.Human.Email == request.Keyword);
+                    query = query.Where(m => m.User != null && m.User.Email == request.Keyword);
                 }
                 else if (request.Keyword.IsValidPhoneNumber())
                 {
-                    query = query.Where(m => m.Human != null && m.Human.PhoneNumber == request.Keyword);
+                    query = query.Where(m => m.User != null && m.User.PhoneNumber == request.Keyword);
                 }
                 else if (Guid.TryParse(request.Keyword, out var guid))
                 {
@@ -156,10 +151,10 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
             var dataQuery = query.Select(i => new StudentDtoModel
             {
                 Id = i.Student.Id,
-                FullName = i.Human!.FullName,
-                BirthDay = i.Human.Birthday,
-                Email = i.Human.Email,
-                PhoneNumber = i.Human.PhoneNumber,
+                FullName = i.User!.FullName,
+                BirthDay = i.User.Birthday,
+                Email = i.User.Email,
+                PhoneNumber = i.User.PhoneNumber,
                 CourseLevel = i.Student.CourseLevel,
                 ExpiredDate = i.Student.ExpiredDate,
                 School = i.Student.School,
@@ -167,10 +162,10 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
                 SchoolGrade = i.Student.SchoolGrade,
                 SchoolId = i.Student.SchoolId,
                 CourseId = i.Student.CourseId,
-                UserId = i.Human.UserId,
+                UserId = i.Student.UserId,
                 CreatedDate = i.Student.CreatedDate,
                 BaseCourseLevel = i.Student.BaseCourseLevel,
-                UserName = i.User.UserName
+                UserName = i.User!.UserName
             });
             int totalItem = await dataQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = (await dataQuery.ToListAsync(cancellationToken))

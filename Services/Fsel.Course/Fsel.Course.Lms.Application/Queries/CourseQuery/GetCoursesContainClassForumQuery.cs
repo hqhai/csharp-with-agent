@@ -36,16 +36,16 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             var methodResult = new MethodResult<IList<CourseModel>>();
 
             var course = await _courseRepository.Queryable
-                                .Include(x => x.LessonResults)
-                                .Where(x => x.LessonResults.Select(x => x.ClassForumResults).FirstOrDefault() != null)
-                                .Select(x => new CourseModel
-                                {
-                                    Id = x.Id,
-                                    Name = x.Name,
-                                    CreatedDate = x.CreatedDate,
-                                    CourseType = x.CourseType,
-                                    CourseLevel = x.CourseLevel,
-                                }).ApplySort(request).ToListAsync(cancellationToken);
+                .Include(x => x.LessonResults)
+                .Where(x => x.LessonResults.Select(x => x.ClassForumResults).FirstOrDefault() != null)
+                .Select(x => new CourseModel
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                    CreatedDate = x.CreatedDate,
+                    CourseType = x.CourseType,
+                    LevelId = x.LevelId,
+                }).ApplySort(request).ToListAsync(cancellationToken);
 
             methodResult.Result = course.Where(x => x.CourseType == EnumCourseType.Academic).ToList();
             methodResult.StatusCode = StatusCodes.Status200OK;

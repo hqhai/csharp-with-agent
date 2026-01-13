@@ -13,6 +13,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
     using Fsel.Course.Application.Commands.FlowCmd;
     using Fsel.Course.Application.Commands.ProgramCmd;
     using Fsel.Course.Application.Queries.CategoryQuery;
+    using Fsel.Course.Application.Queries.LevelQuery;
     using Fsel.Course.Application.Queries.ProgramQuery;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Shared.Constants;

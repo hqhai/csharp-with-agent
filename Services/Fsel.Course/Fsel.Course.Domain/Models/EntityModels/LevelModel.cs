@@ -17,5 +17,19 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public int LevelOrder { get; set; }
 
         public IList<SkillViewModel>? Skils { get; set; }
+
+    }
+
+    public class SelectionLevelModel : LevelModel
+    {
+        public bool CanSelect { get; set; }
+
+        public Guid ProgramId { get; set; }
+
+        public string? CourseType { get; set; }
+
+        public bool IsCurrentLevel { get; set; }
+
+        public bool IsAvailableCourse { get; set; }
     }
 }

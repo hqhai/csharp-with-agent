@@ -70,9 +70,9 @@ namespace Fsel.Shared.Helpers
             return orderCode;
         }
 
-        public static double ConvertDoublePercent(double value)
+        public static double ConvertDoublePercent(double value, int digits = 0)
         {
-            double convertedValue = Math.Round(value / 100, 0, MidpointRounding.AwayFromZero);
+            double convertedValue = Math.Round(value / 100, digits, MidpointRounding.AwayFromZero);
             return convertedValue;
         }
 
@@ -96,6 +96,27 @@ namespace Fsel.Shared.Helpers
         public static double GetPercent(this int correctCount, int correctTotal, int digits = 0)
         {
             return correctTotal > 0 ? ConvertPercentDouble((double)correctCount / correctTotal, digits) : default;
+        }
+
+        public static double GetPercentChart(this int correctCount, int correctTotal, int digits = 0)
+        {
+            if (correctTotal == 0)
+            {
+                if (correctCount == 0)
+                {
+                    return default;
+                }
+                else if (correctCount > 0)
+                {
+                    return MaxPercent;
+                }
+                else
+                {
+                    return -MaxPercent;
+                }
+            }
+
+            return correctTotal > 0 ? ConvertPercentDouble((double)correctCount / correctTotal, digits) : MaxPercent;
         }
 
         public static double GetScore(this int correctCount, int correctTotal)

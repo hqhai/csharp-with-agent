@@ -19,7 +19,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
 
     public class GetClassForumDetailResultsQuery : IRequest<MethodResult<IList<ClassForumDetailResultModel>>>
     {
-        public Guid LessonResultId { get; set; }
+        public Guid ClassForumResultId { get; set; }
     }
 
     public class GetClassForumDetailResultsQueryHandler : IRequestHandler<GetClassForumDetailResultsQuery, MethodResult<IList<ClassForumDetailResultModel>>>
@@ -28,7 +28,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
         private readonly IMapper _mapper;
 
         public GetClassForumDetailResultsQueryHandler(IClassForumDetailResultRepository classForumDetailResultRepository,
-                                                      IMapper mapper)
+            IMapper mapper)
         {
             _classForumDetailResultRepository = classForumDetailResultRepository;
             _mapper = mapper;
@@ -40,15 +40,15 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             MethodResult<IList<ClassForumDetailResultModel>> methodResult = new MethodResult<IList<ClassForumDetailResultModel>>();
 
             var classForumDetailResults = await _classForumDetailResultRepository.Queryable
-                                                                                 .Include(x => x.ClassForumResult)
-                                                                                 .ThenInclude(x => x.ClassForum)
-                                                                                 .Include(x => x.ClassForumResultFiles)
-                                                                                 .Include(x => x.ClassForumDetailResultHistories)
-                                                                                 .ThenInclude(x => x.ClassForumResultFiles)
-                                                                                 .Where(x => x.ClassForumResult!.LessonResultId == request.LessonResultId)
-                                                                                 .ToListAsync(cancellationToken);
+                .Include(x => x.ClassForumResult)
+                .ThenInclude(x => x.ClassForum)
+                .Include(x => x.ClassForumResultFiles)
+                .Include(x => x.ClassForumDetailResultHistories)
+                .ThenInclude(x => x.ClassForumResultFiles)
+                .Where(x => x.ClassForumResultId == request.ClassForumResultId)
+                .ToListAsync(cancellationToken);
 
-            if (classForumDetailResults == null || !classForumDetailResults.Any())
+            if (!classForumDetailResults.Any())
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForumDetailResults));
                 return methodResult;
@@ -68,14 +68,16 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
         {
             int targetScore = default;
             var classForum = classForumDetailResult.ClassForumResult?.ClassForum;
-            if (classForum?.CourseSkill == EnumCourseSkill.Writing && classForum?.TaggetWordLimit <= classForumDetailResult.WordCount)
+            if (classForum?.Layout == Domain.Enums.EnumClassForumLayout.Writing && classForum?.TaggetWordLimit <= classForumDetailResult.WordCount)
             {
                 ++targetScore;
             }
-            if (classForum?.CourseSkill == EnumCourseSkill.Speaking && classForum?.TaggetTimeLimit <= classForumDetailResult.TimeCount)
+
+            if (classForum?.Layout == Domain.Enums.EnumClassForumLayout.Speaking && classForum?.TaggetTimeLimit <= classForumDetailResult.TimeCount)
             {
                 ++targetScore;
             }
+
             return targetScore;
         }
     }

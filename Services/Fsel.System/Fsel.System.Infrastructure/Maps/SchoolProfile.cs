@@ -12,6 +12,7 @@ namespace Fsel.System.Infrastructure.Maps
         public SchoolProfile()
         {
             CreateMap<School, SchoolModel>().IgnoreAllNonExisting();
+            CreateMap<Location, LocationModel>().IgnoreAllNonExisting();
         }
     }
 }

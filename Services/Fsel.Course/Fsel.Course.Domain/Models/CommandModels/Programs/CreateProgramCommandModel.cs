@@ -7,6 +7,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.Programs
 
     public class CreateProgramCommandModel
     {
+        public string? Thumbnail { get; set; }
         public Guid ParentId { get; set; }
 
         public string? Name { get; set; }

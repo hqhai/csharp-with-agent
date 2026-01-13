@@ -46,33 +46,35 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
         public async Task<MethodResult<IList<CourseModel>>> Handle(GetListCourseTeacherQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<IList<CourseModel>> methodResult = new MethodResult<IList<CourseModel>>();
+            var methodResult = new MethodResult<IList<CourseModel>>();
             var courses = await _courseRepository.Queryable
-                              .Include(course => course.CourseTeachers.Where(y => !y.IsDeleted))
-                              .Where(x => request.CourseLevel != null && x.CourseLevel == request.CourseLevel)
-                              .Where(x => x.Status == EnumCourseStatus.Active)
-                              .AsNoTracking()
-                              .Select(course => new CourseModel
-                              {
-                                  Id = course.Id,
-                                  Name = course.Name,
-                                  Code = course.Code,
-                                  InstructionContent = course.InstructionContent,
-                                  Status = course.Status,
-                                  CourseLevel = course.CourseLevel,
-                                  CreatedDate = course.CreatedDate,
-                                  CreatedUserId = course.CreatedUserId,
-                                  CreatedFullName = course.CreatedFullName,
-                                  UpdatedDate = course.UpdatedDate,
-                                  UpdatedUserId = course.UpdatedUserId,
-                                  UpdatedFullName = course.UpdatedFullName,
-                                  CourseTeachers = _mapper.Map<IList<CourseTeacherModel>>(course.CourseTeachers)
-                              }).ToListAsync(cancellationToken: cancellationToken);
-            if (courses == null || courses.Count == 0)
+                .Include(course => course.CourseTeachers.Where(y => !y.IsDeleted))
+                .Where(x => request.CourseLevel != null && x.CourseLevel == request.CourseLevel)
+                .Where(x => x.Status == EnumCourseStatus.Active)
+                .AsNoTracking()
+                .Select(course => new CourseModel
+                {
+                    Id = course.Id,
+                    Name = course.Name,
+                    Code = course.Code,
+                    InstructionContent = course.InstructionContent,
+                    Status = course.Status,
+                    CourseLevel = course.CourseLevel,
+                    LevelId = course.LevelId,
+                    CreatedDate = course.CreatedDate,
+                    CreatedUserId = course.CreatedUserId,
+                    CreatedFullName = course.CreatedFullName,
+                    UpdatedDate = course.UpdatedDate,
+                    UpdatedUserId = course.UpdatedUserId,
+                    UpdatedFullName = course.UpdatedFullName,
+                    CourseTeachers = _mapper.Map<IList<CourseTeacherModel>>(course.CourseTeachers)
+                }).ToListAsync(cancellationToken: cancellationToken);
+            if (courses.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(courses));
                 return methodResult;
             }
+
             var teachersResult = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel
             {
                 Ids = courses.SelectMany(x => x.CourseTeachers!).Select(x => x.TeacherId).ToList()
@@ -83,14 +85,22 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 foreach (var item in courses.SelectMany(x => x.CourseTeachers!).ToList())
                 {
                     var teacher = teachers.FirstOrDefault(x => x.Id == item.TeacherId);
-                    item.FullName = teacher?.Human?.FullName;
+                    item.FullName = teacher?.User?.FullName;
                 }
             }
+
             var couseClasses = courses.Select(x => new CourseClassModel { CourseId = x.Id, Code = x.Code }).ToList();
 
-            var classcourses = await _trainingService.GetClassListStatusNewAsync(new GetClassListStatusNewModel { Courses = couseClasses, CourseLevel = request.CourseLevel, PackageId = request.PackageId, LiveTimeFrameId = request.LiveTimeFrameId, LiveDays = request.LiveDays });
+            var classcourses = await _trainingService.GetClassListStatusNewAsync(new GetClassListStatusNewModel
+            {
+                Courses = couseClasses,
+                CourseLevel = request.CourseLevel,
+                PackageId = request.PackageId,
+                LiveTimeFrameId = request.LiveTimeFrameId,
+                LiveDays = request.LiveDays
+            });
 
-            if (!classcourses.IsSuccessStatusCode || classcourses == null)
+            if (!classcourses.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classcourses));
                 return methodResult;

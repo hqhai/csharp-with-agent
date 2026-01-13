@@ -1,5 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
+using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Models.CommandModels.VideoTimeCodes;
 using Fsel.Shared.Enums;
 
@@ -14,7 +15,8 @@ namespace Fsel.Course.Domain.Models.CommandModels.Videos
         public EnumCourseLevel CourseLevel { get; set; }
         public Guid? ProgramId { get; set; }
         public Guid? LevelId { get; set; }
-        public Guid? OriginalId { get; set; }
+        public IList<VideoPercentConfig>? VideoPercentConfigs { get; set; }
         public IList<CreateVideoTimeCodeCommandModel>? VideoTimeCodes { get; set; }
+        public IList<CreateVideoSubFilePathCommandModel>? VideoSubFilePaths { get; set; }
     }
 }

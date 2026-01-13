@@ -3,7 +3,6 @@
 namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
 {
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums;
     using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Shared.Enums;

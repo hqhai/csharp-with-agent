@@ -109,8 +109,9 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                                 CreatedDate = baseQ.CreatedDate,
                                 UpdatedDate = baseQ.UpdatedDate,
                             };
-
-                if (_authContext.Roles != null && _authContext.Roles.Contains(EnumRole.AdminSchool.ToString()))
+                var targetRoles = new List<string> { EnumRole.AdminSchool.ToString(), EnumRole.TeacherCampus.ToString(), EnumRole.AdminCampus.ToString() };
+                var hasMatchedRole = _authContext.Roles != null && _authContext.Roles.Any(r => targetRoles.Contains(r));
+                if (hasMatchedRole)
                 {
                     var studentSchoolResult = await _userService.GetStudentsToAdminSchoolAsync();
                     if (!studentSchoolResult.IsSuccessStatusCode)
@@ -148,8 +149,8 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     StudentProgressModel studentProgressModel = new StudentProgressModel
                     {
                         StudentId = courseResult.StudentId,
-                        FullName = student?.Human?.FullName,
-                        Email = student?.Human?.Email,
+                        FullName = student?.User?.FullName,
+                        Email = student?.User?.Email,
                         Level = courseResult.CourseLevel ?? default,
                         CourseType = courseResult.CourseLevel.GetEnumCourseType(),
                         CourseId = courseResult.CourseId,

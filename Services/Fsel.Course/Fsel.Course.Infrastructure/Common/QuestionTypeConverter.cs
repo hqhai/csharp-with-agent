@@ -280,6 +280,15 @@ namespace Fsel.Course.Infrastructure.Common
                     }
                     break;
 
+                case EnumQuestionType.LongAnswer:
+                    var longAnswerQuestion = config.Deserialize<LongAnswerQuestion>();
+                    if (longAnswerQuestion != null)
+                    {
+                        result = longAnswerQuestion;
+                        totalCorrect = GetTotalCorrect(longAnswerQuestion);
+                    }
+                    break;
+
                 default:
                     throw new ArgumentException("Invalid question type");
             }
@@ -800,7 +809,7 @@ namespace Fsel.Course.Infrastructure.Common
             }
         }
 
-        public (object?, string?) QuestionShuffleConverterObject(object? config, EnumQuestionType type, IList<SubQuestionConfig>? shuffleConfigs = null)
+        public (object?, string?) QuestionShuffleConverterObject(object? config, EnumQuestionType type, bool isResultDone = false, IList<SubQuestionConfig>? shuffleConfigs = null)
         {
             object? result = config;
             string questionShuffleStr = shuffleConfigs != null ? shuffleConfigs.Serialize() : string.Empty;
@@ -822,8 +831,137 @@ namespace Fsel.Course.Infrastructure.Common
                     }
                     result = matchingTypeQuestion;
                     break;
+
+                //case EnumQuestionType.GapFillWordBankScoreByGap:
+                //    var gapFillQuestion = config.Deserialize<GapFillQuestion>();
+                //    if (gapFillQuestion != null && !isResultDone)
+                //    {
+                //        gapFillQuestion.Contents = GenerateRandomLoop(gapFillQuestion.Contents, shuffleConfigs);
+                //        if (shuffleConfigs == null)
+                //        {
+                //            questionShuffleStr = gapFillQuestion.Contents?.Select((x, index) => new SubQuestionConfig
+                //            {
+                //                Id = $"{x.Id}",
+                //                Index = index
+                //            }).Serialize() ?? string.Empty;
+                //        }
+                //    }
+                //    result = gapFillQuestion;
+                //    break;
+
+                case EnumQuestionType.DragAndDropListSentenceOrder:
+                    var dragAndDropList = config.Deserialize<DragAndDropListSentenceOrderQuestion>();
+                    if (dragAndDropList != null && !isResultDone)
+                    {
+                        dragAndDropList.Contents = GenerateRandomLoop(dragAndDropList.Contents, shuffleConfigs);
+                        if (shuffleConfigs == null)
+                        {
+                            questionShuffleStr = dragAndDropList.Contents?.Select((x, index) => new SubQuestionConfig
+                            {
+                                Id = $"{x.Id}",
+                                Index = index
+                            }).Serialize() ?? string.Empty;
+                        }
+                    }
+                    result = dragAndDropList;
+                    break;
+
+                case EnumQuestionType.DragAndDropSentenceOrder:
+                {
+                    var drag = config.Deserialize<DragAndDropSentenceOrderQuestion>();
+                    if (drag?.Contents == null || drag.Contents.Count == 0)
+                    {
+                        result = drag;
+                        break;
+                    }
+                    if (isResultDone)
+                    {
+                        result = drag;
+                        break;
+                    }
+
+                    // Map config theo ContentId
+                    var map = shuffleConfigs?
+                        .Where(x => !string.IsNullOrWhiteSpace(x.Id) && x.Indexes != null && x.Indexes.Count > 0)
+                        .ToDictionary(x => x.Id!, x => x.Indexes!)
+                        ?? new Dictionary<string, IList<int>>();
+
+                    var generated = new List<SubQuestionConfig>();
+
+                    foreach (var c in drag.Contents)
+                    {
+                        if (c?.Words == null || c.Words.Count <= 1)
+                            continue;
+
+                        var key = $"{c.Id}";
+                        var n = c.Words.Count;
+
+                        if (map.TryGetValue(key, out var idx) && IsValidPermutation(idx, n))
+                        {
+                            // ✅ Có config => sort lại đúng theo lần random đã lưu
+                            c.Words = ApplyPermutation(c.Words, idx);
+                        }
+                        else
+                        {
+                            // ✅ Không có config => random + lưu lại
+                            var perm = GeneratePermutation(n);   // perm là oldIndex theo thứ tự newIndex
+                            c.Words = ApplyPermutation(c.Words, perm);
+
+                            generated.Add(new SubQuestionConfig
+                            {
+                                Id = key,
+                                Indexes = perm
+                            });
+                        }
+                    }
+
+                    // Lần đầu generate => lưu config
+                    if (shuffleConfigs == null)
+                    {
+                        questionShuffleStr = generated.Serialize() ?? string.Empty;
+                    }
+
+                    result = drag;
+                    break;
+                }
             }
             return (result, questionShuffleStr);
+        }
+
+        private static IList<int> GeneratePermutation(int n)
+        {
+            var rng = new Random();
+            var idx = Enumerable.Range(0, n).ToList();
+
+            for (int i = n - 1; i > 0; i--)
+            {
+                var j = rng.Next(i + 1);
+                (idx[i], idx[j]) = (idx[j], idx[i]);
+            }
+
+            return idx;
+        }
+
+        private static bool IsValidPermutation(IList<int> indexes, int n)
+        {
+            if (indexes.Count != n)
+                return false;
+            if (indexes.Any(i => i < 0 || i >= n))
+                return false;
+            return indexes.Distinct().Count() == n;
+        }
+
+        private static IList<string> ApplyPermutation(IList<string> words, IList<int> indexes)
+        {
+            var arr = words.ToArray();
+            var res = new string[words.Count];
+
+            for (int i = 0; i < indexes.Count; i++)
+            {
+                res[i] = arr[indexes[i]];
+            }
+
+            return res;
         }
 
         private KeyboardTextModel? GetKeyboardText(Guid keyboardTextId)
@@ -834,6 +972,7 @@ namespace Fsel.Course.Infrastructure.Common
                 Name = keyboardText.Name,
                 Unicode = keyboardText.Unicode,
                 FilePath = keyboardText.FilePath,
+                VectorLibrary = keyboardText.VectorLibrary
             }).FirstOrDefault(x => x.Id == keyboardTextId);
         }
     }

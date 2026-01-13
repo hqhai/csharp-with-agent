@@ -2,6 +2,7 @@
 
 using Fsel.Common.Constants;
 using Fsel.Core.Extensions;
+using Fsel.Core.Middlewares;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Infrastructure;
 using Fsel.Course.Infrastructure.Common;
@@ -10,13 +11,25 @@ using Fsel.Course.Infrastructure.Common.QuestionHelper.QuestionTypes;
 using Fsel.Course.Infrastructure.Repositories;
 using Fsel.Course.Infrastructure.ValueSettings;
 using Fsel.Course.Lms.Application.InternalEvents;
+using Fsel.Course.Lms.Application.InternalEvents.BaseCourseModule;
+using Fsel.Course.Lms.Application.InternalEvents.BaseUnitModule;
 using Fsel.Course.Lms.Application.Queues.Consumers;
+using Fsel.Course.Lms.Application.Queues.Consumers.ExportFiles;
+using Fsel.Course.Lms.Application.Queues.Consumers.Test;
 using Fsel.Course.Lms.Application.Queues.Publishers;
+using Fsel.Course.Lms.Application.Queues.Publishers.ExportFiles;
+using Fsel.Course.Lms.Application.Queues.Publishers.Test;
+using Fsel.Course.Lms.Application.Services.AIConfigService;
 using Fsel.Course.Lms.Application.Services.AiService;
 using Fsel.Course.Lms.Application.Services.AiService.SpeakingAIService;
 using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService;
 using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService.Interface;
 using Fsel.Course.Lms.Application.Services.ApplicationServices;
+using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
+using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices.BuildModules;
+using Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServices.CourseItemServices;
+using Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServices.LessonItemServices;
+using Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServices.UnitItemServices;
 using Fsel.Course.Lms.Application.Services.FFmpegServices;
 using Fsel.Course.Lms.Application.Services.InteractionService;
 using Fsel.Course.Lms.Application.Services.NotificationServices;
@@ -24,6 +37,8 @@ using Fsel.Course.Lms.Application.Services.OrderServices;
 using Fsel.Course.Lms.Application.Services.SenderService;
 using Fsel.Course.Lms.Application.Services.StorageServices;
 using Fsel.Course.Lms.Application.Services.SystemService;
+using Fsel.Course.Lms.Application.Services.TestServices;
+using Fsel.Course.Lms.Application.Services.TestServices.Interface;
 using Fsel.Course.Lms.Application.Services.TrainingServices;
 using Fsel.Course.Lms.Application.Services.UserServices;
 using Fsel.Shared.Constants;
@@ -34,12 +49,25 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 var appSetting = builder.AddAppSettings<AppSetting>();
 builder.AddServices(appSetting);
-builder.AddSwaggerGens(appSetting);
-builder.AddAuthenticationJwtBearers(appSetting);
+builder.AddOpenIdSwaggerGens(appSetting);
+builder.AddOpenIdAuthenticationJwtBearers(appSetting);
 builder.AddDbContexts<CourseDbContext, CourseReadDbContext>();
 
+// HttpClient
+builder.Services.AddHttpClient();
+
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IFlowService, FlowService>();
 builder.Services.AddScoped<ITestService, TestService>();
+builder.Services.AddScoped<ITestCachingService, TestCachingService>();
+builder.Services.AddScoped<IFlowCachingService, FlowCachingService>();
+builder.Services.AddScoped<ICategoryCachingService, CategoryCachingService>();
+builder.Services.AddScoped<IDocumentCachingService, DocumentCachingService>();
+builder.Services.AddScoped<ICourseCachingService, CourseCachingService>();
+builder.Services.AddScoped<IUnitModuleCachingService, UnitModuleCachingService>();
+builder.Services.AddScoped<ICourseModuleCachingService, CourseModuleCachingService>();
+builder.Services.AddScoped<ILessonModuleCachingService, LessonModuleCachingService>();
+builder.Services.AddScoped<IAggregateResultQueryService, AggregateResultQueryService>();
 
 builder.Services.AddScoped<IPlacementTestRepository, PlacementTestRepository>();
 builder.Services.AddScoped<ILessonRepository, LessonRepository>();
@@ -117,6 +145,9 @@ builder.Services.AddScoped<IClassForumDetailResultRepository, ClassForumDetailRe
 builder.Services.AddScoped<IProsodyScoreRepository, ProsodyScoreRepository>();
 builder.Services.AddScoped<ISpeakingAIService, SpeakingAIService>();
 builder.Services.AddScoped<ISpeakingEvaluationAIService, SpeakingEvaluationAIService>();
+builder.Services.AddScoped<IPronuciationAssessmentService, PronuciationAssessmentService>();
+builder.Services.AddScoped<IAIConfigSubmitService, AIConfigSubmitService>();
+builder.Services.AddScoped<IContinuousPronunciationAssessmentService, PronuciationAssessmentService>();
 builder.Services.AddScoped<IQuestionExplanationErrorRepository, QuestionExplanationErrorRepository>();
 builder.Services.AddScoped<IQuestionExplanationLogRepository, QuestionExplanationLogRepository>();
 builder.Services.AddScoped<IPlacementTestGroupResultRepository, PlacementTestGroupResultRepository>();
@@ -143,6 +174,60 @@ builder.Services.AddScoped<ISubjectConditionRuleRepository, SubjectConditionRule
 builder.Services.AddScoped<IKeyboardTextRepository, KeyboardTextRepository>();
 builder.Services.AddScoped<IKeyboardLayoutRepository, KeyboardLayoutRepository>();
 builder.Services.AddScoped<ICategoryTestBankRepository, CategoryTestBankRepository>();
+builder.Services.AddScoped<ITopicRepository, TopicRepository>();
+builder.Services.AddScoped<ICurriculumStudentRepository, CurriculumStudentRepository>();
+builder.Services.AddScoped<ICurriculumRepository, CurriculumRepository>();
+builder.Services.AddScoped<IHomeWorkConfigRepository, HomeWorkConfigRepository>();
+builder.Services.AddScoped<IHomeWorkExtraPracticeAnswerRepository, HomeWorkExtraPracticeAnswerRepository>();
+builder.Services.AddScoped<IHomeWorkExtraPracticeResultRepository, HomeWorkExtraPracticeResultRepository>();
+builder.Services.AddScoped<IHomeWorkRetryRepository, HomeWorkRetryRepository>();
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddScoped<IVideoSubFilePathRepository, VideoSubFilePathRepository>();
+builder.Services.AddScoped<IStudentGoalAggregateRepository, StudentGoalAggregateRepository>();
+builder.Services.AddScoped<IStudentGoalSummaryRepository, StudentGoalSummaryRepository>();
+builder.Services.AddScoped<IStatusStudentGoalRepository, StatusStudentGoalRepository>();
+builder.Services.AddScoped<IAiPromptManagerRepository, AiPromptManagerRepository>();
+builder.Services.AddScoped<IAiCriteriaConfigRepository, AiFeatureConfigRepository>();
+builder.Services.AddScoped<ICategoryCachingService, CategoryCachingService>();
+builder.Services.AddScoped<ITestSectionResultRepository, TestSectionResultRepository>();
+
+builder.Services.AddScoped<ISpeakingAITestLayoutHandler, SpeakingAITestLayoutHandler>();
+builder.Services.AddScoped<IWritingAITestLayoutHandler, WritingAITestLayoutHandler>();
+builder.Services.AddScoped<ITestAiLayoutService, TestAiLayoutService>();
+
+builder.Services.AddScoped<IDocumentResultRepository, DocumentResultRepository>();
+builder.Services.AddScoped<ITestResultRepository, TestResultRepository>();
+builder.Services.AddScoped<ITestGroupResultRepository, TestGroupResultRepository>();
+builder.Services.AddScoped<IUnitModuleRepository, UnitModuleRepository>();
+builder.Services.AddScoped<ICourseModuleRepository, CourseModuleRepository>();
+
+builder.Services.AddScoped<VideoLessonItemInitializer>();
+builder.Services.AddScoped<ClassForumLessonItemInitializer>();
+builder.Services.AddScoped<HomeWorkLessonItemInitializer>();
+builder.Services.AddScoped<DocumentLessonItemInitializer>();
+builder.Services.AddScoped<ILessonItemInitializerFactory, LessonItemInitializerFactory>();
+builder.Services.AddScoped<TestUnitItemInitializer>();
+builder.Services.AddScoped<LessonUnitItemInitializer>();
+builder.Services.AddScoped<IUnitItemInitializerFactory, UnitItemInitializerFactory>();
+builder.Services.AddScoped<TestCourseItemInitializer>();
+builder.Services.AddScoped<UnitCourseItemInitializer>();
+builder.Services.AddScoped<ICourseItemInitializerFactory, CourseItemInitializerFactory>();
+builder.Services.AddScoped<ICourseResultUpdater, BaseCourseResultEventHandler>();
+builder.Services.AddScoped<IUnitResultUpdater, BaseUnitResultEventHandler>();
+
+builder.Services.AddScoped<IVideoTimeCodeModelCachingService, VideoTimeCodeModelCachingService>();
+builder.Services.AddScoped<ITimeCodeQuestionCachingService, TimeCodeQuestionCachingService>();
+builder.Services.AddScoped<ITestSectionCachingService, TestSectionCachingService>();
+builder.Services.AddScoped<ISpeakingAITestLayoutHandler, SpeakingAITestLayoutHandler>();
+builder.Services.AddScoped<IWritingAITestLayoutHandler, WritingAITestLayoutHandler>();
+builder.Services.AddScoped<IProgramSkillScoresCachingService, ProgramSkillScoresCachingService>();
+builder.Services.AddScoped<ICourseBuildCachingService, CourseBuildCachingService>();
+
+builder.Services.AddScoped<IProgressService, ProgressService>();
+builder.Services.AddScoped<ICourseService, CourseService>();
+builder.Services.AddScoped<IVideoService, VideoService>();
+builder.Services.AddScoped<IVideoCachingService, VideoCachingService>();
+builder.Services.AddScoped<IVideoTimeCodeService, VideoTimeCodeService>();
 
 builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();
@@ -152,6 +237,8 @@ builder.Services.AddScoped<SetTimeRetryClassForumPublisher>();
 builder.Services.AddScoped<TechieActionPublisher>();
 builder.Services.AddScoped<CreateLuckyTicketPublisher>();
 builder.Services.AddScoped<AddFeatureMissionPublisher>();
+builder.Services.AddScoped<SaveUserSurveyAssignmentPublisher>();
+builder.Services.AddScoped<SubmitAiTestLayOutPublisher>();
 
 // Converter
 builder.Services.AddScoped<ExtraPracticeConverter>();
@@ -204,6 +291,11 @@ builder.Services.AddScoped<SavePlacementTestAnswersPublisher>();
 builder.Services.AddScoped<ErrorExplainPublisher>();
 builder.Services.AddScoped<ExportFileExcelSchoolLearningProcessPublisher>();
 builder.Services.AddScoped<SpeechToTextPendingAiPublisher>();
+builder.Services.AddScoped<ClassForumPronunciationPublisher>();
+builder.Services.AddScoped<ExportFileUserInformationSupportSalePublisher>();
+builder.Services.AddScoped<SubmitTestAiSpeakingPublisher>();
+builder.Services.AddScoped<SubmitTestCriteriaPublisher>();
+builder.Services.AddScoped<SetTimeRetryTestPublisher>();
 
 // Refit
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
@@ -247,11 +339,22 @@ queues: new Dictionary<string, Type>
     { QueueSettings.LmsQueue.NameQueue.ExportExcelSchoolLearningProcess, typeof(ExportExcelSchoolLearningProcessConsumer) },
     { QueueSettings.LmsQueue.NameQueue.SavePlacementTestAnswers, typeof(SavePlacementTestAnswersConsumer) },
     { QueueSettings.LmsQueue.NameQueue.ErrorExplainGgSheet, typeof(ErrorExplainConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.ClassForumPronunciationAi, typeof(ClassForumPronunciationConsumer) },
     { QueueSettings.StorageQueue.NameQueue.ResponseSpeechToTextPendingAi, typeof(ResponseSpeechToTextPendingAiConsumer) },
     { QueueSettings.LmsQueue.NameQueue.PushNotice, typeof(PushNoticeConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.QuestionType, typeof(QuestionTypeConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.ExportExcelUserInformationSupportSale, typeof(ExportFileUserInformationSupportSaleConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.JobStudentAggregate, typeof(JobStudentAggregateConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.NotifyWeeklyReportCourseTarget, typeof(NotifyWeeklyReportCourseTargetConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.NotifyWeeklyCourseGoalTarget, typeof(NotifyWeeklyCourseGoalTargetConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.SubmitTestAi, typeof(SubmitAiTestLayOutConsumer) },
 });
 
 var app = builder.Build();
+if (app.Environment.IsDevelopment() || app.Environment.IsStaging() || app.Environment.IsEnvironment(Settings.Environments.Testing))
+{
+    app.UseMiddleware<CacheManagerMiddleware>("/cache");
+}
+
 app.UseServices();
 app.Run();

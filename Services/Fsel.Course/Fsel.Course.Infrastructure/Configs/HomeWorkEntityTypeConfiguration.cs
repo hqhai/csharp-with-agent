@@ -3,6 +3,7 @@
 using Fsel.Common.Enums;
 using Fsel.Common.Helpers;
 using Fsel.Course.Domain.Entities;
+using Fsel.Course.Domain.Enums;
 using Fsel.Shared.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -15,12 +16,13 @@ namespace Fsel.Course.Infrastructure.Configs
         {
             ArgumentNullException.ThrowIfNull(builder);
             builder.Property(e => e.CourseLevel)
-                .HasMaxLength(100)
+                .HasMaxLength(20)
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumCourseLevel>());
+
             builder.Property(e => e.CourseSkill)
-                .HasMaxLength(100)
+                .HasMaxLength(20)
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumCourseSkill>());
@@ -30,6 +32,12 @@ namespace Fsel.Course.Infrastructure.Configs
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumVersionStatus>());
+
+            builder.Property(e => e.VersionType)
+              .HasMaxLength(20)
+              .HasConversion(
+                  v => v.ToString(),
+                  v => v.EnumParse<EnumVersion>());
 
             builder.HasOne(a => a.Skill)
                  .WithMany(b => b.HomeWorks)
@@ -45,6 +53,17 @@ namespace Fsel.Course.Infrastructure.Configs
              .WithMany(b => b.HomeWorks)
              .HasForeignKey(p => p.LevelId)
              .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Property(e => e.Type)
+               .HasMaxLength(20)
+               .HasConversion(
+                   v => v.ToString(),
+                   v => v.EnumParse<EnumHomeWorkType>());
+
+            builder.HasOne(a => a.Topic)
+                   .WithMany(b => b.HomeWorks)
+                   .HasForeignKey(b => b.TopicId)
+                   .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

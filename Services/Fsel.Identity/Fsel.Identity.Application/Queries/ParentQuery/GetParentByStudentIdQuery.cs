@@ -18,16 +18,14 @@ namespace Fsel.Identity.Application.Queries.ParentQuery
     public class GetParentByStudentIdQueryHandler : IRequestHandler<GetParentByStudentIdQuery, MethodResult<ParentProfileModel>>
     {
         private readonly IParentRepository _parentRepository;
-        private readonly IHumanRepository _humanRepository;
         private readonly IParentStudentRepository _parentStudentRepository;
         private readonly UserManager<User> _userManager;
 
-        public GetParentByStudentIdQueryHandler(IParentStudentRepository parentStudentRepository, UserManager<User> userManager, IParentRepository parentRepository, IHumanRepository humanRepository)
+        public GetParentByStudentIdQueryHandler(IParentStudentRepository parentStudentRepository, UserManager<User> userManager, IParentRepository parentRepository)
         {
             _parentStudentRepository = parentStudentRepository;
             _userManager = userManager;
             _parentRepository = parentRepository;
-            _humanRepository = humanRepository;
         }
 
         public async Task<MethodResult<ParentProfileModel>> Handle(GetParentByStudentIdQuery request, CancellationToken cancellationToken)
@@ -41,16 +39,16 @@ namespace Fsel.Identity.Application.Queries.ParentQuery
                 methodResult.StatusCode = StatusCodes.Status204NoContent;
                 return methodResult;
             }
-            var parent = from h in _humanRepository.Queryable
-                         join p in _parentRepository.Queryable on h.Id equals p.HumanId
+            var parent = from u in _userManager.Users
+                         join p in _parentRepository.Queryable on u.Id equals p.UserId
                          where p.Id == parentStudent.ParentId
                          select new ParentProfileModel
                          {
                              Id = p.Id,
-                             FullName = h.FullName,
-                             Email = h.Email,
-                             PhoneNumber = h.PhoneNumber,
-                             Birthday = h.Birthday,
+                             FullName = u.FullName,
+                             Email = u.Email,
+                             PhoneNumber = u.PhoneNumber,
+                             Birthday = u.Birthday,
                              Occupation = p.Occupation
                          };
             methodResult.Result = await parent.FirstOrDefaultAsync(cancellationToken);

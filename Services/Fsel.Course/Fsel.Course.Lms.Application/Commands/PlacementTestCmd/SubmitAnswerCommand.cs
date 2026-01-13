@@ -7,13 +7,15 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.Interfaces;
     using Fsel.Course.Domain.Entities.TestConfigs;
+    using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.Tests;
     using Fsel.Course.Domain.Models.EntityModels.PlacementTestModels;
+    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
-    public class SubmitAnswerCommand : IRequest<MethodResult<PTStateModel>>
+    public class SubmitAnswerCommand : IRequest<MethodResult<PtStateModel>>
     {
         public Guid StudentId { get; set; }
 
@@ -26,18 +28,20 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
         public bool IsSubmit { get; set; }
     }
 
-    public class SubmitAnswerCommandHandler : IRequestHandler<SubmitAnswerCommand, MethodResult<PTStateModel>>
+    public class SubmitAnswerCommandHandler : IRequestHandler<SubmitAnswerCommand, MethodResult<PtStateModel>>
     {
         private IRepository<TestGroupResult> _testGroupResult;
         private readonly IServiceProvider _serviceProvider;
+        private readonly ITestSectionResultRepository _testSectionResultRepository;
 
-        public SubmitAnswerCommandHandler(IRepository<TestGroupResult> testGroupResult, IServiceProvider serviceProvider)
+        public SubmitAnswerCommandHandler(IRepository<TestGroupResult> testGroupResult, ITestSectionResultRepository testSectionResultRepository, IServiceProvider serviceProvider)
         {
             _testGroupResult = testGroupResult;
             _serviceProvider = serviceProvider;
+            _testSectionResultRepository = testSectionResultRepository;
         }
 
-        public async Task<MethodResult<PTStateModel>> Handle(SubmitAnswerCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PtStateModel>> Handle(SubmitAnswerCommand request, CancellationToken cancellationToken)
         {
             var flowTestResult = await _testGroupResult.Queryable.Where(x => x.StudentId == request.StudentId && x.TestType == Domain.Enums.EnumTestType.PlacementTest)
                  .Include(x => x.TestResults)
@@ -45,7 +49,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
 
             if (flowTestResult == null)
             {
-                var result = new MethodResult<PTStateModel>
+                var result = new MethodResult<PtStateModel>
                 {
                     StatusCode = 400,
                 };
@@ -57,14 +61,28 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
 
             if (flowTestResult.Status == Domain.Enums.EnumResultStatus.Done)
             {
-                return new MethodResult<PTStateModel>
+                return new MethodResult<PtStateModel>
                 {
-                    Result = new PTStateModel
+                    Result = new PtStateModel
                     {
                         FlowId = flowTestResult.FlowId,
                         Status = flowTestResult.Status,
                     }
                 };
+            }
+
+            var testSectionResult = await _testSectionResultRepository.Queryable
+                .Where(x => x.Id == request.SectionResultId)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (testSectionResult == null || testSectionResult.Status == Domain.Enums.EnumResultStatus.Done)
+            {
+                var result = new MethodResult<PtStateModel>
+                {
+                    StatusCode = 400,
+                };
+                result.AddErrorBadRequest("Section result not found or already completed.");
+                return result;
             }
 
             var aggregate = new FlowTestResultAggregate(flowTestResult, _serviceProvider);
@@ -74,12 +92,13 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 SectionResultId = request.SectionResultId,
                 TestResultId = request.TestResultId,
                 Answers = request.Answers,
-                IsSubmit = request.IsSubmit
+                IsSubmit = request.IsSubmit,
+                StudentId = request.StudentId
             });
 
-            return new MethodResult<PTStateModel>
+            return new MethodResult<PtStateModel>
             {
-                Result = aggregate.ExpotStateData()
+                Result = await aggregate.ExpotStateData()
             };
         }
     }

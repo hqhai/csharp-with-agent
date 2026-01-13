@@ -17,6 +17,7 @@ namespace Fsel.Course.Domain.Entities
     public class ClassForumDetailResult : Entity, ISubmissionCount
     {
         private const int MaxScore = 2;
+        private const int MaxPronunciationScore = 5;
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(5000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
@@ -61,16 +62,42 @@ namespace Fsel.Course.Domain.Entities
         {
             get
             {
+                return GetGradingScore() + PronunciationScore;
+            }
+        }
+
+        public double GetGradingScore()
+        {
+            double score = default;
+
+            if (!string.IsNullOrEmpty(GradingAlFeedback))
+            {
+                var classForumAIs = Common.Helpers.ConvertHelper.Deserialize<List<ClassForumAIModel>>(GradingAlFeedback);
+                if (classForumAIs != null && classForumAIs.Any())
+                {
+                    score = classForumAIs.Sum(x => x.Score);
+                }
+            }
+
+            return score;
+        }
+
+        [NotMapped]
+        public double PronunciationScore
+        {
+            get
+            {
                 double score = default;
 
-                if (!string.IsNullOrEmpty(GradingAlFeedback))
+                if (!string.IsNullOrEmpty(PronunciationAlFeedback))
                 {
-                    var classForumAIs = Common.Helpers.ConvertHelper.Deserialize<List<ClassForumAIModel>>(GradingAlFeedback);
-                    if (classForumAIs != null && classForumAIs.Any())
+                    var pronunciationAI = Common.Helpers.ConvertHelper.Deserialize<PronunciationAssessmentModel>(PronunciationAlFeedback);
+                    if (pronunciationAI != null)
                     {
-                        score = classForumAIs.Sum(x => x.Score);
+                        score = ScoreHelper.CalculatePronunciationScore(pronunciationAI.AccuracyScore, pronunciationAI.FluencyScore, pronunciationAI.ProsodyScore);
                     }
                 }
+
                 return score;
             }
         }
@@ -80,12 +107,25 @@ namespace Fsel.Course.Domain.Entities
         {
             get
             {
-                return CorrectCount + Score;
+                double count = 0;
+
+                if (!string.IsNullOrEmpty(GradingAlFeedback))
+                {
+                    var classForumAIs = Common.Helpers.ConvertHelper.Deserialize<List<ClassForumAIModel>>(GradingAlFeedback);
+                    if (classForumAIs != null && classForumAIs.Any())
+                    {
+                        count = classForumAIs.Count * MaxScore;
+                    }
+                }
+
+                return PronunciationScore == 0 ? count + PronunciationScore : count + MaxPronunciationScore;
             }
         }
 
         [MaxLength(10000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? GradingAlFeedback { get; set; }
+
+        public string? PronunciationAlFeedback { get; set; }
 
         public DateTime? ProcessDate { get; set; }
         public DateTime? CompletionDate { get; set; }

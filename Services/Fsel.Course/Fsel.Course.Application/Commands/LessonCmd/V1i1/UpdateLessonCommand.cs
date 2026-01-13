@@ -29,10 +29,10 @@ namespace Fsel.Course.Application.Commands.LessonCmd.V1i1
         private readonly IUnitRepository _unitRepository;
 
         public UpdateLessonCommandHandler(ILessonRepository lessonRepository,
-                                          IMapper mapper,
-                                          LessonConverter lessonConverter,
-                                          IVersionEntityUpdater<Lesson> versionEntityUpdater,
-                                          IUnitRepository unitRepository)
+            IMapper mapper,
+            LessonConverter lessonConverter,
+            IVersionEntityUpdater<Lesson> versionEntityUpdater,
+            IUnitRepository unitRepository)
         {
             _lessonRepository = lessonRepository;
             _mapper = mapper;
@@ -47,9 +47,9 @@ namespace Fsel.Course.Application.Commands.LessonCmd.V1i1
             MethodResult<LessonModel> methodResult = new MethodResult<LessonModel>();
 
             var lesson = await _lessonRepository.Queryable
-                                                .Include(x => x.LessonModules)
-                                                .Include(x => x.LessonInstructions)
-                                                .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+                .Include(x => x.LessonModules)
+                .Include(x => x.LessonInstructions)
+                .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
             if (lesson == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lesson));
@@ -64,7 +64,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd.V1i1
             }
 
             bool isCheckUnit = await _unitRepository.Queryable
-                                                    .AnyAsync(x => x.UnitModules.Any(c => c.UnitConfigType == EnumUnitConfigType.Lesson && c.OriginalId == lesson.OriginalId), cancellationToken);
+                .AnyAsync(x => x.UnitModules.Any(c => c.UnitConfigType == EnumUnitConfigType.Lesson && c.OriginalId == lesson.OriginalId), cancellationToken);
 
             var lessonConverter = await _lessonConverter.LessonModuleHandler(request.LessonModules!, true, isCheckUnit, cancellationToken);
             if (!lessonConverter.IsOK)
@@ -81,10 +81,11 @@ namespace Fsel.Course.Application.Commands.LessonCmd.V1i1
             }
 
             await _versionEntityUpdater.UpdateEntity(lesson, newVersionLesson,
-                async (_, entity) => isCheckUnit,
+                async (_, _) => isCheckUnit,
                 async (oldEntity, newEntity) =>
                 {
                     oldEntity.Name = newEntity.Name;
+                    oldEntity.Code = newEntity.Code;
                     oldEntity.InstructionContent = newEntity.InstructionContent;
                     oldEntity.VideoCount = newEntity.VideoCount;
                     oldEntity.ClassForumCount = newEntity.ClassForumCount;
@@ -101,7 +102,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd.V1i1
                 }
             );
 
-            methodResult.Result = _mapper.Map<LessonModel>(lesson);
+            methodResult.Result = _mapper.Map<LessonModel>(newVersionLesson);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

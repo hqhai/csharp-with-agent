@@ -46,7 +46,6 @@ namespace Fsel.Identity.Application.Commands.UserCmd
         private readonly Microsoft.AspNetCore.Identity.UserManager<User> _userManager;
         private readonly IOrderService _orderService;
         private readonly ISystemService _systemService;
-        private readonly IHumanRepository _humanRepository;
         private const string ErrorTemplate = "Định dạng File tải lên không hợp lệ. Vui lòng tải lại file template mẫu và thử lại.";
         private const string Success = "Thành công";
         private const string DataError = "Dữ liệu bị trống hoặc sai định dạng";
@@ -56,13 +55,11 @@ namespace Fsel.Identity.Application.Commands.UserCmd
         public ImportUsersToBlindBagEventCommandHandler(
             Microsoft.AspNetCore.Identity.UserManager<User> userManager,
             IOrderService orderService,
-            ISystemService systemService,
-            IHumanRepository humanRepository)
+            ISystemService systemService)
         {
             _userManager = userManager;
             _orderService = orderService;
             _systemService = systemService;
-            _humanRepository = humanRepository;
         }
 
         public async Task<MethodResult<CreateStudentsToEventFromFileModel>> Handle(ImportUsersToBlindBagEventCommand request, CancellationToken cancellationToken)
@@ -156,11 +153,10 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             var studentUsers = new List<StudentUserModel>();
             if (humanCodes.Any())
             {
-                studentUsers = await (from baseQ in _humanRepository.Queryable.WhereBulkContains(humanCodes, x => x.Code)
-                                      join user in _userManager.Users on baseQ.UserId equals user.Id
+                studentUsers = await (from user in _userManager.Users.WhereBulkContains(humanCodes, x => x.Code)
                                       select new StudentUserModel
                                       {
-                                          HumanCode = baseQ.Code,
+                                          HumanCode = user.Code,
                                           UserId = user.Id
                                       }).ToListAsync(cancellationToken);
             }

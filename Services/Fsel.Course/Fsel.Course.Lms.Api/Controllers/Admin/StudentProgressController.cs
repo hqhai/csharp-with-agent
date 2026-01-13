@@ -10,16 +10,15 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1;
     using Fsel.Course.Lms.Application.Queries.StudentProgressQuery;
+    using Fsel.Course.Lms.Application.Queries.StudentQuery;
     using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
-    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/student-progress")]
     [ApiController]
-    [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool), nameof(EnumRole.CSO) })]
     public class StudentProgressController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -169,6 +168,18 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [ProducesResponseType(typeof(MethodResult<IList<LevelDtoModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetLevelSelection([FromQuery] GetLevelSelectionQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Learning Report
+        /// </summary>
+        [HttpGet("learning-report")]
+        [ProducesResponseType(typeof(MethodResult<StudentCourseProgressModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Get([FromQuery] GetStudentLearningReportQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();

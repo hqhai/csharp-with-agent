@@ -14,9 +14,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 var appSetting = builder.AddAppSettings<BaseAppSetting>();
 builder.AddServices(appSetting);
-builder.AddSwaggerGens(appSetting);
-builder.AddAuthenticationJwtBearers(appSetting);
+builder.AddOpenIdSwaggerGens(appSetting);
+builder.AddOpenIdAuthenticationJwtBearers(appSetting);
 
+builder.AddTenantMasterDbContexts();
 builder.Services.AddHangfire(x => x.UseSqlServerStorage(builder.Configuration.GetConnectionString(Settings.DefaultConnection)));
 builder.Services.AddHangfireServer();
 
@@ -41,7 +42,12 @@ builder.Services.AddScoped<CheckUserDeletionPublisher>();
 builder.Services.AddScoped<WeeklyNoticePublisher>();
 builder.Services.AddScoped<ChooseDailyQuizWinnersPublisher>();
 builder.Services.AddScoped<AggregateDataStudentsInEventPublisher>();
+builder.Services.AddScoped<AggregateDataWeeklyReportPublisher>();
 builder.Services.AddScoped<PushNoticePublisher>();
+builder.Services.AddScoped<NotifyWeeklyReportCourseTargetPublisher>();
+builder.Services.AddScoped<NotifyWeeklyCourseGoalTargetPublisher>();
+builder.Services.AddScoped<JobStudentAggregatePublisher>();
+
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {

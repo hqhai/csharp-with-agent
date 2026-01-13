@@ -23,6 +23,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid? ProgramId { get; set; }
         public Guid? LevelId { get; set; }
         public IList<HighlightRange>? HighlightRanges { get; set; }
+        public IList<HighlightRange>? ProgressSpeedometerRanges { get; set; }
         public IList<UnitModuleDTO>? UnitModules { get; set; }
     }
 
@@ -40,5 +41,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public Guid OriginalId { get; set; }
 
+        public V1i1.LessonSearchModel? Lesson { get; set; }
     }
 }

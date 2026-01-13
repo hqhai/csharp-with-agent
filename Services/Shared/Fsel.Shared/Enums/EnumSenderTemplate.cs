@@ -33,6 +33,7 @@ namespace Fsel.Shared.Enums
         MailRegisterForEventUlis,
         MailRegisterForEventPhenikaa,
         MailRegisterForEventThaiNguyen,
+        CreateAccountFromCRM,
 
         #region event
 
@@ -41,8 +42,23 @@ namespace Fsel.Shared.Enums
         WasInAnotherEvent,
         LearnedOnThePlatform,
         NotEligibleToParticipate,
-        MailRegisterEvent
+        MailRegisterEvent,
 
         #endregion event
+
+        #region Weekly progress report
+
+        WeeklyProgressReport1,
+        WeeklyProgressReport2,
+        WeeklyProgressReport3,
+        WeeklyProgressReport4,
+        WeeklyProgressReport5,
+        WeeklyProgressReport6,
+        WeeklyProgressReport7,
+        WeeklyProgressReport8,
+        WeeklyProgressReport9,
+        LearningProgressWarning
+
+        #endregion Weekly progress report
     }
 }

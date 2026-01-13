@@ -6,27 +6,15 @@ namespace Fsel.Course.Lms.Application.Services.AIService.Models
     using System.Text.Json.Serialization;
     using Refit;
 
-    public class RequestAIModel
+    public class RequestAIModel : BaseRequestAIModel
     {
-        [AliasAs("model")]
-        [JsonPropertyName("model")]
-        public string? Model { get; set; }
-
         [AliasAs("messages")]
         [JsonPropertyName("messages")]
         public IList<object>? Messages { get; set; }
 
-        [AliasAs("temperature")]
-        [JsonPropertyName("temperature")]
-        public double Temperature { get; set; }
-
         [AliasAs("max_tokens")]
         [JsonPropertyName("max_tokens")]
         public double MaxTokens { get; set; }
-
-        [AliasAs("top_p")]
-        [JsonPropertyName("top_p")]
-        public double TopP { get; set; }
 
         [AliasAs("frequency_penalty")]
         [JsonPropertyName("frequency_penalty")]

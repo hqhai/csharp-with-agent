@@ -5,11 +5,15 @@ namespace Fsel.Course.Domain.Entities
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.IEntities;
 
     public class MockTestResult : BaseLearnResult, ITokenResult
     {
+        [NotMapped]
+        public override double PercentModule { get; set; }
+
         public Guid? GradingTeacherId { get; set; }
 
         public Course? Course { get; set; }
@@ -26,7 +30,9 @@ namespace Fsel.Course.Domain.Entities
 
         public int? TokenFirstTime { get; set; }
         public int? TokenLastTime { get; set; }
-
+        public DateTime? NewDate { get; set; }
+        public DateTime? ProcessDate { get; set; }
+        public DateTime? CompletionDate { get; set; }
         public DateTime? GradingStartDate { get; set; }
         public bool IsViewed { get; set; }
         public ICollection<MockTestAnswer> MockTestAnswers { get; set; } = new List<MockTestAnswer>();

@@ -89,7 +89,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
 
         private async Task<LessonResult?> GetLessonResult(LessonResult lessonResult, CancellationToken cancellationToken)
         {
-            return await _lessonResultRepository.Queryable.Include(x => x.VideoResult)
+            return await _lessonResultRepository.Queryable.Include(x => x.VideoResults)
                                                         .Include(x => x.HomeWorkResults.Where(x => x.LessonResultId == lessonResult.Id))
                                                         .Include(x => x.ClassForumResults.Where(x => x.LessonResultId == lessonResult.Id))
                                                         .Where(x => x.Id == lessonResult.Id)

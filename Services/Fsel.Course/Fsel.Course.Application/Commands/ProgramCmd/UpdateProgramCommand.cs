@@ -75,12 +75,12 @@ namespace Fsel.Course.Application.Commands.ProgramCmd
                 return methodResult;
             }
             var programs = await _categoryRepository.Queryable.Where(x => x.ParentId == category.ParentId).ToListAsync(cancellationToken);
-            if (request.IsTestDefault && programs.Any(x => x.IsTestDefault))
+            if (request.IsTestDefault && programs.Any(x => x.Id != request.Id && x.IsTestDefault))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.IsTestDefault), request.IsTestDefault);
                 return methodResult;
             }
-            if (request.TestMode.HasValue && request.TestMode.Value == EnumTestMode.Default && !programs.Any(x => x.IsTestDefault))
+            if (request.TestMode.HasValue && request.TestMode.Value == EnumTestMode.Default && !programs.Any(x => x.Id != request.Id && x.IsTestDefault))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.TestMode), programs.Any(x => x.IsTestDefault));
                 return methodResult;

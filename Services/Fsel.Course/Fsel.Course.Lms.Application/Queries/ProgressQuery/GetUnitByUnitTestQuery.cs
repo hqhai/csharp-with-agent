@@ -120,7 +120,10 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             {
                 return new List<VideoTimeCodeResult>();
             }
-            var videoResultIds = await _videoResultRepository.Queryable.WhereBulkContains(lessonResultIds, x => x.LessonResultId).Where(x => x.StudentId == studentId).Select(x => x.Id).ToListAsync(cancellationToken);
+            var videoResultIds = await _videoResultRepository.Queryable.WhereBulkContains(lessonResultIds, x => x.LessonResultId)
+                                                             .Where(x => x.StudentId == studentId)
+                                                             .Select(x => x.Id)
+                                                             .ToListAsync(cancellationToken);
             if (videoResultIds == null || !videoResultIds.Any())
             {
                 return new List<VideoTimeCodeResult>();
@@ -133,14 +136,14 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 return new List<VideoTimeCodeResult>();
             }
 
-            return await _videoTimeCodeResultRepository.Queryable.WhereBulkContains(videoResultIds, x => x.VideoResultId)
+            return await _videoTimeCodeResultRepository.ReadQueryable.WhereBulkContains(videoResultIds, x => x.VideoResultId)
                                                         .WhereBulkContains(videoTimeCodeIds, x => x.VideoTimeCodeId)
                                                         .ToListAsync(cancellationToken);
         }
 
         private async Task<IList<Guid>> GetLessonIdsAsync(GetUnitByUnitTestQuery request)
         {
-            return await _unitRepository.Queryable.Include(x => x.UnitLessons)
+            return await _unitRepository.ReadQueryable.Include(x => x.UnitLessons)
                                                   .Where(x => x.CourseUnitMockTests.Any(x => x.CourseId == request.CourseId && x.UnitId == request.UnitId))
                                                   .SelectMany(x => x.UnitLessons)
                                                   .OrderBy(x => x.DisplayOrder)
@@ -151,7 +154,12 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
         private async Task<List<Guid>> GetVideoIdsAsync(GetUnitByUnitTestQuery request)
         {
             var lessonIds = await GetLessonIdsAsync(request);
-            return await _lessonRepository.Queryable.Include(x => x.LessonVideos)
+            if (!lessonIds.Any())
+            {
+                return new List<Guid>();
+            }
+
+            return await _lessonRepository.ReadQueryable.Include(x => x.LessonVideos)
                                                   .WhereBulkContains(lessonIds, x => x.Id)
                                                   .SelectMany(x => x.LessonVideos)
                                                   .Select(x => x.VideoId)
@@ -160,7 +168,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
 
         private async Task<IList<Guid>> GetLessonResultIdsAsync(GetUnitByUnitTestQuery request, Guid studentId)
         {
-            return await _lessonResultRepository.Queryable.Where(x => x.StudentId == studentId && x.UnitId == request.UnitId && x.CourseId == request.CourseId).Select(x => x.Id).ToListAsync();
+            return await _lessonResultRepository.ReadQueryable.Where(x => x.StudentId == studentId && x.UnitId == request.UnitId && x.CourseId == request.CourseId).Select(x => x.Id).ToListAsync();
         }
 
         private static long GetSecond(VideoTimeCodeResult x)

@@ -23,17 +23,15 @@ namespace Fsel.Identity.Application.Queries.EventQuery
         private readonly AuthContext _authContext;
         private readonly IStudentEventLearningRecordRepository _studentEventLearningRecordRepository;
         private readonly IStudentRepository _studentRepository;
-        private readonly IHumanRepository _humanRepository;
         private readonly UserManager<User> _userManager;
         private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
         private readonly IMapper _mapper;
 
-        public GetStudentEventLearningRecordQueryHandler(AuthContext authContext, IStudentEventLearningRecordRepository studentEventLearningRecordRepository, IStudentRepository studentRepository, IHumanRepository humanRepository, UserManager<User> userManager, IStudentCompetitionEventsRepository studentCompetitionEventsRepository, IMapper mapper)
+        public GetStudentEventLearningRecordQueryHandler(AuthContext authContext, IStudentEventLearningRecordRepository studentEventLearningRecordRepository, IStudentRepository studentRepository, UserManager<User> userManager, IStudentCompetitionEventsRepository studentCompetitionEventsRepository, IMapper mapper)
         {
             _authContext = authContext;
             _studentEventLearningRecordRepository = studentEventLearningRecordRepository;
             _studentRepository = studentRepository;
-            _humanRepository = humanRepository;
             _userManager = userManager;
             _studentCompetitionEventsRepository = studentCompetitionEventsRepository;
             _mapper = mapper;
@@ -47,8 +45,7 @@ namespace Fsel.Identity.Application.Queries.EventQuery
             var userId = request.UserId ?? _authContext.CurrentUserId;
 
             var student = await (from s in _studentRepository.Queryable
-                                 join h in _humanRepository.Queryable on s.HumanId equals h.Id
-                                 join u in _userManager.Users on h.UserId equals u.Id
+                                 join u in _userManager.Users on s.UserId equals u.Id
                                  where u.Id == userId
                                  select s).FirstOrDefaultAsync(cancellationToken);
             if (student == null)

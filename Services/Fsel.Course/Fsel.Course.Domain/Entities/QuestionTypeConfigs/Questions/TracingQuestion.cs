@@ -3,6 +3,7 @@
 namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions
 {
     using System.Text.Json.Serialization;
+    using Fsel.Course.Domain.Enums;
 
     public class TracingQuestion : IConfigRuby
     {
@@ -27,11 +28,9 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions
     public class KeyboardTextModel
     {
         public Guid Id { get; set; }
-
         public string? Name { get; set; }
-
+        public EnumVectorLibrary VectorLibrary { get; set; }
         public int Unicode { get; set; }
-
         public string? FilePath { get; set; }
     }
 }

@@ -1,0 +1,10 @@
+Translate the following assessment JSON into Vietnamese according to the System instructions.
+
+Rules:
+- Numeric scores remain unchanged.
+- All string values should be translated into Vietnamese only.
+- Preserve explicit English words/phrases when they are teaching examples (even if not quoted).
+- Return only the translated JSON structure following the provided JSON Schema.
+
+Input English JSON Structure:
+{0}

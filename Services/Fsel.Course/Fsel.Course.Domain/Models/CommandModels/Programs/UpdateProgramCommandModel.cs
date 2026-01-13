@@ -8,7 +8,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.Programs
     public class UpdateProgramCommandModel
     {
         public Guid Id { get; set; }
-
+        public string? Thumbnail { get; set; }
         public string? Name { get; set; }
 
         public string? Code { get; set; }

@@ -11,11 +11,11 @@ namespace Fsel.Identity.Infrastructure.Configs
         public void Configure(EntityTypeBuilder<CSO> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
-            builder.HasOne(a => a.Human)
+            builder.HasOne(a => a.User)
                     .WithOne(b => b.CSO)
-                    .HasForeignKey<CSO>(b => b.HumanId)
+                    .HasForeignKey<CSO>(b => b.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
-            builder.HasIndex(x => x.HumanId).IsUnique(false);
+            builder.HasIndex(x => x.UserId).IsUnique(false);
         }
     }
 }

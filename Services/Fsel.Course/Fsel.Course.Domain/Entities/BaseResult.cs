@@ -47,6 +47,8 @@ namespace Fsel.Course.Domain.Entities
             set { _percent = CorrectTotal > 0 ? NumberHelper.GetPercent(CorrectCount, CorrectTotal) : value; }
         }
 
+        public virtual double PercentModule { get; set; }
+
         /// <summary>
         /// Trạng thái
         /// </summary>

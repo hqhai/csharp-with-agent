@@ -10,6 +10,8 @@ namespace Fsel.Course.Infrastructure.Maps
     using Fsel.Course.Domain.Models.CommandModels.TestSections;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.EntityModels.TestModels;
+    using Fsel.Course.Domain.Models.EntityModels.V1i2;
+    using TestSectionModel = Domain.Models.EntityModels.TestModels.TestSectionModel;
 
     public class TestProfile : Profile
     {
@@ -38,6 +40,9 @@ namespace Fsel.Course.Infrastructure.Maps
             CreateMap<TestAISetting, TestAISettingModel>()
                 .ForMember(x => x.TestAICriteriaSettings, p => p.MapFrom(o => o.TestAICriteriaSettings.OrderBy(x => x.CreatedDate)));
             CreateMap<TestAICriteriaSetting, TestAICriteriaSettingModel>().IgnoreAllNonExisting();
+
+            CreateMap<TestResult, ResultModel>().IgnoreAllNonExisting();
+            CreateMap<TestGroupResult, ResultModel>().IgnoreAllNonExisting();
         }
     }
 }

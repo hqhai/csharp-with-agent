@@ -4,6 +4,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
 {
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
+    using Fsel.Core.Base;
     using Fsel.Ordering.Application.Services.UserService;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Shared.Enums;
@@ -20,17 +21,30 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
     {
         private readonly IOrderRepository _orderRepository;
         private readonly IUserService _userService;
+        private readonly AuthContext _authContext;
 
-        public GetCurrentStatusQueryHandler(IOrderRepository orderRepository, IUserService userService)
+        public GetCurrentStatusQueryHandler(IOrderRepository orderRepository, IUserService userService, AuthContext authContext)
         {
             _orderRepository = orderRepository;
             _userService = userService;
+            _authContext = authContext;
         }
 
         public async Task<MethodResult<EnumTrialRegistrationStatus?>> Handle(GetCurrentStatusQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<EnumTrialRegistrationStatus?> methodResult = new MethodResult<EnumTrialRegistrationStatus?>();
+
+            var roleResult = await _userService.GetRoleByUserId(request.UserId.ToString());
+
+            var role = roleResult.Content?.Result;
+
+            if (!string.IsNullOrEmpty(role) && role == EnumRole.StudentCampus.ToString())
+            {
+                methodResult.Result = EnumTrialRegistrationStatus.Payment;
+                return methodResult;
+            }
+
             var currentStatus = EnumTrialRegistrationStatus.New;
 
             var query = await _orderRepository.Queryable.Where(x => x.UserId == request.UserId && x.Status == EnumOrderStatus.Payment).OrderByDescending(x => x.CreatedDate).FirstOrDefaultAsync(cancellationToken);

@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 {
     using Fsel.Core.Entities;
     using Fsel.Course.Domain.Models.EntityModels.PlacementTestModels;
+    using Fsel.Shared.Enums;
 
     public abstract class ResultComponent
     {
@@ -15,8 +16,26 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
         public abstract BaseTestStateModel ExportState();
 
-        public abstract Task Submit();
+        public abstract BaseTestStateModel ExportForTestState();
+
+        public abstract Task Submit(SubmitContext context);
+
+        public abstract Task SubmitTest(SubmitContext context);
 
         public IServiceProvider ServiceProvider { get; set; }
+
+        public virtual IEnumerable<T> GetComponentByType<T>() where T : ResultComponent
+        {
+            if (this is T t)
+            {
+                yield return t;
+            }
+        }
+    }
+
+    public class SubmitContext
+    {
+        public Guid Id { get; set; }
+        public EnumScoringFormulaType? ScoringFormulaType { get; set; }
     }
 }

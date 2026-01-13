@@ -16,14 +16,18 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
     public class Test : Entity, IVersionEntity
     {
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        [RegexValid(Regex = @"^[a-zA-Z0-9_ ]{1,150}$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
-        [MaxLength(150, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [RegexValid(Regex = @"^[^\[\]]{1,200}$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
+        [MaxLength(200, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Name { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [RegexValid(Regex = @"^[a-zA-Z0-9_]{1,150}$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
         [MaxLength(150, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Code { get; set; }
+
+        [RegexValid(Regex = @"^[^\[\]]{0,1000}$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
+        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? Description { get; set; }
 
         public bool IsArchive { get; set; }
         public Guid OriginalId { get; set; }
@@ -35,7 +39,7 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
         public Category? Program { get; set; }
         public Guid LevelId { get; set; }
         public Level? Level { get; set; }
-
+        public EnumVersion VersionType { get; set; } = EnumVersion.V2;
         public ICollection<TestSection> TestSections { get; set; } = new List<TestSection>();
         public ICollection<CategoryTestBank> CategoryTestBanks { get; set; } = new List<CategoryTestBank>();
         public ICollection<TestResult> TestResults { get; set; } = new List<TestResult>();
@@ -219,12 +223,12 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
                         {
                             ErrorCode = nameof(EnumSystemErrorCode.Required),
                             Errors =
-                        {
-                            new Error
-                                {
-                                    FieldName = nameof(p.Percent),
-                                }
-                        },
+                    {
+                        new Error
+                            {
+                                FieldName = nameof(p.Percent),
+                            }
+                    },
                         });
                         result = false;
                     }
@@ -235,12 +239,12 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
                         {
                             ErrorCode = nameof(EnumSystemErrorCode.Required),
                             Errors =
-                        {
-                            new Error
-                                {
-                                    FieldName = nameof(p.ScoringFormulaConfigs),
-                                }
-                        },
+                    {
+                        new Error
+                            {
+                                FieldName = nameof(p.ScoringFormulaConfigs),
+                            }
+                    },
                         });
                         result = false;
                     }
@@ -302,12 +306,12 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
                                 {
                                     ErrorCode = nameof(EnumSystemErrorCode.Required),
                                     Errors =
-                        {
-                            new Error
-                                {
-                                    FieldName = nameof(x.Percent),
-                                }
-                        },
+                            {
+                                new Error
+                                    {
+                                        FieldName = nameof(x.Percent),
+                                    }
+                            },
                                 });
                                 result = false;
                             }
@@ -335,12 +339,12 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
                     {
                         ErrorCode = nameof(EnumSystemErrorCode.Min),
                         Errors =
+                {
+                    new Error
                         {
-                            new Error
-                                {
-                                    FieldName = nameof(totalPercentSkill),
-                                }
-                        },
+                            FieldName = nameof(totalPercentSkill),
+                        }
+                },
                     });
                     result = false;
                 }
@@ -348,8 +352,6 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
             else
             {
                 double totalPercentSkill = 0;
-                double totalPercentPart = 0;
-                double totalPercentExercise = 0;
 
                 TestSections.ForEach(p =>
                 {
@@ -363,18 +365,20 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
                         {
                             ErrorCode = nameof(EnumSystemErrorCode.Required),
                             Errors =
-                        {
-                            new Error
-                                {
-                                    FieldName = nameof(p.Percent),
-                                }
-                        },
+                    {
+                        new Error
+                            {
+                                FieldName = nameof(p.Percent),
+                            }
+                    },
                         });
                         result = false;
                     }
 
                     if (p.TestSections != null && p.TestSections.Any())
                     {
+                        double totalPercentPart = 0;
+
                         p.TestSections.ForEach(x =>
                         {
                             if (x.Percent.HasValue)
@@ -387,18 +391,20 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
                                 {
                                     ErrorCode = nameof(EnumSystemErrorCode.Required),
                                     Errors =
-                        {
-                            new Error
-                                {
-                                    FieldName = nameof(p.Percent),
-                                }
-                        },
+                            {
+                                new Error
+                                    {
+                                        FieldName = nameof(p.Percent),
+                                    }
+                            },
                                 });
                                 result = false;
                             }
 
                             if (x.LayoutType == EnumTestLayoutType.Basic && x.TestSections != null && x.TestSections.Any())
                             {
+                                double totalPercentExercise = 0;
+
                                 x.TestSections.ForEach(n =>
                                 {
                                     if (n.Percent.HasValue)
@@ -411,63 +417,65 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
                                         {
                                             ErrorCode = nameof(EnumSystemErrorCode.Required),
                                             Errors =
-                        {
-                            new Error
-                                {
-                                    FieldName = nameof(p.Percent),
-                                }
-                        },
+                                    {
+                                        new Error
+                                            {
+                                                FieldName = nameof(p.Percent),
+                                            }
+                                    },
                                         });
                                         result = false;
                                     }
                                 });
+
+                                if (totalPercentExercise <= 99 || totalPercentExercise > 100)
+                                {
+                                    AddErrorResults(new ErrorResult
+                                    {
+                                        ErrorCode = nameof(EnumSystemErrorCode.Min),
+                                        Errors =
+                                {
+                                    new Error
+                                        {
+                                            FieldName = nameof(totalPercentExercise),
+                                        }
+                                },
+                                    });
+                                    result = false;
+                                }
                             }
                         });
-                    }
-                });
-                if (totalPercentExercise <= 99 || totalPercentExercise > 100)
-                {
-                    AddErrorResults(new ErrorResult
-                    {
-                        ErrorCode = nameof(EnumSystemErrorCode.Min),
-                        Errors =
-                        {
-                            new Error
-                                {
-                                    FieldName = nameof(totalPercentExercise),
-                                }
-                        },
-                    });
-                    result = false;
-                }
 
-                if (totalPercentPart <= 99 || totalPercentPart > 100)
-                {
-                    AddErrorResults(new ErrorResult
-                    {
-                        ErrorCode = nameof(EnumSystemErrorCode.Min),
-                        Errors =
+                        if (totalPercentPart <= 99 || totalPercentPart > 100)
+                        {
+                            AddErrorResults(new ErrorResult
+                            {
+                                ErrorCode = nameof(EnumSystemErrorCode.Min),
+                                Errors =
                         {
                             new Error
                                 {
                                     FieldName = nameof(totalPercentPart),
                                 }
                         },
-                    });
-                    result = false;
-                }
+                            });
+                            result = false;
+                        }
+                    }
+                });
+
                 if (totalPercentSkill <= 99 || totalPercentSkill > 100)
                 {
                     AddErrorResults(new ErrorResult
                     {
                         ErrorCode = nameof(EnumSystemErrorCode.Min),
                         Errors =
+                {
+                    new Error
                         {
-                            new Error
-                                {
-                                    FieldName = nameof(totalPercentSkill),
-                                }
-                        },
+                            FieldName = nameof(totalPercentSkill),
+                        }
+                },
                     });
                     result = false;
                 }

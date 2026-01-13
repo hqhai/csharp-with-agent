@@ -113,6 +113,7 @@ namespace Fsel.Course.Application.Queries.LessonQuery.V1i1
                 UpdatedFullName = x.Lesson.UpdatedFullName,
                 UpdatedUserId = x.Lesson.UpdatedUserId,
                 Name = x.Lesson.Name,
+                Code = x.Lesson.Code,
                 Status = x.Lesson.Status,
                 LevelId = x.Lesson.LevelId,
                 ProgramId = x.Lesson.ProgramId,
@@ -157,7 +158,7 @@ namespace Fsel.Course.Application.Queries.LessonQuery.V1i1
                 var teachers = teacherResults.Content?.Result;
                 foreach (var item in lessons.Where(x => x.Videos != null).SelectMany(x => x.Videos!))
                 {
-                    item.NameTeacher = teachers?.FirstOrDefault(x => x.Id == item.TeacherId)?.Human?.FullName;
+                    item.NameTeacher = teachers?.FirstOrDefault(x => x.Id == item.TeacherId)?.User?.FullName;
                 }
             }
 

@@ -8,7 +8,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.V1i1
     public class LessonModel : BaseModel
     {
         public string? Name { get; set; }
-
+        public string? Code { get; set; }
         public string? InstructionContent { get; set; }
 
         public int VideoCount { get; set; }

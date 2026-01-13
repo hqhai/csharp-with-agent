@@ -8,21 +8,33 @@ namespace Fsel.Course.Domain.Entities.SkillScoresConfigs
 
     public class SkillScores
     {
-        [JsonRequired]
-        public EnumCourseSkill Skill { get; set; }
+        [JsonRequired] public EnumCourseSkill Skill { get; set; }
 
-        [JsonRequired]
-        public double Scores { get; set; }
+        [JsonRequired] public double Scores { get; set; }
 
+        /// <summary>
+        /// This field is CorrectTotal in BaseResult
+        /// Sum of CorrectTotal of Questions
+        /// </summary>
         [JsonRequired]
         public double TotalCount { get; set; }
 
+        /// <summary>
+        /// This field is CorrectCount in BaseResult
+        /// Sum of CorrectCount of Answers
+        /// </summary>
         [JsonRequired]
         public double CorrectCount { get; set; }
 
+        /// <summary>
+        /// Entire questions of TestSection
+        /// </summary>
         [JsonRequired]
         public double TotalQuestion { get; set; }
 
+        /// <summary>
+        /// Entire questions which had answered, equal numbers of answers
+        /// </summary>
         [JsonRequired]
         public double CountQuestion { get; set; }
 
@@ -39,5 +51,11 @@ namespace Fsel.Course.Domain.Entities.SkillScoresConfigs
         }
 
         public double TokenReceived { get; set; }
+
+        public double? CorrectQuestion { get; set; }
+
+        public Guid? SkillId { get; set; }
+        public string? SkillName { get; set; }
+        public string? SkillFilePath { get; set; }
     }
 }

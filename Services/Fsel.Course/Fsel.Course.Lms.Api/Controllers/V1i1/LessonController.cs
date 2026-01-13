@@ -3,6 +3,7 @@
 namespace Fsel.Course.Lms.Api.Controllers.V1i1
 {
     using System.Net;
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -17,7 +18,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
     [ApiVersions(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/lesson")]
     [ApiController]
-    [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+   [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
     public class LessonController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -31,6 +32,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
         /// Get List Lesson
         /// </summary>
         [HttpGet]
+        [MapToApiVersion(ApiSettings.APIVersion1i1)]
         [ProducesResponseType(typeof(MethodResult<IList<Domain.Models.EntityModels.V1i1.LessonMockTestResultModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetLessons([FromQuery] GetLessonsQuery query)

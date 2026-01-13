@@ -81,7 +81,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
                 return methodResult;
             }
 
-            int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.Human?.Birthday);
+            int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.User?.Birthday);
             if ((request.CourseType == EnumCourseType.Ielts && age < AgeMilestone.StudentAge) || (request.CourseType == EnumCourseType.EnglishFoundation && age < AgeMilestone.TeenagersAge))
             {
                 methodResult.Result = new List<LevelDtoModel>();

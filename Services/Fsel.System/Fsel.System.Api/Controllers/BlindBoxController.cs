@@ -18,7 +18,7 @@ namespace Fsel.System.Api.Controllers
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/blind-box")]
     [ApiController]
-    [Permission(role: nameof(EnumRole.Student))]
+    [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
     public class BlindBoxController : ControllerBase
     {
         private readonly IMediator _mediator;

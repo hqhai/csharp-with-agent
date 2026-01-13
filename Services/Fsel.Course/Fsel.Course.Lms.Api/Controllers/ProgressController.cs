@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Api.Controllers
 {
     using System.Collections.Generic;
     using System.Net;
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -34,6 +35,8 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// get Course progress
         /// </summary>
         [HttpGet("course")]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
+        [MapToApiVersion(ApiSettings.APIVersion1i1)]
         [ProducesResponseType(typeof(MethodResult<IList<CourseUnitMockTestResultModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetCourseProgress([FromQuery] GetCourseUnitMockTestByCourseQuery query)
@@ -46,6 +49,8 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// get overall
         /// </summary>
         [HttpGet("overall/{courseId}")]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
+        [MapToApiVersion(ApiSettings.APIVersion1i1)]
         [ProducesResponseType(typeof(MethodResult<OverallScoreModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetOverallScore([FromRoute] Guid courseId)
@@ -58,6 +63,8 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// get progress menu
         /// </summary>
         [HttpGet("progress-menu/{courseId}")]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
+        [MapToApiVersion(ApiSettings.APIVersion1i1)]
         [ProducesResponseType(typeof(MethodResult<ProgressMenuModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetProgressMenu([FromRoute] Guid courseId)
@@ -70,6 +77,8 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// get overall mock test
         /// </summary>
         [HttpGet("overall-mock-test/{courseId}")]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
+        [MapToApiVersion(ApiSettings.APIVersion1i1)]
         [ProducesResponseType(typeof(MethodResult<IList<OverallScoreReportByMockTestModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetOverallScoreByMockTest([FromRoute] Guid courseId)
@@ -82,6 +91,8 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// get overall detail mock test
         /// </summary>
         [HttpGet("overall-detail-mock-test")]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
+        [MapToApiVersion(ApiSettings.APIVersion1i1)]
         [ProducesResponseType(typeof(MethodResult<MockTestResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetDetailOverallScoreByMockTest([FromQuery] GetDetailOverallScoreByMockTestQuery query)
@@ -94,6 +105,8 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// get overall homework
         /// </summary>
         [HttpGet("overall-homework/{courseId}")]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
+        [MapToApiVersion(ApiSettings.APIVersion1i1)]
         [ProducesResponseType(typeof(MethodResult<OverallScoreReportModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetOverallScoreByHomeWork([FromRoute] Guid courseId)
@@ -106,6 +119,8 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// get overall finalTest
         /// </summary>
         [HttpGet("overall-final-test/{courseId}")]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
+        [MapToApiVersion(ApiSettings.APIVersion1i1)]
         [ProducesResponseType(typeof(MethodResult<OverallScoreReportModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetOverallScoreByFinalTest([FromRoute] Guid courseId)
@@ -118,6 +133,8 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// get overall lesson
         /// </summary>
         [HttpGet("overall-lesson/{courseId}")]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
+        [MapToApiVersion(ApiSettings.APIVersion1i1)]
         [ProducesResponseType(typeof(MethodResult<OverallScoreReportModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetOverallScoreByLesson([FromRoute] Guid courseId)
@@ -130,6 +147,8 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// get overall lesson
         /// </summary>
         [HttpGet("overall-unit-test/{courseId}")]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
+        [MapToApiVersion(ApiSettings.APIVersion1i1)]
         [ProducesResponseType(typeof(MethodResult<OverallScoreReportModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetOverallScoreByUnitTest([FromRoute] Guid courseId)
@@ -142,6 +161,8 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// get overall lesson
         /// </summary>
         [HttpGet("overall-class-forum/{courseId}")]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
+        [MapToApiVersion(ApiSettings.APIVersion1i1)]
         [ProducesResponseType(typeof(MethodResult<OverallScoreReportModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetOverallScoreByClassForum([FromRoute] Guid courseId)
@@ -154,6 +175,8 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// get unit by unit
         /// </summary>
         [HttpGet("unit")]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
+        [MapToApiVersion(ApiSettings.APIVersion1i1)]
         [ProducesResponseType(typeof(MethodResult<IList<UnitModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetUnitByUnit([FromQuery] GetUnitByUnitQuery query)
@@ -166,6 +189,8 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// Get unit by unit Test
         /// </summary>
         [HttpGet("unit/unit-test")]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
+        [MapToApiVersion(ApiSettings.APIVersion1i1)]
         [ProducesResponseType(typeof(MethodResult<OverallScoreReportModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetUnitByUnitTest([FromQuery] GetUnitByUnitTestQuery query)
@@ -178,6 +203,8 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// get unit class forum
         /// </summary>
         [HttpGet("unit/class-forum")]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
+        [MapToApiVersion(ApiSettings.APIVersion1i1)]
         [ProducesResponseType(typeof(MethodResult<IList<ClassForumReportModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetUnitByClassForum([FromQuery] GetUnitByClassForumQuery query)
@@ -190,6 +217,8 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// get unit class forum detail
         /// </summary>
         [HttpGet("unit/class-forum-detail/{classForumId}")]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
+        [MapToApiVersion(ApiSettings.APIVersion1i1)]
         [ProducesResponseType(typeof(MethodResult<IList<ClassForumScoreModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetUnitByClassForumDetail([FromRoute] Guid classForumId)
@@ -202,6 +231,8 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// get unit class forum detail
         /// </summary>
         [HttpGet("unit/class-forum-detail")]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
+        [MapToApiVersion(ApiSettings.APIVersion1i1)]
         [ProducesResponseType(typeof(MethodResult<IList<ClassForumAIModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetUnitByClassForumDetail([FromQuery] GetUnitByClassForumDtoQuery query)
@@ -214,6 +245,8 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// Get List lesson by unitId
         /// </summary>
         [HttpGet("unit/lessons")]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
+        [MapToApiVersion(ApiSettings.APIVersion1i1)]
         [ProducesResponseType(typeof(MethodResult<IList<LessonModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetLessonsByUnitId([FromQuery] GetListLessonQuery query)
@@ -226,6 +259,8 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// Get List lesson by unitId
         /// </summary>
         [HttpGet("unit/lessons-total")]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
+        [MapToApiVersion(ApiSettings.APIVersion1i1)]
         [ProducesResponseType(typeof(MethodResult<UnitResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetUnitByLessonTotal([FromQuery] GetUnitByLessonTotalQuery query)
@@ -238,6 +273,8 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// Get List lesson by lessonResultId
         /// </summary>
         [HttpGet("unit/lessons/{lessonResultId}")]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
+        [MapToApiVersion(ApiSettings.APIVersion1i1)]
         [ProducesResponseType(typeof(MethodResult<OverallScoreReportModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetUnitByLesson([FromRoute] Guid lessonResultId)
@@ -250,6 +287,8 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// Get lesson homework score
         /// </summary>
         [HttpGet("unit/homework/{lessonResultId}")]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
+        [MapToApiVersion(ApiSettings.APIVersion1i1)]
         [ProducesResponseType(typeof(MethodResult<IList<LessonHomeWorkResultModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetListHomeWork([FromRoute] Guid lessonResultId)

@@ -23,6 +23,7 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
         public string? Code { get; set; }
         public Guid PackageId { get; set; }
         public Guid EventId { get; set; }
+        public Guid? UserId { get; set; }
     }
 
     public class CheckVoucherCommandHandler : IRequestHandler<CheckVoucherCommand, MethodResult<CheckVoucherModel>>
@@ -30,17 +31,20 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
         private readonly IVoucherRepository _voucherRepository;
         private readonly AuthContext _authContext;
         private readonly IOrderRepository _orderRepository;
-        private readonly IPackageRepository _packageRepository;
         private readonly IUserVoucherLockRepository _userVoucherLockRepository;
         private readonly IUserService _userService;
         private readonly IEventRepository _eventRepository;
 
-        public CheckVoucherCommandHandler(IVoucherRepository voucherRepository, AuthContext authContext, IOrderRepository orderRepository, IPackageRepository packageRepository, IUserVoucherLockRepository userVoucherLockRepository, IUserService userService, IEventRepository eventRepository)
+        public CheckVoucherCommandHandler(IVoucherRepository voucherRepository,
+            AuthContext authContext,
+            IOrderRepository orderRepository,
+            IUserVoucherLockRepository userVoucherLockRepository,
+            IUserService userService,
+            IEventRepository eventRepository)
         {
             _voucherRepository = voucherRepository;
             _authContext = authContext;
             _orderRepository = orderRepository;
-            _packageRepository = packageRepository;
             _userVoucherLockRepository = userVoucherLockRepository;
             _userService = userService;
             _eventRepository = eventRepository;
@@ -50,6 +54,7 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<CheckVoucherModel>();
+            var userId = request.UserId ?? _authContext.CurrentUserId;
 
             if (string.IsNullOrEmpty(request.Code))
             {
@@ -60,8 +65,8 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
             var voucher = await _voucherRepository.Queryable.Include(p => p.Orders).Include(p => p.VoucherPackages).FirstOrDefaultAsync(p => p.Code.ToLower() == request.Code.ToLower(), cancellationToken);
             if (voucher == null)
             {
-                await ManageUserVoucherLockAsync(_authContext.CurrentUserId, cancellationToken);
-                var result = await GetUserVoucherLockAsync(_authContext.CurrentUserId, cancellationToken);
+                await ManageUserVoucherLockAsync(userId, cancellationToken);
+                var result = await GetUserVoucherLockAsync(userId, cancellationToken);
                 methodResult.Result = new CheckVoucherModel()
                 {
                     VoucherId = null,
@@ -97,7 +102,7 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
                 return methodResult;
             }
 
-            if (voucher.Source == EnumVoucherSource.Retail && voucher.SourceUserId.HasValue && voucher.SourceUserId.Value == _authContext.CurrentUserId)
+            if (voucher.Source == EnumVoucherSource.Retail && voucher.SourceUserId.HasValue && voucher.SourceUserId.Value == userId)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.NotSubjectToUse));
                 return methodResult;
@@ -122,7 +127,7 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
 
                 var voucherIds = vouchersAuto.Select(p => p.Id).ToList();
 
-                var orders = await _orderRepository.Queryable.Where(p => p.UserId == _authContext.CurrentUserId && p.VoucherId.HasValue && voucherIds.Contains(p.VoucherId.Value) && p.Status == EnumOrderStatus.Payment).ToListAsync(cancellationToken);
+                var orders = await _orderRepository.Queryable.Where(p => p.UserId == userId && p.VoucherId.HasValue && voucherIds.Contains(p.VoucherId.Value) && p.Status == EnumOrderStatus.Payment).ToListAsync(cancellationToken);
 
                 if (orders.Count >= voucher.NumberOfChanges)
                 {
@@ -131,7 +136,7 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
                 }
             }
 
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentResult = await _userService.GetStudentByUserIdAsync(userId);
             if (!studentResult.IsSuccessStatusCode)
             {
                 methodResult.AddError(studentResult.Error);
@@ -151,13 +156,13 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
                 {
                     EnumApplicableSubjectsVoucher.NewSale =>
                         !_orderRepository.Queryable.Any(p =>
-                            p.UserId == _authContext.CurrentUserId &&
+                            p.UserId == userId &&
                             p.Status == EnumOrderStatus.Payment &&
                             !p.IsTrial),
 
                     EnumApplicableSubjectsVoucher.CurrentStudent =>
                         _orderRepository.Queryable.Any(p =>
-                            p.UserId == _authContext.CurrentUserId &&
+                            p.UserId == userId &&
                             p.Status == EnumOrderStatus.Payment &&
                             !p.IsTrial) &&
                         student.ExpiredDate.HasValue &&
@@ -165,7 +170,7 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
 
                     EnumApplicableSubjectsVoucher.Alumni =>
                         _orderRepository.Queryable.Any(p =>
-                            p.UserId == _authContext.CurrentUserId &&
+                            p.UserId == userId &&
                             p.Status == EnumOrderStatus.Payment &&
                             !p.IsTrial) &&
                         (!student.ExpiredDate.HasValue ||
@@ -173,8 +178,8 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
 
                     EnumApplicableSubjectsVoucher.Other =>
                         voucher.ApplicableEmails != null &&
-                        !string.IsNullOrEmpty(student.Human?.Email) &&
-                        voucher.ApplicableEmails.Contains(student.Human.Email),
+                        !string.IsNullOrEmpty(student.User?.Email) &&
+                        voucher.ApplicableEmails.Contains(student.User.Email),
 
                     _ => false
                 };
@@ -211,7 +216,7 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
                 totalPrice = package.Price;
             }
 
-            await ResetUserVoucherLockAsync(_authContext.CurrentUserId, cancellationToken);
+            await ResetUserVoucherLockAsync(userId, cancellationToken);
 
             methodResult.Result = new CheckVoucherModel()
             {

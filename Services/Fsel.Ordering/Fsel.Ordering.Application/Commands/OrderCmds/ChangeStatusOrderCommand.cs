@@ -195,7 +195,7 @@ AddCoinWhenCoursePurchasedPublisher addCoinWhenCoursePurchasedPublisher)
                             CreatedDate = order.CreatedDate.ToString("dd-MM-yyyy HH:mm", CultureInfo.InvariantCulture),
                             Price = order.Price.ToString(CultureInfo.InvariantCulture),
                             FullName = order.FullName,
-                            StudentEmail = student?.Human?.Email,
+                            StudentEmail = student?.User?.Email,
                             BillingEmail = order.Email,
                             CompanyTaxCode = order.CompanyTaxCode,
                             CompanyAddress = order.CompanyAddress,
@@ -358,7 +358,7 @@ AddCoinWhenCoursePurchasedPublisher addCoinWhenCoursePurchasedPublisher)
 
         private (EnumStudentEditHistoryType, string) GetStudentEditHistory(string? role, int package)
         {
-            if (role == null || role == EnumRole.Student.ToString())
+            if (role == null || role == EnumRole.Student.ToString() || role == EnumRole.StudentCampus.ToString())
             {
                 return (EnumStudentEditHistoryType.BuyPackage, BuyPackage + $"{package} tháng");
             }

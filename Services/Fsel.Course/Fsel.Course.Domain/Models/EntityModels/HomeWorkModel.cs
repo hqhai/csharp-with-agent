@@ -1,6 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Core.Base.BaseModels;
+using Fsel.Course.Domain.Enums;
 using Fsel.Shared.Enums;
 using Fsel.Shared.Helpers;
 
@@ -11,7 +12,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? Name { get; set; }
 
         public string? Code { get; set; }
-
+        public EnumHomeWorkType Type { get; set; }
         public string? MediaPost { get; set; }
         public string? MediaPostContent => StringHelper.ProcessHtml(MediaPost, false);
 
@@ -34,6 +35,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? SkillName { get; set; }
         public string? ProgramName { get; set; }
         public string? LevelName { get; set; }
+        public EnumVersion VersionType { get; set; }
         public HomeWorkResultModel? HomeWorkResult { get; set; }
     }
 }

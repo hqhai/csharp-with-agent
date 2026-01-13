@@ -153,12 +153,12 @@ namespace Fsel.Course.Infrastructure.Common.LessonHelpers
                 return methodResult;
             }
 
-            var openOrders = request.LessonModules.Select(x => x.OpenOrder).Distinct().ToList();
-            if (!IsValidNumber(openOrders))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.OpenOrderOutOfSequence), nameof(openOrders), openOrders);
-                return methodResult;
-            }
+            //var openOrders = request.LessonModules.Select(x => x.OpenOrder).Distinct().ToList();
+            //if (!IsValidNumber(openOrders))
+            //{
+            //    methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.OpenOrderOutOfSequence), nameof(openOrders), openOrders);
+            //    return methodResult;
+            //}
 
             var videoIds = request.LessonModules.Where(x => x.LessonConfigType == EnumLessonConfigType.Video && x.OriginalId.HasValue).Select(x => x.OriginalId!.Value).ToList() ?? new List<Guid>();
             var checkVideo = await _videoRepository.Queryable.WhereBulkContains(videoIds, x => x.OriginalId).Where(x => x.VersionStatus == EnumVersionStatus.LastVersion).CountAsync(cancellationToken: cancellationToken);

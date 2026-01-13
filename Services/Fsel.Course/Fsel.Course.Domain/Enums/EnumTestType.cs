@@ -4,6 +4,8 @@ namespace Fsel.Course.Domain.Enums
 {
     public enum EnumTestType
     {
-        PlacementTest
+        PlacementTest,
+        FullTest,
+        SkillTest
     }
 }

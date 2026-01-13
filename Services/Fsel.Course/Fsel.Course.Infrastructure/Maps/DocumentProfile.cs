@@ -3,6 +3,7 @@
 namespace Fsel.Course.Infrastructure.Maps
 {
     using AutoMapper;
+    using Domain.Models.EntityModels.V1i2;
     using Fsel.Core.Extensions;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Models.CommandModels.Documents;
@@ -13,8 +14,10 @@ namespace Fsel.Course.Infrastructure.Maps
         public DocumentProfile()
         {
             CreateMap<Document, DocumentModel>().IgnoreAllNonExisting();
+            CreateMap<DocumentResult, ResultModel>().IgnoreAllNonExisting();
             CreateMap<DocumentFile, DocumentFileModel>().IgnoreAllNonExisting();
             CreateMap<CreateDocumentCommandModel, Document>().IgnoreAllNonExisting();
+            CreateMap<DocumentResult, DocumentResultModel>().IgnoreAllNonExisting();
         }
     }
 }

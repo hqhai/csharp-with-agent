@@ -13,17 +13,16 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Course.Lms.Application.Commands.ClassForumCmd;
     using Fsel.Course.Lms.Application.Commands.ClassForumResultCmd;
     using Fsel.Course.Lms.Application.Queries.ClassForumResultQuery;
+    using Fsel.Shared.Attributes;
+    using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using Fsel.Shared.Constants;
-    using Fsel.Shared.Attributes;
-    using Microsoft.AspNetCore.Authorization;
-    using Fsel.Shared.Enums;
+    using CreateClassForumResultCommand = Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2.CreateClassForumResultCommand;
 
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/class-forum-result")]
     [ApiController]
-    //[Permission]
     public class ClassForumResultController : BaseController
     {
         private readonly IMediator _mediator;

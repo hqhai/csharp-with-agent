@@ -53,11 +53,11 @@ namespace Fsel.Course.Domain.Entities
 
         public bool IsAlFeedBack { get; set; }
 
-        //[RequiredIf(nameof(IsAlFeedBack), true, ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        // AI settings - Deprecated: Chuyển sang AICriteriaConfigs quản lý
+        // Giữ lại để compatible với dữ liệu cũ
         [MaxLength(5000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? SystemRoleAlConfig { get; set; }
 
-        //[RequiredIf(nameof(IsAlFeedBack), true, ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(5000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? UserAlConfig { get; set; }
 
@@ -92,6 +92,11 @@ namespace Fsel.Course.Domain.Entities
         public EnumVersionStatus VersionStatus { get; set; }
 
         public EnumClassForumLayout Layout { get; set; }
+
+        // AICriteria lookup by SubFeatureType + ObjectId (runtime, không lưu trong DB)
+        // SubFeatureType = EnumSubFeatureType.ClassForum (implicit)
+
+        public Guid? AiPromptCriteriaId { get; set; }
 
         public ICollection<ClassForumResult> ClassForumResults { get; set; } = new List<ClassForumResult>();
 

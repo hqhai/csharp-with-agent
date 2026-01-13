@@ -157,7 +157,9 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             var updatePlacementTestAnswers = new List<PlacementTestAnswer>();
             if (questions != null && questions.Any())
             {
-                var placementTestAnswers = await _placementTestAnswerRepository.Queryable.Where(x => x.PlacementTestResultId == request.PlacementTestResultId).ToListAsync();
+                var placementTestAnswers = await _placementTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id)
+                                                                               .Where(x => x.CreatedDate >= sectionGroupResult.CreatedDate)
+                                                                               .ToListAsync();
                 foreach (var item in request.Answers)
                 {
                     var question = questions.FirstOrDefault(x => x.Id == item.QuestionId);

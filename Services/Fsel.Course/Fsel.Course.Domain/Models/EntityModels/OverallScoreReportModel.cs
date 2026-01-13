@@ -4,6 +4,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 {
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.IEntities;
+    using Fsel.Course.Domain.Models.EntityModels.SkillModels;
     using Fsel.Shared.Enums;
 
     public class OverallScoreReportModel : IHighestStreak
@@ -16,5 +17,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public int? HighestStreak { get; set; }
         public IList<SkillScores>? SkillScores { get; set; }
         public IList<EnumCourseSkill>? CourseSkills { get; set; }
+        public IList<SkillViewModel>? Skills { get; set; }
     }
 }

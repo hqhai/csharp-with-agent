@@ -3,6 +3,7 @@
 namespace Fsel.ExamPractice.Domain.Entities.SkillScoreConfigs
 {
     using System.Text.Json.Serialization;
+    using Fsel.ExamPractice.Domain.Enums;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
 
@@ -10,6 +11,8 @@ namespace Fsel.ExamPractice.Domain.Entities.SkillScoreConfigs
     {
         [JsonRequired]
         public EnumCourseSkill Skill { get; set; }
+
+        public EnumExamPracticeScoreCriteria? ScoreCriteria { get; set; }
 
         [JsonRequired]
         public double Scores { get; set; }

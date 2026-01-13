@@ -22,12 +22,12 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
     public class GetStudentByUserIdsQueryHandler : IRequestHandler<GetStudentByUserIdsQuery, MethodResult<IList<StudentModel>>>
     {
         private readonly IMapper _mapper;
-        private readonly IHumanRepository _humanRepository;
+        private readonly IStudentRepository _studentRepository;
 
-        public GetStudentByUserIdsQueryHandler(IMapper mapper, IHumanRepository humanRepository)
+        public GetStudentByUserIdsQueryHandler(IMapper mapper, IStudentRepository studentRepository)
         {
             _mapper = mapper;
-            _humanRepository = humanRepository;
+            _studentRepository = studentRepository;
         }
 
         public async Task<MethodResult<IList<StudentModel>>> Handle(GetStudentByUserIdsQuery request, CancellationToken cancellationToken)
@@ -40,21 +40,24 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                 return methodResult;
             }
 
-            var students = await _humanRepository.Queryable
-                .Include(x => x.User)
-                .Where(i => i.UserId != null)
+            var students = await _studentRepository.Queryable
+                .Where(i => i.User != null)
                 .WhereBulkContains(request.UserIds, i => i.UserId)
                 .Select(x => new StudentModel
                 {
-                    Id = x.Student!.Id,
-                    ClassId = x.Student!.ClassId,
-                    Occupation = x.Student.Occupation,
-                    CourseLevel = x.Student.CourseLevel,
-                    CreatedDate = x.Student.CreatedDate,
-                    School = x.Student.School,
-                    SchoolId = x.Student.SchoolId,
-                    ExpiredDate = x.Student.ExpiredDate,
-                    Human = _mapper.Map<HumanProfileModel>(x)
+                    Id = x.Id,
+                    ClassId = x.ClassId,
+                    Occupation = x.Occupation,
+                    CourseLevel = x.CourseLevel,
+                    CreatedDate = x.CreatedDate,
+                    School = x.School,
+                    SchoolId = x.SchoolId,
+                    SchoolClass = x.SchoolClass,
+                    SchoolGrade = x.SchoolGrade,
+                    BaseCourseLevel = x.BaseCourseLevel,
+                    ExpiredDate = x.ExpiredDate,
+                    UserId = x.UserId,
+                    User = _mapper.Map<UserModel>(x.User)
                 })
                 .ToListAsync(cancellationToken);
 

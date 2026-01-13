@@ -6,6 +6,7 @@ namespace Fsel.Course.Application.Queries.TestQuery
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
+    using Domain.Models.EntityModels;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities;
@@ -110,7 +111,7 @@ namespace Fsel.Course.Application.Queries.TestQuery
                 var model = _mapper.Map<TestSectionModel>(entity);
                 if (questionDict.TryGetValue(entity.Id, out var questions))
                 {
-                    model.Questions = _mapper.Map<IList<Domain.Models.EntityModels.QuestionModel>>(questions);
+                    model.Questions = _mapper.Map<IList<QuestionModel>>(questions);
                 }
                 if (testAISettingDict.TryGetValue(entity.Id, out var testAISettings))
                 {

@@ -79,7 +79,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             //    methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.CsoInvalid), nameof(classForumResult.CheckCsoId));
             //    return methodResult;
             //}
-            await _classForumResultRepository.ExecuteTransactionAsync(async () =>
+            await _classForumResultRepository.ExecuteTransactionAsync((Func<Task<VoidMethodResult>>)(async () =>
             {
                 Dictionary<EnumNotificationType, EnumNotificationContent> enumNotification = new();
 
@@ -105,7 +105,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
 
                 await _classForumResultRepository.BulkUpdateList(new List<ClassForumResult> { classForumResult }, bulk =>
                 {
-                    bulk.IgnoreOnUpdateExpression = c => new { c.StudentId, c.LessonResultId, c.ClassForumId };
+                    bulk.IgnoreOnUpdateExpression = c => (new { c.StudentId, c.LessonResultId, c.ClassForumId });
                 });
 
                 //Thông báo cho user khi bài viết được phê duyệt
@@ -114,7 +114,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<ClassForumResultModel>(classForumResult);
                 return methodResult;
-            });
+            }));
 
             return methodResult;
         }
@@ -129,7 +129,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             if (lessonResult != null)
             {
                 var user = await _userService.GetUserByStudentId(lessonResult.StudentId);
-                var userId = user?.Content?.Result?.Human?.UserId;
+                var userId = user?.Content?.Result?.UserId;
 
                 GetFeatureModuleQuery query = new GetFeatureModuleQuery
                 {

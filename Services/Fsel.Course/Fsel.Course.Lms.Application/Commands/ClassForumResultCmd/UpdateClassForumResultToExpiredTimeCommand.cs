@@ -47,7 +47,11 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
-            var classForumResult = await _classForumResultRepository.Queryable.Include(x => x.ClassForumDetailResults.Where(x => x.Status != EnumClassForumResultStatus.Draft).OrderBy(x => x.CreatedDate)).ThenInclude(x => x.ClassForumResultFiles).Include(x => x.ClassForum)
+            var classForumResult = await _classForumResultRepository.Queryable
+                                    .Include(x => x.ClassForumDetailResults.Where(x => x.Status != EnumClassForumResultStatus.Draft).OrderBy(x => x.CreatedDate))
+                                        .ThenInclude(x => x.ClassForumResultFiles)
+                                    .Include(x => x.ClassForum)
+                                        .ThenInclude(x => x.Skill)
                                     .FirstOrDefaultAsync(x => x.Id == request.ClassForumResultId, cancellationToken);
             if (classForumResult == null || !classForumResult.ClassForumDetailResults.Any())
             {
@@ -189,7 +193,10 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                         TotalCount = classForumResult.CorrectTotal,
                         CountQuestion = 1,
                         TotalQuestion = 1,
-                        Skill = classForumResult.ClassForum?.CourseSkill ?? default
+                        Skill = classForumResult.ClassForum?.CourseSkill ?? default,
+                        SkillId = classForumResult.ClassForum?.SkillId ?? default,
+                        SkillName = classForumResult.ClassForum?.Skill?.Name ?? default,
+                        SkillFilePath = classForumResult.ClassForum?.Skill?.FilePath ?? default
                     }
                 };
             }

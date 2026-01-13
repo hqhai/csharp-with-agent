@@ -5,9 +5,12 @@ namespace Fsel.Identity.Api.Controllers
     using System.Net;
     using Asp.Versioning;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Identity.Application.Commands.OtherCmd;
+    using Fsel.Identity.Application.Commands.SystemConfigs;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
@@ -34,6 +37,19 @@ namespace Fsel.Identity.Api.Controllers
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return Redirect(commandResult.Result ?? string.Empty);
+        }
+
+        /// <summary>
+        /// SystemConfig
+        /// </summary>
+        [HttpPost("system-config")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(roles: new[] { nameof(EnumRole.MasterAdmin) })]
+        public async Task<IActionResult> Save([FromBody] SaveSystemConfigCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }

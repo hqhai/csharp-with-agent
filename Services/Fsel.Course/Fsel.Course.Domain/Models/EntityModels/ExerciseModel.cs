@@ -17,6 +17,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public IEnumerable<string>? AudioPaths => StringHelper.GetIframeUrls(MediaPost, true);
         public IEnumerable<string>? VideoPaths => StringHelper.GetIframeUrls(MediaPost, false);
         public EnumCourseSkill CourseSkill { get; set; }
+        public SkillViewModel? Skill { get; set; }
         public IList<QuestionModel> Questions { get; set; } = new List<QuestionModel>();
     }
 }

@@ -10,12 +10,12 @@ namespace Fsel.Identity.Infrastructure.Common
 
     public class SaveOtpCodeConverter
     {
-        private readonly IUserOtpCodeRepository _userOtpCodeRepository;
+        private readonly IUserOtpCodeRepository _userOtpRepository;
         private const int AddOneCountRetry = 1;
 
-        public SaveOtpCodeConverter(IUserOtpCodeRepository userOtpCodeRepository)
+        public SaveOtpCodeConverter(IUserOtpCodeRepository userOtpRepository)
         {
-            _userOtpCodeRepository = userOtpCodeRepository;
+            _userOtpRepository = userOtpRepository;
         }
 
         public async Task<string> SaveOTpCodeBySmsCommand(UserOtpCode? lastOTP, Guid userId, CancellationToken cancellationToken)
@@ -25,22 +25,22 @@ namespace Fsel.Identity.Infrastructure.Common
                 lastOTP = new UserOtpCode
                 {
                     UserId = userId,
-                    OTPCode = NumberHelper.GetRandomCode(),
+                    OtpCode = NumberHelper.GetRandomCode(),
                     Status = EnumOtpCodeStatus.New,
                     Type = EnumUserOtpCodeType.SMS,
                     RetryCount = AddOneCountRetry,
                     ExpiredTime = DateTime.MaxValue,
                 };
-                _userOtpCodeRepository.Add(lastOTP);
+                _userOtpRepository.Add(lastOTP);
             }
             else
             {
                 lastOTP.RetryCount += AddOneCountRetry;
-                _userOtpCodeRepository.Update(lastOTP);
+                _userOtpRepository.Update(lastOTP);
             }
 
-            await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-            return lastOTP.OTPCode ?? string.Empty;
+            await _userOtpRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            return lastOTP.OtpCode ?? string.Empty;
         }
     }
 }

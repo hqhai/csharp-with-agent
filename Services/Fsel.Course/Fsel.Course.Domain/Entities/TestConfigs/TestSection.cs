@@ -81,13 +81,24 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
         public ICollection<TestSection> TestSections { get; set; } = new List<TestSection>();
         public ICollection<TestAISetting> TestAISettings { get; set; } = new List<TestAISetting>();
         public ICollection<TestSectionQuestion> TestSectionQuestions { get; set; } = new List<TestSectionQuestion>();
+        public ICollection<TestAnswer> TestAnswers { get; set; } = new List<TestAnswer>();
         public ICollection<TestSectionResult> SectionResults { get; set; } = new List<TestSectionResult>();
+        public ICollection<TestScore> TestScores { get; set; } = new List<TestScore>();
     }
 
     public class TestSectionConfig
     {
         [MaxLength(10000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? MediaPost { get; set; }
+
+        public double? TotalScore { get; set; }
+        public string? AudioPath { get; set; }
+
+        public string? MediaPostContent => Shared.Helpers.StringHelper.ProcessHtml(MediaPost, false);
+
+        public IEnumerable<string>? AudioPaths => Shared.Helpers.StringHelper.GetIframeUrls(MediaPost, true).AddS3BaseUrls();
+
+        public IEnumerable<string>? VideoPaths => Shared.Helpers.StringHelper.GetIframeUrls(MediaPost, false).AddS3BaseUrls();
 
         /// <summary>
         /// Media Post Ruby
@@ -109,8 +120,7 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
     public class ScoringFormulaConfig
     {
         public int From { get; set; }
-
-        public int? Equal { get; set; }
+        public double? Equal { get; set; }
     }
 
     public class ReportContentBankConfig

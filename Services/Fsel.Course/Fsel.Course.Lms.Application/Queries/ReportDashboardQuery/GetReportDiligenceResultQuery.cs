@@ -95,12 +95,12 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
             }
 
             // Lọc bản ghi có dữ liệu Human
-            students = students.Where(s => s.Human != null && s.Human.UserId.HasValue).ToList();
+            students = students.Where(s => s.User != null).ToList();
 
             // Lấy dữ liệu AccessTime
             var accessTimeResult = await _systemService.GetAccessTimeByUserAndFeature(new GetAccessTimeByUserAndFeatureQueryModel
             {
-                UserIds = students.Select(s => s.Human!.UserId!.Value).ToList(),
+                UserIds = students.Select(s => s.UserId).ToList(),
                 Features = new List<EnumFeature>() { EnumFeature.ClassForum, EnumFeature.VideoLesson, EnumFeature.HomeWork }
             });
 
@@ -132,14 +132,14 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
             if (request.EnumCourseLevels != null && request.EnumCourseLevels.Count > 0)
             {
                 students = students.Where(s => s.CourseLevel != null && request.EnumCourseLevels.Contains(s.CourseLevel ?? default)).ToList();
-                featureAccsessTime = featureAccsessTime.Where(f => students.Select(s => s.Human!.UserId).Contains(f.CreatedUserId)).ToList();
+                featureAccsessTime = featureAccsessTime.Where(f => students.Select(s => s.UserId).Contains(f.CreatedUserId)).ToList();
             }
 
             // Lọc theo lớp học của học sinh
             if (request.SchoolClasses != null && request.SchoolClasses.Count > 0)
             {
                 students = students.Where(s => s.SchoolClass != null && request.SchoolClasses.Contains(s.SchoolClass)).ToList();
-                featureAccsessTime = featureAccsessTime.Where(f => students.Select(s => s.Human!.UserId).Contains(f.CreatedUserId)).ToList();
+                featureAccsessTime = featureAccsessTime.Where(f => students.Select(s => s.UserId).Contains(f.CreatedUserId)).ToList();
             }
 
             var classes = students.Where(s => s.SchoolClass != null).Select(s => s.SchoolClass).ToList();
@@ -296,7 +296,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
 
             // Lọc những student không có bản ghi nào trong dữ liệu AccessTiem đã lọc
             var studentNotAccessInSomeDays = student
-                .Where(s => !featureAccsessTimeInSomeDays.Any(f => f.CreatedUserId == s.Human!.UserId))
+                .Where(s => !featureAccsessTimeInSomeDays.Any(f => f.CreatedUserId == s.UserId))
                 .Where(s => s.SchoolClass != null)
                 .GroupBy(s => s.SchoolClass)
                 .OrderBy(x => x.Key)

@@ -1,0 +1,137 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Course.Lms.Application.Commands.LessonCmd.V1i2
+{
+    using System;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using AutoMapper;
+    using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Entities.V1i1;
+    using Fsel.Course.Domain.Enums;
+    using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
+    using Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServices.LessonItemServices;
+    using MediatR;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
+
+    public class StartLessonCommand : IRequest<MethodResult<LessonResultModel>>
+    {
+        public Guid LessonResultId { get; set; }
+    }
+
+    public class StartLessonCommandHandler : IRequestHandler<StartLessonCommand, MethodResult<LessonResultModel>>
+    {
+        private readonly ILessonResultRepository _lessonResultRepository;
+        private readonly ILessonModuleCachingService _lessonModuleCachingService;
+        private readonly ILessonModuleRepository _lessonModuleRepository;
+        private readonly ILessonItemInitializerFactory _lessonItemInitializerFactory;
+        private readonly IMapper _mapper;
+
+        public StartLessonCommandHandler(ILessonResultRepository lessonResultRepository,
+            ILessonModuleCachingService lessonModuleCachingService,
+            ILessonModuleRepository lessonModuleRepository,
+            ILessonItemInitializerFactory lessonItemInitializerFactory,
+            IMapper mapper)
+        {
+            _lessonResultRepository = lessonResultRepository;
+            _lessonModuleCachingService = lessonModuleCachingService;
+            _lessonModuleRepository = lessonModuleRepository;
+            _lessonItemInitializerFactory = lessonItemInitializerFactory;
+            _mapper = mapper;
+        }
+
+        public async Task<MethodResult<LessonResultModel>> Handle(StartLessonCommand request, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            var methodResult = new MethodResult<LessonResultModel>();
+
+            var lessonResult = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.LessonResultId, cancellationToken);
+            if (lessonResult == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(LessonResult), request.LessonResultId);
+                return methodResult;
+            }
+            if (lessonResult.Status != EnumResultStatus.New)
+            {
+                return methodResult;
+            }
+            await UpdateLessonResultAsync(lessonResult, cancellationToken);
+
+            await _lessonResultRepository.ExecuteTransactionAsync(async () =>
+            {
+                lessonResult.Status = EnumResultStatus.Process;
+                lessonResult.ProcessDate = DateTime.UtcNow;
+                await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                methodResult.Result = _mapper.Map<LessonResultModel>(lessonResult);
+                return methodResult;
+            });
+
+            return methodResult;
+        }
+
+        /// <summary>
+        /// Được gọi khi 1 LessonModule hoàn thành.
+        /// - Mở tất cả module phía sau.
+        /// - Nếu số module có Result Done == số module cần làm → Done lesson.
+        /// </summary>
+        public async Task UpdateLessonResultAsync(LessonResult lessonResult, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(lessonResult);
+
+            var lessonModules = await GetLessonModulesAsync(lessonResult.LessonId);
+            var nextModules = GetNextModules(lessonModules);
+            if (nextModules.Any())
+            {
+                foreach (var nextModule in nextModules)
+                {
+                    await UpdateNewResultLessonModule(nextModule, lessonResult, cancellationToken);
+                }
+            }
+        }
+
+        private async Task UpdateNewResultLessonModule(
+        LessonModule nextModule,
+        LessonResult lessonResult,
+        CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(nextModule);
+
+            var initializer = _lessonItemInitializerFactory.Get(nextModule.LessonConfigType);
+            if (initializer != null)
+            {
+                await initializer.InitializeAsync(nextModule, lessonResult, cancellationToken);
+            }
+        }
+
+        private static IList<LessonModule> GetNextModules(IList<LessonModule> lessonModules)
+        {
+            var minOrder = lessonModules.OrderBy(m => m.OpenOrder).FirstOrDefault();
+            if (minOrder == null)
+            {
+                return new List<LessonModule>();
+            }
+            return lessonModules.Where(m => m.OpenOrder == minOrder.OpenOrder)
+                                .OrderBy(m => m.OpenOrder)
+                                .ToList();
+        }
+
+        private async Task<IList<LessonModule>> GetLessonModulesAsync(Guid id)
+        {
+            return await _lessonModuleCachingService.GetOrSetAsync(id.ToString(), async (ctx, _) =>
+            {
+                var lessonModules = await _lessonModuleRepository.ReadQueryable
+                                                .Where(x => x.LessonId == id)
+                                                .ToListAsync(_);
+
+                return lessonModules.OrderBy(x => x.DisplayOrder).ToList();
+            });
+        }
+    }
+}

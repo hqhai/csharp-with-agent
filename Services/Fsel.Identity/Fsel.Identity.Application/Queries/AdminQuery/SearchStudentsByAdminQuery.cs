@@ -31,7 +31,6 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
     public class SearchStudentsByAdminQueryHandler : IRequestHandler<SearchStudentsByAdminQuery, MethodResult<PagingItemsModel<StudentSearchAdminModel>>>
     {
         private readonly UserManager<User> _userManager;
-        private readonly IHumanRepository _humanRepository;
         private readonly IStudentRepository _studentRepository;
         private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
         private readonly ICompetitionEventsRepository _competitionEventsRepository;
@@ -58,10 +57,9 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
         private readonly IUserRoleRepository _userRoleRepository;
         private readonly RoleManager<Role> _roleManager;
 
-        public SearchStudentsByAdminQueryHandler(UserManager<User> userManager, IHumanRepository humanRepository, IStudentRepository studentRepository, IStudentCompetitionEventsRepository studentCompetitionEventsRepository, ICompetitionEventsRepository competitionEventsRepository, ILmsCourseService lmsCourseService, IOrderService orderService, UserDbContext userDbContext, IUserRoleRepository userRoleRepository, RoleManager<Role> roleManager)
+        public SearchStudentsByAdminQueryHandler(UserManager<User> userManager, IStudentRepository studentRepository, IStudentCompetitionEventsRepository studentCompetitionEventsRepository, ICompetitionEventsRepository competitionEventsRepository, ILmsCourseService lmsCourseService, IOrderService orderService, UserDbContext userDbContext, IUserRoleRepository userRoleRepository, RoleManager<Role> roleManager)
         {
             _userManager = userManager;
-            _humanRepository = humanRepository;
             _studentRepository = studentRepository;
             _studentCompetitionEventsRepository = studentCompetitionEventsRepository;
             _competitionEventsRepository = competitionEventsRepository;
@@ -89,19 +87,19 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
 
                         join r in _roleManager.Roles on ur.RoleId equals r.Id
 
-                        join h in _humanRepository.Queryable.IgnoreQueryFilters()
-                        on u.Id equals h.UserId into humanGroup
-                        from human in humanGroup.DefaultIfEmpty()
-
                         join s in _studentRepository.Queryable.IgnoreQueryFilters()
-                        on human.Id equals s.HumanId into studentGroup
+                        on u.Id equals s.UserId into studentGroup
                         from student in studentGroup.DefaultIfEmpty()
 
                         where r.Name == EnumRole.Student.ToString()
 
-                        select new { User = u, Human = human, Student = student };
+                        select new { User = u, Student = student };
 
             query = query.Where(p => p.User.IsDeleted == request.IsDelete);
+            if (request.StudentId.HasValue)
+            {
+                query = query.Where(m => m.Student.Id == request.StudentId);
+            }
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
@@ -150,9 +148,9 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 CreatedDate = p.User.CreatedDate,
                 EmailConfirm = p.User.EmailConfirmed,
                 PasswordDefault = p.User.DefaultPassword,
-                Birthday = p.Human.Birthday,
-                StudentCode = p.Human.Code,
-                Gender = p.Human.Gender,
+                Birthday = p.User.Birthday,
+                StudentCode = p.User.Code,
+                Gender = p.User.Gender,
                 SchoolName = p.Student.School,
                 Class = p.Student.SchoolClass,
                 Grade = p.Student.SchoolGrade,
@@ -224,6 +222,9 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
             user.IsLearnStudent = dataStudent?.IsLearnStudent ?? default;
             user.TotalLesson = dataStudent?.TotalLesson == 0 ? null : dataStudent?.TotalLesson;
             user.TotalLessonDone = user.TotalLesson == null ? null : dataStudent?.TotalLessonDone;
+
+            user.Program = dataStudent?.Program;
+            user.Level = dataStudent?.Level;
 
             if (user.StudentId.HasValue)
             {

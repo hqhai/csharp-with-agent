@@ -57,6 +57,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
                 UpdatedDate = x.UpdatedDate,
                 CreatedFullName = x.CreatedFullName,
                 Status = x.Status,
+                Address = x.Address,
                 PaymentMethod = x.PaymentMethod,
                 PackageId = x.PackageId,
                 MonthNumber = x.Package == null ? null : x.Package.MonthNumber,
@@ -77,7 +78,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
                 query = query.Where(p => p.Status != EnumOrderStatus.New || (p.Status == EnumOrderStatus.New && (p.PaymentMethod == EnumPaymentMethodStatus.Payoo || p.PaymentMethod == EnumPaymentMethodStatus.AppStore || p.PaymentMethod == EnumPaymentMethodStatus.CHPlay)));
             }
 
-            if (_authContext.Roles?.FirstOrDefault() == EnumRole.Student.ToString())
+            if (_authContext.Roles?.FirstOrDefault() == EnumRole.Student.ToString() || _authContext.Roles?.FirstOrDefault() == EnumRole.StudentCampus.ToString())
             {
                 query = query.Where(p => p.UserId == _authContext.CurrentUserId);
             }
@@ -86,7 +87,11 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
             {
                 if (request.Keyword.IsValidEmail())
                 {
-                    query = query.Where(p => !string.IsNullOrEmpty(p.Email) && p.Email.Contains(request.Keyword));
+                    query = query.Where(p => !string.IsNullOrEmpty(p.Email) && p.Email == request.Keyword);
+                }
+                else if (request.Keyword.IsValidPhoneNumber())
+                {
+                    query = query.Where(p => !string.IsNullOrEmpty(p.PhoneNumber) && p.PhoneNumber == request.Keyword);
                 }
                 else
                 {
@@ -126,6 +131,11 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
                     .ToListAsync(cancellationToken);
 
             var userIds = lists.Select(l => l.UserId).Distinct().ToList();
+
+            var orderUsers = await _orderRepository.Queryable.Where(p => !p.IsTrial && p.RevenueType == EnumPaymentRevenueType.Revenue)
+                                                             .WhereBulkContains(userIds, x => x.UserId)
+                                                             .GroupBy(x => x.UserId)
+                                                             .ToDictionaryAsync(x => x.Key, x => x.Count(), cancellationToken);
             if (userIds.Any())
             {
                 var batches = SplitList(userIds, BatchSize);
@@ -149,8 +159,8 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
                 }
 
                 var studentDict = students
-                    .Where(x => x.Human != null && x.Human.UserId.HasValue)
-                    .ToDictionary(x => x.Human?.UserId ?? default, x => x);
+                    .Where(x => x.UserId != Guid.Empty)
+                    .ToDictionary(x => x.UserId, x => x);
 
                 if (studentDict != null)
                 {
@@ -158,11 +168,15 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
                     {
                         if (studentDict.TryGetValue(p.UserId, out var student))
                         {
-                            p.StudentCode = student.Human?.Code;
-                            p.StudentPhoneNumber = student.Human?.PhoneNumber;
-                            p.StudentEmail = student.Human?.Email;
-                            p.StudentFullName = student.Human?.FullName;
+                            p.StudentCode = student.User?.Code;
+                            p.StudentPhoneNumber = student.User?.PhoneNumber;
+                            p.StudentEmail = student.User?.Email;
+                            p.StudentFullName = student.User?.FullName;
                             p.ExpiredDate = student.ExpiredDate;
+                        }
+                        if (orderUsers.TryGetValue(p.UserId, out var countOrder))
+                        {
+                            p.CountOrder = countOrder;
                         }
                     });
                 }

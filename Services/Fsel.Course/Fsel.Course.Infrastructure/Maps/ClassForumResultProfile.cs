@@ -7,6 +7,7 @@ namespace Fsel.Course.Infrastructure.Maps
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Models.CommandModels.ClassForumResults;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Domain.Models.EntityModels.V1i2;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
     using Fsel.Shared.Models.ShareModels;
 
@@ -33,6 +34,9 @@ namespace Fsel.Course.Infrastructure.Maps
                 .ForMember(x => x.MediaPost, x => x.MapFrom(y => y.ClassForum != null ? y.ClassForum.MediaPost : null))
                 .ForMember(x => x.CourseSkill, x => x.MapFrom(y => y.ClassForum != null ? y.ClassForum.CourseSkill : default))
                 .ForMember(x => x.ClassForumFiles, x => x.MapFrom(y => y.ClassForum != null ? y.ClassForum.ClassForumFiles : default));
+
+            CreateMap<ClassForumResult, ResultModel>()
+                .ForMember(p => p.Status, x => x.MapFrom(n => n.ResultStatus));
         }
     }
 }

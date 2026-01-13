@@ -58,7 +58,7 @@ namespace Fsel.System.Api.Controllers
         [HttpPost("create-history-deduct-coin-of-student")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+       [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
         public async Task<IActionResult> CreateHistoryDeductCoinOfStudent([FromBody] CreateHistoryDeductCoinOfStudentCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);

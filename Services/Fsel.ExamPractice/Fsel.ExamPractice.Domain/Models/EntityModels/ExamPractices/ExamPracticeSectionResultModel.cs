@@ -13,7 +13,7 @@ namespace Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices
     {
         public int CorrectCount { get; set; }
         public int CorrectTotal { get; set; }
-        public virtual double Percent { get; set; }
+        public double Percent { get; set; }
         public IList<SkillScores>? SkillScores { get; set; }
         public int? HighestStreak { get; set; }
         public double WorkingTime { get; set; }
@@ -22,6 +22,7 @@ namespace Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices
         public Guid StudentId { get; set; }
         public Guid ExamPracticeResultId { get; set; }
         public bool IsTestDone { get; set; }
+        public string? Note { get; set; }
         public BandScoresReport? BandScoresReport { get; set; }
         public double TargetBandScore { get; set; }
         public bool IsCheckScoreColor { get; set; }

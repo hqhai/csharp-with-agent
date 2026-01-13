@@ -75,7 +75,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
 
             var featureAccessTimeQuery = students.SelectMany(x =>
             {
-                var userId = x.Human?.UserId ?? default;
+                var userId = x.UserId;
                 return new List<GetFeatureAccessTimeExportQueryModel> {
                      new GetFeatureAccessTimeExportQueryModel
                      {
@@ -105,10 +105,10 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             {
                 var reportProgress = new ReportTimeStudentModel
                 {
-                    FullName = student.Human?.FullName,
-                    Email = student.Human?.Email,
+                    FullName = student.User?.FullName,
+                    Email = student.User?.Email,
                 };
-                var userId = student.Human?.UserId ?? default;
+                var userId = student.UserId;
                 var featureAccessTimes = featureAccessTimeResults?.Where(x => x.CreatedUserId == userId).ToList();
                 if (featureAccessTimes != null && featureAccessTimes.Any())
                 {

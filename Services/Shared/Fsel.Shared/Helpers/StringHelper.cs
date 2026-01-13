@@ -6,8 +6,12 @@ namespace Fsel.Shared.Helpers
     using System.ComponentModel;
     using System.Globalization;
     using System.Text;
+    using System.Text.Json;
     using System.Text.RegularExpressions;
+    using Fsel.Common.Helpers;
+    using System.Web;
     using Fsel.Shared.Constants;
+    using Nest;
 
     public static class StringHelper
     {
@@ -47,7 +51,7 @@ namespace Fsel.Shared.Helpers
 
         public static IList<T>? ToList<T>(this string? str, char separator = ',')
         {
-            return str?.Split(separator).Select(x =>
+            return str?.Split(separator).Where(x => !string.IsNullOrEmpty(x)).Select(x =>
             {
                 if (TypeDescriptor.GetConverter(typeof(T)).IsValid(x))
                 {
@@ -179,6 +183,18 @@ namespace Fsel.Shared.Helpers
             {
                 string url = match.Groups[1].Value;
                 urls.Add(url);
+            }
+
+            if (isAudio)
+            {
+                string audioTagPattern = @"<audio[^>]*\ssrc=""([^""]+)""[^>]*>";
+
+                var audioTagMatches = Regex.Matches(inputHtml, audioTagPattern, RegexOptions.Singleline | RegexOptions.IgnoreCase);
+
+                foreach (Match match in audioTagMatches)
+                {
+                    urls.Add(match.Groups[1].Value);
+                }
             }
 
             return urls;
@@ -365,6 +381,12 @@ namespace Fsel.Shared.Helpers
             return string.Format(objStr, param ?? Array.Empty<object>());
         }
 
+        public static string FormatStringWithParam(object data, dynamic? param)
+        {
+            string objStr = data?.ToString() ?? string.Empty;
+            return string.Format(objStr, param);
+        }
+
         public static bool ContainsSpecialChars(string input)
         {
             return Regex.IsMatch(input, @"^[\p{L}\s]+$");
@@ -445,6 +467,174 @@ namespace Fsel.Shared.Helpers
                 }
                 return answers.Select(ans => CleanText(ans)).ToList();
             }
+
+            private static readonly Regex ContentFieldsRx = new(
+            "\"BeforeClick\"\\s*:\\s*\"(?<before>(?:\\\\.|[^\"])*)\"\\s*,\\s*"
+            + "\"Transcript\"\\s*:\\s*\"(?<trans>(?:\\\\.|[^\"])*)\"\\s*,\\s*"
+            + "\"AfterQuestions\"\\s*:\\s*\"(?<after>(?:\\\\.|[^\"])*)\"",
+            RegexOptions.Singleline | RegexOptions.Compiled);
+
+            /// <summary>
+            /// Nhận chuỗi content (string chứa JSON), trả về content hợp nhất:
+            /// {BeforeClick}\n\n**Click to listen:**\n{"<Transcript JSON-string>"}\n\n{AfterQuestions}
+            /// </summary>
+            public static string NormalizeListeningContent(string rawContent)
+            {
+                if (string.IsNullOrWhiteSpace(rawContent))
+                {
+                    return string.Empty;
+                }
+                var m = ContentFieldsRx.Match(rawContent);
+                if (!m.Success)
+                {
+                    return rawContent; // Không đúng cấu trúc kỳ vọng thì trả nguyên văn
+                }
+                // Helper: giải escape JSON an toàn (kể cả emoji \uXXXX)
+                static string UnescapeJsonString(string s)
+                {
+                    // s đang là phần thân của một chuỗi JSON -> bọc thêm "..."
+                    return JsonSerializer.Deserialize<string>($"\"{s}\"") ?? string.Empty;
+                }
+
+                var before = UnescapeJsonString(m.Groups["before"].Value);
+                var trans = UnescapeJsonString(m.Groups["trans"].Value);
+                var after = UnescapeJsonString(m.Groups["after"].Value);
+
+                // Loại bỏ phần "Click to listen:" ở cuối BeforeClick (nếu có) để tránh lặp
+                before = Regex.Replace(before, @"\s*Click to listen:?\s*$", "", RegexOptions.IgnoreCase);
+
+                // Biểu diễn Transcript thành một JSON string literal hợp lệ (có dấu ngoặc kép & escape chuẩn)
+                var transJsonLiteral = trans.Serialize(); // ví dụ -> "Once upon a time..."
+
+                // Ghép theo format yêu cầu, bao quanh JSON string literal bởi {}
+                var merged =
+                    $"{before}\n\n" +
+                    $"**Click to listen:**\n" +
+                    $"{{{transJsonLiteral}}}\n\n" +
+                    $"{after}";
+
+                return StripTrailingEscapesAndEmojis(merged);
+            }
+        }
+
+        public static (string? FirstName, string? LastName) ParseFullName(this string? fullName)
+        {
+            if (string.IsNullOrWhiteSpace(fullName))
+            {
+                return (string.Empty, null);
+            }
+
+            int firstSpaceIndex = fullName.IndexOf(' ', StringComparison.InvariantCulture);
+
+            if (firstSpaceIndex == -1)
+            {
+                return (fullName.Trim(), null);
+            }
+
+            string lastName = fullName[..firstSpaceIndex].Trim();
+            string firstName = fullName[(firstSpaceIndex + 1)..].Trim();
+
+            return (firstName, lastName);
+        }
+
+        public static string InjectParam(this string input, params string[] parameters)
+        {
+            if (string.IsNullOrEmpty(input) || parameters == null || parameters.Length == 0)
+            {
+                return input ?? string.Empty;
+            }
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                string placeholder = $"{{{{{i}}}}}";
+                input = input.Replace(placeholder, parameters[i] ?? string.Empty, StringComparison.InvariantCultureIgnoreCase);
+            }
+            return input;
+        }
+
+        public static T DecodeUrlBase64ToObject<T>(this string urlBase64)
+        {
+            if (string.IsNullOrWhiteSpace(urlBase64))
+            {
+                return default;
+            }
+
+            try
+            {
+                string decodedBase64 = HttpUtility.UrlDecode(urlBase64);
+                byte[] data = Convert.FromBase64String(decodedBase64);
+                string jsonString = Encoding.UTF8.GetString(data);
+
+                // Deserialize thành object
+                return JsonSerializer.Deserialize<T>(jsonString);
+            }
+            catch
+            {
+                return default;
+            }
+        }
+
+        public static string EncodeObjectToUrlBase64(this object obj)
+        {
+            if (obj == null)
+            {
+                return string.Empty;
+            }
+
+            // Serialize object thành JSON
+            string jsonString = JsonSerializer.Serialize(obj);
+
+            // Chuyển sang base64
+            byte[] bytes = Encoding.UTF8.GetBytes(jsonString);
+            string base64String = Convert.ToBase64String(bytes);
+
+            // Encode URL để đảm bảo an toàn
+            return HttpUtility.UrlEncode(base64String);
+        }
+
+        public static string ToSafeString(this string? input, string replace = "")
+        {
+            if (string.IsNullOrEmpty(input))
+            {
+                return replace;
+            }
+            return input.Trim();
+        }
+
+        private static string StripTrailingEscapesAndEmojis(string s)
+        {
+            if (string.IsNullOrEmpty(s))
+            {
+                return s;
+            }
+            // Xóa emoji thật ở cuối: 🌲 (U+1F332) và 😊 (U+1F60A), kèm khoảng trắng
+            s = Regex.Replace(
+                s,
+                @"(?:\s*(?:\uD83C\uDF32|\uD83D\uDE0A))+\s*$",
+                "",
+                RegexOptions.Singleline
+            );
+
+            // Xóa emoji ở dạng JSON-escaped ở cuối: \uD83C\uDF32 hoặc \uD83D\uDE0A
+            s = Regex.Replace(
+                s,
+                @"(?:\s*(?:\\uD83C\\uDF32|\\uD83D\\uDE0A))+\s*$",
+                "",
+                RegexOptions.Singleline
+            );
+
+            // Xóa mọi chuỗi escape JSON khác ở cuối (\\uXXXX, \\xXX, \\n, \\t, \\", \/, \\...)
+            s = Regex.Replace(
+                s,
+                @"(?:\s*(?:\\u[0-9A-Fa-f]{4}|\\x[0-9A-Fa-f]{2}|\\[0-7]{1,3}|\\[abefnrtv""\\/]|\\))+\s*$",
+                "",
+                RegexOptions.Singleline
+            );
+            return s;
+        }
+
+        public static string GenerateEmail(string localPath, string domainPath)
+        {
+            return localPath + domainPath;
         }
     }
 }

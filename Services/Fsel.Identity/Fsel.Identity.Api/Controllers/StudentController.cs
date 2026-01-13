@@ -53,6 +53,19 @@ namespace Fsel.Identity.Api.Controllers
         }
 
         /// <summary>
+        /// Execute-list-query
+        /// </summary>
+        [HttpGet("search-query")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<StudentDetailModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Search([FromQuery] BaseQueryModel query)
+        {
+            SetQuery(query);
+            var result = await _studentRepository.GetListByPageResultAsync<StudentDetailModel>(query);
+            return result.GetActionResult();
+        }
+
+        /// <summary>
         /// Get Student by UserId
         /// </summary>
         [HttpGet("get-by-user-id/{id}")]
@@ -346,10 +359,36 @@ namespace Fsel.Identity.Api.Controllers
         [HttpPost("deduct-coin-of-student")]
         [ProducesResponseType(typeof(MethodResult<StudentModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(role: nameof(EnumRole.Student))]
+        [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
         public async Task<IActionResult> DeductCoinOfStudent([FromBody] DeductCoinOfStudentCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Update status student campus
+        /// </summary>
+        [HttpPut("update-status/{studentId}")]
+        [ProducesResponseType(typeof(MethodResult<StudentModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> UpdateStatusStudentCampus([FromRoute] Guid studentId, [FromBody] UpdateStatusStudentCampusCommand command)
+        {
+            ArgumentNullException.ThrowIfNull(command);
+            command.StudentId = studentId;
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get coin of student
+        /// </summary>
+        [HttpGet("get-coin")]
+        [ProducesResponseType(typeof(MethodResult<long>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetCoin()
+        {
+            var commandResult = await _mediator.Send(new GetCoinOfStudentQuery()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

@@ -46,7 +46,7 @@ namespace Fsel.System.Application.Services.UserServices
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentsByStudentIdsAsync([Body] IList<Guid> studentIds);
 
         [Post("/v1/admin/cso")]
-        Task<IApiResponse<MethodResult<IList<HumanModel>>>> GetCSOByIds([Body] IList<Guid>? ids);
+        Task<IApiResponse<MethodResult<IList<UserModel>>>> GetCSOByIds([Body] IList<Guid>? ids);
 
         [Get("/v1/cso/get-by-user-id/{id}")]
         Task<IApiResponse<MethodResult<CSOModel>>> GetCsoByUserIdAsync([FromRoute] Guid id);
@@ -87,9 +87,8 @@ namespace Fsel.System.Application.Services.UserServices
         [Get("/v1/user/get-user-profile")]
         Task<IApiResponse<MethodResult<UserModel>>> GetUserProfileAsync();
 
-        [RefitCache(CacheSettings.TimeCache.TenMinutes)]
         [Get("/v1/admin/student/search")]
-        Task<IApiResponse<MethodResult<PagingItemsModel<StudentDtoModel>>>> SearchStudentSchoolAsync([FromBody] SearchStudentSchoolQueryModel query);
+        Task<IApiResponse<MethodResult<PagingItemsModel<StudentDtoModel>>>> SearchStudentSchoolAsync([FromQuery] SearchStudentSchoolQueryModel query);
 
         [RefitCache(CacheSettings.TimeCache.TenMinutes)]
         [Get("/v1/admin/student/gets")]
@@ -100,5 +99,13 @@ namespace Fsel.System.Application.Services.UserServices
 
         [Post("/v1/student/get-by-user-ids")]
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentsByUserIds([Body] IList<Guid> ids);
+
+        [Get("/v1/admin-school/student/schoolId")]
+        [RefitCache(CacheSettings.TimeCache.OneHour)]
+        Task<IApiResponse<MethodResult<Guid>>> GetSchoolIdAsync();
+
+        [RefitCache(CacheSettings.TimeCache.OneHour)]
+        [Get("/v1/student/get-by-user-id/{id}")]
+        Task<IApiResponse<MethodResult<StudentModel>>> GetStudentByUserIdWithCacheAsync([FromRoute] Guid id);
     }
 }

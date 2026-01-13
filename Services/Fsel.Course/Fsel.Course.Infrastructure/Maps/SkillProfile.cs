@@ -15,6 +15,7 @@ namespace Fsel.Course.Infrastructure.Maps
         public SkillProfile()
         {
             CreateMap<Skill, SkillModel>().IgnoreAllNonExisting();
+            CreateMap<Skill, SkillViewModel>().IgnoreAllNonExisting();
             CreateMap<CreateSkillCommandModel, Skill>().IgnoreAllNonExisting();
             CreateMap<UpdateSkillCommandModel, Skill>().IgnoreAllNonExisting();
         }
