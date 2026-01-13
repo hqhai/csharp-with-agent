@@ -14,6 +14,7 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.TestConfigs;
     using Fsel.Course.Domain.Enums;
+    using Fsel.Course.Domain.Models.EntityModels.TestModels;
     using Fsel.Course.Domain.Models.EntityModels.V1i2;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
     using Fsel.Shared.Enums;
@@ -48,7 +49,7 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
         {
             var testSectionResult = await _testSectionResultRepository.ReadQueryable
                 .AsNoTracking()
-                .Include(x => x.TestResult)
+                .Include(x => x.TestScores)
                 .Include(x => x.TestSection)
                 .Include(x => x.TestAnswers)
                 .FirstOrDefaultAsync(x => x.Id == request.TestSectionResultId, cancellationToken);
@@ -231,7 +232,12 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
                 SkillScores = nodeResult?.SkillScores,
                 CorrectTotal = nodeResult?.CorrectTotal ?? 0,
                 HighestStreak = nodeResult?.HighestStreak,
-
+                TestScores = nodeResult?.TestScores.OrderBy(x => x.CreatedDate).Select(x => new TestScoreModel
+                {
+                    Criteria = x.Criteria,
+                    Feedback = x.Feedback,
+                    Score = x.Score,
+                }).ToList(),
                 SectionResultId = nodeResult?.Id,
                 Status = nodeResult?.Status ?? EnumResultStatus.New,
                 UpdatedDate = nodeResult?.UpdatedDate,
