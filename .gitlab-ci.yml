@@ -365,46 +365,46 @@ build-multi-subject-prod-cms-planetdefender:
     refs:
     - main-multiple-subject
 
-# build-multi-subject-prod-exam-practice:
-#   stage: build-multi-subject-prod
-#   tags:
-#   - docker-runner
-#   retry:
-#     max: 2
-#   script:
-#     - apk add --update coreutils && rm -rf /var/cache/apk/*
-#     - docker login registry.fsel.edu.vn -u $DOCKER_USER -p $DOCKER_PASS
-#     - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES .
-#     - docker push $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES
-#   variables:
-#     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/exam-practice
-#     DOCKERFILE: "./Environments/Testing/ExamPractice.Testing.Dockerfile"
-#   extends: ".build-image-gitlab-registry"
-#   only:
-#     changes:
-#     - Services/Fsel.ExamPractice/**/*
-#     - Services/Shared/**/*
-#     refs:
-#     - main-multiple-subject
+build-multi-subject-prod-exam-practice:
+  stage: build-multi-subject-prod
+  tags:
+  - docker-runner
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u $DOCKER_USER -p $DOCKER_PASS
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/exam-practice
+    DOCKERFILE: "./Environments/Testing/ExamPractice.Testing.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.ExamPractice/**/*
+    - Services/Shared/**/*
+    refs:
+    - main-multiple-subject
 
-# build-multi-subject-prod-exam-practice-lms:
-#   stage: build-multi-subject-prod
-#   tags:
-#   - docker-runner
-#   retry:
-#     max: 2
-#   script:
-#     - apk add --update coreutils && rm -rf /var/cache/apk/*
-#     - docker login registry.fsel.edu.vn -u $DOCKER_USER -p $DOCKER_PASS
-#     - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES .
-#     - docker push $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES
-#   variables:
-#     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/exam-practice-lms
-#     DOCKERFILE: "./Environments/Testing/ExamPracticeLms.Testing.Dockerfile"
-#   extends: ".build-image-gitlab-registry"
-#   only:
-#     changes:
-#     - Services/Fsel.ExamPractice/**/*
-#     - Services/Shared/**/*
-#     refs:
-#     - main-multiple-subject
+build-multi-subject-prod-exam-practice-lms:
+  stage: build-multi-subject-prod
+  tags:
+  - docker-runner
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u $DOCKER_USER -p $DOCKER_PASS
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/exam-practice-lms
+    DOCKERFILE: "./Environments/Testing/ExamPracticeLms.Testing.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.ExamPractice/**/*
+    - Services/Shared/**/*
+    refs:
+    - main-multiple-subject
