@@ -81,7 +81,9 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
                 return null;
             }
 
-            var questions = await _questionRepository.ReadQueryable.WhereBulkContains(request.QuestionAnswerIds.Select(x => x.QuestionId), x => x.Id).ToListAsync();
+            var questions = await _questionRepository.ReadQueryable.WhereBulkContains(request.QuestionAnswerIds.Select(x => x.QuestionId), x => x.Id)
+                                                     .OrderBy(x => x.CreatedDate)
+                                                     .ToListAsync();
 
             if (!questions.Any())
             {

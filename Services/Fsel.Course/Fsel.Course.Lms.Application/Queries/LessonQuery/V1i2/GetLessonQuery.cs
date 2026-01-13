@@ -189,7 +189,6 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
             if (videoResultsByOriginalId.TryGetValue(module.Id, out var videoResult))
             {
                 var dto = _mapper.Map<ModuleLessonModel>(module);
-                dto.Name = videoResult.Video.Name;
                 dto.ObjectId = videoResult.Video.Id;
                 dto.Result = _mapper.Map<ResultModel>(videoResult.VideoResult);
                 moduleResults.Add(dto);
@@ -199,7 +198,6 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
             if (videoDics.TryGetValue(module.OriginalId, out var video))
             {
                 var dto = _mapper.Map<ModuleLessonModel>(module);
-                dto.Name = video.Name;
                 dto.ObjectId = video.Id;
                 moduleResults.Add(dto);
             }
@@ -215,7 +213,6 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
             if (classForumResultsByOriginalId.TryGetValue(module.OriginalId, out var forumResult))
             {
                 var dto = _mapper.Map<ModuleLessonModel>(module);
-                dto.Name = lesson.Name;
                 dto.ObjectId = forumResult.ClassForum.Id;
                 dto.Result = _mapper.Map<ResultModel>(forumResult.ClassForumResult);
                 moduleResults.Add(dto);
@@ -225,7 +222,6 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
             if (classForumDics.TryGetValue(module.OriginalId, out var forum))
             {
                 var dto = _mapper.Map<ModuleLessonModel>(module);
-                dto.Name = lesson.Name;
                 dto.ObjectId = forum.Id;
                 moduleResults.Add(dto);
             }
@@ -240,8 +236,6 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
             if (homeWorkResultsByOriginalId.TryGetValue(module.Id, out var hwResult))
             {
                 var dto = _mapper.Map<ModuleLessonModel>(module);
-                dto.Name = hwResult.HomeWork.Name;
-                dto.Code = hwResult.HomeWork.Code;
                 dto.ObjectId = hwResult.HomeWork.Id;
                 dto.Result = _mapper.Map<ResultModel>(hwResult.HomeWorkResult);
                 moduleResults.Add(dto);
@@ -251,7 +245,6 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
             if (homeWorkDics.TryGetValue(module.OriginalId, out var hw))
             {
                 var dto = _mapper.Map<ModuleLessonModel>(module);
-                dto.Name = hw.Name;
                 dto.ObjectId = hw.Id;
                 moduleResults.Add(dto);
             }
@@ -267,7 +260,6 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
             if (documentResultsByOriginalId.TryGetValue(module.OriginalId, out var docResult))
             {
                 var dto = _mapper.Map<ModuleLessonModel>(module);
-                dto.Name = lesson.Name;
                 dto.ObjectId = docResult.Document.Id;
                 dto.Result = _mapper.Map<ResultModel>(docResult.DocumentResult);
                 moduleResults.Add(dto);
@@ -277,7 +269,6 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
             if (documentDics.TryGetValue(module.OriginalId, out var doc))
             {
                 var dto = _mapper.Map<ModuleLessonModel>(module);
-                dto.Name = lesson.Name;
                 dto.ObjectId = doc.Id;
                 moduleResults.Add(dto);
             }

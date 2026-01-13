@@ -40,10 +40,10 @@ namespace Fsel.Course.Lms.Application.Queries.StudentGoalSummaryQuery
                 return methodResult;
             }
 
-            var query = _studentGoalAggregateRepository.Queryable.Where(x => x.StudentId == request.StudentId && x.CourseId == request.CourseId);
+            var query = _studentGoalAggregateRepository.ReadQueryable.Where(x => x.IsActive && x.StudentId == request.StudentId && x.CourseId == request.CourseId);
 
             var queryData = from baseQ in query
-                            join sum in _studentGoalSummaryRepository.Queryable on baseQ.Id equals sum.StudentGoalAggregateId
+                            join sum in _studentGoalSummaryRepository.ReadQueryable on baseQ.Id equals sum.StudentGoalAggregateId
                             select new StudentGoalSummaryModel
                             {
                                 Id = sum.Id,
