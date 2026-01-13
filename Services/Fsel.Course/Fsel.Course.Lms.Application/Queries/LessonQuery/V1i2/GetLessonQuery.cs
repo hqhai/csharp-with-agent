@@ -151,33 +151,78 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
             return moduleResults;
         }
 
-        private static List<ModuleLessonModel> GroupHomeWorkModuleLesson(IList<ModuleLessonModel> moduleLessonModels)
+        private static List<ModuleLessonModel> GroupHomeWorkModuleLesson(
+            IList<ModuleLessonModel> moduleLessonModels)
         {
-            var homeWorkModules = moduleLessonModels
+            var homeworkModules = moduleLessonModels
                 .Where(x => x.LessonConfigType == EnumLessonConfigType.HomeWork)
                 .ToList();
 
-            homeWorkModules = homeWorkModules
-                .GroupBy(x => new { x.OpenOrder })
-                .Select(g =>
-                {
-                    var first = g.First();
-                    if (g.Count() > 1)
-                    {
-                        first = new ModuleLessonModel
-                        {
-                            LessonConfigType = first.LessonConfigType,
-                            LessonId = first.LessonId,
-                            OpenOrder = g.Key.OpenOrder,
-                            Name = first.Name,
-                            SubModules = g.ToList(),
-                        };
-                    }
-                    return first;
-                })
+            var groupedHomework = homeworkModules
+                .GroupBy(x => x.OpenOrder)
+                .SelectMany(g => SplitByConsecutiveDisplayOrder(g))
                 .ToList();
 
-            return moduleLessonModels.Where(x => x.LessonConfigType != EnumLessonConfigType.HomeWork).Concat(homeWorkModules).ToList();
+            return moduleLessonModels
+                .Where(x => x.LessonConfigType != EnumLessonConfigType.HomeWork)
+                .Concat(groupedHomework)
+                .OrderBy(x => x.DisplayOrder)
+                .ToList();
+        }
+
+        private static IEnumerable<ModuleLessonModel> SplitByConsecutiveDisplayOrder(IEnumerable<ModuleLessonModel> modules)
+        {
+            var ordered = modules
+                .OrderBy(x => x.DisplayOrder)
+                .ToList();
+
+            var buffer = new List<ModuleLessonModel>();
+
+            foreach (var current in ordered)
+            {
+                if (buffer.Count == 0)
+                {
+                    buffer.Add(current);
+                    continue;
+                }
+
+                var last = buffer[^1];
+
+                if (current.DisplayOrder == last.DisplayOrder + 1)
+                {
+                    buffer.Add(current);
+                }
+                else
+                {
+                    yield return BuildHomeworkGroup(buffer);
+                    buffer = new List<ModuleLessonModel> { current };
+                }
+            }
+
+            if (buffer.Count > 0)
+            {
+                yield return BuildHomeworkGroup(buffer);
+            }
+        }
+
+        private static ModuleLessonModel BuildHomeworkGroup(List<ModuleLessonModel> group)
+        {
+            if (group.Count == 1)
+            {
+                return group[0];
+            }
+
+            var first = group[0];
+
+            return new ModuleLessonModel
+            {
+                LessonConfigType = first.LessonConfigType,
+                LessonId = first.LessonId,
+                OpenOrder = first.OpenOrder,
+                DisplayOrder = first.DisplayOrder,
+                Name = first.Name,
+                SubModules = group
+            };
         }
 
         private void BuildVideoModuleLesson(
