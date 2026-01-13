@@ -53,6 +53,9 @@ builder.AddOpenIdSwaggerGens(appSetting);
 builder.AddOpenIdAuthenticationJwtBearers(appSetting);
 builder.AddDbContexts<CourseDbContext, CourseReadDbContext>();
 
+// HttpClient
+builder.Services.AddHttpClient();
+
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IFlowService, FlowService>();
 builder.Services.AddScoped<ITestService, TestService>();
