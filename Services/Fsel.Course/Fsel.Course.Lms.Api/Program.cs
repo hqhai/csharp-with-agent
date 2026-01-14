@@ -188,7 +188,6 @@ builder.Services.AddScoped<IStudentGoalSummaryRepository, StudentGoalSummaryRepo
 builder.Services.AddScoped<IStatusStudentGoalRepository, StatusStudentGoalRepository>();
 builder.Services.AddScoped<IAiPromptManagerRepository, AiPromptManagerRepository>();
 builder.Services.AddScoped<IAiCriteriaConfigRepository, AiFeatureConfigRepository>();
-builder.Services.AddScoped<ICategoryCachingService, CategoryCachingService>();
 builder.Services.AddScoped<ITestSectionResultRepository, TestSectionResultRepository>();
 
 builder.Services.AddScoped<ISpeakingAITestLayoutHandler, SpeakingAITestLayoutHandler>();
