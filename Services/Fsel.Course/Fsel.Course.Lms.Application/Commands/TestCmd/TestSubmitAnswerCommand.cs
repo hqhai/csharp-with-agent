@@ -57,16 +57,16 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
                 return methodResult;
             }
 
-            //if (testResult.Status == EnumResultStatus.Done)
-            //{
-            //    return new MethodResult<SingleTestStateModel>
-            //    {
-            //        Result = new SingleTestStateModel
-            //        {
-            //            Status = testResult.Status,
-            //        }
-            //    };
-            //}
+            if (testResult.Status == EnumResultStatus.Done)
+            {
+                return new MethodResult<SingleTestStateModel>
+                {
+                    Result = new SingleTestStateModel
+                    {
+                        Status = testResult.Status,
+                    }
+                };
+            }
 
             var testGroupResult = await _testGroupResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == testResult.TestGroupResultId, cancellationToken);
             if (testGroupResult == null)
