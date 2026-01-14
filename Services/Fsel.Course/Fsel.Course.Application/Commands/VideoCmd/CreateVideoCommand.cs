@@ -45,7 +45,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
             #region Validate
 
             var factory = VideoFactory.Create(request, _mapper, _questionConverter);
-            var video = factory.Build();
+            var video = factory.Build(version: 0, originalId: Guid.NewGuid());
             if (await video.ValidateDuplicateVideo(_videoRepository).ConfigureAwait(false))
             {
                 methodResult.AddErrorBadRequest(video.ErrorMessages);
