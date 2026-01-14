@@ -54,29 +54,28 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
             var weekEndUtc = weekStartUtc.AddDays(7).Date;
 
             var queryData = await (from baseQ in _studentGoalAggregateRepository.Queryable.Where(x => x.IsActive)
-                join sum in _studentGoalSummaryRepository.Queryable on baseQ.Id equals sum.StudentGoalAggregateId
-                where sum.StartDate.Date <= weekEndUtc && sum.EndDate.Date >= weekStartUtc
-                select new StudentGoalAggregateModel
-                {
-                    Id = baseQ.Id,
-                    ClassName = baseQ.ClassName,
-                    CombinedProgress = baseQ.CombinedProgress,
-                    TotalCompletedLessons = baseQ.TotalCompletedLessons,
-                    CreatedFullName = baseQ.CreatedFullName,
-                    CreatedDate = baseQ.CreatedDate,
-                    CourseType = baseQ.CourseType,
-                    LevelId = baseQ.LevelId,
-                    CourseId = baseQ.CourseId,
-                    ConsecutiveBehindWeeks = baseQ.ConsecutiveBehindWeeks,
-                    CompletedLessons = sum.CompletedLessons, // tổng số lesson đã hoàn thành trong tuần
-                    CreatedUserId = baseQ.CreatedUserId,
-                    StudentId = baseQ.StudentId,
-                    UpdatedDate = baseQ.UpdatedDate,
-                    UpdatedFullName = baseQ.UpdatedFullName,
-                    UpdatedUserId = baseQ.UpdatedUserId,
-                    TotalTargetLessons = sum.TotalTargetLessons, // tổng số lượng lesson của course
-                    LessonsPerWeek = sum.LessonsPerWeek, // target tuần
-                }).ToListAsync(cancellationToken);
+                                   join sum in _studentGoalSummaryRepository.Queryable on baseQ.Id equals sum.StudentGoalAggregateId
+                                   where sum.StartDate.Date <= weekEndUtc && sum.EndDate.Date >= weekStartUtc
+                                   select new StudentGoalAggregateModel
+                                   {
+                                       Id = baseQ.Id,
+                                       ClassName = baseQ.ClassName,
+                                       CombinedProgress = baseQ.CombinedProgress,
+                                       TotalCompletedLessons = baseQ.TotalCompletedLessons,
+                                       CreatedFullName = baseQ.CreatedFullName,
+                                       CreatedDate = baseQ.CreatedDate,
+                                       LevelId = baseQ.LevelId,
+                                       CourseId = baseQ.CourseId,
+                                       ConsecutiveBehindWeeks = baseQ.ConsecutiveBehindWeeks,
+                                       CompletedLessons = sum.CompletedLessons, // tổng số lesson đã hoàn thành trong tuần
+                                       CreatedUserId = baseQ.CreatedUserId,
+                                       StudentId = baseQ.StudentId,
+                                       UpdatedDate = baseQ.UpdatedDate,
+                                       UpdatedFullName = baseQ.UpdatedFullName,
+                                       UpdatedUserId = baseQ.UpdatedUserId,
+                                       TotalTargetLessons = sum.TotalTargetLessons, // tổng số lượng lesson của course
+                                       LessonsPerWeek = sum.LessonsPerWeek, // target tuần
+                                   }).ToListAsync(cancellationToken);
 
             if (queryData.Any())
             {

@@ -19,7 +19,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
     public class GetStudentGoalStatusHistoryQueryHandler : IRequestHandler<GetStudentGoalStatusHistoryQuery, MethodResult<IList<StausStudentGoalHistoryModel>>>
     {
         private readonly IStatusStudentGoalRepository _statusStudentGoalRepository;
-        private readonly IMapper  _mapper;
+        private readonly IMapper _mapper;
 
         public GetStudentGoalStatusHistoryQueryHandler(IStatusStudentGoalRepository statusStudentGoalRepository, IMapper mapper)
         {
@@ -45,7 +45,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
 
             methodResult.Result = _mapper.Map<IList<StausStudentGoalHistoryModel>>(studentGoalHistory);
             methodResult.StatusCode = StatusCodes.Status200OK;
-
             return methodResult;
         }
     }

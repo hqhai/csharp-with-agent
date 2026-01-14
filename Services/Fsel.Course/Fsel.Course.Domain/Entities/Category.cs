@@ -52,5 +52,6 @@ namespace Fsel.Course.Domain.Entities
         public ICollection<Course> Courses { get; set; } = new List<Course>();
         public ICollection<HomeWork> HomeWorks { get; set; } = new List<HomeWork>();
         public ICollection<TestGroupResult> TestGroupResults { get; set; } = new List<TestGroupResult>();
+        public ICollection<StudentGoalAggregate> StudentGoalAggregates { get; set; } = new List<StudentGoalAggregate>();
     }
 }

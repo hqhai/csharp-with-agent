@@ -15,10 +15,11 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public int LessonsPerWeek { get; set; }
         public int CompletedLessons { get; set; }
         public int ConsecutiveBehindWeeks { get; set; }
+        public Guid? CourseResultId { get; set; }
         public EnumCombinedProgress? CombinedProgress { get; set; }
         public EnumProgressStatus ProgressStatus { get; set; }
-        public EnumCourseType CourseType { get; set; }
         public Guid? LevelId { get; set; }
+        public Guid? ProgramId { get; set; }
         public EnumStatusStudentCampus? StatusStudentCampus { get; set; }
         public string? StudentCampusCode { get; set; }
         public string? ClassCampusCode { get; set; }
@@ -27,5 +28,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid? UserId { get; set; }
         public Guid StudentId { get; set; }
         public Guid CourseId { get; set; }
+        public CategoryModel? Program { get; set; }
+        public LevelModel? Level { get; set; }
     }
 }

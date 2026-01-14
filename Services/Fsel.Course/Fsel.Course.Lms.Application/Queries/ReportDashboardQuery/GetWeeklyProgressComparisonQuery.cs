@@ -21,9 +21,8 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
     {
         public Guid SchoolId { get; set; }
 
-        public Guid? ClassIdStr { get; set; }
-
-        public EnumCourseType? CourseTypeStr { get; set; }
+        public string? ClassIdStr { get; set; }
+        public string? ProgramIdStr { get; set; }
 
         public DateTime? EndDate { get; set; }
     }
@@ -157,27 +156,25 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                 DateTime nowVn,
                 CancellationToken cancellationToken)
         {
-            var query = _studentGoalAggregateRepository.Queryable
-                .Where(x => x.IsActive);
+            var query = _studentGoalAggregateRepository.ReadQueryable.Where(x => x.IsActive);
 
-            if (request.ClassIdStr.HasValue)
+            if (!string.IsNullOrEmpty(request.ClassIdStr))
             {
-                query = query.Where(x => x.ClassId == request.ClassIdStr);
+                var classIds = request.ClassIdStr.ToList<Guid>();
+                query = query.Where(x => classIds != null && x.ClassId.HasValue && classIds.Contains(x.ClassId.Value));
+            }
+            if (!string.IsNullOrEmpty(request.ProgramIdStr))
+            {
+                var programIds = request.ProgramIdStr.ToList<Guid>();
+                query = query.Where(x => programIds != null && x.ProgramId.HasValue && programIds.Contains(x.ProgramId.Value));
             }
 
-            if (request.CourseTypeStr.HasValue)
-            {
-                query = query.Where(x => x.CourseType == request.CourseTypeStr);
-            }
-
-            var firstGoalStartDate = await
-                (from baseQ in query
-                 join sgs in _studentGoalSummaryRepository.Queryable
-                     on baseQ.Id equals sgs.StudentGoalAggregateId
-                 where baseQ.SchoolId == request.SchoolId
-                 orderby sgs.StartDate
-                 select sgs.StartDate)
-                .FirstOrDefaultAsync(cancellationToken);
+            var firstGoalStartDate = await (from baseQ in query
+                                            join sgs in _studentGoalSummaryRepository.ReadQueryable
+                                                on baseQ.Id equals sgs.StudentGoalAggregateId
+                                            where baseQ.SchoolId == request.SchoolId
+                                            orderby sgs.StartDate
+                                            select sgs.StartDate).FirstOrDefaultAsync(cancellationToken);
 
             if (firstGoalStartDate != default &&
                 (nowVn.Year < firstGoalStartDate.Year ||
@@ -188,7 +185,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
 
             var studentGoals = await
                 (from baseQ in query
-                 join sgs in _studentGoalSummaryRepository.Queryable.AsNoTracking()
+                 join sgs in _studentGoalSummaryRepository.ReadQueryable.AsNoTracking()
                      on baseQ.Id equals sgs.StudentGoalAggregateId
                  where baseQ.SchoolId == request.SchoolId
                        && sgs.StartDate.Date >= startDate
