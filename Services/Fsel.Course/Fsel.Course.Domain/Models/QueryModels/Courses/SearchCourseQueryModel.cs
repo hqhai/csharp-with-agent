@@ -14,5 +14,8 @@ namespace Fsel.Course.Domain.Models.QueryModels.Courses
         public Guid? LevelId { get; set; }
 
         public Guid? ProgramId { get; set; }
+
+        public IList<Guid>? LevelIds { get; set; }
+        public IList<Guid>? ProgramIds { get; set; }
     }
 }
