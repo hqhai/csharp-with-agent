@@ -22,6 +22,7 @@ stages:
 - build-image
 - deploy
 - build-multi-subject-prod
+- build-multi-subject-testing
 
 ".build-image-gitlab-registry":
   stage: build-image
