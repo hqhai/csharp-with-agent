@@ -48,13 +48,9 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
             CancellationToken cancellationToken)
         {
             var testSectionResult = await _testSectionResultRepository.ReadQueryable
-                .AsNoTracking()
-                .Include(x => x.TestScores)
-                .Include(x => x.TestSection)
-                .Include(x => x.TestAnswers)
                 .FirstOrDefaultAsync(x => x.Id == request.TestSectionResultId, cancellationToken);
 
-            if (testSectionResult?.TestResult is null)
+            if (testSectionResult is null)
             {
                 return new MethodResult<SectionStateModel>();
             }
@@ -92,6 +88,7 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
 
             var sectionResultBySectionId = await _testSectionResultRepository.ReadQueryable
                 .Include(x => x.TestAnswers)
+                .Include(x => x.TestScores)
                 .AsNoTracking()
                 .Where(r =>
                     r.TestResultId == testSectionResult.TestResultId &&
