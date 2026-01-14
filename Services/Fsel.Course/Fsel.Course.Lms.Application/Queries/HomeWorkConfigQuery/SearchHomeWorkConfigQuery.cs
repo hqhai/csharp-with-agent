@@ -67,6 +67,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkConfigQuery
                             Skill = s.Name,
                             SkillId = s.Id,
                             Subject = p.CategoryParent != null ? p.CategoryParent.Name : null,
+                            SubjectId = p.CategoryParent != null ? p.CategoryParent.Id : null,
                         };
 
             if (!string.IsNullOrEmpty(request.Keyword))

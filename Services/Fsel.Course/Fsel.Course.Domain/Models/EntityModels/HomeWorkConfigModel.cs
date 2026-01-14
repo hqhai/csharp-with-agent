@@ -24,6 +24,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid? SkillId { get; set; }
         public string? Skill { get; set; }
         public string? Subject { get; set; }
+        public Guid? SubjectId { get; set; }
 
         public EnumCourseType CourseType
         {
