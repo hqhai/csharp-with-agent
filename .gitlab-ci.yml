@@ -34,7 +34,7 @@ stages:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u $DOCKER_USER -p $DOCKER_PASS
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
-    - docker push $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES
+    - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
 
 build-multi-subject-testing-auth:
   stage: build-multi-subject-testing
