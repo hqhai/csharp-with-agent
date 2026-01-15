@@ -10,6 +10,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public string? Name { get; set; }
 
+        public string? Thumbnail { get; set; }
         public string? Type { get; set; }
 
         public EnumTestMode? TestMode { get; set; }
@@ -17,7 +18,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public List<LevelModel>? Levels { get; set; } = new List<LevelModel>();
 
         public List<SubjectModel> ChildSubjects { get; set; } = new List<SubjectModel>();
-
 
         public bool HasLevel()
         {
