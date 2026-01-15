@@ -81,22 +81,24 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
                 return null;
             }
 
-            var questions = await _questionRepository.ReadQueryable.WhereBulkContains(request.QuestionAnswerIds.Select(x => x.QuestionId), x => x.Id).ToListAsync();
+            var questions = await _questionRepository.ReadQueryable.WhereBulkContains(request.QuestionAnswerIds.Select(x => x.QuestionId), x => x.Id)
+                                                     .OrderBy(x => x.CreatedDate)
+                                                     .ToListAsync();
 
             if (!questions.Any())
             {
                 return null;
             }
+            var questionIds = questions.Select(y => y.Id).ToList();
 
             var testAnswers = await _testAnswerRepository.ReadQueryable.WhereBulkContains(request.QuestionAnswerIds.Select(x => x.AnswerId), x => x.Id).ToListAsync();
 
             var listQuestion = new List<QuestionModel>();
-
             var listQuestionShuffle = new List<QuestionShuffle>();
+
             var questionShuffles = await _questionShuffleRepository.Queryable
-                .Where(x => questions.Select(y => y!.Id).Contains(x.QuestionId) && x.StudentId == request.StudentId)
-                .OrderBy(x => x.CreatedDate)
-                .ToListAsync();
+                                                                   .Where(x => questionIds.Contains(x.QuestionId) && x.StudentId == request.StudentId)
+                                                                   .ToListAsync();
             foreach (var question in questions)
             {
                 var questionModel = _mapper.Map<QuestionModel>(question);
