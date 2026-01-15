@@ -4,6 +4,7 @@ using Fsel.Course.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    partial class CourseDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260115021833_Update_Unit_Add_Description")]
+    partial class Update_Unit_Add_Description
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -7096,15 +7099,8 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid>("CourseId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("CourseLevel")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("CourseType")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                    b.Property<Guid>("CourseResultId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
@@ -7147,6 +7143,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid?>("LevelId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("ProgramId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid?>("SchoolId")
                         .HasColumnType("uniqueidentifier");
 
@@ -7179,6 +7178,10 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CourseId");
+
+                    b.HasIndex("LevelId");
+
+                    b.HasIndex("ProgramId");
 
                     b.ToTable("StudentGoalAggregates");
                 });
@@ -11116,7 +11119,21 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Fsel.Course.Domain.Entities.Level", "Level")
+                        .WithMany("StudentGoalAggregates")
+                        .HasForeignKey("LevelId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("Fsel.Course.Domain.Entities.Category", "Program")
+                        .WithMany("StudentGoalAggregates")
+                        .HasForeignKey("ProgramId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
                     b.Navigation("Course");
+
+                    b.Navigation("Level");
+
+                    b.Navigation("Program");
                 });
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.StudentGoalSummary", b =>
@@ -11718,6 +11735,8 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Navigation("PlacementTests");
 
+                    b.Navigation("StudentGoalAggregates");
+
                     b.Navigation("SubjectConditions");
 
                     b.Navigation("TestGroupResults");
@@ -11991,6 +12010,8 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Navigation("SkillLevels");
 
                     b.Navigation("StepFlows");
+
+                    b.Navigation("StudentGoalAggregates");
 
                     b.Navigation("TestGroupResults");
 
