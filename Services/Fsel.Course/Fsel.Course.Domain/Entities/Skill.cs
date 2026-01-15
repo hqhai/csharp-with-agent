@@ -25,6 +25,9 @@ namespace Fsel.Course.Domain.Entities
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Description { get; set; }
 
+        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? ColorCode { get; set; }
+
         public ICollection<Exercise> Exercises { get; set; } = new List<Exercise>();
         public ICollection<SectionGroup> SectionGroups { get; set; } = new List<SectionGroup>();
         public ICollection<ClassForum> ClassForums { get; set; } = new List<ClassForum>();
