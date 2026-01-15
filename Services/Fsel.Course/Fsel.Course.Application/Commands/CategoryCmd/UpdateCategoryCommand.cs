@@ -24,7 +24,6 @@ namespace Fsel.Course.Application.Commands.CategoryCmd
     {
         private readonly ICategoryRepository _categoryRepository;
         private readonly IMapper _mapper;
-        private static readonly Regex s_regexCode = new Regex("^[a-zA-Z0-9]+$", RegexOptions.Compiled);
 
         public UpdateCategoryCommandHandler(ICategoryRepository categoryRepository,
                                             IMapper mapper)
@@ -59,7 +58,7 @@ namespace Fsel.Course.Application.Commands.CategoryCmd
                 return methodResult;
             }
 
-            if (string.IsNullOrEmpty(request.Code) || (!string.IsNullOrEmpty(request.Code) && !s_regexCode.IsMatch(request.Code)))
+            if (string.IsNullOrEmpty(request.Code))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCategoryErrorCode.CodeNotValid), nameof(request.Code), request.Code);
                 return methodResult;

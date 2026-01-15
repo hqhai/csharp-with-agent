@@ -33,8 +33,6 @@ namespace Fsel.Course.Infrastructure.Common
         public List<ActionFlow> DeleteActionFlows = new List<ActionFlow>();
         public List<ActionFlow> DeleteListActionFlow = new List<ActionFlow>();
         public List<StepFlow> DeleteListStepFlow = new List<StepFlow>();
-        private static readonly Regex s_regexCode = new Regex("^[a-zA-Z0-9_]+$", RegexOptions.Compiled);
-        private static readonly Regex s_regexName = new Regex("^[a-zA-Z0-9 ]+$", RegexOptions.Compiled);
 
         public ProgramConverter(ILevelRepository levelRepository,
                                 IMapper mapper,
@@ -63,13 +61,13 @@ namespace Fsel.Course.Infrastructure.Common
 
             #region Validate
 
-            if (string.IsNullOrEmpty(levelRequest.Name) || (!string.IsNullOrEmpty(levelRequest.Name) && !s_regexName.IsMatch(levelRequest.Name)))
+            if (string.IsNullOrEmpty(levelRequest.Name))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCategoryErrorCode.NameNotValid), nameof(levelRequest.Name), levelRequest.Name);
                 return methodResult;
             }
 
-            if (string.IsNullOrEmpty(levelRequest.Code) || (!string.IsNullOrEmpty(levelRequest.Code) && !s_regexCode.IsMatch(levelRequest.Code)))
+            if (string.IsNullOrEmpty(levelRequest.Code))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCategoryErrorCode.CodeNotValid), nameof(levelRequest.Code), levelRequest.Code);
                 return methodResult;
