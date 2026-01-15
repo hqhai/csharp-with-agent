@@ -27,6 +27,7 @@ namespace Fsel.Course.Infrastructure.Common.UnitHelper
             {
                 Code = _createRequest.Code,
                 Name = _createRequest.Name,
+                Description = _createRequest.Description,
                 LessonCount = _createRequest.Modules?.Count(m => m.ModuleType == EnumUnitConfigType.Lesson) ?? 0,
                 TestCount = _createRequest.Modules?.Count(m => m.ModuleType == EnumUnitConfigType.Test) ?? 0,
                 VersionStatus = EnumVersionStatus.LastVersion,
