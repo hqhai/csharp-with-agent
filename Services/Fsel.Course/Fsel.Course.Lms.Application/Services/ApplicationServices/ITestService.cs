@@ -315,7 +315,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                                                                       .FirstOrDefaultAsync();
             if (testSectionResult == null || testSectionResult.Status == EnumResultStatus.Done)
             {
-                throw new InvalidOperationException("TestSectionResult Invalid");
+                return;
             }
             await SubmitQuestions(request);
         }
@@ -328,7 +328,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                 return;
             }
 
-            var testSectionResult = await _testSectionResultRepository.Queryable.Include(x => x.TestSection)
+            var testSectionResult = await _testSectionResultRepository.Queryable.AsNoTracking()
+                                                                      .Include(x => x.TestSection)
                                                                       .Where(x => x.Id == request.SectionResultId)
                                                                       .FirstOrDefaultAsync();
             if (testSectionResult == null)
@@ -393,7 +394,9 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                                                                     .Where(x => x.TestResultId == request.TestResultId)
                                                                     .ToListAsync();
                 var testSectionResultIds = partResults.Select(x => x.Id).ToList();
-                var testAnswers = await _testAnswerRepository.Queryable.Where(x => x.TestSectionResultId.HasValue && testSectionResultIds.Contains(x.TestSectionResultId.Value)).ToListAsync();
+                var testAnswers = await _testAnswerRepository.Queryable.AsNoTracking()
+                                                             .Where(x => x.TestSectionResultId.HasValue && testSectionResultIds.Contains(x.TestSectionResultId.Value))
+                                                             .ToListAsync();
 
                 var addAnswers = new List<TestAnswer>();
                 var updateAnswers = new List<TestAnswer>();
@@ -466,7 +469,9 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                                                                     .ToListAsync();
 
                 var testSectionResultIds = partResults.Select(x => x.Id).ToList();
-                var testAnswers = await _testAnswerRepository.Queryable.Where(x => x.TestSectionResultId.HasValue && testSectionResultIds.Contains(x.TestSectionResultId.Value)).ToListAsync();
+                var testAnswers = await _testAnswerRepository.Queryable.AsNoTracking()
+                                                             .Where(x => x.TestSectionResultId.HasValue && testSectionResultIds.Contains(x.TestSectionResultId.Value))
+                                                             .ToListAsync();
 
                 var addAnswers = new List<TestAnswer>();
                 var updateAnswers = new List<TestAnswer>();
@@ -530,7 +535,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                                                                            .Where(x => x.TestResultId == request.TestResultId)
                                                                            .ToListAsync();
                 var partResultIds = partResults.Select(x => x.Id).ToList();
-                var testAnswers = await _testAnswerRepository.Queryable.Where(x => x.TestSectionResultId.HasValue && partResultIds.Contains(x.TestSectionResultId.Value))
+                var testAnswers = await _testAnswerRepository.Queryable.AsNoTracking()
+                                                             .Where(x => x.TestSectionResultId.HasValue && partResultIds.Contains(x.TestSectionResultId.Value))
                                                              .ToListAsync();
 
                 var addAnswers = new List<TestAnswer>();
@@ -599,7 +605,9 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                                                      .ToListAsync();
             if (questions != null && questions.Any())
             {
-                var testAnswers = await _testAnswerRepository.Queryable.Where(x => x.TestSectionResultId == request.SectionResultId).ToListAsync();
+                var testAnswers = await _testAnswerRepository.Queryable.AsNoTracking()
+                                                             .Where(x => x.TestSectionResultId == request.SectionResultId)
+                                                             .ToListAsync();
 
                 var addAnswers = new List<TestAnswer>();
                 var updateAnswers = new List<TestAnswer>();
