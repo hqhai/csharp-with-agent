@@ -311,7 +311,6 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             }
 
             var testSectionResult = await _testSectionResultRepository.Queryable.Include(x => x.TestSection)
-                                                                      .Include(x => x.SectionResults)
                                                                       .Where(x => x.Id == request.SectionResultId)
                                                                       .FirstOrDefaultAsync();
             if (testSectionResult == null || testSectionResult.Status == EnumResultStatus.Done)
@@ -330,8 +329,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             }
 
             var testSectionResult = await _testSectionResultRepository.Queryable.Include(x => x.TestSection)
-                                                                .Where(x => x.Id == request.SectionResultId)
-                                                                .FirstOrDefaultAsync();
+                                                                      .Where(x => x.Id == request.SectionResultId)
+                                                                      .FirstOrDefaultAsync();
             if (testSectionResult == null)
             {
                 return;
@@ -396,6 +395,9 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                 var testSectionResultIds = partResults.Select(x => x.Id).ToList();
                 var testAnswers = await _testAnswerRepository.Queryable.Where(x => x.TestSectionResultId.HasValue && testSectionResultIds.Contains(x.TestSectionResultId.Value)).ToListAsync();
 
+                var addAnswers = new List<TestAnswer>();
+                var updateAnswers = new List<TestAnswer>();
+
                 foreach (var item in request.Answers)
                 {
                     var testSection = testSections.FirstOrDefault(x => x.Id == item.TestSectionId);
@@ -430,7 +432,11 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                             TestSectionId = item.TestSectionId,
                             StudentId = request.StudentId ?? partResult.StudentId
                         };
-                        _testAnswerRepository.Add(testAnswer);
+                        addAnswers.Add(testAnswer);
+                    }
+                    else
+                    {
+                        updateAnswers.Add(testAnswer);
                     }
                     testAnswer.Answer = item.Answer;
                     testAnswer.Status = EnumAnswerStatus.Done;
@@ -440,7 +446,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                     }
                 }
 
-                await _testAnswerRepository.DbContext.SaveChangesAsync();
+                await SaveAsync(addAnswers, updateAnswers);
             }
         }
 
@@ -461,6 +467,9 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
 
                 var testSectionResultIds = partResults.Select(x => x.Id).ToList();
                 var testAnswers = await _testAnswerRepository.Queryable.Where(x => x.TestSectionResultId.HasValue && testSectionResultIds.Contains(x.TestSectionResultId.Value)).ToListAsync();
+
+                var addAnswers = new List<TestAnswer>();
+                var updateAnswers = new List<TestAnswer>();
 
                 foreach (var item in request.Answers)
                 {
@@ -487,7 +496,11 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                             TestSectionId = item.TestSectionId,
                             StudentId = request.StudentId ?? partResult.StudentId
                         };
-                        _testAnswerRepository.Add(testAnswer);
+                        addAnswers.Add(testAnswer);
+                    }
+                    else
+                    {
+                        updateAnswers.Add(testAnswer);
                     }
                     testAnswer.SpeechTextAnswer = item.SpeechTextAnswer;
                     testAnswer.PronunciationScore = pronunciation.PronunciationScore;
@@ -498,8 +511,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                         return;
                     }
                 }
-
-                await _testAnswerRepository.DbContext.SaveChangesAsync();
+                await SaveAsync(addAnswers, updateAnswers);
             }
         }
 
@@ -520,6 +532,10 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                 var partResultIds = partResults.Select(x => x.Id).ToList();
                 var testAnswers = await _testAnswerRepository.Queryable.Where(x => x.TestSectionResultId.HasValue && partResultIds.Contains(x.TestSectionResultId.Value))
                                                              .ToListAsync();
+
+                var addAnswers = new List<TestAnswer>();
+                var updateAnswers = new List<TestAnswer>();
+
                 foreach (var item in request.Answers)
                 {
                     var question = questions.FirstOrDefault(x => x.Id == item.QuestionId);
@@ -553,7 +569,11 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                             TestSectionId = partResult.TestSectionId,
                             StudentId = request.StudentId ?? partResult.StudentId
                         };
-                        _testAnswerRepository.Add(testAnswer);
+                        addAnswers.Add(testAnswer);
+                    }
+                    else
+                    {
+                        updateAnswers.Add(testAnswer);
                     }
 
                     testAnswer.Answer = answerConfig;
@@ -566,8 +586,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                         return;
                     }
                 }
-
-                await _testAnswerRepository.DbContext.SaveChangesAsync();
+                await SaveAsync(addAnswers, updateAnswers);
             }
         }
 
@@ -581,6 +600,10 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             if (questions != null && questions.Any())
             {
                 var testAnswers = await _testAnswerRepository.Queryable.Where(x => x.TestSectionResultId == request.SectionResultId).ToListAsync();
+
+                var addAnswers = new List<TestAnswer>();
+                var updateAnswers = new List<TestAnswer>();
+
                 foreach (var item in request.Answers)
                 {
                     var question = questions.FirstOrDefault(x => x.Id == item.QuestionId);
@@ -606,7 +629,11 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                             QuestionId = question.Id,
                             StudentId = request.StudentId
                         };
-                        _testAnswerRepository.Add(testAnswer);
+                        addAnswers.Add(testAnswer);
+                    }
+                    else
+                    {
+                        updateAnswers.Add(testAnswer);
                     }
 
                     testAnswer.Answer = answerConfig;
@@ -619,8 +646,37 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                         return;
                     }
                 }
+                await SaveAsync(addAnswers, updateAnswers);
+            }
+        }
 
-                await _testAnswerRepository.DbContext.SaveChangesAsync();
+        private async Task SaveAsync(IList<TestAnswer> addAnswers, IList<TestAnswer> updateAnswers)
+        {
+            if (addAnswers.Any())
+            {
+                try
+                {
+                    await _testAnswerRepository.BulkMergeAsync(addAnswers, bulk =>
+                    {
+                        bulk.ColumnPrimaryKeyExpression = c => new { c.TestResultId, c.TestSectionResultId, c.TestSectionId, c.QuestionId, c.IsDeleted };
+                    });
+                }
+                catch
+                {
+                }
+            }
+            if (updateAnswers.Any())
+            {
+                try
+                {
+                    await _testAnswerRepository.BulkUpdateList(updateAnswers, bulk =>
+                    {
+                        bulk.IgnoreOnUpdateExpression = c => new { c.TestResultId, c.TestSectionResultId, c.TestSectionId, c.QuestionId, c.IsDeleted };
+                    });
+                }
+                catch
+                {
+                }
             }
         }
     }
