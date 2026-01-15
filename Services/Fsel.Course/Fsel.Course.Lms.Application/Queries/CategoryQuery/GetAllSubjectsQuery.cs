@@ -67,6 +67,7 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
                 Name = category.Name,
                 Type = category.Type.ToString(),
                 TestMode = category.TestMode,
+                Thumbnail = category.Thumbnail,
                 ChildSubjects = new List<SubjectModel>()
             };
             foreach (var child in category.Categorys)
