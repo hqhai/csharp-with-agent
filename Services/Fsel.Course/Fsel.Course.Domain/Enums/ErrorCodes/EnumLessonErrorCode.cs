@@ -38,5 +38,9 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         OpenOrderOutOfSequence,
 
         DisplayOrderOutOfSequence,
+
+        NameNotNullOrEmpty,
+
+        NameNotValid,
     }
 }
