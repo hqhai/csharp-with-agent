@@ -24,11 +24,10 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
 
     public class GetTimeCodeDetailQuery : IRequest<MethodResult<VideoTimeCodeModel>>
     {
-        public Guid VideoId { get; set; }
+        public Guid VideoResultId { get; set; }
         public Guid VideoTimeCodeId { get; set; }
         public bool IsShowSubStatus { get; set; }
         public bool IsCreateAnswer { get; set; }
-        public Guid? LessonResultId { get; set; }
     }
 
     public class GetTimeCodeDetailQueryHandler : IRequestHandler<GetTimeCodeDetailQuery, MethodResult<VideoTimeCodeModel>>
@@ -72,8 +71,8 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
             var studentId = studentsResult.Content?.Result?.Id ?? default;
 
             var videoResult = await _videoResultRepository.Queryable
-                        .Where(x => !request.LessonResultId.HasValue || x.LessonResultId == request.LessonResultId)
-                        .FirstOrDefaultAsync(x => x.VideoId == request.VideoId && x.StudentId == studentId, cancellationToken);
+                        .Where(x => x.Id == request.VideoResultId)
+                        .FirstOrDefaultAsync(x => x.StudentId == studentId, cancellationToken);
             if (videoResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videoResult));
