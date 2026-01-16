@@ -65,6 +65,8 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i2
             {
                 var courseModel = _mapper.Map<CourseModel>(course);
                 courseModel.CourseResult = courseResult;
+                courseModel.SubjectId = course.Program?.CategoryParent?.Id;
+                courseModel.SubjectName = course.Program?.CategoryParent?.Name;
                 methodResult.Result = courseModel;
             }
 
@@ -123,7 +125,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i2
                 var course = await _courseRepository.ReadQueryable
                                                     .Include(x => x.CourseTeachers)
                                                     .Include(x => x.Level)
-                                                    .Include(x => x.Program)
+                                                    .Include(x => x.Program).ThenInclude(p => p.CategoryParent)
                                                     .Where(x => x.Id == id)
                                                     .FirstOrDefaultAsync(_);
                 return course;
