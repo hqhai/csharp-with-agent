@@ -37,6 +37,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public Guid OriginalId { get; set; }
 
+        public bool IsUsed { get; set; }
+
         public IList<CourseUnitMockTestModel>? CourseUnitMockTests { get; set; }
         public IList<CourseTeacherModel>? CourseTeachers { get; set; }
         public IList<CourseModuleModel>? CourseModules { get; set; }
