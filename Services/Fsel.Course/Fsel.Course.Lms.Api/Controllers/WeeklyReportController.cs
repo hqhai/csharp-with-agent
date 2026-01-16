@@ -17,6 +17,7 @@ namespace Fsel.Course.Lms.Api.Controllers
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/weekly-report")]
     [ApiController]
+    [Permission(role: nameof(EnumRole.Admin))]
     public class WeeklyReportController : ControllerBase
     {
         private readonly IMediator _mediator;

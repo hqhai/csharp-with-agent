@@ -25,7 +25,6 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.Logging;
 
     public class AggregateDataWeeklyReportCommand : IRequest<MethodResult<bool>>
     {
@@ -99,15 +98,15 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                     UserIds = students.Select(x => x.UserId).ToList(),
                 };
 
-                //var studentFilter = await _userService.GetListUserSetting(query);
-                //var studentFilterResult = studentFilter?.Content?.Result?.Where(x => x.NotifiEmail).Select(x => x.UserId).ToList();
+                var studentFilter = await _userService.GetListUserSetting(query);
+                var studentFilterResult = studentFilter?.Content?.Result?.Where(x => x.NotifiEmail).Select(x => x.UserId).ToList();
 
-                //if (studentFilterResult == null || studentFilterResult.Count == 0)
-                //{
-                //    return methodResult;
-                //}
+                if (studentFilterResult == null || studentFilterResult.Count == 0)
+                {
+                    return methodResult;
+                }
 
-                //students = students.Where(x => x.User != null && studentFilterResult.Contains(x.UserId)).OrderBy(x => x.User!.Email).ToList();
+                students = students.Where(x => x.User != null && studentFilterResult.Contains(x.UserId)).OrderBy(x => x.User!.Email).ToList();
 
                 var userIds = students.Select(x => x.UserId).Distinct().ToList();
                 var studentIds = students.Select(x => x.Id).Distinct().ToList();
@@ -317,13 +316,9 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                     {
                         weeklyReportEntities.Add(new WeeklyReport()
                         {
-                            //StudentId = item.Id,
-                            //Email = item.User?.Email,
-                            //ParentEmail = item.ParentEmail,
-                            //Param = weeklyReport
                             StudentId = item.Id,
-                            Email = "nguyenhuukhoa5462@gmail.com",
-                            ParentEmail = null,
+                            Email = item.User?.Email,
+                            ParentEmail = item.ParentEmail,
                             Param = weeklyReport
                         });
                     }
