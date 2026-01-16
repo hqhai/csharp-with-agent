@@ -58,19 +58,6 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                 }, token);
             });
 
-            //foreach (var item in request.StudentIds)
-            //{
-            //    using var scope = _serviceProvider.CreateScope();
-            //    var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-
-            //    await mediator.Send(new AggregateDataWeeklyReportCommand
-            //    {
-            //        StudentIds = new List<Guid> { item },
-            //        StartDate = request.StartDate,
-            //        EndDate = request.EndDate
-            //    }, cancellationToken);
-            //}
-
             methodResult.Result = true;
             return methodResult;
         }
