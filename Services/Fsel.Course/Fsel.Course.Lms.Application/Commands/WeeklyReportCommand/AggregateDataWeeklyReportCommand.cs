@@ -29,7 +29,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
 
     public class AggregateDataWeeklyReportCommand : IRequest<MethodResult<bool>>
     {
-        public ICollection<Guid>? StudentIds { get; set; }
+        public IList<Guid>? StudentIds { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
     }
@@ -44,7 +44,6 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
         private readonly IUnitResultRepository _unitResultRepository;
         private readonly IMediator _mediator;
         private readonly AppSetting _appSetting;
-        private readonly ILogger<AggregateDataWeeklyReportCommandHandler> _logger;
         private readonly IWeeklyReportRepository _weeklyReportRepository;
         private readonly ISkillRepository _skillRepository;
         private readonly ITestGroupResultRepository _testGroupResultRepository;
@@ -54,7 +53,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
         private readonly ITestRepository _testRepository;
         private const int ChunkSize = 10000;
 
-        public AggregateDataWeeklyReportCommandHandler(IUserService userService, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, ISystemService systemService, ILessonResultRepository lessonResultRepository, IUnitResultRepository unitResultRepository, IMediator mediator, AppSetting appSetting, ILogger<AggregateDataWeeklyReportCommandHandler> logger, IWeeklyReportRepository weeklyReportRepository, ISkillRepository skillRepository, ITestGroupResultRepository testGroupResultRepository, ICourseResultRepository courseResultRepository, IAggregateResultQueryService aggregateResultQueryService, ITestResultRepository testResultRepository, ITestRepository testRepository)
+        public AggregateDataWeeklyReportCommandHandler(IUserService userService, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, ISystemService systemService, ILessonResultRepository lessonResultRepository, IUnitResultRepository unitResultRepository, IMediator mediator, AppSetting appSetting, IWeeklyReportRepository weeklyReportRepository, ISkillRepository skillRepository, ITestGroupResultRepository testGroupResultRepository, ICourseResultRepository courseResultRepository, IAggregateResultQueryService aggregateResultQueryService, ITestResultRepository testResultRepository, ITestRepository testRepository)
         {
             _userService = userService;
             _finalTestResultRepository = finalTestResultRepository;
@@ -64,7 +63,6 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
             _unitResultRepository = unitResultRepository;
             _mediator = mediator;
             _appSetting = appSetting;
-            _logger = logger;
             _weeklyReportRepository = weeklyReportRepository;
             _skillRepository = skillRepository;
             _testGroupResultRepository = testGroupResultRepository;
@@ -79,260 +77,270 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
 
-            var students = new List<StudentModel>();
-
-            if (request.StudentIds == null || request.StudentIds.Count == 0)
+            try
             {
-                return methodResult;
-            }
+                var students = new List<StudentModel>();
 
-            var studentResults = await _userService.GetStudentsByStudentIdsAsync(request.StudentIds.ToList());
-            students = studentResults.Content?.Result?.ToList();
-
-            if (students?.Count == 0 || students == null)
-            {
-                return methodResult;
-            }
-
-            UserSettingQuery query = new UserSettingQuery
-            {
-                UserIds = students.Select(x => x.UserId).ToList(),
-            };
-
-            //var studentFilter = await _userService.GetListUserSetting(query);
-            //var studentFilterResult = studentFilter?.Content?.Result?.Where(x => x.NotifiEmail).Select(x => x.UserId).ToList();
-
-            //if (studentFilterResult == null || studentFilterResult.Count == 0)
-            //{
-            //    return methodResult;
-            //}
-
-            //students = students.Where(x => x.User != null && studentFilterResult.Contains(x.UserId)).OrderBy(x => x.User!.Email).ToList();
-
-            var userIds = students.Select(x => x.UserId).Distinct().ToList();
-            var studentIds = students.Select(x => x.Id).Distinct().ToList();
-
-            DateTime currentDate = request.EndDate.HasValue ? request.EndDate.Value : DateTime.UtcNow.Date;
-
-            DateTime lastFridayAt13 = request.StartDate.HasValue ? request.StartDate.Value : currentDate.AddDays(-7);
-
-            DateTime lastLastFridayAt13 = currentDate.AddDays(-14);
-
-            var dates = DateTimeHelper.GenerateDateList(lastFridayAt13, currentDate);
-
-            var featureAccessTimeResults = await GetFeatureAccessTimesInChunks(userIds, lastFridayAt13, currentDate);
-            var previousFeatureAccessTimeResults = await GetFeatureAccessTimesInChunks(userIds, lastLastFridayAt13, lastFridayAt13);
-
-            var skillScoresHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.Skill, cancellationToken);
-
-            var lessonNameHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.LessonName, cancellationToken);
-
-            var unitNameHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.UnitName, cancellationToken);
-
-            var weeklyReports = await _weeklyReportRepository.Queryable.ToListAsync(cancellationToken);
-
-            var weeklyReportEntities = new List<WeeklyReport>();
-
-            var skills = await _skillRepository.Queryable.ToListAsync(cancellationToken);
-
-            var unitsResultEntities = await _unitResultRepository.Queryable.Include(un => un.Unit).Include(co => co.Course).ThenInclude(p => p.Program)
-                        .WhereBulkContains(studentIds, p => p.StudentId)
-                        .Where(p => p.Status != EnumResultStatus.Unfinished && p.Status != EnumResultStatus.New).OrderBy(n => n.UpdatedDate).ToListAsync(cancellationToken);
-
-            var lessonResults = await _lessonResultRepository.Queryable.Include(p => p.VideoResults).Include(x => x.ClassForumResults)
-                        .Include(x => x.UnitModule)
-                        .WhereBulkContains(studentIds, p => p.StudentId)
-                        .Where(p => p.Status == EnumResultStatus.Done)
-                        .Where(p => p.UpdatedDate.HasValue && p.UpdatedDate.Value.Date >= lastFridayAt13.Date && p.UpdatedDate.Value.Date < currentDate.Date)
-                        .OrderBy(n => n.CreatedDate).ToListAsync(cancellationToken);
-
-            var unitResultsNext = await _unitResultRepository.Queryable.Include(un => un.Unit)
-                        .WhereBulkContains(studentIds, p => p.StudentId)
-                        .Where(x => x.Status == EnumResultStatus.New || x.Status == EnumResultStatus.Process).OrderBy(x => x.UpdatedDate).ToListAsync(cancellationToken);
-
-            var courseResults = await _courseResultRepository.Queryable.WhereBulkContains(studentIds, p => p.StudentId).ToListAsync(cancellationToken);
-
-            foreach (var item in students)
-            {
-                if (weeklyReports.Any(p => p.StudentId == item.Id))
+                if (request.StudentIds == null || request.StudentIds.Count == 0)
                 {
-                    continue;
+                    return methodResult;
                 }
 
-                var studentDailyStreaks = featureAccessTimeResults.Where(p => p.CreatedUserId == item.UserId).Where(x => x.CreatedDate.HasValue).Select(p => p.CreatedDate!.Value.Date).Distinct().ToList();
+                var studentResults = await _userService.GetStudentsByStudentIdsAsync(request.StudentIds.ToList());
+                students = studentResults.Content?.Result?.ToList();
 
-                var weeklyReport = new WeeklyReportModel()
+                if (students?.Count == 0 || students == null)
                 {
-                    FullName = item.User?.FullName,
-                    StartDate = lastFridayAt13.ToString("dd-MM-yyyy", CultureInfo.CurrentCulture),
-                    EndDate = currentDate.AddDays(-1).ToString("dd-MM-yyyy", CultureInfo.CurrentCulture),
-                    TotalDay = studentDailyStreaks?.Count.ToString(CultureInfo.CurrentCulture),
-                    ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl
+                    return methodResult;
+                }
+
+                UserSettingQuery query = new UserSettingQuery
+                {
+                    UserIds = students.Select(x => x.UserId).ToList(),
                 };
 
-                weeklyReport.NoDailyStreak = null;
-                weeklyReport.DailyStreak = SendMailSetting.Display;
+                //var studentFilter = await _userService.GetListUserSetting(query);
+                //var studentFilterResult = studentFilter?.Content?.Result?.Where(x => x.NotifiEmail).Select(x => x.UserId).ToList();
 
-                CheckAndAssignStatusDate(weeklyReport, studentDailyStreaks, dates.ToList());
+                //if (studentFilterResult == null || studentFilterResult.Count == 0)
+                //{
+                //    return methodResult;
+                //}
 
-                var featureAccessTimes = featureAccessTimeResults.Where(p => p.CreatedUserId == item.UserId).ToList();
-                var previousFeatureAccessTimes = previousFeatureAccessTimeResults.Where(p => p.CreatedUserId == item.UserId).ToList();
+                //students = students.Where(x => x.User != null && studentFilterResult.Contains(x.UserId)).OrderBy(x => x.User!.Email).ToList();
 
-                AddTimeIntoTemplate(weeklyReport, featureAccessTimes, previousFeatureAccessTimes);
+                var userIds = students.Select(x => x.UserId).Distinct().ToList();
+                var studentIds = students.Select(x => x.Id).Distinct().ToList();
 
-                var unitsResults = unitsResultEntities.Where(p => p.StudentId == item.Id && p.CourseId == item.CourseId).OrderBy(n => n.CreatedDate).ToList();
+                DateTime currentDate = request.EndDate.HasValue ? request.EndDate.Value : DateTime.UtcNow.Date;
 
-                var courseType = unitsResults.FirstOrDefault()?.Course?.CourseType;
+                DateTime lastFridayAt13 = request.StartDate.HasValue ? request.StartDate.Value : currentDate.AddDays(-7);
 
-                string unitName = string.Empty;
+                DateTime lastLastFridayAt13 = currentDate.AddDays(-14);
 
-                foreach (var unit in unitsResults)
+                var dates = DateTimeHelper.GenerateDateList(lastFridayAt13, currentDate);
+
+                var featureAccessTimeResults = await GetFeatureAccessTimesInChunks(userIds, lastFridayAt13, currentDate);
+                var previousFeatureAccessTimeResults = await GetFeatureAccessTimesInChunks(userIds, lastLastFridayAt13, lastFridayAt13);
+
+                var skillScoresHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.Skill, cancellationToken);
+
+                var lessonNameHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.LessonName, cancellationToken);
+
+                var unitNameHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.UnitName, cancellationToken);
+
+                var weeklyReports = await _weeklyReportRepository.Queryable.ToListAsync(cancellationToken);
+
+                var weeklyReportEntities = new List<WeeklyReport>();
+
+                var skills = await _skillRepository.Queryable.ToListAsync(cancellationToken);
+
+                var unitsResultEntities = await _unitResultRepository.Queryable.Include(un => un.Unit).Include(co => co.Course).ThenInclude(p => p.Program)
+                            .WhereBulkContains(studentIds, p => p.StudentId)
+                            .Where(p => p.Status != EnumResultStatus.Unfinished && p.Status != EnumResultStatus.New).OrderBy(n => n.UpdatedDate).ToListAsync(cancellationToken);
+
+                var lessonResults = await _lessonResultRepository.Queryable.Include(p => p.VideoResults).Include(x => x.ClassForumResults)
+                            .Include(x => x.UnitModule)
+                            .WhereBulkContains(studentIds, p => p.StudentId)
+                            .Where(p => p.Status == EnumResultStatus.Done)
+                            .Where(p => p.UpdatedDate.HasValue && p.UpdatedDate.Value.Date >= lastFridayAt13.Date && p.UpdatedDate.Value.Date < currentDate.Date)
+                            .OrderBy(n => n.CreatedDate).ToListAsync(cancellationToken);
+
+                var unitResultsNext = await _unitResultRepository.Queryable.Include(un => un.Unit)
+                            .WhereBulkContains(studentIds, p => p.StudentId)
+                            .Where(x => x.Status == EnumResultStatus.New || x.Status == EnumResultStatus.Process).OrderBy(x => x.UpdatedDate).ToListAsync(cancellationToken);
+
+                var courseResults = await _courseResultRepository.Queryable.WhereBulkContains(studentIds, p => p.StudentId).ToListAsync(cancellationToken);
+
+                foreach (var item in students)
                 {
-                    var lessonResultsDone = lessonResults
-                        .Where(p => p.StudentId == item.Id && p.UnitId == unit.UnitId).Where(x => x.ClassForumResults.Any(x => x.Status.HasValue)).ToList();
-
-                    if (lessonResultsDone.Count > 0)
-                    {
-                        unitName += string.Format(CultureInfo.InvariantCulture, unitNameHtml, unit.Unit?.Name);
-
-                        for (var i = 0; i < lessonResultsDone.Count; i++)
-                        {
-                            unitName += string.Format(CultureInfo.InvariantCulture, lessonNameHtml, lessonResultsDone[i].UnitModule?.DisplayOrder, lessonResultsDone[i].VideoResults?.OrderBy(p => p.CreatedDate).FirstOrDefault()?.CreatedDate.Date.ToString("dd-MM-yyyy", CultureInfo.CurrentCulture), lessonResultsDone[i].UpdatedDate!.Value.ToString("dd-MM-yyyy", CultureInfo.CurrentCulture));
-
-                            var skillScores = lessonResultsDone[i].SkillScores?.OrderBy(x => x.Skill).ToList();
-
-                            foreach (var ls in skillScores ?? new List<SkillScores>())
-                            {
-                                var skill = skills.FirstOrDefault(x => x.Id == ls.SkillId);
-                                var html = string.Format(CultureInfo.InvariantCulture, skillScoresHtml, skill?.FilePath, skill?.Name, ls.Percent, ls.Percent < 100 ? SendMailSetting.NoBorderRight : SendMailSetting.Border, "rgb(189,134,227)", 100 - ls.Percent, ls.Percent > 0 ? SendMailSetting.NoBorderLeft : SendMailSetting.Border, ls.Percent + "%");
-                                unitName += html;
-                            }
-                        }
-                        weeklyReport.IsLessonDone = SendMailSetting.Display;
-                    }
-                }
-                weeklyReport.SkillScores = unitName;
-
-                var courseResult = courseResults.FirstOrDefault(p => p.CourseId == item.CourseId && p.StudentId == item.Id);
-
-                if ((previousFeatureAccessTimes?.Count == 0 && featureAccessTimes?.Count == 0) || !item.CourseId.HasValue || courseResult == null)
-                {
-                    weeklyReport.SenderTemplate = EnumSenderTemplate.WeeklyReport4;
-                }
-                else if (featureAccessTimes?.Count == 0)
-                {
-                    if (courseType == null)
+                    if (weeklyReports.Any(p => p.StudentId == item.Id))
                     {
                         continue;
                     }
 
-                    weeklyReport.SenderTemplate = EnumSenderTemplate.WeeklyReport3;
+                    var studentDailyStreaks = featureAccessTimeResults.Where(p => p.CreatedUserId == item.UserId).Where(x => x.CreatedDate.HasValue).Select(p => p.CreatedDate!.Value.Date).Distinct().ToList();
 
-                    var unitResultNext = unitResultsNext.Where(x => x.StudentId == item.Id && x.CourseId == item.CourseId).OrderBy(x => x.UpdatedDate).FirstOrDefault();
-
-                    if (unitResultNext != null)
+                    var weeklyReport = new WeeklyReportModel()
                     {
-                        weeklyReport.NextUnit = unitResultNext.Unit?.Name;
-                        if (unitResultNext.Status == EnumResultStatus.New)
-                        {
-                            weeklyReport.NextLesson = 1;
-                            weeklyReport.PercentLesson = 0;
-                            weeklyReport.Weekly3Display = null;
-                            weeklyReport.SkillMockTestDisplay = SendMailSetting.Display;
-                        }
-                        else
-                        {
-                            var learningTree = await _aggregateResultQueryService.GetLearningTreeFromCourseToLesson(
-                                                item.Id,
-                                                courseResult.Id,
-                                                cancellationToken);
+                        FullName = item.User?.FullName,
+                        StartDate = lastFridayAt13.ToString("dd-MM-yyyy", CultureInfo.CurrentCulture),
+                        EndDate = currentDate.AddDays(-1).ToString("dd-MM-yyyy", CultureInfo.CurrentCulture),
+                        TotalDay = studentDailyStreaks?.Count.ToString(CultureInfo.CurrentCulture),
+                        ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl
+                    };
 
-                            var lessons = learningTree
-                                .GetAllItemByType<LessonComponent>()
-                                .ToList();
+                    weeklyReport.NoDailyStreak = null;
+                    weeklyReport.DailyStreak = SendMailSetting.Display;
 
-                            var lesson = lessons.FirstOrDefault(p => p.Status == EnumResultStatus.New);
-                            if (lesson == null)
+                    CheckAndAssignStatusDate(weeklyReport, studentDailyStreaks, dates.ToList());
+
+                    var featureAccessTimes = featureAccessTimeResults.Where(p => p.CreatedUserId == item.UserId).ToList();
+                    var previousFeatureAccessTimes = previousFeatureAccessTimeResults.Where(p => p.CreatedUserId == item.UserId).ToList();
+
+                    AddTimeIntoTemplate(weeklyReport, featureAccessTimes, previousFeatureAccessTimes);
+
+                    var unitsResults = unitsResultEntities.Where(p => p.StudentId == item.Id && p.CourseId == item.CourseId).OrderBy(n => n.CreatedDate).ToList();
+
+                    var courseType = unitsResults.FirstOrDefault()?.Course?.CourseType;
+
+                    string unitName = string.Empty;
+
+                    foreach (var unit in unitsResults)
+                    {
+                        var lessonResultsDone = lessonResults
+                            .Where(p => p.StudentId == item.Id && p.UnitId == unit.UnitId).Where(x => x.ClassForumResults.Any(x => x.Status.HasValue)).ToList();
+
+                        if (lessonResultsDone.Count > 0)
+                        {
+                            unitName += string.Format(CultureInfo.InvariantCulture, unitNameHtml, unit.Unit?.Name);
+
+                            for (var i = 0; i < lessonResultsDone.Count; i++)
                             {
-                                lesson = lessons.FirstOrDefault(p => p.Status == EnumResultStatus.Process);
+                                unitName += string.Format(CultureInfo.InvariantCulture, lessonNameHtml, lessonResultsDone[i].UnitModule?.DisplayOrder, lessonResultsDone[i].VideoResults?.OrderBy(p => p.CreatedDate).FirstOrDefault()?.CreatedDate.Date.ToString("dd-MM-yyyy", CultureInfo.CurrentCulture), lessonResultsDone[i].UpdatedDate!.Value.ToString("dd-MM-yyyy", CultureInfo.CurrentCulture));
+
+                                var skillScores = lessonResultsDone[i].SkillScores?.OrderBy(x => x.Skill).ToList();
+
+                                foreach (var ls in skillScores ?? new List<SkillScores>())
+                                {
+                                    var skill = skills.FirstOrDefault(x => x.Id == ls.SkillId);
+                                    var html = string.Format(CultureInfo.InvariantCulture, skillScoresHtml, skill?.FilePath, skill?.Name, ls.Percent, ls.Percent < 100 ? SendMailSetting.NoBorderRight : SendMailSetting.Border, skill?.ColorCode, 100 - ls.Percent, ls.Percent > 0 ? SendMailSetting.NoBorderLeft : SendMailSetting.Border, ls.Percent + "%");
+                                    unitName += html;
+                                }
                             }
+                            weeklyReport.IsLessonDone = SendMailSetting.Display;
+                        }
+                    }
+                    weeklyReport.SkillScores = unitName;
 
-                            if (lesson != null)
+                    var courseResult = courseResults.FirstOrDefault(p => p.CourseId == item.CourseId && p.StudentId == item.Id);
+
+                    if ((previousFeatureAccessTimes?.Count == 0 && featureAccessTimes?.Count == 0) || !item.CourseId.HasValue || courseResult == null)
+                    {
+                        weeklyReport.SenderTemplate = EnumSenderTemplate.WeeklyReport4;
+                    }
+                    else if (featureAccessTimes?.Count == 0)
+                    {
+                        if (courseType == null)
+                        {
+                            continue;
+                        }
+
+                        weeklyReport.SenderTemplate = EnumSenderTemplate.WeeklyReport3;
+
+                        var unitResultNext = unitResultsNext.Where(x => x.StudentId == item.Id && x.CourseId == item.CourseId).OrderBy(x => x.UpdatedDate).FirstOrDefault();
+
+                        if (unitResultNext != null)
+                        {
+                            weeklyReport.NextUnit = unitResultNext.Unit?.Name;
+                            if (unitResultNext.Status == EnumResultStatus.New)
                             {
-                                var lessonResult = await _lessonResultRepository.Queryable.Include(p => p.UnitModule).FirstOrDefaultAsync(p => p.Id == lesson.LearningResultId, cancellationToken);
-
-                                weeklyReport.NextLesson = lessonResult?.UnitModule?.DisplayOrder;
-                                var percentLesson = await GetLesson(lessonResult?.CourseId, lessonResult?.UnitId, lessonResult?.LessonId, item.Id);
-                                weeklyReport.PercentLesson = percentLesson;
+                                weeklyReport.NextLesson = 1;
+                                weeklyReport.PercentLesson = 0;
                                 weeklyReport.Weekly3Display = null;
                                 weeklyReport.SkillMockTestDisplay = SendMailSetting.Display;
                             }
                             else
                             {
-                                var testResult = await _testGroupResultRepository.Queryable.Include(mt => mt.TestResults).ThenInclude(p => p.Test).ThenInclude(p => p.TestSections).ThenInclude(p => p.Skill).Where(x => x.StudentId == item.Id && x.Status != EnumResultStatus.Done && x.TestType == EnumTestType.SkillTest).OrderBy(x => x.UpdatedDate).FirstOrDefaultAsync(cancellationToken);
+                                var learningTree = await _aggregateResultQueryService.GetLearningTreeFromCourseToLesson(
+                                                    item.Id,
+                                                    courseResult.Id,
+                                                    cancellationToken);
 
-                                var skill = testResult?.TestResults?.FirstOrDefault()?.Test?.TestSections.Select(p => p.Skill).FirstOrDefault();
-                                if (skill != null)
+                                var lessons = learningTree
+                                    .GetAllItemByType<LessonComponent>()
+                                    .ToList();
+
+                                var lesson = lessons.FirstOrDefault(p => p.Status == EnumResultStatus.New);
+                                if (lesson == null)
                                 {
-                                    weeklyReport.SkillMockTest = skill.Name;
+                                    lesson = lessons.FirstOrDefault(p => p.Status == EnumResultStatus.Process);
                                 }
 
-                                weeklyReport.Weekly3Display = SendMailSetting.Display;
-                                weeklyReport.SkillMockTestDisplay = null;
+                                if (lesson != null)
+                                {
+                                    var lessonResult = await _lessonResultRepository.Queryable.Include(p => p.UnitModule).FirstOrDefaultAsync(p => p.Id == lesson.LearningResultId, cancellationToken);
+
+                                    weeklyReport.NextLesson = lessonResult?.UnitModule?.DisplayOrder;
+                                    var percentLesson = await GetLesson(lessonResult?.CourseId, lessonResult?.UnitId, lessonResult?.LessonId, item.Id);
+                                    weeklyReport.PercentLesson = percentLesson;
+                                    weeklyReport.Weekly3Display = null;
+                                    weeklyReport.SkillMockTestDisplay = SendMailSetting.Display;
+                                }
+                                else
+                                {
+                                    var testResult = await _testGroupResultRepository.Queryable.Include(mt => mt.TestResults).ThenInclude(p => p.Test).ThenInclude(p => p.TestSections).ThenInclude(p => p.Skill).Where(x => x.StudentId == item.Id && x.Status != EnumResultStatus.Done && x.TestType == EnumTestType.SkillTest).OrderBy(x => x.UpdatedDate).FirstOrDefaultAsync(cancellationToken);
+
+                                    var skill = testResult?.TestResults?.FirstOrDefault()?.Test?.TestSections.Select(p => p.Skill).FirstOrDefault();
+                                    if (skill != null)
+                                    {
+                                        weeklyReport.SkillMockTest = skill.Name;
+                                    }
+
+                                    weeklyReport.Weekly3Display = SendMailSetting.Display;
+                                    weeklyReport.SkillMockTestDisplay = null;
+                                }
                             }
                         }
+                        else
+                        {
+                            var testGroupResult = await _testGroupResultRepository.Queryable.Include(mt => mt.TestResults).ThenInclude(p => p.Test).Where(x => x.StudentId == item.Id && x.Status != EnumResultStatus.Done && x.TestType == EnumTestType.FullTest).OrderBy(x => x.UpdatedDate).FirstOrDefaultAsync(cancellationToken);
+                            if (testGroupResult == null)
+                            {
+                                continue;
+                            }
+                            weeklyReport.NextUnit = testGroupResult.TestResults.FirstOrDefault()?.Test?.Name;
+                            weeklyReport.Weekly3Display = SendMailSetting.Display;
+                            weeklyReport.SkillMockTestDisplay = SendMailSetting.Display;
+                        }
+                    }
+                    else if (previousFeatureAccessTimes?.Count == 0)
+                    {
+                        weeklyReport.SenderTemplate = EnumSenderTemplate.WeeklyReport;
+                        weeklyReport.NoDailyStreak = null;
+                        weeklyReport.DailyStreak = SendMailSetting.Display;
                     }
                     else
                     {
-                        var testGroupResult = await _testGroupResultRepository.Queryable.Include(mt => mt.TestResults).ThenInclude(p => p.Test).Where(x => x.StudentId == item.Id && x.Status != EnumResultStatus.Done && x.TestType == EnumTestType.FullTest).OrderBy(x => x.UpdatedDate).FirstOrDefaultAsync(cancellationToken);
-                        if (testGroupResult == null)
+                        weeklyReport.SenderTemplate = EnumSenderTemplate.WeeklyReport2;
+                    }
+
+                    var token = await _userService.SenderSettingGenerateToken(new UpdateSenderSettingCommandModel
+                    {
+                        UserId = item.UserId,
+                        Template = weeklyReport.SenderTemplate
+                    });
+
+                    weeklyReport.AccessLink = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl!.UpdateSenderSettingUrl!, token?.Content?.Result ?? string.Empty);
+
+                    if (!string.IsNullOrEmpty(item.User?.Email))
+                    {
+                        weeklyReportEntities.Add(new WeeklyReport()
                         {
-                            continue;
-                        }
-                        weeklyReport.NextUnit = testGroupResult.TestResults.FirstOrDefault()?.Test?.Name;
-                        weeklyReport.Weekly3Display = SendMailSetting.Display;
-                        weeklyReport.SkillMockTestDisplay = SendMailSetting.Display;
+                            //StudentId = item.Id,
+                            //Email = item.User?.Email,
+                            //ParentEmail = item.ParentEmail,
+                            //Param = weeklyReport
+                            StudentId = item.Id,
+                            Email = "nguyenhuukhoa5462@gmail.com",
+                            ParentEmail = null,
+                            Param = weeklyReport
+                        });
                     }
                 }
-                else if (previousFeatureAccessTimes?.Count == 0)
-                {
-                    weeklyReport.SenderTemplate = EnumSenderTemplate.WeeklyReport;
-                    weeklyReport.NoDailyStreak = null;
-                    weeklyReport.DailyStreak = SendMailSetting.Display;
-                }
-                else
-                {
-                    weeklyReport.SenderTemplate = EnumSenderTemplate.WeeklyReport2;
-                }
 
-                var token = await _userService.SenderSettingGenerateToken(new UpdateSenderSettingCommandModel
+                await _weeklyReportRepository.ExecuteTransactionAsync(async () =>
                 {
-                    UserId = item.UserId,
-                    Template = weeklyReport.SenderTemplate
+                    await _weeklyReportRepository.AddList(weeklyReportEntities);
+                    await _weeklyReportRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    methodResult.StatusCode = StatusCodes.Status201Created;
+                    methodResult.Result = true;
+                    return methodResult;
                 });
-
-                weeklyReport.AccessLink = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl!.UpdateSenderSettingUrl!, token?.Content?.Result ?? string.Empty);
-
-                if (!string.IsNullOrEmpty(item.User?.Email))
-                {
-                    weeklyReportEntities.Add(new WeeklyReport()
-                    {
-                        StudentId = item.Id,
-                        Email = "nguyenhuukhoa5462@gmail.com",
-                        ParentEmail = null,
-                        Param = weeklyReport
-                    });
-                }
             }
-
-            await _weeklyReportRepository.ExecuteTransactionAsync(async () =>
+            catch (ArgumentException ex)
             {
-                await _weeklyReportRepository.AddList(weeklyReportEntities);
-                await _weeklyReportRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = true;
-                return methodResult;
-            });
+            }
 
             return methodResult;
         }

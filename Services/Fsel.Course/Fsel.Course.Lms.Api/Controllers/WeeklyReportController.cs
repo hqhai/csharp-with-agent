@@ -17,7 +17,6 @@ namespace Fsel.Course.Lms.Api.Controllers
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/weekly-report")]
     [ApiController]
-    [Permission(role: nameof(EnumRole.Admin))]
     public class WeeklyReportController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -45,7 +44,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpPost("aggregate-data-weekly-report")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> WeeklyReport([FromBody] AggregateDataWeeklyReportCommand command)
+        public async Task<IActionResult> WeeklyReport([FromBody] AggregateDataWeeklyReportsCommand command)
         {
             var queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
