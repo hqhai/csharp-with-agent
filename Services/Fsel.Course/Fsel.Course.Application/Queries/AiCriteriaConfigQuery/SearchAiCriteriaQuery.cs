@@ -99,13 +99,24 @@ namespace Fsel.Course.Application.Queries.AiCriteriaConfigQuery
 
             if (request.EnableTieredLookup)
             {
-                // Tiered lookup: trả về 1 kết quả phù hợp nhất
-                var result = await GetTieredResult(query, request, cancellationToken);
-                if (result == null)
+                // Tiered lookup: trả về 1 kết quả phù hợp nhất (trả về entity để dùng trong query)
+                var resultEntity = await GetTieredResult(query, request, cancellationToken);
+                if (resultEntity == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(AICriteriaConfigs));
                     return methodResult;
                 }
+
+                // Map sang model trước
+                var result = _mapper.Map<AICriteriaConfigsModel>(resultEntity);
+
+                // Lấy AiCriteriaModels cho result
+                var tieredCriteria = await _aiCriteriaConfigRepository.ReadQueryable
+                    .Where(x => x.SubFeatureType == resultEntity.SubFeatureType
+                                && x.ProjectId == resultEntity.ProjectId
+                                && x.DefaultType == EnumDefaultType.Default)
+                    .ToListAsync(cancellationToken);
+                result.AiCriteriaModels = _mapper.Map<IList<AiCriteriaModel>>(tieredCriteria);
 
                 methodResult.Result = new List<AICriteriaConfigsModel> { result };
                 methodResult.StatusCode = StatusCodes.Status200OK;
@@ -120,7 +131,21 @@ namespace Fsel.Course.Application.Queries.AiCriteriaConfigQuery
                 return methodResult;
             }
 
-            methodResult.Result = _mapper.Map<IList<AICriteriaConfigsModel>>(allResults);
+            var resultModels = _mapper.Map<IList<AICriteriaConfigsModel>>(allResults);
+
+            // Lấy AiCriteriaModels cho mỗi result
+            for (int i = 0; i < allResults.Count; i++)
+            {
+                var criteria = await _aiCriteriaConfigRepository.ReadQueryable
+                    .Where(x => x.SubFeatureType == allResults[i].SubFeatureType
+                                && x.ProjectId == allResults[i].ProjectId
+                                && x.DefaultType == EnumDefaultType.Default)
+                    .ToListAsync(cancellationToken);
+
+                resultModels[i].AiCriteriaModels = _mapper.Map<IList<AiCriteriaModel>>(criteria);
+            }
+
+            methodResult.Result = resultModels;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
@@ -131,7 +156,7 @@ namespace Fsel.Course.Application.Queries.AiCriteriaConfigQuery
         /// Tier 2: Project default (ObjectId == null && ProjectId specified)
         /// Tier 3: Global default (ObjectId == null && ProjectId == null)
         /// </summary>
-        private async Task<AICriteriaConfigsModel?> GetTieredResult(
+        private async Task<AICriteriaConfigs?> GetTieredResult(
             IQueryable<AICriteriaConfigs> baseQuery,
             SearchAiCriteriaQuery request,
             CancellationToken cancellationToken)
@@ -145,7 +170,7 @@ namespace Fsel.Course.Application.Queries.AiCriteriaConfigQuery
 
                 if (custom != null)
                 {
-                    return _mapper.Map<AICriteriaConfigsModel>(custom);
+                    return custom;
                 }
             }
 
@@ -158,7 +183,7 @@ namespace Fsel.Course.Application.Queries.AiCriteriaConfigQuery
 
                 if (projectDefault != null)
                 {
-                    return _mapper.Map<AICriteriaConfigsModel>(projectDefault);
+                    return projectDefault;
                 }
             }
 
@@ -167,7 +192,7 @@ namespace Fsel.Course.Application.Queries.AiCriteriaConfigQuery
                 .Where(x => x.ObjectId == null)
                 .FirstOrDefaultAsync(cancellationToken);
 
-            return globalDefault != null ? _mapper.Map<AICriteriaConfigsModel>(globalDefault) : null;
+            return globalDefault;
         }
     }
 }
