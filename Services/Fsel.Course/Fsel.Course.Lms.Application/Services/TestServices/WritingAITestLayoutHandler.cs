@@ -213,6 +213,12 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
                     var percent = testSectionResult.TestSection?.Percent ?? default;
                     currentSectionResult.PercentModule = NumberHelper.ConvertDoublePercent(percent * currentSectionResult.Percent);
                 }
+                else
+                {
+                    var scores = currentSectionResult.SkillScores[0].Scores;
+                    var percent = currentSectionResult.TestSection?.Percent ?? default;
+                    currentSectionResult.ScoreModule = NumberHelper.ConvertDoublePercent(scores * percent, 2);
+                }
 
                 testSectionResult.SkillScores = new List<SkillScores> { testSkillScore };
                 testSectionResult.CorrectCount = (int)testSkillScore.CorrectCount;

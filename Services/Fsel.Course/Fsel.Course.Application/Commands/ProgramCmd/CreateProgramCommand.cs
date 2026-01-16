@@ -28,7 +28,6 @@ namespace Fsel.Course.Application.Commands.ProgramCmd
         private readonly IMapper _mapper;
         private readonly ProgramConverter _programConverter;
         private readonly ITestRepository _testRepository;
-        private static readonly Regex s_regexCode = new Regex("^[a-zA-Z0-9]+$", RegexOptions.Compiled);
 
         public CreateProgramCommandHandler(ICategoryRepository categoryRepository,
                                            IMapper mapper,
@@ -54,7 +53,7 @@ namespace Fsel.Course.Application.Commands.ProgramCmd
                 return methodResult;
             }
 
-            if (string.IsNullOrEmpty(request.Code) || (!string.IsNullOrEmpty(request.Code) && !s_regexCode.IsMatch(request.Code)))
+            if (string.IsNullOrEmpty(request.Code))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCategoryErrorCode.CodeNotValid), nameof(request.Code), request.Code);
                 return methodResult;

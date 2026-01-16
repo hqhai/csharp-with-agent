@@ -61,6 +61,7 @@ namespace Fsel.Course.Application.Commands.UnitCmd
                 {
                     oldEntity.Code = newEntity.Code;
                     oldEntity.Name = newEntity.Name;
+                    oldEntity.Description = newEntity.Description;
                     oldEntity.LessonCount = newEntity.LessonCount;
                     oldEntity.TestCount = newEntity.TestCount;
                     oldEntity.LevelId = newEntity.LevelId;

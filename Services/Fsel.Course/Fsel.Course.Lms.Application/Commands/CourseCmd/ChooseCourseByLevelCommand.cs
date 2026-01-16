@@ -3,6 +3,7 @@
 namespace Fsel.Course.Lms.Application.Commands.CourseCmd
 {
     using AutoMapper;
+    using Common.Enums;
     using Core.Base;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
@@ -77,7 +78,12 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
             }
 
             var courses = await _courseRepository.ReadQueryable
-                .Where(x => x.ProgramId == request.ProgramId && x.LevelId == request.LevelId && !x.IsArchive && x.Status == EnumCourseStatus.Active).ToListAsync(cancellationToken);
+                .Where(x => x.ProgramId == request.ProgramId
+                            && x.LevelId == request.LevelId
+                            && !x.IsArchive
+                            && x.VersionStatus == EnumVersionStatus.LastVersion
+                            && x.Status == EnumCourseStatus.Active)
+                .ToListAsync(cancellationToken);
 
             var random = new Random();
             var course = courses.OrderBy(x => random.Next()).FirstOrDefault();

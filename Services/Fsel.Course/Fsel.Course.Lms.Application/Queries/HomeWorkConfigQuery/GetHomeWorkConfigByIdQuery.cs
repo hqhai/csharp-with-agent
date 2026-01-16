@@ -22,11 +22,17 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkConfigQuery
     {
         private readonly IHomeWorkConfigRepository _homeWorkConfigRepository;
         private readonly IHomeWorkRepository _homeWorkRepository;
+        private readonly ICategoryRepository _categoryRepository;
+        private readonly ILevelRepository _levelRepository;
+        private readonly ISkillRepository _skillRepository;
 
-        public GetHomeWorkConfigByIdQueryHandler(IHomeWorkConfigRepository homeWorkConfigRepository, IHomeWorkRepository homeWorkRepository)
+        public GetHomeWorkConfigByIdQueryHandler(IHomeWorkConfigRepository homeWorkConfigRepository, IHomeWorkRepository homeWorkRepository, ICategoryRepository categoryRepository, ILevelRepository levelRepository, ISkillRepository skillRepository)
         {
             _homeWorkConfigRepository = homeWorkConfigRepository;
             _homeWorkRepository = homeWorkRepository;
+            _categoryRepository = categoryRepository;
+            _levelRepository = levelRepository;
+            _skillRepository = skillRepository;
         }
 
         public async Task<MethodResult<HomeWorkConfigModel>> Handle(GetHomeWorkConfigByIdQuery request, CancellationToken cancellationToken)
@@ -36,6 +42,9 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkConfigQuery
 
             var query = await (from hc in _homeWorkConfigRepository.Queryable
                                join h in _homeWorkRepository.Queryable on hc.HomeWorkId equals h.Id
+                               join p in _categoryRepository.Queryable.Include(n => n.CategoryParent) on h.ProgramId equals p.Id
+                               join s in _skillRepository.Queryable on h.SkillId equals s.Id
+                               join l in _levelRepository.Queryable on h.LevelId equals l.Id
                                where hc.Id == request.Id
                                select new HomeWorkConfigModel()
                                {
@@ -50,7 +59,14 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkConfigQuery
                                    StartDate = hc.StartDate,
                                    HomeWorkId = hc.HomeWorkId,
                                    CourseLevel = h.CourseLevel,
-                                   CourseSkill = h.CourseSkill
+                                   CourseSkill = h.CourseSkill,
+                                   Program = p.Name,
+                                   ProgramId = p.Id,
+                                   Level = l.Name,
+                                   LevelId = l.Id,
+                                   Skill = s.Name,
+                                   SkillId = s.Id,
+                                   Subject = p.CategoryParent != null ? p.CategoryParent.Name : null,
                                }).FirstOrDefaultAsync(cancellationToken);
 
             methodResult.Result = query;

@@ -196,19 +196,6 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
-        /// Update goal aggregate
-        /// </summary>
-        [HttpPost("test-goal-aggregate")]
-        [ProducesResponseType(typeof(MethodResult<object>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(roles: new string[] { nameof(EnumRole.Admin) })]
-        public async Task<IActionResult> UpdateAggregateTest()
-        {
-            var queryResult = await _mediator.Send(new TestDataRebuildCommand()).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
         /// Import Module Process
         /// </summary>
         [HttpGet("unauthorized")]

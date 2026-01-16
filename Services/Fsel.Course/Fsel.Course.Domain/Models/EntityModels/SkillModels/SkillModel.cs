@@ -10,6 +10,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.SkillModels
         public string? Name { get; set; }
         public string? Code { get; set; }
         public string? Description { get; set; }
+        public string? ColorCode { get; set; }
         public bool IsActive { get; set; }
     }
 }

@@ -15,8 +15,8 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
     public class GetWeeklyProgressByClassQuery : IRequest<MethodResult<IList<StackBarChartsModel>>>
     {
         public Guid SchoolId { get; set; }
-        public Guid? ClassIdStr { get; set; }
-        public EnumCourseType? CourseTypeStr { get; set; }
+        public string? ClassIdStr { get; set; }
+        public string? ProgramIdStr { get; set; }
     }
 
     public class GetWeeklyProgressByClassQueryHandler : IRequestHandler<GetWeeklyProgressByClassQuery, MethodResult<IList<StackBarChartsModel>>>
@@ -38,7 +38,33 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
 
             var (currentWeekStartUtc, previousWeekStartUtc) = GetWeekBoundariesUtc();
 
-            var query = BuildBaseQuery(request);
+            var query = _studentGoalAggregateRepository.Queryable.Where(x => x.IsActive).AsNoTracking();
+
+            if (!string.IsNullOrEmpty(request.ClassIdStr))
+            {
+                var classIds = request.ClassIdStr.ToList<Guid>();
+                if (classIds != null && classIds.Any())
+                {
+                    query = query.Where(x => x.ClassId.HasValue && classIds.Contains(x.ClassId.Value));
+                }
+                else
+                {
+                    return methodResult;
+                }
+            }
+
+            if (!string.IsNullOrEmpty(request.ProgramIdStr))
+            {
+                var programIds = request.ProgramIdStr.ToList<Guid>();
+                if (programIds != null && programIds.Any())
+                {
+                    query = query.Where(x => x.ProgramId.HasValue && programIds.Contains(x.ProgramId.Value));
+                }
+                else
+                {
+                    return methodResult;
+                }
+            }
             var data = await GetDataForWeekAsync(query, request.SchoolId, currentWeekStartUtc, cancellationToken) ?? new List<ProgressRow>();
             var dataPre = await GetDataForWeekAsync(query, request.SchoolId, previousWeekStartUtc, cancellationToken) ?? new List<ProgressRow>();
             var stackBar = BuildStackBarChart(dataPre);
@@ -140,22 +166,6 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
             var currentWeekStartUtc = nowUtc.AddDays(-delta);
             var previousWeekStartUtc = currentWeekStartUtc.AddDays(-7);
             return (currentWeekStartUtc, previousWeekStartUtc);
-        }
-
-        private IQueryable<StudentGoalAggregate> BuildBaseQuery(GetWeeklyProgressByClassQuery request)
-        {
-            var query = _studentGoalAggregateRepository.Queryable.Where(x => x.IsActive).AsNoTracking();
-
-            if (request.ClassIdStr.HasValue)
-            {
-                query = query.Where(x => x.ClassId == request.ClassIdStr.Value);
-            }
-
-            if (request.CourseTypeStr.HasValue)
-            {
-                query = query.Where(x => x.CourseType == request.CourseTypeStr.Value);
-            }
-            return query;
         }
 
         private async Task<List<ProgressRow>?> GetDataForWeekAsync(
