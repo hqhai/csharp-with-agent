@@ -122,6 +122,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Course Module Not Null
         /// </summary>
-        CourseModulesNotNull
+        CourseModulesNotNull,
+
+        /// <summary>
+        /// Course is used
+        /// </summary>
+        CourseIsUsed
     }
 }
