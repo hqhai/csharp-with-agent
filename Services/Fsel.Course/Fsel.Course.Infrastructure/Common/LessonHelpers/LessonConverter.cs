@@ -35,6 +35,7 @@ namespace Fsel.Course.Infrastructure.Common.LessonHelpers
         private const int MinLenghtName = 150;
         private const int MinLenghtFilePath = 3000;
         private static readonly Regex s_regexCode = new Regex("^[a-zA-Z0-9._]+$", RegexOptions.Compiled);
+        private static readonly Regex s_regexName = new Regex("^[^<>]*$", RegexOptions.Compiled);
         private static readonly Regex s_regexInstructionContent = new Regex("^[^<>&#*]{1,2000}$", RegexOptions.Compiled);
         private static readonly Regex s_regexInstruction = new Regex("^[^<>&#*]{1,1000}$", RegexOptions.Compiled);
 
@@ -93,19 +94,31 @@ namespace Fsel.Course.Infrastructure.Common.LessonHelpers
             ArgumentNullException.ThrowIfNull(request);
             VoidMethodResult methodResult = new VoidMethodResult();
 
+            if (string.IsNullOrEmpty(request.Code))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.CodeNotNullOrEmpty), request.Code);
+                return methodResult;
+            }
+
             if (string.IsNullOrEmpty(request.Name))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.CodeNotNullOrEmpty), request.Name);
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.NameNotNullOrEmpty), request.Name);
                 return methodResult;
             }
 
-            if (!s_regexCode.IsMatch(request.Name))
+            if (!s_regexCode.IsMatch(request.Code))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.CodeNotValid), request.Name);
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.CodeNotValid), request.Code);
                 return methodResult;
             }
 
-            var checkCode = await _lessonRepository.Queryable.AnyAsync(x => (isUpdate ? (x.Id != request.Id && x.OriginalId != originId) : (!originId.HasValue)) && x.Name == request.Name.Trim(), cancellationToken);
+            if (!s_regexName.IsMatch(request.Name))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.NameNotValid), request.Name);
+                return methodResult;
+            }
+
+            var checkCode = await _lessonRepository.Queryable.AnyAsync(x => (isUpdate ? (x.Id != request.Id && x.OriginalId != originId) : (!originId.HasValue)) && x.Code == request.Code.Trim(), cancellationToken);
             if (checkCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.CodeAlreadyExist), request.Name);
