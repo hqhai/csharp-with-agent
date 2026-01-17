@@ -67,6 +67,7 @@ namespace Fsel.Course.Application.Queries.ProgramQuery
                                      Code = g.Key.Code,
                                      Description = g.Key.Description,
                                      Status = g.Key.Status,
+                                     Thumbnail = g.Key.Thumbnail,
                                      TestMode = g.Key.TestMode,
                                      IsTestDefault = g.Key.IsTestDefault,
                                      Type = g.Key.Type,

@@ -35,10 +35,10 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
-        [RegexValid(Regex = @"^[^\[\]]{1,200}$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
+        [RegexValid(Regex = @"^[^<>]*$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
         public string? Name { get; set; }
 
-        [RegexValid(Regex = @"^[^\[\]]{0,1000}$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
+        [RegexValid(Regex = @"^[^<>]*$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Description { get; set; }
 

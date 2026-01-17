@@ -87,8 +87,8 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
                 worksheet.Cells[startRow, 7].Value = item.CompletedLessons + "/" + item.LessonsPerWeek;
                 worksheet.Cells[startRow, 8].Value = item.ConsecutiveBehindWeeks;
                 worksheet.Cells[startRow, 9].Value = item.StatusStudentCampus!.GetDescription();
-                worksheet.Cells[startRow, 10].Value = item.CourseType;
-                worksheet.Cells[startRow, 11].Value = item.LevelId.HasValue ? item.LevelId.Value.ToString() : string.Empty;
+                worksheet.Cells[startRow, 10].Value = item.Program?.Name;
+                worksheet.Cells[startRow, 11].Value = item.Level?.Name;
 
                 count++;
                 startRow++;

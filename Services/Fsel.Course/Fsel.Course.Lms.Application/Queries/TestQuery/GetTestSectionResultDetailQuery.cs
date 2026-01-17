@@ -14,6 +14,7 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.TestConfigs;
     using Fsel.Course.Domain.Enums;
+    using Fsel.Course.Domain.Models.EntityModels.TestModels;
     using Fsel.Course.Domain.Models.EntityModels.V1i2;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
     using Fsel.Shared.Enums;
@@ -47,13 +48,9 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
             CancellationToken cancellationToken)
         {
             var testSectionResult = await _testSectionResultRepository.ReadQueryable
-                .AsNoTracking()
-                .Include(x => x.TestResult)
-                .Include(x => x.TestSection)
-                .Include(x => x.TestAnswers)
                 .FirstOrDefaultAsync(x => x.Id == request.TestSectionResultId, cancellationToken);
 
-            if (testSectionResult?.TestResult is null)
+            if (testSectionResult is null)
             {
                 return new MethodResult<SectionStateModel>();
             }
@@ -91,6 +88,7 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
 
             var sectionResultBySectionId = await _testSectionResultRepository.ReadQueryable
                 .Include(x => x.TestAnswers)
+                .Include(x => x.TestScores)
                 .AsNoTracking()
                 .Where(r =>
                     r.TestResultId == testSectionResult.TestResultId &&
@@ -231,7 +229,12 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
                 SkillScores = nodeResult?.SkillScores,
                 CorrectTotal = nodeResult?.CorrectTotal ?? 0,
                 HighestStreak = nodeResult?.HighestStreak,
-
+                TestScores = nodeResult?.TestScores.OrderBy(x => x.CreatedDate).Select(x => new TestScoreModel
+                {
+                    Criteria = x.Criteria,
+                    Feedback = x.Feedback,
+                    Score = x.Score,
+                }).ToList(),
                 SectionResultId = nodeResult?.Id,
                 Status = nodeResult?.Status ?? EnumResultStatus.New,
                 UpdatedDate = nodeResult?.UpdatedDate,

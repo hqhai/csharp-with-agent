@@ -70,6 +70,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
                             SkillName = s.Name,
                             CreatedUserId = h.CreatedUserId,
                             ProgramId = h.ProgramId,
+                            Program = p.Name,
                             SubjectId = p.ParentId,
                             Subject = p.CategoryParent != null ? p.CategoryParent.Name : null,
                         };

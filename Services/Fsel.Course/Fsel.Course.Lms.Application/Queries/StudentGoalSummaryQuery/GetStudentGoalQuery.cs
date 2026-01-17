@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.Queries.StudentGoalSummaryQuery
 {
+    using AutoMapper;
     using Common.ActionResults;
     using Core.Base;
     using Domain.IRepositories;
@@ -26,16 +27,19 @@ namespace Fsel.Course.Lms.Application.Queries.StudentGoalSummaryQuery
         private readonly IStudentGoalSummaryRepository _studentGoalSummaryRepository;
         private readonly IUserService _userService;
         private readonly AuthContext _authContext;
+        private readonly IMapper _mapper;
 
         public GetStudentGoalQueryHandler(IStudentGoalAggregateRepository studentGoalAggregateRepository,
             IStudentGoalSummaryRepository studentGoalSummaryRepository,
             IUserService userService,
-            AuthContext authContext)
+            AuthContext authContext,
+            IMapper mapper)
         {
             _studentGoalAggregateRepository = studentGoalAggregateRepository;
             _studentGoalSummaryRepository = studentGoalSummaryRepository;
             _userService = userService;
             _authContext = authContext;
+            _mapper = mapper;
         }
 
         public async Task<MethodResult<IList<StudentGoalAggregateModel>>> Handle(GetStudentGoalQuery request, CancellationToken cancellationToken)
@@ -74,7 +78,26 @@ namespace Fsel.Course.Lms.Application.Queries.StudentGoalSummaryQuery
             if (!string.IsNullOrEmpty(request.ClassIdStr))
             {
                 var classIds = request.ClassIdStr.ToList<Guid>();
-                query = query.WhereBulkContains(classIds, x => x.ClassId);
+                if (classIds != null && classIds.Count > 0)
+                {
+                    query = query.WhereBulkContains(classIds, x => x.ClassId);
+                }
+                else
+                {
+                    return methodResult;
+                }
+            }
+            if (!string.IsNullOrEmpty(request.ProgramIdStr))
+            {
+                var programIds = request.ProgramIdStr.ToList<Guid>();
+                if (programIds != null && programIds.Count > 0)
+                {
+                    query = query.WhereBulkContains(programIds, x => x.ProgramId);
+                }
+                else
+                {
+                    return methodResult;
+                }
             }
 
             if (!string.IsNullOrEmpty(request.Keyword))
@@ -85,30 +108,32 @@ namespace Fsel.Course.Lms.Application.Queries.StudentGoalSummaryQuery
             }
 
             var queryData = from baseQ in query
-                join sum in _studentGoalSummaryRepository.Queryable.AsNoTracking() on baseQ.Id equals sum.StudentGoalAggregateId
-                where sum.StartDate.Date <= weekStartUtc && sum.EndDate.Date >= weekEndUtc
-                select new StudentGoalAggregateModel
-                {
-                    Id = baseQ.Id,
-                    ClassName = baseQ.ClassName,
-                    CombinedProgress = baseQ.CombinedProgress,
-                    TotalCompletedLessons = baseQ.TotalCompletedLessons,
-                    CreatedFullName = baseQ.CreatedFullName,
-                    CreatedDate = baseQ.CreatedDate,
-                    CourseType = baseQ.CourseType,
-                    LevelId = baseQ.LevelId,
-                    CourseId = baseQ.CourseId,
-                    ConsecutiveBehindWeeks = baseQ.ConsecutiveBehindWeeks,
-                    CompletedLessons = sum.CompletedLessons,
-                    CreatedUserId = baseQ.CreatedUserId,
-                    StudentId = baseQ.StudentId,
-                    ProgressStatus = sum.ProgressStatus,
-                    UpdatedDate = baseQ.UpdatedDate,
-                    UpdatedFullName = baseQ.UpdatedFullName,
-                    UpdatedUserId = baseQ.UpdatedUserId,
-                    TotalTargetLessons = sum.TotalTargetLessons,
-                    LessonsPerWeek = sum.LessonsPerWeek,
-                };
+                            join sum in _studentGoalSummaryRepository.Queryable.AsNoTracking() on baseQ.Id equals sum.StudentGoalAggregateId
+                            where sum.StartDate.Date <= weekStartUtc && sum.EndDate.Date >= weekEndUtc
+                            select new StudentGoalAggregateModel
+                            {
+                                Id = baseQ.Id,
+                                ClassName = baseQ.ClassName,
+                                CombinedProgress = baseQ.CombinedProgress,
+                                TotalCompletedLessons = baseQ.TotalCompletedLessons,
+                                CreatedFullName = baseQ.CreatedFullName,
+                                CreatedDate = baseQ.CreatedDate,
+                                CourseResultId = baseQ.CourseResultId,
+                                LevelId = baseQ.LevelId,
+                                CourseId = baseQ.CourseId,
+                                ConsecutiveBehindWeeks = baseQ.ConsecutiveBehindWeeks,
+                                CompletedLessons = sum.CompletedLessons,
+                                CreatedUserId = baseQ.CreatedUserId,
+                                StudentId = baseQ.StudentId,
+                                ProgressStatus = sum.ProgressStatus,
+                                UpdatedDate = baseQ.UpdatedDate,
+                                UpdatedFullName = baseQ.UpdatedFullName,
+                                UpdatedUserId = baseQ.UpdatedUserId,
+                                TotalTargetLessons = sum.TotalTargetLessons,
+                                LessonsPerWeek = sum.LessonsPerWeek,
+                                Level = _mapper.Map<LevelModel>(baseQ.Level),
+                                Program = _mapper.Map<CategoryModel>(baseQ.Program),
+                            };
 
             var lists = await queryData
                 .AsNoTracking()

@@ -8,6 +8,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     {
         public string? Code { get; set; }
         public string? Label { get; set; }
+        public string? Thumbnail { get; set; }
         public Guid Data { get; set; }
         public EnumTypeCategory ExpandedIcon { get; set; }
         public DateTime CreatedDate { get; set; }

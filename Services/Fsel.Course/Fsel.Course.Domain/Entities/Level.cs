@@ -12,13 +12,15 @@ namespace Fsel.Course.Domain.Entities
     public class Level : Entity
     {
         [MaxLength(200, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [RegexValid(Regex = @"^[^<>]*$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
         public string? Name { get; set; }
 
         [MaxLength(200, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [RegexValid(Regex = @"^[^<>]*$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
         public string? Code { get; set; }
 
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
-        [RegexValid(Regex = @"^[^<>]{0,1000}$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
+        [RegexValid(Regex = @"^[^<>]*$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
         public string? Description { get; set; }
 
         public int LevelOrder { get; set; }
@@ -39,5 +41,6 @@ namespace Fsel.Course.Domain.Entities
 
         public ICollection<TestGroupResult> TestGroupResults { get; set; } = new List<TestGroupResult>();
         public ICollection<TestGroupResult> TestGroupResultsForCurrentLevel { get; set; } = new List<TestGroupResult>();
+        public ICollection<StudentGoalAggregate> StudentGoalAggregates { get; set; } = new List<StudentGoalAggregate>();
     }
 }

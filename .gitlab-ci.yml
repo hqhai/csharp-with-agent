@@ -33,8 +33,30 @@ stages:
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u $DOCKER_USER -p $DOCKER_PASS
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES .
-    - docker push $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
+
+build-multi-subject-testing-auth:
+  stage: build-multi-subject-testing
+  tags:
+  - docker-runner
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u $DOCKER_USER -p $DOCKER_PASS
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
+    DOCKERFILE: "./Environments/Testing/Auth.Testing.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Identity/**/*
+    - Services/Shared/**/*
+    refs:
+    - testing-multiple-subject
 
 build-multi-subject-testing-auth:
   stage: build-multi-subject-testing
@@ -520,7 +542,6 @@ build-multi-subject-prod-storage:
     refs:
     - main-multiple-subject
 
-
 build-multi-subject-testing-system:
   stage: build-multi-subject-testing
   tags:
@@ -696,7 +717,6 @@ build-multi-subject-prod-cms-planetdefender:
     - Services/Shared/**/*
     refs:
     - main-multiple-subject
-
 
 build-multi-subject-testing-exam-practice:
   stage: build-multi-subject-testing

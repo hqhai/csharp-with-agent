@@ -188,7 +188,6 @@ builder.Services.AddScoped<IStudentGoalSummaryRepository, StudentGoalSummaryRepo
 builder.Services.AddScoped<IStatusStudentGoalRepository, StatusStudentGoalRepository>();
 builder.Services.AddScoped<IAiPromptManagerRepository, AiPromptManagerRepository>();
 builder.Services.AddScoped<IAiCriteriaConfigRepository, AiFeatureConfigRepository>();
-builder.Services.AddScoped<ICategoryCachingService, CategoryCachingService>();
 builder.Services.AddScoped<ITestSectionResultRepository, TestSectionResultRepository>();
 
 builder.Services.AddScoped<ISpeakingAITestLayoutHandler, SpeakingAITestLayoutHandler>();
@@ -228,6 +227,8 @@ builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<IVideoService, VideoService>();
 builder.Services.AddScoped<IVideoCachingService, VideoCachingService>();
 builder.Services.AddScoped<IVideoTimeCodeService, VideoTimeCodeService>();
+builder.Services.AddScoped<ILearningGoalAggregateService, LearningGoalAggregateService>();
+builder.Services.AddScoped<IStudentGoalProgressService, StudentGoalProgressService>();
 
 builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();

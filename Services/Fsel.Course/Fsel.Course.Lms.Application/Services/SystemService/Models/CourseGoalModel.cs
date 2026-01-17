@@ -10,8 +10,8 @@ namespace Fsel.Course.Lms.Application.Services.SystemService.Models
     {
         public string? Name { get; set; }
         public EnumCourseGoalCategory GoalCategory { get; set; }
-        public EnumCourseLevel CourseLevel { get; set; }
-        public EnumCourseType CourseType { get; set; }
+        public Guid? ProgramId { get; set; }
+        public Guid? LevelId { get; set; }
         public string? SchoolName { get; set; }
         public Guid? SchoolId { get; set; }
         public string? ClassName { get; set; }

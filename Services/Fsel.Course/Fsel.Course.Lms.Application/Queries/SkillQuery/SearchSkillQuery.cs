@@ -1,10 +1,9 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Application.Queries.SkillQuery
+namespace Fsel.Course.Lms.Application.Queries.SkillQuery
 {
     using System;
     using System.Threading.Tasks;
-    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
@@ -51,7 +50,6 @@ namespace Fsel.Course.Application.Queries.SkillQuery
                 Code = x.Code,
                 Description = x.Description,
                 FilePath = x.FilePath,
-                ColorCode = x.ColorCode,
                 CreatedDate = x.CreatedDate,
                 UpdatedDate = x.UpdatedDate,
                 CreatedFullName = x.CreatedFullName,

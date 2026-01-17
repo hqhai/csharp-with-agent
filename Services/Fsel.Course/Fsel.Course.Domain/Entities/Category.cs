@@ -19,14 +19,15 @@ namespace Fsel.Course.Domain.Entities
 
         [MaxLength(200, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        [RegexValid(Regex = @"^[^<>]{1,200}$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
+        [RegexValid(Regex = @"^[^<>]*$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
         public string? Name { get; set; }
 
         [MaxLength(200, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [RegexValid(Regex = @"^[a-zA-Z0-9]*$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
         public string? Code { get; set; }
 
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
-        [RegexValid(Regex = @"^[^<>]{0,1000}$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
+        [RegexValid(Regex = @"^[^<>]*$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
         public string? Description { get; set; }
 
         public EnumTypeCategory Type { get; set; }
@@ -52,5 +53,6 @@ namespace Fsel.Course.Domain.Entities
         public ICollection<Course> Courses { get; set; } = new List<Course>();
         public ICollection<HomeWork> HomeWorks { get; set; } = new List<HomeWork>();
         public ICollection<TestGroupResult> TestGroupResults { get; set; } = new List<TestGroupResult>();
+        public ICollection<StudentGoalAggregate> StudentGoalAggregates { get; set; } = new List<StudentGoalAggregate>();
     }
 }
