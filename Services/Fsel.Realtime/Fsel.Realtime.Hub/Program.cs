@@ -24,6 +24,8 @@ builder.Services.AddScoped<DictionaryPublisher>();
 builder.Services.AddScoped<SetTimeExamPracticePublisher>();
 builder.Services.AddScoped<GetTimeExamPracticePublisher>();
 builder.Services.AddScoped<QuestionTypePublisher>();
+builder.Services.AddScoped<AITranslationRequestPublisher>();
+builder.Services.AddScoped<TranslationHub>();
 
 builder.Services.AddScoped<SetTimeModuleHub>();
 builder.Services.AddScoped<TechieHub>();
@@ -62,6 +64,7 @@ multicastQueues: new Dictionary<string, Type>
     { QueueSettings.ExamPracticeQueue.NameQueue.GetTimeExamPractice, typeof(GetTimeExamPracticeConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.TestSpeaking, typeof(TestAISpeakingConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.TestWriting, typeof(TestAIFeedBackConsumer) },
+    { QueueSettings.RealtimeQueue.NameQueue.AITranslationResponse, typeof(AITranslationResultConsumer) },
 });
 
 var app = builder.Build();
@@ -89,5 +92,6 @@ app.UseHubs<QuestionTypeHub>(RealtimeSettings.SetTimeExamPracticeHub.Pattern);
 app.UseHubs<QuestionTypeHub>(RealtimeSettings.QuestionTypeHub.Pattern);
 app.UseHubs<TestWritingHub>(RealtimeSettings.TestWritingAIFeedBackHub.Pattern);
 app.UseHubs<TestSpeakingHub>(RealtimeSettings.TestSpeakingAIFeedBackHub.Pattern);
+app.UseHubs<TranslationHub>(RealtimeSettings.TranslationHub.Pattern);
 
 app.Run();
