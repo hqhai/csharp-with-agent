@@ -26,6 +26,8 @@ namespace Fsel.Course.Domain.Enums
         ShortAnswerWordCount,
         [Description("Long Answer")]
         LongAnswer,
-        ClassForumDefault
+        ClassForumDefault,
+        [Description("AI Response Translation")]
+        AiResponseTranslation
     }
 }

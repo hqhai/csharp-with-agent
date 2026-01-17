@@ -297,6 +297,7 @@ builder.Services.AddScoped<ExportFileUserInformationSupportSalePublisher>();
 builder.Services.AddScoped<SubmitTestAiSpeakingPublisher>();
 builder.Services.AddScoped<SubmitTestCriteriaPublisher>();
 builder.Services.AddScoped<SetTimeRetryTestPublisher>();
+builder.Services.AddScoped<TranslationResultPublisher>();
 
 // Refit
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
@@ -349,6 +350,7 @@ queues: new Dictionary<string, Type>
     { QueueSettings.LmsQueue.NameQueue.NotifyWeeklyReportCourseTarget, typeof(NotifyWeeklyReportCourseTargetConsumer) },
     { QueueSettings.LmsQueue.NameQueue.NotifyWeeklyCourseGoalTarget, typeof(NotifyWeeklyCourseGoalTargetConsumer) },
     { QueueSettings.LmsQueue.NameQueue.SubmitTestAi, typeof(SubmitAiTestLayOutConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.AITranslationResponse, typeof(AITranslationResponseConsumer) },
 });
 
 var app = builder.Build();

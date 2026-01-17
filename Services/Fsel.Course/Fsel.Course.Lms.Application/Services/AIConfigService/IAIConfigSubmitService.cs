@@ -19,7 +19,7 @@ namespace Fsel.Course.Lms.Application.Services.AIConfigService
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>AI Response string, null nếu không tìm thấy config</returns>
         Task<string?> SubmitByObjectIdAsync(
-            Guid objectId,
+            Guid? objectId,
             string content,
             EnumSubFeatureType subFeatureType,
             EnumFeatureMultiple featureMultiple,
