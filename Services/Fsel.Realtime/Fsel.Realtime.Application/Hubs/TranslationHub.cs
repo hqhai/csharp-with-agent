@@ -13,7 +13,6 @@ namespace Fsel.Realtime.Application.Hubs
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.SignalR;
-    [Authorize]
     public class TranslationHub : BaseHub
     {
         private readonly AuthContext _authContext;
