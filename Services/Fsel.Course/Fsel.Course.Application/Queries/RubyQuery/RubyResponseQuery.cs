@@ -5,7 +5,6 @@ namespace Fsel.Course.Application.Queries.RubyQuery
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.QueryModels.Ruby;
     using MediatR;
@@ -40,7 +39,7 @@ namespace Fsel.Course.Application.Queries.RubyQuery
 
             if (scope == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(scope));
+                methodResult.Result = null;
                 return methodResult;
             }
 
