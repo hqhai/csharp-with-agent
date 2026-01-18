@@ -6,8 +6,8 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
     using System.Threading.Tasks;
     using Fsel.Core.Base;
     using Fsel.Course.Lms.Application.Commands.AiCmd;
-    using MediatR;
     using Fsel.Shared.Models.ShareModels;
+    using MediatR;
     using Microsoft.AspNetCore.Http;
 
     public class AITranslationResponseConsumer : BaseConsumer<AITranslationRequestModel>
@@ -42,8 +42,7 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
         {
             await _mediator.Send(new SubmitTranslationAICommand
             {
-                ClassForumDetailResultId = message.ClassForumDetailResultId,
-                AiResponseContent = message.AiResponseContent
+                ClassForumDetailResultId = message.ClassForumDetailResultId
             }, CancellationToken.None);
         }
 
