@@ -21,6 +21,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
             set { _wordContent = value; WordCount = StringHelper.CountWords(value); }
         }
 
+        public string? AITranslationContent { get; set; }
+
         private int? _wordCount;
         private EnumMediaType? _mediaType;
 
