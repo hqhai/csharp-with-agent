@@ -270,6 +270,18 @@ namespace Fsel.Identity.Api.Controllers
         }
 
         /// <summary>
+        /// Update Course To Student
+        /// </summary>
+        [HttpPut("update-learning-context")]
+        [ProducesResponseType(typeof(MethodResult<StudentModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> UpdateLearningContext([FromBody] UpdateStudentLearningContextCommand command)
+        {
+            MethodResult<StudentModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Update Profile Student
         /// </summary>
         [HttpPut("update-profile")]

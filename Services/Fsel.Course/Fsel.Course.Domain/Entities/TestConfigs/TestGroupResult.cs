@@ -33,8 +33,20 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
 
         public Guid? LevelId { get; set; }
         public Level? Level { get; set; }
+
+        /// <summary>
+        /// Level hệ thống đề xuất
+        /// </summary>
         public Guid? CurrentLevelId { get; set; }
+
         public Level? CurrentLevel { get; set; }
+
+        /// <summary>
+        /// Level được sử dụng để gửi email
+        /// </summary>
+        public Guid? EmailLevelId { get; set; }
+
+        public Level? EmailLevel { get; set; }
 
         public Guid? FlowId { get; set; }
         public Flow? Flow { get; set; }
