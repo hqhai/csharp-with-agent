@@ -75,6 +75,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
                     {
                         Skill = homeWork.CourseSkill,
                         SkillId = homeWork.SkillId,
+                        SkillFilePath = homeWork.Skill?.FilePath,
                         SkillName = homeWork.Skill?.Name,
                         TotalQuestion = homeWork.HomeWorkQuestions?.Count ?? 0,
                     },
