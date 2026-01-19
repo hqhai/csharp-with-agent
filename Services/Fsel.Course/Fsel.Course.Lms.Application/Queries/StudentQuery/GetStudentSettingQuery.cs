@@ -7,13 +7,11 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
-    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.EntityModels.UserNavigationActionModels;
     using Fsel.Course.Infrastructure.ValueSettings;
     using Fsel.Course.Lms.Application.Queries.CourseChangeQuery;
-    using Fsel.Course.Lms.Application.Queries.PlacementTestQuery;
     using Fsel.Course.Lms.Application.Services.InteractionService;
     using Fsel.Course.Lms.Application.Services.InteractionService.CommandModels;
     using Fsel.Course.Lms.Application.Services.OrderServices;

@@ -8,7 +8,6 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
     using Fsel.Core.Base.Interfaces;
     using Fsel.Course.Domain.Entities.TestConfigs;
     using Fsel.Course.Domain.Models.EntityModels.PlacementTestModels;
-    using Fsel.Course.Domain.Models.EntityModels.UserNavigationActionModels;
     using Fsel.Course.Lms.Application.Queries.CourseChangeQuery;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates;
     using MediatR;

@@ -27,12 +27,12 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private readonly IChangeCourseService _changeCourseService;
-        private readonly MediatR.IMediator _mediator;
+        private readonly IMediator _mediator;
 
         public ChangeCourseLevelCommandHandler(AuthContext authContext,
             IUserService userService,
             IChangeCourseService changeCourseService,
-            MediatR.IMediator mediator)
+            IMediator mediator)
         {
             _authContext = authContext;
             _userService = userService;
@@ -89,7 +89,8 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
                     break;
 
                 case EnumChangeCourseAction.ChangeDirectly:
-                    await _changeCourseService.SwitchDirectlyToNewCourse(new SelectCourseLevelRequest
+                case EnumChangeCourseAction.ChangeDirectlyBecauseByPass:
+                    await _changeCourseService.SwitchDirectlyToNewCourseForChangeCourse(new SelectCourseLevelRequest
                     {
                         StudentId = student.Id,
                         ToProgramId = changeCourseDirective.ToProgramId,
@@ -102,23 +103,8 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
                     });
                     break;
 
-                case EnumChangeCourseAction.ChangeDirectlyBecauseByPass:
-                    await _changeCourseService.SwitchDirectlyToNewCourse(
-                        new SelectCourseLevelRequest
-                        {
-                            StudentId = student.Id,
-                            ToProgramId = changeCourseDirective.ToProgramId,
-                            ToLevelId = changeCourseDirective.ToLevelId,
-                            SelectedLevelId = changeCourseDirective.ToLevelId,
-                            SelectedProgramId = changeCourseDirective.ToProgramId,
-                            FromInfo = changeCourseDirective.FromInfo,
-                            Action = changeCourseDirective.Action,
-                            PtResultId = changeCourseDirective.PtResultId
-                        });
-                    break;
-
                 case EnumChangeCourseAction.SwitchToExistedCourse:
-                    await _changeCourseService.SwitchDirectlyToExistCourse(changeCourseDirective.CourseResultId.Value, student.Id);
+                    await _changeCourseService.SwitchDirectlyToExistCourseForChangeLevel(changeCourseDirective.CourseResultId.Value, student.Id);
                     break;
 
                 case EnumChangeCourseAction.NotAllow:
