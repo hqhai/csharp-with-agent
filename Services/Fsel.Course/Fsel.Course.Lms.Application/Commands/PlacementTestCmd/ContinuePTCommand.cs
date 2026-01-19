@@ -35,9 +35,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
         public async Task<MethodResult<PtStateModel>> Handle(ContinuePTCommand request, CancellationToken cancellationToken)
         {
             var navigateActionResult = await _mediator.Send(new GetUserNavigationQuery(), cancellationToken);
-            if (!navigateActionResult.IsOK
-                || navigateActionResult.Result?.Status != EnumNavigateActionStatus.ContinuePt
-                || navigateActionResult.Result?.PtResultId == null)
+            if (!navigateActionResult.IsOK || navigateActionResult.Result?.PtResultId == null)
             {
                 var methodResult = new MethodResult<PtStateModel>
                 {
