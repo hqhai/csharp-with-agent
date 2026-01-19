@@ -26,7 +26,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
 
         Task<(IList<SkillScores>?, IList<SkillScores>, bool)> GetSkillScoresAsync(VideoTimeCodeResult videoTimeCodeResult, VideoTimeCode videoTimeCode, bool isTimeUp, CancellationToken cancellationToken = default);
 
-        Task<VoidMethodResult> CreateAnswers(CreateVideoTimeCodeAnswerV1i1CommandModel request, VideoTimeCode videoTimeCode, VideoTimeCodeResult videoTimeCodeResult, CancellationToken cancellationToken = default);
+        Task<VoidMethodResult> CreateAnswers(CreateVideoTimeCodeAnswerV1i1CommandModel request, VideoTimeCodeResult videoTimeCodeResult, CancellationToken cancellationToken = default);
 
         Task<long> UpdateVideoAnswers(VideoTimeCode videoTimeCode, VideoTimeCodeResult videoTimeCodeResult, bool isDoneTimeCode = false, bool isSubmit = true, CancellationToken cancellationToken = default);
     }
@@ -94,7 +94,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             var indexProcess = GetIndexProcess(videoTimeCodes, videoResult.CurrentVideoTimeCodeId);
 
             // 2. Load data từ DB 1 lần, convert sang lookup/dict
-            var timeCodeResultDict = await LoadVideoTimeCodeResultDictAsync(videoResult.Id);
+            var timeCodeResultDict = await LoadVideoTimeCodeResultDictAsync(videoResult);
             var timeCodeQuestionLookup = await LoadTimeCodeQuestionLookupAsync(video.Id);
 
             // 3. Build từng VideoTimeCodeModel
@@ -176,11 +176,12 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             return videoTimeCode;
         }
 
-        private async Task<Dictionary<Guid, VideoTimeCodeResult?>> LoadVideoTimeCodeResultDictAsync(Guid videoResultId)
+        private async Task<Dictionary<Guid, VideoTimeCodeResult?>> LoadVideoTimeCodeResultDictAsync(VideoResult videoResult)
         {
-            return await _videoTimeCodeResultRepository.ReadQueryable
-                                                       .Where(x => x.VideoResultId == videoResultId)
-                                                       .ToDictionaryAsync(x => x.VideoTimeCodeId, x => (VideoTimeCodeResult?)x);
+            var videoTimeCodeResults = await _videoTimeCodeResultRepository.ReadQueryable.Where(x => x.VideoResultId == videoResult.Id && x.CreatedDate >= videoResult.CreatedDate)
+                                                                                     .Where(x => !(videoResult.Status == EnumResultStatus.Done) || x.UpdatedDate <= videoResult.UpdatedDate)
+                                                                                     .ToListAsync();
+            return videoTimeCodeResults.ToDictionary(x => x.VideoTimeCodeId, x => (VideoTimeCodeResult?)x);
         }
 
         private async Task<ILookup<Guid, TimeCodeQuestionModel>> LoadTimeCodeQuestionLookupAsync(Guid videoId)
@@ -297,15 +298,21 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
 
         #region Create Answers
 
-        public async Task<VoidMethodResult> CreateAnswers(CreateVideoTimeCodeAnswerV1i1CommandModel request, VideoTimeCode videoTimeCode, VideoTimeCodeResult videoTimeCodeResult, CancellationToken cancellationToken = default)
+        public async Task<VoidMethodResult> CreateAnswers(CreateVideoTimeCodeAnswerV1i1CommandModel request, VideoTimeCodeResult videoTimeCodeResult, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(request);
-            ArgumentNullException.ThrowIfNull(videoTimeCode);
             ArgumentNullException.ThrowIfNull(videoTimeCodeResult);
             VoidMethodResult methodResult = new VoidMethodResult();
+
+            if (request.Answers == null || !request.Answers.Any())
+            {
+                return methodResult;
+            }
+
+            var videoTimeCode = videoTimeCodeResult.VideoTimeCode;
             var videoTimeCodeAnswers = await _videoTimeCodeAnswerRepository.Queryable
-                                                .Where(x => x.VideoResultId == request.VideoResultId && x.VideoTimeCodeId == request.VideoTimeCodeId)
-                                                .ToListAsync(cancellationToken);
+                                                                           .Where(x => x.VideoTimeCodeResultId == videoTimeCodeResult.Id)
+                                                                           .ToListAsync(cancellationToken);
 
             var timeCodeQuestions = await GetDetailtTimeCodeQuestionsAsync(request.VideoTimeCodeId);
             var requestQuestionIds = request.Answers.Select(x => x.QuestionId).ToList();
@@ -315,9 +322,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                                                     .ToHashSet();
 
             // Tìm các QuestionId không thuộc TimeCode
-            var invalidQuestionIds = requestQuestionIds
-                .Where(q => !validQuestionIds.Contains(q))
-                .ToList();
+            var invalidQuestionIds = requestQuestionIds.Where(q => !validQuestionIds.Contains(q)).ToList();
             if (invalidQuestionIds.Any())
             {
                 // Báo lỗi rõ ràng

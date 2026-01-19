@@ -24,7 +24,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
     public class GetVideoTimeCodeQuery : IRequest<MethodResult<VideoModel>>
     {
         public Guid VideoId { get; set; }
-        public Guid LessonResultId { get; set; }
+        public Guid VideoResultId { get; set; }
     }
 
     public class GetVideoTimeCodeQueryHandler : IRequestHandler<GetVideoTimeCodeQuery, MethodResult<VideoModel>>
@@ -68,7 +68,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
             }
             var studentId = studentsResult.Content?.Result?.Id;
 
-            var videoResult = await _videoResultRepository.Queryable.Where(x => x.LessonResultId == request.LessonResultId && x.VideoId == request.VideoId && x.StudentId == studentId).FirstOrDefaultAsync(cancellationToken);
+            var videoResult = await _videoResultRepository.Queryable.Where(x => x.Id == request.VideoResultId).FirstOrDefaultAsync(cancellationToken);
             if (videoResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videoResult));
@@ -76,7 +76,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
             }
             var video = await _videoRepository.Queryable.Include(i => i.VideoTimeCodes)
                                                         .Include(p => p.VideoSubFilePaths)
-                                                        .Where(x => x.Id == request.VideoId)
+                                                        .Where(x => x.Id == videoResult.VideoId)
                                                         .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
             if (video == null)
