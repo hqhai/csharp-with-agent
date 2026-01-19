@@ -217,7 +217,9 @@ namespace Fsel.Course.Infrastructure.Repositories
         {
             try
             {
-                return await Queryable
+                return await ReadQueryable
+                        .Include(x => x.Skill)
+                        .Include(x => x.Level)
                         .Include(x => x.HomeWorkQuestions)
                         .ThenInclude(x => x.Question)
                         .Include(x => x.HomeWorkQuestions)
