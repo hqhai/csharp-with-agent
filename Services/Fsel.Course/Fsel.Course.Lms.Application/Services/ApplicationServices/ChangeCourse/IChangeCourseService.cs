@@ -146,13 +146,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.ChangeCourse
 
             await _testGroupResultRepository.UnitOfWork.SaveChangesAsync();
 
-            await _userService.UpdateLearningContextAsync(new UpdateStudentLearningContextCommandModel
-            {
-                CourseId = null,
-                LevelId = null,
-                ProgramId = null,
-                SubjectId = null
-            });
+            await _userService.UpdateLearningContextAsync(new UpdateStudentLearningContextCommandModel());
 
             return testGroupResult;
         }
@@ -210,13 +204,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.ChangeCourse
             _courseChangingHistoryRepository.Add(history);
             await _testGroupResultRepository.UnitOfWork.SaveChangesAsync();
 
-            await _userService.UpdateLearningContextAsync(new UpdateStudentLearningContextCommandModel
-            {
-                CourseId = null,
-                LevelId = null,
-                ProgramId = null,
-                SubjectId = null
-            });
+            await _userService.UpdateLearningContextAsync(new UpdateStudentLearningContextCommandModel());
 
             return testGroupResult;
         }
@@ -225,7 +213,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.ChangeCourse
         {
             ArgumentNullException.ThrowIfNull(request);
 
-            var courses = await _courseRepository.ReadQueryable
+            var courses = await _courseRepository.ReadQueryable.Include(x => x.Program)
+                .ThenInclude(x => x.CategoryParent)
                 .Where(x => x.ProgramId == request.SelectedProgramId
                             && x.LevelId == request.SelectedLevelId
                             && x.VersionStatus == EnumVersionStatus.LastVersion
@@ -273,7 +262,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.ChangeCourse
                     }
                 }
                 await _testGroupResultRepository.UnitOfWork.SaveChangesAsync();
-                await _userService.UpdateCourseToStudentAsync(course.Id);
+                await UpdateLearningContextAsync(course);
             }
         }
 
@@ -328,13 +317,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.ChangeCourse
                         await _testGroupResultRepository.UnitOfWork.SaveChangesAsync();
                     }
                 }
-                await _userService.UpdateLearningContextAsync(new UpdateStudentLearningContextCommandModel
-                {
-                    CourseId = course.Id,
-                    LevelId = course.LevelId,
-                    ProgramId = course.ProgramId,
-                    SubjectId = course.Program?.CategoryParent?.Id
-                });
+                await UpdateLearningContextAsync(course);
             }
         }
 
@@ -396,14 +379,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.ChangeCourse
 
                 _courseChangingHistoryRepository.Add(history);
                 await _testGroupResultRepository.UnitOfWork.SaveChangesAsync();
-
-                await _userService.UpdateLearningContextAsync(new UpdateStudentLearningContextCommandModel
-                {
-                    CourseId = course.Id,
-                    LevelId = course.LevelId,
-                    ProgramId = course.ProgramId,
-                    SubjectId = course.Program?.CategoryParent?.Id
-                });
+                await UpdateLearningContextAsync(course);
             }
         }
 
@@ -443,15 +419,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.ChangeCourse
             }
 
             await _testGroupResultRepository.UnitOfWork.SaveChangesAsync();
-
-            var course = targetCourseResult.Course;
-            await _userService.UpdateLearningContextAsync(new UpdateStudentLearningContextCommandModel
-            {
-                CourseId = course?.Id,
-                LevelId = course?.LevelId,
-                ProgramId = course?.ProgramId,
-                SubjectId = course?.Program?.CategoryParent?.Id
-            });
+            await UpdateLearningContextAsync(targetCourseResult.Course);
         }
 
         public async Task SwitchDirectlyToExistCourseForChangeLevel(Guid courseResultId, Guid studentId)
@@ -478,8 +446,11 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.ChangeCourse
             targetCourseResult.WorkingStatus = EnumWorkingStatus.Active;
 
             await _testGroupResultRepository.UnitOfWork.SaveChangesAsync();
+            await UpdateLearningContextAsync(targetCourseResult.Course);
+        }
 
-            var course = targetCourseResult.Course;
+        private async Task UpdateLearningContextAsync(Course? course)
+        {
             await _userService.UpdateLearningContextAsync(new UpdateStudentLearningContextCommandModel
             {
                 CourseId = course?.Id,
