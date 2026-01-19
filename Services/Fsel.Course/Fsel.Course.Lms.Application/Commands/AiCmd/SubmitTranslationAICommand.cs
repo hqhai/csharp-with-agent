@@ -44,7 +44,15 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 ClassForumDetailResultId = request.ClassForumDetailResultId
             };
 
-            var translatedContent = await ExecuteTranslationAsync(request, cancellationToken);
+            // Get GradingAlFeedback from database
+            var gradingAlFeedback = await GetGradingAlFeedbackAsync(request.ClassForumDetailResultId, cancellationToken);
+
+            if (string.IsNullOrEmpty(gradingAlFeedback))
+            {
+                return result;
+            }
+
+            var translatedContent = await ExecuteTranslationAsync(gradingAlFeedback, cancellationToken);
             result.TranslatedContent = translatedContent;
 
             // Save translated content to database
@@ -57,11 +65,19 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
         #region Private Methods
 
-        private async Task<string?> ExecuteTranslationAsync(SubmitTranslationAICommand request, CancellationToken cancellationToken)
+        private async Task<string?> GetGradingAlFeedbackAsync(Guid classForumDetailResultId, CancellationToken cancellationToken)
+        {
+            var classForumDetailResult = await _classForumDetailResultRepository.Queryable
+                .FirstOrDefaultAsync(x => x.Id == classForumDetailResultId, cancellationToken);
+
+            return classForumDetailResult?.GradingAlFeedback;
+        }
+
+        private async Task<string?> ExecuteTranslationAsync(string gradingAlFeedback, CancellationToken cancellationToken)
         {
             return await _aiConfigSubmitService.SubmitByObjectIdAsync(
                 null,
-                request.AiResponseContent ?? string.Empty,
+                gradingAlFeedback,
                 EnumSubFeatureType.AiResponseTranslation,
                 EnumFeatureMultiple.Lesson,
                 cancellationToken
