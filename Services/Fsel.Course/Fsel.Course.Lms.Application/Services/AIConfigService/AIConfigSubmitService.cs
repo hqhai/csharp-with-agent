@@ -32,7 +32,7 @@ namespace Fsel.Course.Lms.Application.Services.AIConfigService
         }
 
         public async Task<string?> SubmitByObjectIdAsync(
-            Guid objectId,
+            Guid? objectId,
             string content,
             EnumSubFeatureType subFeatureType,
             EnumFeatureMultiple featureMultiple,
@@ -61,7 +61,7 @@ namespace Fsel.Course.Lms.Application.Services.AIConfigService
         /// 3. Default cho FeatureMultiple (cả ObjectId và SubFeatureType đều null)
         /// </summary>
         private async Task<AICriteriaConfigs?> FindAIConfigWithCascadingFallbackAsync(
-            Guid objectId,
+            Guid? objectId,
             EnumSubFeatureType subFeatureType,
             EnumFeatureMultiple featureMultiple,
             CancellationToken cancellationToken)

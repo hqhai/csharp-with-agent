@@ -32,6 +32,9 @@ namespace Fsel.Course.Domain.Entities
             set { _wordContent = value; WordCount = StringHelper.CountWords(value); }
         }
 
+        [MaxLength(10000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? AITranslationContent { get; set; }
+
         private int? _wordCount;
         private EnumMediaType? _mediaType;
 

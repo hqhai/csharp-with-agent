@@ -76,7 +76,9 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
             }
             var studentId = studentsResult.Content?.Result?.Id;
 
-            var homeWorkResult = await _homeWorkResultRepository.Queryable.FirstOrDefaultAsync(x => x.LessonResultId == request.LessonResultId && x.HomeWorkId == request.HomeWorkId && x.StudentId == studentId, cancellationToken);
+            var homeWorkResult = await _homeWorkResultRepository.Queryable.AsNoTracking()
+                                                                .Where(x => x.HomeWorkId == request.HomeWorkId && x.StudentId == studentId)
+                                                                .FirstOrDefaultAsync(x => x.LessonResultId == request.LessonResultId, cancellationToken);
             if (homeWorkResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWorkResult));

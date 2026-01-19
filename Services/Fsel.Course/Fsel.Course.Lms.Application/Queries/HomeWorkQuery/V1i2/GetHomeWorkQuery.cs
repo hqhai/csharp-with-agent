@@ -77,7 +77,9 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery.V1i2
             }
             var studentId = studentsResult.Content?.Result?.Id;
 
-            var homeWorkResult = await _homeWorkResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.HomeWorkResultId && x.LessonModuleId == request.LessonModuleId && x.StudentId == studentId, cancellationToken);
+            var homeWorkResult = await _homeWorkResultRepository.Queryable.AsNoTracking()
+                                                                .Where(x => x.LessonModuleId == request.LessonModuleId && x.StudentId == studentId)
+                                                                .FirstOrDefaultAsync(x => x.Id == request.HomeWorkResultId, cancellationToken);
             if (homeWorkResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWorkResult));
@@ -88,8 +90,8 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery.V1i2
                 methodResult.AddErrorBadRequest(nameof(EnumResultErrorCode.ResultStatusUnfinished), nameof(homeWorkResult));
                 return methodResult;
             }
-            var homeWork = await _homeWorkRepository.GetAsync(homeWorkResult);
 
+            var homeWork = await _homeWorkRepository.GetAsync(homeWorkResult);
             if (homeWork == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWork));

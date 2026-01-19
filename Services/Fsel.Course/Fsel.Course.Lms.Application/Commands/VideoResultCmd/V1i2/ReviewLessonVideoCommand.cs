@@ -67,13 +67,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd.V1i2
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videoResult));
                 return methodResult;
             }
-            videoResult.NumberOfStars = request.NumberOfStars;
-            videoResult.Feedback = request.Feedback;
-            if (!videoResult.IsValid())
-            {
-                methodResult.AddErrorBadRequest(videoResult.ErrorMessages);
-                return methodResult;
-            }
             var videoTimeCodeResults = await _videoTimeCodeResultRepository.ReadQueryable.Where(x => x.VideoResultId == videoResult.Id).ToListAsync(cancellationToken);
             var isVideoTimeCodeDone = videoTimeCodeResults.Any(x => x.Status != EnumResultStatus.Done);
             if (isVideoTimeCodeDone)
@@ -81,7 +74,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd.V1i2
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(isVideoTimeCodeDone));
                 return methodResult;
             }
-
             var video = await GetVideoAsync(videoResult.VideoId);
             if (video == null)
             {
@@ -94,6 +86,17 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd.V1i2
                 methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeErrorCode.VideoTimeCodesNotCompleted), nameof(videoTimeCodeResults));
                 return methodResult;
             }
+
+            videoResult.NumberOfStars = request.NumberOfStars;
+            videoResult.Feedback = request.Feedback;
+            videoResult.HighestStreak = await _videoConverter.GetHighestStreak(videoResult);
+            videoResult.TimeCodeHighestStreak = GetHighestStreak(videoTimeCodeResults);
+            if (!videoResult.IsValid())
+            {
+                methodResult.AddErrorBadRequest(videoResult.ErrorMessages);
+                return methodResult;
+            }
+
             if (videoResult.Status != EnumResultStatus.Done)
             {
                 await DoQuestBoard(videoResult.StudentId, cancellationToken);
@@ -122,6 +125,25 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd.V1i2
 
                 return video;
             });
+        }
+
+        public int GetHighestStreak(IList<VideoTimeCodeResult> videoTimeCodeResults)
+        {
+            var highestStreak = 0;
+            var maxHighestStreak = 0;
+            foreach (var videoTimeCodeResult in videoTimeCodeResults)
+            {
+                if (videoTimeCodeResult.CorrectCount == videoTimeCodeResult.CorrectTotal)
+                {
+                    highestStreak++;
+                    maxHighestStreak = Math.Max(maxHighestStreak, highestStreak);
+                }
+                else
+                {
+                    highestStreak = 0;
+                }
+            }
+            return maxHighestStreak;
         }
 
         private async Task<VideoResult> GetVideoResult(VideoResult videoResult, CancellationToken cancellationToken)

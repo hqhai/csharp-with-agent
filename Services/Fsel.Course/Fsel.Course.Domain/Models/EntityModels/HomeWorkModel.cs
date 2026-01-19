@@ -33,6 +33,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid? LevelId { get; set; }
         public Guid OriginalId { get; set; }
         public string? SkillName { get; set; }
+        public string? SkillFilePath { get; set; }
         public string? ProgramName { get; set; }
         public string? LevelName { get; set; }
         public EnumVersion VersionType { get; set; }

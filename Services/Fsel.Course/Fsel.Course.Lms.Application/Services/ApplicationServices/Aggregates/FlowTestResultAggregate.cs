@@ -59,6 +59,13 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 {
                     FlowTestResult.CurrentLevelId = node?.StepFlow?.LevelId;
                     FlowTestResult.Status = EnumResultStatus.Done;
+                    foreach (var item in FlowTestResult.CourseChangingHistories)
+                    {
+                        if (item.Status == Domain.Entities.EnumChangingStatus.InProgressPt)
+                        {
+                            item.Status = Domain.Entities.EnumChangingStatus.InProgressSelectCourse;
+                        }
+                    }
                     await Commit();
                     return;
                 }

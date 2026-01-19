@@ -27,6 +27,7 @@ using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService.Interface
 using Fsel.Course.Lms.Application.Services.ApplicationServices;
 using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
 using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices.BuildModules;
+using Fsel.Course.Lms.Application.Services.ApplicationServices.ChangeCourse;
 using Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServices.CourseItemServices;
 using Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServices.LessonItemServices;
 using Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServices.UnitItemServices;
@@ -68,6 +69,7 @@ builder.Services.AddScoped<IUnitModuleCachingService, UnitModuleCachingService>(
 builder.Services.AddScoped<ICourseModuleCachingService, CourseModuleCachingService>();
 builder.Services.AddScoped<ILessonModuleCachingService, LessonModuleCachingService>();
 builder.Services.AddScoped<IAggregateResultQueryService, AggregateResultQueryService>();
+builder.Services.AddScoped<IChangeCourseService, ChangeCourseService>();
 
 builder.Services.AddScoped<IPlacementTestRepository, PlacementTestRepository>();
 builder.Services.AddScoped<ILessonRepository, LessonRepository>();
@@ -199,6 +201,7 @@ builder.Services.AddScoped<ITestResultRepository, TestResultRepository>();
 builder.Services.AddScoped<ITestGroupResultRepository, TestGroupResultRepository>();
 builder.Services.AddScoped<IUnitModuleRepository, UnitModuleRepository>();
 builder.Services.AddScoped<ICourseModuleRepository, CourseModuleRepository>();
+builder.Services.AddScoped<ICourseChangingHistoryRepository, CourseChangingHistoryRepository>();
 
 builder.Services.AddScoped<VideoLessonItemInitializer>();
 builder.Services.AddScoped<ClassForumLessonItemInitializer>();
@@ -297,6 +300,7 @@ builder.Services.AddScoped<ExportFileUserInformationSupportSalePublisher>();
 builder.Services.AddScoped<SubmitTestAiSpeakingPublisher>();
 builder.Services.AddScoped<SubmitTestCriteriaPublisher>();
 builder.Services.AddScoped<SetTimeRetryTestPublisher>();
+builder.Services.AddScoped<TranslationResultPublisher>();
 
 // Refit
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
@@ -349,6 +353,7 @@ queues: new Dictionary<string, Type>
     { QueueSettings.LmsQueue.NameQueue.NotifyWeeklyReportCourseTarget, typeof(NotifyWeeklyReportCourseTargetConsumer) },
     { QueueSettings.LmsQueue.NameQueue.NotifyWeeklyCourseGoalTarget, typeof(NotifyWeeklyCourseGoalTargetConsumer) },
     { QueueSettings.LmsQueue.NameQueue.SubmitTestAi, typeof(SubmitAiTestLayOutConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.AITranslationResponse, typeof(AITranslationResponseConsumer) },
 });
 
 var app = builder.Build();

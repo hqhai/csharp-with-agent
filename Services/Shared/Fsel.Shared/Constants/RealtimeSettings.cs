@@ -223,5 +223,15 @@ namespace Fsel.Shared.Constants
                 public const string QuestionType = $"QuestionType";
             }
         }
+
+        public static class TranslationHub
+        {
+            public const string Pattern = $"/translation";
+
+            public static class Methods
+            {
+                public const string TranslationResultHub = $"TranslationResultHub";
+            }
+        }
     }
 }

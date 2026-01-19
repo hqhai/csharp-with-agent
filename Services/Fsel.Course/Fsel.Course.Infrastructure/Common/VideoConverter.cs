@@ -768,26 +768,25 @@ namespace Fsel.Course.Infrastructure.Common
         {
             ArgumentNullException.ThrowIfNull(videoResult);
 
-            var correctnessTimeline = await (
-                from vtc in _videoTimeCodeRepository.ReadQueryable
-                join te in _timeCodeExerciseRepository.ReadQueryable
-                    on vtc.Id equals te.VideoTimeCodeId
-                join eq in _exerciseQuestionRepository.ReadQueryable
-                    on te.ExerciseId equals eq.ExerciseId
-                join q in _questionRepository.ReadQueryable
-                    on eq.QuestionId equals q.Id
+            var correctnessTimeline = await (from vtc in _videoTimeCodeRepository.ReadQueryable
+                                             join te in _timeCodeExerciseRepository.ReadQueryable
+                                                 on vtc.Id equals te.VideoTimeCodeId
+                                             join eq in _exerciseQuestionRepository.ReadQueryable
+                                                 on te.ExerciseId equals eq.ExerciseId
+                                             join q in _questionRepository.ReadQueryable
+                                                 on eq.QuestionId equals q.Id
 
-                join a in _videoTimeCodeAnswerRepository.ReadQueryable on q.Id equals a.QuestionId into answerGroup
-                from a in answerGroup.DefaultIfEmpty()
+                                             join a in _videoTimeCodeAnswerRepository.ReadQueryable on q.Id equals a.QuestionId into answerGroup
+                                             from a in answerGroup.DefaultIfEmpty()
 
-                where vtc.VideoId == videoResult.VideoId
-                && a.VideoResultId == videoResult.Id
-                && !q.Ungraded
-                && q.QuestionType != EnumQuestionType.ExercisePreparation
-                && a.CreatedDate >= videoResult.CreatedDate
-                orderby q.CreatedDate
-                select a != null && a.IsCorrect == true && a.IsFirstSubmit
-            ).ToListAsync();
+                                             where vtc.VideoId == videoResult.VideoId
+                                             && a.VideoResultId == videoResult.Id
+                                             && !q.Ungraded
+                                             && q.QuestionType != EnumQuestionType.ExercisePreparation
+                                             && a.CreatedDate >= videoResult.CreatedDate
+                                             orderby q.CreatedDate
+                                             select a != null && a.IsCorrect == true && a.IsFirstSubmit)
+                                             .ToListAsync();
 
             return correctnessTimeline.GetHighestStreak();
         }
