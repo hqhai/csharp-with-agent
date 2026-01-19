@@ -75,8 +75,8 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
 
             var navigateActionResult = await _mediator.Send(new GetUserNavigationQuery(), cancellationToken);
             if (!navigateActionResult.IsOK
-                && navigateActionResult.Result?.Status != EnumNavigateActionStatus.ChooseProgram
-                && navigateActionResult.Result?.Status != EnumNavigateActionStatus.NotDoingYetAnything)
+                || (navigateActionResult.Result?.Status != EnumNavigateActionStatus.ChooseProgram
+                && navigateActionResult.Result?.Status != EnumNavigateActionStatus.NotDoingYetAnything))
             {
                 methodResult.AddErrorBadRequest("This is not time to select program");
                 return methodResult;
