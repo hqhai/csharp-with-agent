@@ -169,10 +169,10 @@ namespace Fsel.Course.Lms.Api.Controllers
             return queryResult.GetActionResult();
         }
 
-        [HttpPost("select/{projectId:guid}")]
-        public async Task<IActionResult> SelectPtFlowByProgramId(Guid projectId)
+        [HttpPost("select/{programId:guid}")]
+        public async Task<IActionResult> SelectPtFlowByProgramId(Guid programId)
         {
-            var chosePtFlowCommand = new ChosePtFlowCommand(projectId);
+            var chosePtFlowCommand = new ChosePtFlowCommand(programId);
             var queryResult = await _mediator.Send(chosePtFlowCommand).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }

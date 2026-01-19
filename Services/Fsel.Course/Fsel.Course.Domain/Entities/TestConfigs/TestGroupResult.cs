@@ -45,6 +45,8 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
 
         public Guid? ProgramIdOfPt { get; set; }
 
+        public ICollection<CourseChangingHistory> CourseChangingHistories { get; set; } = new List<CourseChangingHistory>();
+
         public ICollection<TestResult> TestResults { get; set; } = new List<TestResult>();
     }
 }

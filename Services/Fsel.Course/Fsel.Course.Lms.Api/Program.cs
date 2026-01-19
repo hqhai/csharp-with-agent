@@ -27,6 +27,7 @@ using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService.Interface
 using Fsel.Course.Lms.Application.Services.ApplicationServices;
 using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
 using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices.BuildModules;
+using Fsel.Course.Lms.Application.Services.ApplicationServices.ChangeCourse;
 using Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServices.CourseItemServices;
 using Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServices.LessonItemServices;
 using Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServices.UnitItemServices;
@@ -68,6 +69,7 @@ builder.Services.AddScoped<IUnitModuleCachingService, UnitModuleCachingService>(
 builder.Services.AddScoped<ICourseModuleCachingService, CourseModuleCachingService>();
 builder.Services.AddScoped<ILessonModuleCachingService, LessonModuleCachingService>();
 builder.Services.AddScoped<IAggregateResultQueryService, AggregateResultQueryService>();
+builder.Services.AddScoped<IChangeCourseService, ChangeCourseService>();
 
 builder.Services.AddScoped<IPlacementTestRepository, PlacementTestRepository>();
 builder.Services.AddScoped<ILessonRepository, LessonRepository>();
@@ -199,6 +201,7 @@ builder.Services.AddScoped<ITestResultRepository, TestResultRepository>();
 builder.Services.AddScoped<ITestGroupResultRepository, TestGroupResultRepository>();
 builder.Services.AddScoped<IUnitModuleRepository, UnitModuleRepository>();
 builder.Services.AddScoped<ICourseModuleRepository, CourseModuleRepository>();
+builder.Services.AddScoped<ICourseChangingHistoryRepository, CourseChangingHistoryRepository>();
 
 builder.Services.AddScoped<VideoLessonItemInitializer>();
 builder.Services.AddScoped<ClassForumLessonItemInitializer>();

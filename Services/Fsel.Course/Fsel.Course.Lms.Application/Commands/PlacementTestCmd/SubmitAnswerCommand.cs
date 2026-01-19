@@ -10,10 +10,12 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.Tests;
     using Fsel.Course.Domain.Models.EntityModels.PlacementTestModels;
-    using Fsel.Course.Infrastructure.Repositories;
+    using Fsel.Course.Domain.Models.EntityModels.UserNavigationActionModels;
+    using Fsel.Course.Lms.Application.Queries.CourseChangeQuery;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
+    using IMediator = MediatR.IMediator;
 
     public class SubmitAnswerCommand : IRequest<MethodResult<PtStateModel>>
     {
@@ -33,18 +35,37 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
         private IRepository<TestGroupResult> _testGroupResult;
         private readonly IServiceProvider _serviceProvider;
         private readonly ITestSectionResultRepository _testSectionResultRepository;
+        private readonly MediatR.IMediator _mediator;
 
-        public SubmitAnswerCommandHandler(IRepository<TestGroupResult> testGroupResult, ITestSectionResultRepository testSectionResultRepository, IServiceProvider serviceProvider)
+        public SubmitAnswerCommandHandler(IRepository<TestGroupResult> testGroupResult,
+            ITestSectionResultRepository testSectionResultRepository,
+            IServiceProvider serviceProvider,
+            IMediator mediator)
         {
             _testGroupResult = testGroupResult;
             _serviceProvider = serviceProvider;
             _testSectionResultRepository = testSectionResultRepository;
+            _mediator = mediator;
         }
 
         public async Task<MethodResult<PtStateModel>> Handle(SubmitAnswerCommand request, CancellationToken cancellationToken)
         {
-            var flowTestResult = await _testGroupResult.Queryable.Where(x => x.StudentId == request.StudentId && x.TestType == Domain.Enums.EnumTestType.PlacementTest)
+            var navigateActionResult = await _mediator.Send(new GetUserNavigationQuery(), cancellationToken);
+            if (!navigateActionResult.IsOK
+                || navigateActionResult.Result?.Status != EnumNavigateActionStatus.ContinuePt
+                || navigateActionResult.Result?.PtResultId == null)
+            {
+                var methodResult = new MethodResult<PtStateModel>
+                {
+                    StatusCode = 400,
+                };
+                methodResult.AddErrorBadRequest("Not pt is process");
+                return methodResult;
+            }
+
+            var flowTestResult = await _testGroupResult.Queryable.Where(x => x.Id == navigateActionResult.Result.PtResultId)
                  .Include(x => x.TestResults)
+                 .Include(x => x.CourseChangingHistories)
                  .FirstOrDefaultAsync(cancellationToken);
 
             if (flowTestResult == null)
