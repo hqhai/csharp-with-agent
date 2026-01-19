@@ -103,7 +103,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
                     break;
 
                 case EnumChangeCourseAction.SwitchToExistedCourse:
-                    await _changeCourseService.SwitchDirectlyToExistCourse(changeCourseDirective.CourseResultId.Value, student.Id, navigateActionResult.Result.RelatedHistoryId);
+                    await _changeCourseService.SwitchDirectlyToExistCourseForSelectLevelAfterPt(changeCourseDirective.CourseResultId.Value, student.Id, navigateActionResult.Result.RelatedHistoryId);
                     break;
 
                 case EnumChangeCourseAction.NotAllow or EnumChangeCourseAction.ChangeAndStartPt:

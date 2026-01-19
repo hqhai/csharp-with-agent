@@ -86,10 +86,14 @@ namespace Fsel.Course.Domain.Models.EntityModels.UserNavigationActionModels
                 }
                 else if (latestHistory?.Status == EnumChangingStatus.Completed)
                 {
+                    var relatedCourseResultIdHistory = ChangeHistories.FirstOrDefault(x => x.ToCourseResultId == CurrentStateInfo.CourseResultId && x.PtResultId != null);
+                    var ptResult = _ptResults?.FirstOrDefault(pt => pt.Id == relatedCourseResultIdHistory?.PtResultId);
+
                     return new NavigateAction
                     {
-                        PtResultId = relatedPtResult?.Id,
-                        LevelOfPt = relatedPtResult?.CurrentLevelId,
+                        PtResultId = ptResult?.Id,
+                        LevelOfPt = ptResult?.CurrentLevelId,
+                        CurrentCourseResultId = relatedCourseResultIdHistory?.ToCourseResultId,
                         Status = EnumNavigateActionStatus.ContinueLearning
                     };
                 }
@@ -119,6 +123,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.UserNavigationActionModels
         public Guid? PtResultId { get; set; }
         public Guid? LevelOfPt { get; set; }
         public Guid? RelatedHistoryId { get; set; }
+        public Guid? CurrentCourseResultId { get; set; }
         public EnumNavigateActionStatus Status { get; set; } = EnumNavigateActionStatus.NotDoingYetAnything;
     }
 

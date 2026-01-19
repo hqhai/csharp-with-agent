@@ -81,7 +81,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseChangeQuery
                 LevelId = currentCourseResult?.Course?.LevelId,
                 CourseResultId = currentCourseResult?.Id,
                 ProgramId = currentCourseResult?.Course?.Level?.ProgramId,
-                CourseId = student.CourseId,
+                CourseId = currentCourseResult?.CourseId,
                 PtResultId = allCourseChangeHistories.Where(x => x.SelectedProgramId == currentCourseResult?.Course?.Level?.ProgramId)
                 .OrderByDescending(x => x.CreatedDate).FirstOrDefault()?.PtResultId
             };
