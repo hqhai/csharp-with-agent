@@ -40,6 +40,9 @@ namespace Fsel.Identity.Domain.Entities
 
         public EnumCourseLevel? CourseLevel { get; set; }
         public EnumCourseLevel? BaseCourseLevel { get; set; }
+        public Guid? LevelId { get; set; }
+        public Guid? ProgramId { get; set; }
+        public Guid? SubjectId { get; set; }
 
         public bool CreatedByParent { get; set; }
         public long NumberOfToken { get; set; }
