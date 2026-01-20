@@ -3,31 +3,33 @@
 namespace Fsel.Course.Domain.Enums
 {
     using System.ComponentModel;
+    using System.ComponentModel.DataAnnotations;
 
     public enum EnumSubFeatureType
     {
-        [Description("Ai Practice Gym")]
+        [Description("Ai Practice Gym"), Display(Name = "Ai Practice Gym")]
         AiPracticeGym,
-        [Description("Class Forum Speaking")]
+        [Description("Class Forum Speaking"), Display(Name = "Class Forum Speaking")]
         ClassForumSpeaking,
-        [Description("Class Forum Writing")]
+        [Description("Class Forum Writing"), Display(Name = "Class Forum Writing")]
         ClassForumWriting,
-        [Description("Video Lesson")]
+        [Description("Video Lesson"), Display(Name = "Video Lesson")]
         VideoLesson,
-        [Description("Home Work")]
-        HomeWork,
-        [Description("Test Config Speaking Layout")]
+        [Description("Homework"), Display(Name = "Homework")]
+        Homework,
+        [Description("Test Config Speaking Layout"), Display(Name = "Test Config Speaking Layout")]
         TestConfigSpeakingLayout,
-        [Description("Test Config Writing Layout")]
+        [Description("Test Config Writing Layout"), Display(Name = "Test Config Writing Layout")]
         TestConfigWritingLayout,
-        [Description("Short Answer (Answer base)")]
+        [Description("Short Answer (Answer base)"), Display(Name = "Short Answer (Answer base)")]
         ShortAnswerBase,
-        [Description("Short Answer (Word count)")]
+        [Description("Short Answer (Word count)"), Display(Name = "Short Answer (Word count)")]
         ShortAnswerWordCount,
-        [Description("Long Answer")]
+        [Description("Long Answer"), Display(Name = "Long Answer")]
         LongAnswer,
+        [Description("Class Forum Default"), Display(Name = "Class Forum Default")]
         ClassForumDefault,
-        [Description("AI Response Translation")]
+        [Description("AI Response Translation"), Display(Name = "AI Response Translation")]
         AiResponseTranslation
     }
 }
