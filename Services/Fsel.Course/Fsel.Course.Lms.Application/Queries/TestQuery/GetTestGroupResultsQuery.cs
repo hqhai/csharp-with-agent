@@ -88,6 +88,8 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
                 var test = new TestGroupResultModels()
                 {
                     TestGroupResultId = group.Key.Id,
+                    CreatedDate = group.Key.CreatedDate,
+                    UpdatedDate = group.Key.UpdatedDate,
                     SubjectId = data?.Subject.Id,
                     SubjectName = data?.Subject.Name,
                     CurrentLevelId = currentLevel?.Id,
@@ -130,7 +132,7 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
                 models.Add(test);
             }
 
-            methodResult.Result = models;
+            methodResult.Result = models.OrderByDescending(p => p.UpdatedDate ?? p.CreatedDate).ToList();
             return methodResult;
         }
     }
