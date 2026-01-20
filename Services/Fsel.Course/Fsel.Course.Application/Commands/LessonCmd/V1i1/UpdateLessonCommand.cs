@@ -126,7 +126,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd.V1i1
 
             foreach (var module in newEntity.LessonModules)
             {
-                var existingModule = lesson.LessonModules.FirstOrDefault(m => m.OriginalId == module.OriginalId && m.LessonConfigType == module.LessonConfigType);
+                var existingModule = lesson.LessonModules.FirstOrDefault(m => m.OriginalId == module.OriginalId && m.LessonConfigType == module.LessonConfigType && m.DisplayNumber == module.DisplayNumber);
                 if (existingModule != null)
                 {
                     existingModule.Name = module.Name;
