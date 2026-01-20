@@ -43,7 +43,6 @@ namespace Fsel.Course.Lcms.Api.Controllers.V1i1
         [HttpGet("all-course-level")]
         [ProducesResponseType(typeof(MethodResult<MethodResult<IList<SubjectModel>>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        //[Common.Attributes.Permission(role: nameof(EnumRole.MasterAdmin))]
         public async Task<IActionResult> GetLevelInCategories()
         {
             var queryResult = await _mediator.Send(new GetLevelInCategoryQuery()).ConfigureAwait(false);
