@@ -7,10 +7,12 @@ using Fsel.Common.Attributes;
 using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base.Interfaces;
+using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Course.Lms.Application.Commands.OtherFeatureCmd;
 using Fsel.Course.Lms.Application.Commands.TestCmd;
 using Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd;
 using Fsel.Course.Lms.Application.Queries.OtherFeatureQuery;
+using Fsel.Course.Lms.Application.Queries.TestQuery;
 using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService.Interface;
 using Fsel.Shared.Attributes;
 using Fsel.Shared.Constants;
@@ -218,6 +220,32 @@ namespace Fsel.Course.Lms.Api.Controllers
         public async Task<double> TestAi([FromQuery] string? question, [FromQuery] string? file)
         {
             return await _speakingEvaluationAIService.EvaluationSpeakingV1(question, file);
+        }
+
+        /// <summary>
+        /// Get placement test
+        /// </summary>
+        [HttpGet("get-test-group-results")]
+        [ProducesResponseType(typeof(MethodResult<IList<TestGroupResultModels>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(StudentManagement.View)]
+        public async Task<IActionResult> GetPlacementTestResults([FromQuery] GetTestGroupResultsQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get placement test
+        /// </summary>
+        [HttpDelete("delete-test-group-results")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(StudentManagement.Update)]
+        public async Task<IActionResult> GetPlacementTestResults([FromBody] DeleteTestGroupResultCommand command)
+        {
+            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
     }
 

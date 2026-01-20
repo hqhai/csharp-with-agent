@@ -15,6 +15,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseChangeQuery
 
     public class GetUserNavigationQuery : IRequest<MethodResult<NavigateAction>>
     {
+        public Guid? UserId { get; set; }
     }
 
     public class GetUserNavigationQueryHandler : IRequestHandler<GetUserNavigationQuery, MethodResult<NavigateAction>>
@@ -40,9 +41,10 @@ namespace Fsel.Course.Lms.Application.Queries.CourseChangeQuery
 
         public async Task<MethodResult<NavigateAction>> Handle(GetUserNavigationQuery request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<NavigateAction>();
 
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentResult = await _userService.GetStudentByUserIdAsync(request.UserId ?? _authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
