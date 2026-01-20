@@ -201,5 +201,8 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
 
         [Put("/v1/student/update-status/{studentId}")]
         Task<IApiResponse<MethodResult<StudentModel>>> UpdateStatusStudentCampus([FromRoute] Guid studentId, [FromBody] UpdateStatusStudentMode command);
+
+        [Put("/v1/student/update-learning-context")]
+        Task<IApiResponse<MethodResult<StudentModel>>> UpdateLearningContextAsync([Body] UpdateStudentLearningContextCommandModel command);
     }
 }

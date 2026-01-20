@@ -57,8 +57,25 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
                 if (node?.StepFlow?.Id == null || node?.IsLeft == true)
                 {
+                    var categoryService = ServiceProvider.GetRequiredService<ICategoryService>();
+                    var level = node?.StepFlow.Level;
+
                     FlowTestResult.CurrentLevelId = node?.StepFlow?.LevelId;
+
+                    if (level != null)
+                    {
+                        var minLevel = await categoryService.LoadPreviousOrMinLevelAsync(level.ProgramId, level.Id);
+                        FlowTestResult.EmailLevelId = minLevel?.Id;
+                    }
+
                     FlowTestResult.Status = EnumResultStatus.Done;
+                    foreach (var item in FlowTestResult.CourseChangingHistories)
+                    {
+                        if (item.Status == Domain.Entities.EnumChangingStatus.InProgressPt)
+                        {
+                            item.Status = Domain.Entities.EnumChangingStatus.InProgressSelectCourse;
+                        }
+                    }
                     await Commit();
                     return;
                 }

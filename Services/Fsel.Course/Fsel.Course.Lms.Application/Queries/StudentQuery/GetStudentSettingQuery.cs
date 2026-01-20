@@ -4,15 +4,14 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
 {
     using System.Threading;
     using AutoMapper;
-    using Core.Base.Interfaces;
-    using Domain.Entities.TestConfigs;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
-    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Domain.Models.EntityModels.UserNavigationActionModels;
     using Fsel.Course.Infrastructure.ValueSettings;
+    using Fsel.Course.Lms.Application.Queries.CourseChangeQuery;
     using Fsel.Course.Lms.Application.Services.InteractionService;
     using Fsel.Course.Lms.Application.Services.InteractionService.CommandModels;
     using Fsel.Course.Lms.Application.Services.OrderServices;
@@ -23,8 +22,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
-    using Services.ApplicationServices;
 
     public class GetStudentSettingQuery : IRequest<MethodResult<StudentSettingModel>>
     {
@@ -40,7 +37,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
         private readonly AuthContext _authContext;
         private readonly IInteractionService _interactionService;
         private readonly AppSetting _appSetting;
-        private readonly IRepository<TestGroupResult> _testGroupResultRepository;
+        private readonly MediatR.IMediator _mediator;
 
         public SettingStudentCheckQueryHandler(IUserService userService,
             IOrderService orderService,
@@ -48,8 +45,8 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
             IMapper mapper,
             AuthContext authContext,
             IInteractionService interactionService,
-            IRepository<TestGroupResult> testGroupResultRepository,
-            AppSetting appSetting)
+            AppSetting appSetting,
+            MediatR.IMediator mediator)
         {
             _userService = userService;
             _orderService = orderService;
@@ -57,8 +54,8 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
             _mapper = mapper;
             _authContext = authContext;
             _interactionService = interactionService;
-            _testGroupResultRepository = testGroupResultRepository;
             _appSetting = appSetting;
+            _mediator = mediator;
         }
 
         public async Task<MethodResult<StudentSettingModel>> Handle(GetStudentSettingQuery request, CancellationToken cancellationToken)
@@ -92,7 +89,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                 UserStatus = student?.User?.Status
             };
             var role = _authContext.Roles?.FirstOrDefault();
-
+            NavigateAction? navigateAction = null;
             if (!string.IsNullOrEmpty(role) && role == EnumRole.StudentCampus.ToString())
             {
                 settingStudentModel.IsLockPT = true;
@@ -100,7 +97,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
             }
             else
             {
-                await GetPlacementTestAsync(settingStudentModel, student, cancellationToken);
+                navigateAction = await GetPlacementTestAsync(settingStudentModel, student, cancellationToken);
             }
 
             var @eventResults = await _userService.GetEventByUserId(request.UserId ?? _authContext.CurrentUserId);
@@ -133,7 +130,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
             }
 
             settingStudentModel.Status = status?.Content?.Result;
-            if (student.CourseId.HasValue)
+            if (student.CourseId.HasValue && (navigateAction == null || navigateAction.Status == EnumNavigateActionStatus.ContinueLearning))
             {
                 var course = await _courseRepository.GetByIdAsync(student.CourseId.Value);
                 settingStudentModel.Course = _mapper.Map<CourseModel>(course);
@@ -156,17 +153,36 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
             return methodResult;
         }
 
-        private async Task GetPlacementTestAsync(StudentSettingModel settingStudentModel, StudentModel student, CancellationToken cancellationToken)
+        private async Task<NavigateAction> GetPlacementTestAsync(StudentSettingModel settingStudentModel, StudentModel student, CancellationToken cancellationToken)
         {
-            var testGroupResult = await _testGroupResultRepository.Queryable
-                .Include(x => x.Level)
-                .FirstOrDefaultAsync(x => x.StudentId == student.Id
-                                          && x.TestType == EnumTestType.PlacementTest,
-                    cancellationToken);
+            var getUserNavigationResult = await _mediator.Send(new GetUserNavigationQuery(), cancellationToken);
+            if (!getUserNavigationResult.IsOK || getUserNavigationResult.Result == null)
+            {
+                throw new Exception("Get user navigation failed");
+            }
 
-            settingStudentModel.IsPlacementTest = testGroupResult != null;
-            settingStudentModel.IsLockPT = testGroupResult?.Status is EnumResultStatus.ByPass or EnumResultStatus.Done;
-            settingStudentModel.PTLevel = testGroupResult?.CurrentLevelId;
+            var userNavigation = getUserNavigationResult.Result;
+
+            if (userNavigation.Status is EnumNavigateActionStatus.NotDoingYetAnything or EnumNavigateActionStatus.ContinuePt)
+            {
+                settingStudentModel.IsPlacementTest = userNavigation.PtResultId != null;
+                settingStudentModel.IsLockPT = false;
+                return userNavigation;
+            }
+            else if (userNavigation.Status is EnumNavigateActionStatus.ChooseLevel or EnumNavigateActionStatus.ContinueLearning)
+            {
+                settingStudentModel.IsPlacementTest = true;
+                settingStudentModel.IsLockPT = true;
+                settingStudentModel.PTLevel = userNavigation.LevelOfPt;
+                return userNavigation;
+            }
+
+            if (userNavigation.Status == EnumNavigateActionStatus.ContinueLearning)
+            {
+                settingStudentModel.Course = null;
+            }
+
+            return userNavigation;
         }
     }
 }

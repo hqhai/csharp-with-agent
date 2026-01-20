@@ -2,12 +2,16 @@
 
 namespace Fsel.Course.Application.Queries.AiPromptManagerQuery
 {
+    using System.Collections.Immutable;
     using Common.ActionResults;
     using Domain.Enums;
+    using Domain.IRepositories;
     using Domain.Models.CommandModels.AiCriteriaConfig;
     using Domain.Models.QueryModels.AiPromptConfig;
+    using Fsel.Common.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
     using Shared.Helpers;
 
     public class GetFeatureQuery : IRequest<MethodResult<IReadOnlyList<GetFeatureAiModelQuery>>>
@@ -16,47 +20,66 @@ namespace Fsel.Course.Application.Queries.AiPromptManagerQuery
 
     public class GetFeatureQueryHandler : IRequestHandler<GetFeatureQuery, MethodResult<IReadOnlyList<GetFeatureAiModelQuery>>>
     {
-        public Task<MethodResult<IReadOnlyList<GetFeatureAiModelQuery>>> Handle(GetFeatureQuery request, CancellationToken cancellationToken)
+        private readonly IAiCriteriaConfigRepository _aiCriteriaConfigRepository;
+
+        public GetFeatureQueryHandler(IAiCriteriaConfigRepository aiCriteriaConfigRepository)
+        {
+            _aiCriteriaConfigRepository = aiCriteriaConfigRepository;
+        }
+
+        public async Task<MethodResult<IReadOnlyList<GetFeatureAiModelQuery>>> Handle(GetFeatureQuery request, CancellationToken cancellationToken)
         {
             var methodResult = new MethodResult<IReadOnlyList<GetFeatureAiModelQuery>>();
 
-            var featureTypeLookup = FeatureModel.FeatureTypes
-                .GroupBy(x => x.Feature)
-                .ToDictionary(g => g.Key, g => g.SelectMany(x => x.SubFeatures).ToList());
+            // Get all distinct FeatureMultiple and SubFeatureType pairs from DB
+            var dbData = await _aiCriteriaConfigRepository.Queryable
+                .Where(c => c.FeatureMultiple.HasValue
+                            && c.SubFeatureType.HasValue
+                            && c.VersionStatus == EnumVersionStatus.LastVersion)
+                .Select(c => new
+                {
+                    FeatureMultiple = c.FeatureMultiple.Value,
+                    SubFeatureType = c.SubFeatureType.Value
+                })
+                .Distinct()
+                .ToListAsync(cancellationToken);
 
-            var criteriaLookup = FeatureModel.FeatureCriteria
-                .ToDictionary(x => x.SubFeature, x => x.Criterias);
+            // Get all features from enum
+            var allFeatures = Enum.GetValues<EnumFeatureMultiple>();
 
-            var features = Enum.GetValues<EnumFeatureMultiple>()
+            // Build tree: use DB data, fallback to FeatureModel static config
+            var features = allFeatures
                 .Select(feature =>
                 {
-                    var subTypes = featureTypeLookup.TryGetValue(feature, out var subs)
-                        ? subs
-                        : new List<EnumSubFeatureType>();
+                    // Get subfeatures from DB for this feature
+                    var featureDbData = dbData.Where(x => x.FeatureMultiple == feature).ToList();
+                    IReadOnlyList<EnumSubFeatureType> subFeatures;
 
-                    var typeItems = subTypes
-                        .Select(sub =>
-                        {
-                            var criteriaEnums = criteriaLookup.TryGetValue(sub, out var crits)
-                                ? crits
-                                : new List<EnumCriteriaAi>();
+                    if (featureDbData.Any())
+                    {
+                        // Use DB data
+                        subFeatures = featureDbData
+                            .Select(x => x.SubFeatureType)
+                            .Distinct()
+                            .OrderBy(sf => sf)
+                            .ToList()
+                            .AsReadOnly();
+                    }
+                    else
+                    {
+                        // Fallback to FeatureModel static config
+                        subFeatures = FeatureModel.FeatureSubFeatures.TryGetValue(feature, out var configSubFeatures)
+                            ? configSubFeatures
+                            : ImmutableList<EnumSubFeatureType>.Empty;
+                    }
 
-                            var criteriaItems = criteriaEnums
-                                .Select(c => new GetFeatureCriteriaQuery(
-                                    Id: (int)c,
-                                    Key: c.ToString(),
-                                    Label: c.DisplayName()
-                                ))
-                                .ToList()
-                                .AsReadOnly();
-
-                            return new GetTypeFeatureQuery(
-                                Id: (int)sub,
-                                Key: sub.ToString(),
-                                Label: sub.DisplayName(),
-                                SubFeatures: criteriaItems
-                            );
-                        })
+                    var typeItems = subFeatures
+                        .Select(sf => new GetTypeFeatureQuery(
+                            Id: (int)sf,
+                            Key: sf.ToString(),
+                            Label: sf.DisplayName(),
+                            SubFeatures: null
+                        ))
                         .ToList()
                         .AsReadOnly();
 
@@ -67,13 +90,13 @@ namespace Fsel.Course.Application.Queries.AiPromptManagerQuery
                         SubFeatures: typeItems
                     );
                 })
-                .OrderBy(x => x.Key)
+                .OrderBy(f => f.Key)
                 .ToList()
                 .AsReadOnly();
 
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = features;
-            return Task.FromResult(methodResult);
+            return methodResult;
         }
     }
 }

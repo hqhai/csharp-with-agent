@@ -20,43 +20,18 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
 
     public class GetAllSubjectsQueryHandler : IRequestHandler<GetAllSubjectsQuery, MethodResult<IList<SubjectModel>>>
     {
-        private readonly ICategoryRepository _categoryRepository;
         private readonly ICategoryCachingService _categoryCachingService;
 
         public GetAllSubjectsQueryHandler(ICategoryRepository categoryRepository, ICategoryCachingService categoryCachingService)
         {
-            _categoryRepository = categoryRepository;
             _categoryCachingService = categoryCachingService;
         }
 
         public async Task<MethodResult<IList<SubjectModel>>> Handle(GetAllSubjectsQuery request, CancellationToken cancellationToken)
         {
-            var subjects = await _categoryCachingService.GetOrSetAsync("all", async (ctx, _) =>
-            {
-                var categories = await _categoryRepository.ReadQueryable
-                    .Where(x => x.Type == EnumTypeCategory.Subject
-                                && x.Status == EnumStatus.Active
-                                && x.ParentId == null)
-                    .ToListAsync(cancellationToken);
-                foreach (var category in categories)
-                {
-                    await LoadChildCategory(category);
-                }
-
-                return categories;
-            }, token: cancellationToken);
-
-            var subjectModels = subjects.Select(x => GetSubjectModels(x)).ToList();
+            var subjects = await _categoryCachingService.GetAll(cancellationToken);
+            var subjectModels = subjects.Select(GetSubjectModels).ToList();
             return new MethodResult<IList<SubjectModel>>() { Result = subjectModels, StatusCode = 200 };
-        }
-
-        private async Task LoadChildCategory(Category category)
-        {
-            category.Categorys = await _categoryRepository.ReadQueryable.Where(x => x.ParentId == category.Id && x.Status == EnumStatus.Active).ToListAsync();
-            foreach (var child in category.Categorys)
-            {
-                await LoadChildCategory(child);
-            }
         }
 
         private SubjectModel GetSubjectModels(Category category)

@@ -9,10 +9,7 @@ namespace Fsel.Shared.Models.ShareModels
     /// </summary>
     public class AITranslationRequestModel
     {
-
         public Guid ClassForumDetailResultId { get; set; }
-
-        public string? AiResponseContent { get; set; }
     }
 
     /// <summary>
@@ -20,9 +17,7 @@ namespace Fsel.Shared.Models.ShareModels
     /// </summary>
     public class AITranslationResultModel
     {
-
         public Guid ClassForumDetailResultId { get; set; }
-
         public string? TranslatedContent { get; set; }
     }
 }

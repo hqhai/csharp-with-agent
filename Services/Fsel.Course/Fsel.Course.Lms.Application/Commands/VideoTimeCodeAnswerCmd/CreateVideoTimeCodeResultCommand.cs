@@ -63,7 +63,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
 
         private async Task<VideoTimeCodeResult> GetAndUpdateVideoTimeCodeResultAsync(VideoTimeCode videoTimeCode, VideoResult videoResult)
         {
-            var videoTimeCodeResult = await _videoTimeCodeResultRepository.Queryable
+            var videoTimeCodeResult = await _videoTimeCodeResultRepository.Queryable.AsNoTracking()
                                                 .Where(x => x.VideoTimeCodeId == videoTimeCode.Id && x.VideoResultId == videoResult.Id)
                                                 .FirstOrDefaultAsync();
             if (videoTimeCodeResult == null)

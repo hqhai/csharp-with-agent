@@ -13,7 +13,6 @@ namespace Fsel.Realtime.Application.Hubs
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.SignalR;
-    [Authorize]
     public class TranslationHub : BaseHub
     {
         private readonly AuthContext _authContext;
@@ -39,19 +38,19 @@ namespace Fsel.Realtime.Application.Hubs
         }
 
         /// <summary>
-        /// Client gọi hàm này để yêu cầu phiên dịch AI response sang tiếng Việt
+        /// Client gọi hàm này để yêu cầu phiên dịch GradingAlFeedback sang tiếng Việt
         /// </summary>
-        /// <param name="request">Thông tin yêu cầu phiên dịch</param>
-        public async Task TranslateAIResponse(AITranslationRequestModel request)
+        /// <param name="classForumDetailResultId">ID của ClassForumDetailResult</param>
+        public async Task TranslateAIResponse(Guid classForumDetailResultId)
         {
-            if (IsInvalidRequest(request))
+            if (classForumDetailResultId == Guid.Empty)
             {
                 return;
             }
 
-            await JoinTranslationGroupAsync(request.ClassForumDetailResultId.ToString());
+            await JoinTranslationGroupAsync(classForumDetailResultId.ToString());
 
-            await PublishTranslationRequestAsync(request);
+            await PublishTranslationRequestAsync(classForumDetailResultId);
         }
 
         public override async Task OnDisconnectedHubAsync(Exception? exception)
@@ -65,18 +64,17 @@ namespace Fsel.Realtime.Application.Hubs
 
         #region Private Methods
 
-        private static bool IsInvalidRequest(AITranslationRequestModel request)
-        {
-            return request == null;
-        }
-
         private async Task JoinTranslationGroupAsync(string groupId)
         {
             await Groups.AddGroupAsync(Context.ConnectionId, groupId);
         }
 
-        private async Task PublishTranslationRequestAsync(AITranslationRequestModel request)
+        private async Task PublishTranslationRequestAsync(Guid classForumDetailResultId)
         {
+            var request = new AITranslationRequestModel
+            {
+                ClassForumDetailResultId = classForumDetailResultId
+            };
             await _translationRequestPublisher.Publish(request, CancellationToken.None);
         }
 

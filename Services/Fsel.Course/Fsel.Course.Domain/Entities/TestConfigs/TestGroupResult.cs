@@ -33,8 +33,20 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
 
         public Guid? LevelId { get; set; }
         public Level? Level { get; set; }
+
+        /// <summary>
+        /// Level hệ thống đề xuất
+        /// </summary>
         public Guid? CurrentLevelId { get; set; }
+
         public Level? CurrentLevel { get; set; }
+
+        /// <summary>
+        /// Level được sử dụng để gửi email
+        /// </summary>
+        public Guid? EmailLevelId { get; set; }
+
+        public Level? EmailLevel { get; set; }
 
         public Guid? FlowId { get; set; }
         public Flow? Flow { get; set; }
@@ -44,6 +56,8 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
         public Category? Category { get; set; }
 
         public Guid? ProgramIdOfPt { get; set; }
+
+        public ICollection<CourseChangingHistory> CourseChangingHistories { get; set; } = new List<CourseChangingHistory>();
 
         public ICollection<TestResult> TestResults { get; set; } = new List<TestResult>();
     }

@@ -35,7 +35,8 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery.V1i2
         private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
         private readonly IVideoTimeCodeService _videoTimeCodeService;
 
-        public GetTimeCodeDetailQueryHandler(IVideoTimeCodeRepository videoTimeCodeRepository,
+        public GetTimeCodeDetailQueryHandler(
+            IVideoTimeCodeRepository videoTimeCodeRepository,
             IVideoResultRepository videoResultRepository,
             IMediator mediator,
             IVideoTimeCodeResultRepository videoTimeCodeResultRepository,

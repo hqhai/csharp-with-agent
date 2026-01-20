@@ -13,6 +13,8 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
     using Domain.Enums;
     using Domain.IRepositories;
     using Domain.Models.EntityModels;
+    using Fsel.Course.Domain.Models.EntityModels.UserNavigationActionModels;
+    using Fsel.Course.Lms.Application.Queries.CourseChangeQuery;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
@@ -27,6 +29,7 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
     public class GetLevelsByProgramQueryHandler : IRequestHandler<GetLevelsByProgramQuery, MethodResult<List<SelectionLevelModel>>>
     {
         private readonly IMapper _mapper;
+        private readonly MediatR.IMediator _mediator;
         private readonly ILevelRepository _levelRepository;
         private readonly ICourseCachingService _courseCachingService;
         private readonly IRepository<TestGroupResult> _testGroupResult;
@@ -40,6 +43,7 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
             ISubjectConditionRepository subjectConditionRepository,
             IUserService userService,
             ILevelRepository levelRepository,
+            IMediator mediator,
             ICourseCachingService courseCachingService,
             IMapper mapper)
         {
@@ -48,6 +52,7 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
             _subjectConditionRepository = subjectConditionRepository;
             _userService = userService;
             _mapper = mapper;
+            _mediator = mediator;
             _levelRepository = levelRepository;
             _courseCachingService = courseCachingService;
         }
@@ -55,35 +60,74 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
         public async Task<MethodResult<List<SelectionLevelModel>>> Handle(GetLevelsByProgramQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
+            var methodResult = new MethodResult<List<SelectionLevelModel>>();
+
             var studentResult = await _userService.GetStudentByUserIdAsync(request.UserId);
             if (!studentResult.IsSuccessStatusCode)
             {
-                return new MethodResult<List<SelectionLevelModel>>();
+                return methodResult;
             }
 
             var student = studentResult?.Content?.Result;
             if (student == null)
             {
-                return new MethodResult<List<SelectionLevelModel>>();
+                return methodResult;
             }
 
             var user = studentResult?.Content?.Result?.User;
 
             if (user == null)
             {
-                return new MethodResult<List<SelectionLevelModel>>();
+                return methodResult;
+            }
+
+            var navigateActionResult = await _mediator.Send(new GetUserNavigationQuery(), cancellationToken);
+            if (navigateActionResult?.Result == null || !navigateActionResult.IsOK)
+            {
+                methodResult.AddErrorBadRequest("PT is not found");
+                return methodResult;
+            }
+
+            var navigateAction = navigateActionResult.Result;
+
+            if (navigateAction.Status == EnumNavigateActionStatus.ContinuePt)
+            {
+                methodResult.AddErrorBadRequest("PT is not completed");
+                return methodResult;
+            }
+
+            if (navigateAction.Status != EnumNavigateActionStatus.ChooseLevel)
+            {
+                methodResult.AddErrorBadRequest("No subject need select course");
+                return methodResult;
             }
 
             var ptTestResult = await _testGroupResult.ReadQueryable
-                .Where(x => x.StudentId == student.Id && x.TestType == EnumTestType.PlacementTest)
-                .FirstOrDefaultAsync(cancellationToken);
+                .FirstOrDefaultAsync(x => x.Id == navigateAction.PtResultId, cancellationToken);
 
-            if (!IsDonePt(ptTestResult))
+            if (ptTestResult == null || !IsDonePt(ptTestResult))
             {
-                return new MethodResult<List<SelectionLevelModel>>();
+                methodResult.AddErrorBadRequest("PT is not completed");
+                return methodResult;
             }
 
+            var levelsFromPtOnSameProgram = await _testGroupResult.ReadQueryable
+                .Where(x => x.ProgramId == ptTestResult.ProgramId
+                            && x.StudentId == student.Id
+                            && x.TestType == EnumTestType.PlacementTest
+                            && x.Status == EnumResultStatus.Done)
+                .Include(x => x.CurrentLevel)
+                .Select(x => x.CurrentLevel)
+                .ToListAsync(cancellationToken);
+
+            var highestLevelFromPt = levelsFromPtOnSameProgram.Where(x => x != null)
+                .OrderByDescending(x => x.LevelOrder)
+                .FirstOrDefault();
+
+            var highestLevelId = highestLevelFromPt?.Id ?? ptTestResult.CurrentLevelId;
+
             var program = await _categoryRepository.ReadQueryable
+                .Include(x => x.Levels)
                 .FirstOrDefaultAsync(x => x.Id == ptTestResult.ProgramId, cancellationToken);
 
             if (program == null)
@@ -102,7 +146,7 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
                 .Include(x => x.SubjectConditionRules)
                 .FirstOrDefaultAsync(cancellationToken);
 
-            var matchestRule = suggestCondition?.SubjectConditionRules.Where(x => IsMatchRule(x, age, ptTestResult.CurrentLevelId))
+            var matchestRule = suggestCondition?.SubjectConditionRules.Where(x => IsMatchRule(x, age, highestLevelId))
                 .OrderBy(x =>
                 {
                     var ageCondition = x?.ConditionRules?.FirstOrDefault(x => x.Type == EnumSubjectConditionRuleType.Age);
@@ -140,10 +184,17 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
 
                 if (!selectionLevel.CanSelect)
                 {
-                    selectionLevel.CanSelect = !ptTestResult.CurrentLevelId.HasValue || ptTestResult.CurrentLevelId.Value == x.Id;
+                    if (program.TestMode == EnumTestMode.Not && program.Levels.Any(l => l.Id == x.Id))
+                    {
+                        selectionLevel.CanSelect = true;
+                    }
+                    else
+                    {
+                        selectionLevel.CanSelect = highestLevelId == x.Id;
+                    }
                 }
 
-                selectionLevel.IsCurrentLevel = ptTestResult.CurrentLevelId == x.Id;
+                selectionLevel.IsCurrentLevel = highestLevelId == x.Id;
 
                 return selectionLevel;
             }).ToList();

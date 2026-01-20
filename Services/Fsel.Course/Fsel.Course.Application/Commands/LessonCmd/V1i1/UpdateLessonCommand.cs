@@ -81,7 +81,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd.V1i1
             }
 
             await _versionEntityUpdater.UpdateEntity(lesson, newVersionLesson,
-                async (_, _) => isCheckUnit,
+                async (_, entity) => isCheckUnit,
                 async (oldEntity, newEntity) =>
                 {
                     oldEntity.Name = newEntity.Name;
@@ -102,7 +102,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd.V1i1
                 }
             );
 
-            methodResult.Result = _mapper.Map<LessonModel>(newVersionLesson);
+            methodResult.Result = _mapper.Map<LessonModel>(lesson);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
@@ -126,7 +126,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd.V1i1
 
             foreach (var module in newEntity.LessonModules)
             {
-                var existingModule = lesson.LessonModules.FirstOrDefault(m => m.OriginalId == module.OriginalId && m.LessonConfigType == module.LessonConfigType);
+                var existingModule = lesson.LessonModules.FirstOrDefault(m => m.OriginalId == module.OriginalId && m.LessonConfigType == module.LessonConfigType && m.DisplayNumber == module.DisplayNumber);
                 if (existingModule != null)
                 {
                     existingModule.Name = module.Name;
