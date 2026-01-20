@@ -110,11 +110,11 @@ namespace Fsel.Course.Application.Commands.LessonCmd.V1i1
         private static void LessonModuleHandler(Lesson lesson, Lesson newVersionLesson, Lesson newEntity, Lesson oldEntity)
         {
             var keys = newVersionLesson.LessonModules
-                .Select(x => (x.OriginalId, x.LessonConfigType, x.OpenOrder))
+                .Select(x => (x.OriginalId, x.LessonConfigType, x.DisplayNumber))
                 .ToHashSet();
 
             var removedModules = lesson.LessonModules
-                .Where(u => !keys.Contains((u.OriginalId, u.LessonConfigType, u.OpenOrder)))
+                .Where(u => !keys.Contains((u.OriginalId, u.LessonConfigType, u.DisplayNumber)))
                 .ToList();
             if (removedModules.Any())
             {
