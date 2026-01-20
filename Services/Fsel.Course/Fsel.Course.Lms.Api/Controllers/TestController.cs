@@ -229,7 +229,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [ProducesResponseType(typeof(MethodResult<IList<TestGroupResultModels>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Permission(StudentManagement.View)]
-        public async Task<IActionResult> GetPlacementTestResults([FromQuery] GetTestGroupResultsQuery query)
+        public async Task<IActionResult> GetTestGroupResults([FromQuery] GetTestGroupResultsQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
@@ -238,11 +238,11 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Get placement test
         /// </summary>
-        [HttpDelete("delete-test-group-results")]
+        [HttpDelete("delete-test-group-result")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Permission(StudentManagement.Update)]
-        public async Task<IActionResult> GetPlacementTestResults([FromBody] DeleteTestGroupResultCommand command)
+        public async Task<IActionResult> DeleteTestGroupResult([FromBody] DeleteTestGroupResultCommand command)
         {
             var queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
