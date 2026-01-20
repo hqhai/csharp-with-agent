@@ -59,18 +59,25 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
 
             EnumCourseType courseType = lessonResult.Course.CourseType;
             var tokenConfigs = await GetTokenConfigsAsync(videoTimeCodeResult.VideoTimeCode, courseType);
+
+            var isFirstSubmit = videoTimeCodeResult.VideoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone || videoTimeCodeResult.Status == EnumResultStatus.New;
+
             foreach (var videoTimeCodeAnswer in videoTimeCodeAnswers)
             {
                 var mission = GetTokenMission(tokenConfigs, videoTimeCodeResult.VideoTimeCode.TimeCodeType, videoTimeCodeAnswer.IsFirstSubmit);
                 var tokenConfig = tokenConfigs.FirstOrDefault(x => x.Mission == mission);
                 var token = tokenConfig.GetTokenConfig<TokenCoinConfigs>()?.BaseValue ?? default;
                 videoTimeCodeAnswer.TokenReceived = (int)token * videoTimeCodeAnswer.CorrectCount;
+                if (videoTimeCodeAnswer.Status != EnumAnswerStatus.Done)
+                {
+                    videoTimeCodeAnswer.IsFirstSubmit = isFirstSubmit;
+                }
             }
             await _videoTimeCodeAnswerRepository.ExecuteTransactionAsync(async () =>
             {
                 await _videoTimeCodeAnswerRepository.BulkUpdateList(videoTimeCodeAnswers, bulk =>
                 {
-                    bulk.ColumnInputExpression = entity => new { entity.TokenReceived };
+                    bulk.ColumnInputExpression = entity => new { entity.TokenReceived, entity.IsFirstSubmit };
                 });
                 methodResult.Result = true;
                 return methodResult;
