@@ -30,5 +30,31 @@ namespace Fsel.Course.Domain.Models.EntityModels.ChangeCourseModels
         {
             return RootSubjects.Select(subject => subject.ChangeProgram(request)).OfType<ChangeProgramDirective>().FirstOrDefault();
         }
+
+        public ChangeSubjectDirective? ChangeSubject(ChangeProgramRequest request)
+        {
+            var subject = RootSubjects.FirstOrDefault(s => s.Id == request.ProgramId);
+
+            return subject?.ChangeSubject(request);
+        }
+
+        public Guid? GetCurrentLearningSubject()
+        {
+            return RootSubjects.FirstOrDefault(subject => subject.IsCurrentLearning())?.Id;
+        }
+
+        public ChangeSubjectDirective? SelectProjectSubject(ChangeProgramRequest request)
+        {
+            foreach(var subject in RootSubjects)
+            {
+                var directive = subject.SelectProjectSubject(request);
+                if (directive != null)
+                {
+                    return directive;
+                }
+            }
+
+            return null;
+        }
     }
 }

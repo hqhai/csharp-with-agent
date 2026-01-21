@@ -6,14 +6,12 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities;
-    using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.EntityModels.ChangeCourseModels;
     using Fsel.Course.Domain.Models.EntityModels.UserNavigationActionModels;
     using Fsel.Course.Lms.Application.Queries.CourseChangeQuery;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.ChangeCourse;
     using MediatR;
-    using Microsoft.Extensions.Logging;
     using Services.UserServices;
     using Shared.Enums.ErrorCodes;
     using IMediator = MediatR.IMediator;

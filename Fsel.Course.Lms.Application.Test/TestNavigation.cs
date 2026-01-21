@@ -117,6 +117,8 @@ namespace Fsel.Course.Lms.Application.Test
                     SelectedProgramId = Data.englishSubject.Categorys.ElementAt(0).Categorys.First(x => x.Name == "Academic English").Id,
                     PtResultId = ptResults.First().Id,
                     ToCourseResultId = currentCourseResult.Id,
+                    Action = EnumChangeCourseAction.None,
+                    Status = EnumChangingStatus.Completed
                 }
             };
 
