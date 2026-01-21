@@ -11,7 +11,6 @@ namespace Fsel.System.Application.Queries.ChabotQuery
     using Fsel.System.Domain.Entities.Chatbots;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
-    using Fsel.System.Infrastructure.Repositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -23,11 +22,9 @@ namespace Fsel.System.Application.Queries.ChabotQuery
 
     public class GetChatBotByIdQueryHandler : IRequestHandler<GetChatBotByIdQuery, MethodResult<ChatBotModel>>
     {
-
         private readonly IMapper _mapper;
         private readonly IChatBotRepository _chatBotRepository;
         private readonly IChatbotConfigRepository _chatBotConfigRepository;
-
 
         public GetChatBotByIdQueryHandler(IMapper mapper, IChatBotRepository chatBotRepository, IChatbotConfigRepository chatBotConfigRepository)
         {
@@ -83,18 +80,23 @@ namespace Fsel.System.Application.Queries.ChabotQuery
                 case (EnumCourseSkill.Vocabulary):
                     token = chatbotConfig?.ChatbotTokenConfigs?.VocabularyToken ?? default;
                     break;
+
                 case (EnumCourseSkill.Grammar):
                     token = chatbotConfig?.ChatbotTokenConfigs?.GrammarToken ?? default;
                     break;
+
                 case (EnumCourseSkill.Listening):
                     token = chatbotConfig?.ChatbotTokenConfigs?.ListeningToken ?? default;
                     break;
+
                 case (EnumCourseSkill.Reading):
                     token = chatbotConfig?.ChatbotTokenConfigs?.ReadingToken ?? default;
                     break;
+
                 case (EnumCourseSkill.Writing):
                     token = chatbotConfig?.ChatbotTokenConfigs?.WritingToken ?? default;
                     break;
+
                 case (EnumCourseSkill.Speaking):
                     token = chatbotConfig?.ChatbotTokenConfigs?.SpeakingToken ?? default;
                     break;

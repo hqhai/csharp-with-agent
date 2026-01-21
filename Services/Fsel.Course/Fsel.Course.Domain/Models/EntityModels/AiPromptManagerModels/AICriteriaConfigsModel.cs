@@ -32,6 +32,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.AiPromptManagerModels
 
         public Guid AiPromptManagerId { get; set; }
 
+        public string? AiModel { get; set; }
         public string? SchemaType { get; set; }
         public string? SchemaName { get; set; }
         public IList<AiCriteriaModel>? AiCriteriaModels { get; set; }

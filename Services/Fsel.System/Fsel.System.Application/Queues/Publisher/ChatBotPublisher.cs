@@ -12,6 +12,7 @@ namespace Fsel.System.Application.Queues.Publisher
     {
         private readonly IQueueProvider _queueProvider;
         private readonly ILogger<ChatBotPublisher> _logger;
+
         public ChatBotPublisher(IQueueProvider queueProvider, ILogger<ChatBotPublisher> logger)
         {
             _queueProvider = queueProvider;

@@ -4,6 +4,7 @@ namespace Fsel.Course.Domain.Entities
 {
     using System;
     using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities.TestConfigs;
     using Fsel.Course.Domain.Entities.V1i1;
@@ -33,6 +34,5 @@ namespace Fsel.Course.Domain.Entities
         public Guid? CourseModuleId { get; set; }
         public ICollection<TestGroupResult> TestGroupResults { get; set; } = new List<TestGroupResult>();
         public ICollection<LessonResult> LessonResults { get; set; } = new List<LessonResult>();
-        public ICollection<UnitResult> UnitResults { get; set; } = new List<UnitResult>();
     }
 }
