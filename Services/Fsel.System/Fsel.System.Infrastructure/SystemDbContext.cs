@@ -4,7 +4,6 @@ using Fsel.Core.Base;
 using Fsel.Shared.Constants;
 using Fsel.System.Domain.Entities;
 using Fsel.System.Domain.Entities.BlindBoxs;
-using Fsel.System.Domain.Entities.ChatBot;
 using Fsel.System.Domain.Entities.Chatbots;
 using Fsel.System.Domain.Entities.Configs;
 using Fsel.System.Domain.Entities.CourseGoals;

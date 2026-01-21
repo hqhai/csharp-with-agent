@@ -4,7 +4,7 @@ namespace Fsel.System.Infrastructure.Maps
 {
     using AutoMapper;
     using Fsel.Core.Extensions;
-    using Fsel.System.Domain.Entities.ChatBot;
+    using Fsel.System.Domain.Entities.Chatbots;
     using Fsel.System.Domain.Models.CommandModels.ChatBot;
     using Fsel.System.Domain.Models.EntityModels;
 

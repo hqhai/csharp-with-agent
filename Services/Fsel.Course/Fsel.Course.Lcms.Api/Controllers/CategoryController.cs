@@ -51,7 +51,6 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// Get All PlacementTest type and Course level
         /// </summary>
         [HttpGet("all-course-skill")]
-        [MapToApiVersion(ApiSettings.APIVersion1)]
         [ProducesResponseType(typeof(MethodResult<object>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetEnumCourseSkillsAsync()
