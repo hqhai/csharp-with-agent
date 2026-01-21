@@ -10,28 +10,25 @@ namespace Fsel.Course.Domain.Models.CommandModels.AiCriteriaConfig
 
     public static class FeatureModel
     {
-        private static readonly IReadOnlyDictionary<EnumFeatureMultiple, IReadOnlyList<EnumSubFeatureType>> _featureSubFeatures;
-        private static readonly IReadOnlyDictionary<EnumSubFeatureType, IReadOnlyList<EnumCriteriaAi>> _subFeatureCriteria;
-
         static FeatureModel()
         {
-            _featureSubFeatures = FeatureTypes
+            FeatureSubFeatures = FeatureTypes
                 .ToImmutableDictionary(x => x.Feature, x => (IReadOnlyList<EnumSubFeatureType>)x.SubFeatures);
 
-            _subFeatureCriteria = FeatureCriteria
+            SubFeatureCriteria = FeatureCriteria
                 .ToImmutableDictionary(x => x.SubFeature, x => (IReadOnlyList<EnumCriteriaAi>)x.Criterias);
         }
 
-        public static IReadOnlyDictionary<EnumFeatureMultiple, IReadOnlyList<EnumSubFeatureType>> FeatureSubFeatures => _featureSubFeatures;
-        public static IReadOnlyDictionary<EnumSubFeatureType, IReadOnlyList<EnumCriteriaAi>> SubFeatureCriteria => _subFeatureCriteria;
+        public static IReadOnlyDictionary<EnumFeatureMultiple, IReadOnlyList<EnumSubFeatureType>> FeatureSubFeatures { get; private set; }
+        public static IReadOnlyDictionary<EnumSubFeatureType, IReadOnlyList<EnumCriteriaAi>> SubFeatureCriteria { get; private set; }
 
-        private static readonly ImmutableList<FeatureTypeMap> _featureTypes = ImmutableList.Create(
+        private static readonly ImmutableList<FeatureTypeMap> s_featureTypes = ImmutableList.Create(
             new FeatureTypeMap(EnumFeatureMultiple.Unit, ImmutableList.Create(EnumSubFeatureType.AiPracticeGym)),
             new FeatureTypeMap(EnumFeatureMultiple.Lesson, ImmutableList.Create(
                 EnumSubFeatureType.ClassForumSpeaking,
                 EnumSubFeatureType.ClassForumWriting,
                 EnumSubFeatureType.VideoLesson,
-                EnumSubFeatureType.HomeWork
+                EnumSubFeatureType.Homework
             )),
             new FeatureTypeMap(EnumFeatureMultiple.Test, ImmutableList.Create(
                 EnumSubFeatureType.TestConfigSpeakingLayout,
@@ -40,12 +37,12 @@ namespace Fsel.Course.Domain.Models.CommandModels.AiCriteriaConfig
             ))
         );
 
-        private static readonly ImmutableList<FeatureCriteriaMap> _featureCriteria = ImmutableList.Create(
+        private static readonly ImmutableList<FeatureCriteriaMap> s_featureCriteria = ImmutableList.Create(
             new FeatureCriteriaMap(EnumSubFeatureType.AiPracticeGym, ImmutableList<EnumCriteriaAi>.Empty),
             new FeatureCriteriaMap(EnumSubFeatureType.ClassForumSpeaking, ImmutableList<EnumCriteriaAi>.Empty),
             new FeatureCriteriaMap(EnumSubFeatureType.ClassForumWriting, ImmutableList<EnumCriteriaAi>.Empty),
             new FeatureCriteriaMap(EnumSubFeatureType.VideoLesson, ImmutableList<EnumCriteriaAi>.Empty),
-            new FeatureCriteriaMap(EnumSubFeatureType.HomeWork, ImmutableList<EnumCriteriaAi>.Empty),
+            new FeatureCriteriaMap(EnumSubFeatureType.Homework, ImmutableList<EnumCriteriaAi>.Empty),
             new FeatureCriteriaMap(EnumSubFeatureType.TestConfigSpeakingLayout, ImmutableList.Create(
                 EnumCriteriaAi.Fc, EnumCriteriaAi.Lr, EnumCriteriaAi.Gra
             )),
@@ -54,7 +51,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.AiCriteriaConfig
             ))
         );
 
-        public static IReadOnlyList<FeatureTypeMap> FeatureTypes => _featureTypes;
-        public static IReadOnlyList<FeatureCriteriaMap> FeatureCriteria => _featureCriteria;
+        public static IReadOnlyList<FeatureTypeMap> FeatureTypes => s_featureTypes;
+        public static IReadOnlyList<FeatureCriteriaMap> FeatureCriteria => s_featureCriteria;
     }
 }
