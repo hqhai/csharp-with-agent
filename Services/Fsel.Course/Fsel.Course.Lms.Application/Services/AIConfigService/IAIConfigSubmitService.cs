@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.Services.AIConfigService
 {
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
 
     /// <summary>
@@ -21,6 +22,16 @@ namespace Fsel.Course.Lms.Application.Services.AIConfigService
         Task<string?> SubmitByObjectIdAsync(
             Guid? objectId,
             string content,
+            EnumSubFeatureType subFeatureType,
+            EnumFeatureMultiple featureMultiple,
+            CancellationToken cancellationToken);
+
+        Task<AICriteriaConfigs?> FindAIConfigByIdAsync(Guid objectId,
+            EnumSubFeatureType subFeatureType,
+            EnumFeatureMultiple featureMultiple,
+            CancellationToken cancellationToken);
+
+        Task<IList<AICriteriaConfigs>?> FindAIConfigsAsync(IList<Guid>? objectIds,
             EnumSubFeatureType subFeatureType,
             EnumFeatureMultiple featureMultiple,
             CancellationToken cancellationToken);

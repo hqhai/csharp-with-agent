@@ -1,8 +1,8 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Domain.Enums
+namespace Fsel.System.Domain.Enums
 {
-    using System.ComponentModel;
+    using global::System.ComponentModel;
 
     public enum EnumFeatureMultiple
     {

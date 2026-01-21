@@ -8,24 +8,25 @@ namespace Fsel.System.Domain.Models.EntityModels
     public class ChatbotSkillConfigModel : BaseModel
     {
         public IList<SkillConfigModel>? Configs { get; set; }
+        public Guid? SkillId { get; set; }
+        public string? SkillName { get; set; }
         public EnumCourseSkill? Skill { get; set; }
         public string? AiConfig { get; set; }
     }
 
     #region ChildClass
+
     public class SkillConfigModel
     {
         public string? Name { get; set; }
-
         public IList<ItemSkillContentModel>? ItemSkillContent { get; set; }
     }
 
     public class ItemSkillContentModel
     {
         public EnumGrammarPromptType? ContentType { get; set; }
-
         public string? Content { get; set; }
-
     }
-    #endregion
+
+    #endregion ChildClass
 }

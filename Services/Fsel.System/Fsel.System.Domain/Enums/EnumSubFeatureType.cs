@@ -1,8 +1,8 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Domain.Enums
+namespace Fsel.System.Domain.Enums
 {
-    using System.ComponentModel;
+    using global::System.ComponentModel;
 
     public enum EnumSubFeatureType
     {
@@ -35,27 +35,7 @@ namespace Fsel.Course.Domain.Enums
 
         [Description("Long Answer")]
         LongAnswer,
-        ClassForumDefault,
 
-        [Description("AI Response Translation")]
-        AiResponseTranslation,
-
-        [Description("Ai Practice Gym Reading")]
-        AiPracticeGymReading,
-
-        [Description("Ai Practice Gym Listening")]
-        AiPracticeGymListening,
-
-        [Description("Ai Practice Gym Writing")]
-        AiPracticeGymWriting,
-
-        [Description("Ai Practice Gym Speaking")]
-        AiPracticeGymSpeaking,
-
-        [Description("Ai Practice Gym Vocabulary")]
-        AiPracticeGymVocabulary,
-
-        [Description("Ai Practice Gym Grammar")]
-        AiPracticeGymGrammar,
+        ClassForumDefault
     }
 }

@@ -1,10 +1,12 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.System.Domain.Entities.ChatBot
+namespace Fsel.System.Domain.Entities.Chatbots
 {
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
     using Fsel.Shared.Enums;
+    using global::System.ComponentModel.DataAnnotations;
     using global::System.ComponentModel.DataAnnotations.Schema;
 
     public class ChatBot : Entity
@@ -13,7 +15,12 @@ namespace Fsel.System.Domain.Entities.ChatBot
 
         public EnumCourseSkill Skill { get; set; }
         public Guid? SkillId { get; set; }
+
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? SkillName { get; set; }
+
+        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? SkillFilePath { get; set; }
 
         public long RemainToken { get; set; }
 
@@ -32,9 +39,9 @@ namespace Fsel.System.Domain.Entities.ChatBot
         {
             get
             {
-                return ConvertHelper.Deserialize<IList<ChatBotMessage>>(ContentStr);
+                return ContentStr.Deserialize<IList<ChatBotMessage>>();
             }
-            set { ContentStr = ConvertHelper.Serialize(value); }
+            set { ContentStr = value.Serialize(); }
         }
 
         [NotMapped]
@@ -42,9 +49,9 @@ namespace Fsel.System.Domain.Entities.ChatBot
         {
             get
             {
-                return ConvertHelper.Deserialize<ChatBotMessage>(LastestAnswerStr);
+                return LastestAnswerStr.Deserialize<ChatBotMessage>();
             }
-            set { LastestAnswerStr = ConvertHelper.Serialize(value); }
+            set { LastestAnswerStr = value.Serialize(); }
         }
 
         [NotMapped]
@@ -52,9 +59,9 @@ namespace Fsel.System.Domain.Entities.ChatBot
         {
             get
             {
-                return ConvertHelper.Deserialize<ChatBotMessage>(LastestQuestionStr);
+                return LastestQuestionStr.Deserialize<ChatBotMessage>();
             }
-            set { LastestQuestionStr = ConvertHelper.Serialize(value); }
+            set { LastestQuestionStr = value.Serialize(); }
         }
     }
 

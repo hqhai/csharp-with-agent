@@ -2,7 +2,6 @@
 
 namespace Fsel.System.Application.Services.AIServices.Models
 {
-    using Fsel.System.Application.Services.AiServices.Models;
     using Fsel.System.Domain.Models.CommandModels.ChatBot;
     using global::System.Text.Json.Serialization;
     using Refit;
