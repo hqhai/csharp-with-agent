@@ -12,6 +12,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.Units
         public string? Name { get; set; }
         public string? Code { get; set; }
         public string? Description { get; set; }
+        public bool IsAIPracticeGymEnabled { get; set; }
         public IList<Module>? Modules { get; set; }
         public IList<HighlightRange>? HighlightRanges { get; set; }
         public IList<HighlightRange>? ProgressSpeedometerRanges { get; set; }

@@ -3,9 +3,7 @@
 namespace Fsel.Course.Domain.Entities
 {
     using System.ComponentModel.DataAnnotations;
-    using System.ComponentModel.DataAnnotations.Schema;
     using Common.Enums.ErrorCodes;
-    using Common.Helpers;
     using Core.Entities;
     using Fsel.Common.Enums;
     using Fsel.Shared.Enums;
@@ -35,9 +33,11 @@ namespace Fsel.Course.Domain.Entities
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(200, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Name { get; set; }
+
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(100000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? AiModel { get; set; }
+
         public Guid? FeatureObjectId { get; set; }
         public Guid? ProjectId { get; set; }
         public Guid? AiPromptManagerParentId { get; set; }

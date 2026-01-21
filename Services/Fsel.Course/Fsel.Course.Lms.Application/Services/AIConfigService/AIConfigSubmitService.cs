@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.Services.AIConfigService
 {
+    using System.Collections.Generic;
     using Fsel.Common.Enums;
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
@@ -145,6 +146,27 @@ namespace Fsel.Course.Lms.Application.Services.AIConfigService
             return ConvertHelper.Deserialize<object>(jsonSchemaString!)!;
         }
 
-        #endregion
+        public Task<AICriteriaConfigs?> FindAIConfigByIdAsync(Guid objectId, EnumSubFeatureType subFeatureType, EnumFeatureMultiple featureMultiple, CancellationToken cancellationToken)
+        {
+            return FindAIConfigWithCascadingFallbackAsync(objectId, subFeatureType, featureMultiple, cancellationToken);
+        }
+
+        public async Task<IList<AICriteriaConfigs>?> FindAIConfigsAsync(IList<Guid>? objectIds, EnumSubFeatureType subFeatureType, EnumFeatureMultiple featureMultiple, CancellationToken cancellationToken)
+        {
+            var query = _aiCriteriaConfigRepository.ReadQueryable
+                .Where(x => x.VersionStatus == EnumVersionStatus.LastVersion)
+                .Where(x => x.FeatureMultiple == featureMultiple)
+                .Where(x =>
+                    (objectIds != null && x.ObjectId.HasValue && objectIds.Contains(x.ObjectId.Value) && x.SubFeatureType == subFeatureType) ||
+                    (x.ObjectId == null && x.SubFeatureType == subFeatureType) ||
+                    (x.ObjectId == null && x.SubFeatureType == null))
+                .OrderByDescending(x =>
+                    x.ObjectId != null ? 1 :
+                    x.SubFeatureType != null ? 2 : 3);
+
+            return await query.ToListAsync(cancellationToken);
+        }
+
+        #endregion Private Methods
     }
 }

@@ -72,7 +72,6 @@ namespace Fsel.Course.Application.Queries.AiPromptManagerQuery
 
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = new PagingItemsModel<AiManagerSearchModel>(lists, request, totalItem);
-
             return methodResult;
         }
     }

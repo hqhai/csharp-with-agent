@@ -4,7 +4,7 @@ namespace Fsel.System.Domain.Models.EntityModels
 {
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
-    using Fsel.System.Domain.Entities.ChatBot;
+    using Fsel.System.Domain.Entities.Chatbots;
     using global::System;
 
     public class ChatBotModel : BaseModel
