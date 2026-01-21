@@ -82,5 +82,10 @@ namespace Fsel.Course.Domain.Models.EntityModels.ChangeCourseModels
 
             return null;
         }
+
+        public override ChangeSubjectDirective? SelectProjectSubject(ChangeProgramRequest request)
+        {
+            return base.ChangeSubject(request);
+        }
     }
 }

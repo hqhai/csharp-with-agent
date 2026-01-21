@@ -7,7 +7,14 @@ namespace Fsel.Course.Domain.Models.EntityModels.ChangeCourseModels
     public abstract class ChangeCourseComponent
     {
         public string Name { get; set; }
+
         public abstract ChangeCourseDirective? ChangeCourse(ChangeCourseRequest request);
+
+        public abstract ChangeSubjectDirective? ChangeSubject(ChangeProgramRequest request);
+
+        public abstract ChangeSubjectDirective? SelectProjectSubject(ChangeProgramRequest request);
+
+        public abstract bool IsCurrentLearning();
 
         public abstract FromInfo? GetCurrentInfo();
 
@@ -46,6 +53,14 @@ namespace Fsel.Course.Domain.Models.EntityModels.ChangeCourseModels
         public Guid ToProgramId { get; set; }
     }
 
+    public class ChangeSubjectDirective
+    {
+        public EnumChangeSubjectAction Action { get; set; }
+        public Guid? CourseResultId { get; set; }
+        public Guid? OwnSubjectId { get; set; }
+        public DateTime? CreatedOrUpdatedDate { get; set; }
+    }
+
     public enum EnumChangeProgramAction
     {
         None,
@@ -59,5 +74,12 @@ namespace Fsel.Course.Domain.Models.EntityModels.ChangeCourseModels
         ChangeCourse,
         ResetCourse,
         ResetCourseAndPt
+    }
+
+    public enum EnumChangeSubjectAction
+    {
+        None,
+        ChangeAndStartPt,
+        ChangeToRecentCourse
     }
 }

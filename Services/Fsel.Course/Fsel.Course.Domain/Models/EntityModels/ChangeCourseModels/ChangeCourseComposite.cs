@@ -37,6 +37,21 @@ namespace Fsel.Course.Domain.Models.EntityModels.ChangeCourseModels
 
         public abstract ChangeProgramDirective? ChangeProgram(ChangeProgramRequest request);
 
+
+        public override ChangeSubjectDirective? ChangeSubject(ChangeProgramRequest request)
+        {
+            return Children
+                .Select(child => child.ChangeSubject(request))
+                .OfType<ChangeSubjectDirective>()
+                .OrderByDescending(x => x.CreatedOrUpdatedDate)
+                .FirstOrDefault();
+        }
+
+        public override bool IsCurrentLearning()
+        {
+            return Children.Any(child => child.IsCurrentLearning());
+        }
+
         public override FromInfo? GetCurrentInfo()
         {
             foreach (var chil in Children)
