@@ -147,6 +147,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         [HttpGet("get-subjects")]
+        [Permission(roles: new[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
         public async Task<IActionResult> GetSubjects()
         {
             var getProgramQuery = new GetAllSubjectsQuery();

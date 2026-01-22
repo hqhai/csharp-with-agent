@@ -1,42 +1,39 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
+namespace Fsel.Course.Lms.Application.Queries.CourseQuery
 {
-    using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
-    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Domain.Models.EntityModels.ChangeCourseModels;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.ChangeCourse;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
 
-    public class GetAllSubjectsQuery : IRequest<MethodResult<IList<SubjectModel>>>
+    public class GetLevelsForChangeQuery : IRequest<MethodResult<SubjectModel>>
     {
     }
 
-    public class GetAllSubjectsQueryHandler : IRequestHandler<GetAllSubjectsQuery, MethodResult<IList<SubjectModel>>>
+    public class GetLevelsForChangeQueryHandler : IRequestHandler<GetLevelsForChangeQuery, MethodResult<SubjectModel>>
     {
-        private readonly IChangeCourseService _changeCourseService;
-        private readonly IUserService _userService;
         private readonly AuthContext _authContext;
+        private readonly IUserService _userService;
+        private readonly IChangeCourseService _changeCourseService;
 
-        public GetAllSubjectsQueryHandler(IUserService userService,
-            IChangeCourseService changeCourseService,
-            AuthContext authContext)
+        public GetLevelsForChangeQueryHandler(AuthContext authContext, IUserService userService, IChangeCourseService changeCourseService)
         {
-            _changeCourseService = changeCourseService;
-            _userService = userService;
             _authContext = authContext;
+            _userService = userService;
+            _changeCourseService = changeCourseService;
         }
 
-        public async Task<MethodResult<IList<SubjectModel>>> Handle(GetAllSubjectsQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<SubjectModel>> Handle(GetLevelsForChangeQuery request, CancellationToken cancellationToken)
         {
-            var methodResult = new MethodResult<IList<SubjectModel>>();
+            var methodResult = new MethodResult<SubjectModel>();
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
@@ -52,8 +49,11 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
             }
 
             var subjectAggregate = await _changeCourseService.GetChangeSubjectAggreate(student, cancellationToken);
-            var subjectModels = subjectAggregate.GetSubjectTree();
-            return new MethodResult<IList<SubjectModel>>() { Result = subjectModels, StatusCode = 200 };
+
+            var subjectChangeCourse = subjectAggregate.RootSubjects.FirstOrDefault(x => x.GetComponentsByType<LevelChangeCourse>().Any(x => x.IsCurrentLearningLevel));
+            var subjectModel = subjectChangeCourse?.GetSubjectTree(isIncludeLevel: true);
+
+            return new MethodResult<SubjectModel>() { Result = subjectModel, StatusCode = 200 };
         }
     }
 }

@@ -19,6 +19,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public List<SubjectModel> ChildSubjects { get; set; } = new List<SubjectModel>();
 
+        public bool HadLearnedBefore { get; set; }
+
         public bool HasLevel()
         {
             if (Levels != null && Levels.Any())
