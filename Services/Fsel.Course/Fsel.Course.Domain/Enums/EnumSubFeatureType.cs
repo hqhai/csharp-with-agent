@@ -17,6 +17,7 @@ namespace Fsel.Course.Domain.Enums
         VideoLesson,
         [Description("Homework"), Display(Name = "Homework")]
         Homework,
+
         [Description("Test Config Speaking Layout"), Display(Name = "Test Config Speaking Layout")]
         TestConfigSpeakingLayout,
         [Description("Test Config Writing Layout"), Display(Name = "Test Config Writing Layout")]
@@ -27,9 +28,29 @@ namespace Fsel.Course.Domain.Enums
         ShortAnswerWordCount,
         [Description("Long Answer"), Display(Name = "Long Answer")]
         LongAnswer,
+
         [Description("Class Forum Default"), Display(Name = "Class Forum Default")]
         ClassForumDefault,
-        [Description("AI Response Translation"), Display(Name = "AI Response Translation")]
-        AiResponseTranslation
+
+        [Description("AI Response Translation")]
+        AiResponseTranslation,
+
+        [Description("Ai Practice Gym Reading")]
+        AiPracticeGymReading,
+
+        [Description("Ai Practice Gym Listening")]
+        AiPracticeGymListening,
+
+        [Description("Ai Practice Gym Writing")]
+        AiPracticeGymWriting,
+
+        [Description("Ai Practice Gym Speaking")]
+        AiPracticeGymSpeaking,
+
+        [Description("Ai Practice Gym Vocabulary")]
+        AiPracticeGymVocabulary,
+
+        [Description("Ai Practice Gym Grammar")]
+        AiPracticeGymGrammar,
     }
 }

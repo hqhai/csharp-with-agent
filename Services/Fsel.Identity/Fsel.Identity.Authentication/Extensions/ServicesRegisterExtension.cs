@@ -28,7 +28,6 @@ namespace Fsel.Identity.Authentication.Extensions
     using Fsel.Identity.Infrastructure;
     using Fsel.Identity.Infrastructure.Providers;
     using Fsel.Identity.Infrastructure.Repositories;
-    using Fsel.Core.Middlewares.Authentication;
     using Fsel.Identity.Infrastructure.ValueSettings;
     using Fsel.Shared.Constants;
     using Microsoft.AspNetCore.Authentication;
@@ -41,7 +40,6 @@ namespace Fsel.Identity.Authentication.Extensions
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.FileProviders;
-    using Microsoft.Extensions.Options;
     using static IdentityServer4.IdentityServerConstants;
 
     public static class ServicesRegisterExtension

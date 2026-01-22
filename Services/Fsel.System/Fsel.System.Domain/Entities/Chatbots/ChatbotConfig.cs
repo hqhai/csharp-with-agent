@@ -16,6 +16,8 @@ namespace Fsel.System.Domain.Entities.Chatbots
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? ProgramName { get; set; }
 
+        public Guid ProgramId { get; set; }
+
         /// <summary>
         /// Course Name
         /// </summary>
@@ -49,7 +51,6 @@ namespace Fsel.System.Domain.Entities.Chatbots
         public Guid UnitId { get; set; }
 
         public ChatbotTokenConfigs? ChatbotTokenConfigs { get; set; }
-
         public ICollection<ChatbotSkillConfig> ChatbotSkillConfigs { get; set; } = new List<ChatbotSkillConfig>();
     }
 }

@@ -8,12 +8,15 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
     using Common.Enums.ErrorCodes;
     using Core.Base;
     using Domain.Models.EntityModels.PlacementTestModels;
+    using Fsel.Course.Domain.Enums;
+    using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels.ChangeCourseModels;
     using Fsel.Course.Domain.Models.EntityModels.UserNavigationActionModels;
     using Fsel.Course.Lms.Application.Queries.CourseChangeQuery;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.ChangeCourse;
     using MediatR;
+    using Microsoft.EntityFrameworkCore;
     using Services.UserServices;
     using Shared.Enums.ErrorCodes;
     using Shared.Helpers;
@@ -35,18 +38,21 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
         private readonly IChangeCourseService _changeCourseService;
         private readonly IMediator _mediator;
         private readonly IServiceProvider _serviceProvider;
+        private readonly ICategoryRepository _categoryRepository;
 
         public ChosePtFlowCommandHandler(AuthContext authContext,
             IUserService userService,
             IChangeCourseService changeCourseService,
             IMediator mediator,
-            IServiceProvider serviceProvider)
+            IServiceProvider serviceProvider,
+            ICategoryRepository categoryRepository)
         {
             _authContext = authContext;
             _userService = userService;
             _changeCourseService = changeCourseService;
             _mediator = mediator;
             _serviceProvider = serviceProvider;
+            _categoryRepository = categoryRepository;
         }
 
         public async Task<MethodResult<PtStateModel>> Handle(ChosePtFlowCommand request, CancellationToken cancellationToken)
@@ -82,52 +88,79 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 return methodResult;
             }
 
-            var changeProgramAggregate = await _changeCourseService.GetChangeProgramAggreate(student, request.ProgramId, cancellationToken);
+            var category = await _categoryRepository.ReadQueryable.FirstOrDefaultAsync(x => x.Id == request.ProgramId);
 
-            var changeProgramDirective = changeProgramAggregate.ChangeProgram(new ChangeProgramRequest
+            if (category.Type == Shared.Enums.EnumTypeCategory.Program)
             {
-                ProgramId = request.ProgramId,
-            });
+                var changeProgramAggregate = await _changeCourseService.GetChangeProgramAggreate(student, cancellationToken);
 
-            if (changeProgramDirective?.Action == EnumChangeProgramAction.ChangeAndStartPt)
-            {
-                var testGroupResult = await _changeCourseService.InitForMustDoPtProgram(new ChangeCourseModel
+                var changeProgramDirective = changeProgramAggregate.ChangeProgram(new ChangeProgramRequest
                 {
-                    OwnPtProgramId = changeProgramDirective.ProgramOwnPt.Value,
-                    ToProgramId = changeProgramDirective.ToProgramId,
-                    StudentId = student.Id,
-                    Age = DateTimeHelper.GetYearOld(student.User.Birthday),
+                    ProgramId = request.ProgramId,
                 });
 
-                var aggregate = new FlowTestResultAggregate(testGroupResult, _serviceProvider);
-                await aggregate.Start();
-                methodResult.Result = await aggregate.ExpotStateData();
-            }
-            else if (changeProgramDirective?.Action == EnumChangeProgramAction.ChangeDirectlyBecauseByPass)
-            {
-                var testGroupResult = await _changeCourseService.InitForProgramByPassPt(new ChangeCourseModel
+                if (changeProgramDirective?.Action == EnumChangeProgramAction.ChangeAndStartPt)
                 {
-                    ToProgramId = changeProgramDirective.ToProgramId,
-                    OwnPtProgramId = changeProgramDirective.ToProgramId,
-                    StudentId = student.Id,
-                    Age = DateTimeHelper.GetYearOld(student.User.Birthday),
-                });
+                    var testGroupResult = await _changeCourseService.InitForMustDoPtProgram(new ChangeCourseModel
+                    {
+                        OwnPtProgramId = changeProgramDirective.ProgramOwnPt.Value,
+                        ToProgramId = changeProgramDirective.ToProgramId,
+                        StudentId = student.Id,
+                        Age = DateTimeHelper.GetYearOld(student.User.Birthday),
+                    });
 
-                methodResult.Result = new PtStateModel { Status = testGroupResult.Status, TestGroupResultId = testGroupResult.Id, StudentId = student.Id };
-            }
-            else if (changeProgramDirective?.Action == EnumChangeProgramAction.ChangeToProgramExistedPt
-                && navigateActionResult?.Result?.RelatedHistoryId != null
-                && changeProgramDirective?.RelatedPtResultId != null)
-            {
-                var testGroupResult = await _changeCourseService.InitForProgramExistedPt(navigateActionResult.Result.RelatedHistoryId.Value, request.ProgramId, changeProgramDirective.RelatedPtResultId.Value);
-                methodResult.Result = new PtStateModel { Status = testGroupResult.Status, TestGroupResultId = testGroupResult.Id, StudentId = student.Id };
+                    var aggregate = new FlowTestResultAggregate(testGroupResult, _serviceProvider);
+                    await aggregate.Start();
+                    methodResult.Result = await aggregate.ExpotStateData();
+                }
+                else if (changeProgramDirective?.Action == EnumChangeProgramAction.ChangeDirectlyBecauseByPass)
+                {
+                    var testGroupResult = await _changeCourseService.InitForProgramByPassPt(new ChangeCourseModel
+                    {
+                        ToProgramId = changeProgramDirective.ToProgramId,
+                        OwnPtProgramId = changeProgramDirective.ToProgramId,
+                        StudentId = student.Id,
+                        Age = DateTimeHelper.GetYearOld(student.User.Birthday),
+                    });
+
+                    methodResult.Result = new PtStateModel { Status = testGroupResult.Status, TestGroupResultId = testGroupResult.Id, StudentId = student.Id };
+                }
+                else if (changeProgramDirective?.Action == EnumChangeProgramAction.ChangeToProgramExistedPt
+                    && navigateActionResult?.Result?.RelatedHistoryId != null
+                    && changeProgramDirective?.RelatedPtResultId != null)
+                {
+                    //var testGroupResult = await _changeCourseService.InitForProgramExistedPt(navigateActionResult.Result.RelatedHistoryId.Value, request.ProgramId, changeProgramDirective.RelatedPtResultId.Value);
+                    //methodResult.Result = new PtStateModel { Status = testGroupResult.Status, TestGroupResultId = testGroupResult.Id, StudentId = student.Id };
+                    methodResult.AddErrorBadRequest("Cannot select this program becahse it had pt");
+                }
+                else
+                {
+                    methodResult.AddErrorBadRequest("Data is wrong for changeProgramDirective");
+                }
+
+                return methodResult;
             }
             else
             {
-                methodResult.AddErrorBadRequest("Data is wrong for changeProgramDirective");
-            }
+                var changeProgramAggregate = await _changeCourseService.GetChangeSubjectAggreate(student, cancellationToken);
 
-            return methodResult;
+                var changeProgramDirective = changeProgramAggregate.SelectProjectSubject(new ChangeProgramRequest
+                {
+                    ProgramId = request.ProgramId,
+                });
+
+                if (changeProgramDirective?.Action != EnumChangeSubjectAction.ChangeToRecentCourse || changeProgramDirective?.CourseResultId == null)
+                {
+                    methodResult.AddErrorBadRequest("The selected ProjectId is wrong");
+                }
+                else
+                {
+                    var ptResult = await _changeCourseService.SwitchDirectlyToExistCourseForChangeLevel(changeProgramDirective.CourseResultId.Value, student.Id);
+                    methodResult.Result = new PtStateModel { StudentId = student.Id, TestGroupResultId = ptResult.Id, Status = ptResult.Status };
+                }
+
+                return methodResult;
+            }
         }
     }
 }

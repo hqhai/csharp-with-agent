@@ -52,5 +52,68 @@ namespace Fsel.Course.Domain.Models.EntityModels.ChangeCourseModels
 
             return null;
         }
+
+        public override ChangeSubjectDirective? ChangeSubject(ChangeProgramRequest request)
+        {
+            if (IsProject())
+            {
+                return base.ChangeSubject(request);
+            }
+            else
+            {
+                var childDirectives = Children
+                 .Select(child => child.ChangeSubject(request))
+                 .OfType<ChangeSubjectDirective>()
+                 .OrderByDescending(x => x.CreatedOrUpdatedDate)
+                 .ToList();
+
+                if (childDirectives.Count(x => x.Action == EnumChangeSubjectAction.ChangeToRecentCourse) < Children.Count)
+                {
+                    return new ChangeSubjectDirective
+                    {
+                        Action = EnumChangeSubjectAction.ChangeAndStartPt,
+                    };
+                }
+                else
+                {
+                    return childDirectives.FirstOrDefault();
+                }
+            }
+        }
+
+        public override ChangeSubjectDirective? SelectProjectSubject(ChangeProgramRequest request)
+        {
+            if (IsProject())
+            {
+                if (Id != request.ProgramId)
+                {
+                    return null;
+                }
+
+                return Children
+                .Select(child => child.ChangeSubject(request))
+                .OfType<ChangeSubjectDirective>()
+                .OrderByDescending(x => x.CreatedOrUpdatedDate)
+                .FirstOrDefault();
+            }
+            else
+            {
+                foreach (var child in Children)
+                {
+                    var changeSubjectResponse = child.SelectProjectSubject(request);
+                    if (changeSubjectResponse != null)
+                    {
+                        return changeSubjectResponse;
+                    }
+                }
+
+                return null;
+            }
+        }
+
+        private bool IsProject()
+        {
+            return Children.All(c => c is ProgramChangeCourse);
+        }
     }
 }

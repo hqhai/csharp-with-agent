@@ -46,7 +46,7 @@ namespace Fsel.Realtime.Application.Hubs
 
                 ChatBotSendingMessageModel model = new ChatBotSendingMessageModel
                 {
-                    ChatbotId = config.ChatBotId,
+                    ChatbotId = config.ChatBotId ?? Guid.Empty,
                     Content = config.Content ?? string.Empty,
                 };
                 _logger.LogInformation($"Start Invoke ChatBot: Content : {config.Content}, ChatbotId: {config.ChatBotId}, Environment.MachineName: {Environment.MachineName}");

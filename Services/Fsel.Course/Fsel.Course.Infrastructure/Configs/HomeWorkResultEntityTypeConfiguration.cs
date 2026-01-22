@@ -42,7 +42,6 @@ namespace Fsel.Course.Infrastructure.Configs
                 .HasForeignKey(p => p.LessonModuleId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            builder.HasIndex(c => new { c.LessonResultId, c.HomeWorkId, c.StudentId }).IsUnique().HasFilter("[IsDeleted] = 0");
             builder.HasIndex(c => new { c.StudentId });
             builder.HasIndexIncludeAllProperties(c => new { c.StudentId });
         }

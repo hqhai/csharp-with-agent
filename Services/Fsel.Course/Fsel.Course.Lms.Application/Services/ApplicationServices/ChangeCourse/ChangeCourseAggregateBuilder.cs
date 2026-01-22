@@ -36,7 +36,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.ChangeCourse
             _user = user;
         }
 
-        public ChangeCourseAggregateBuilder BuildTree(Guid? targetLevelId)
+        public ChangeCourseAggregateBuilder BuildTree(Guid? targetLevelId = null)
         {
             var subjectComponents = new List<SubjectChangeCourse>();
             foreach (var subject in _subjects)
@@ -78,7 +78,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.ChangeCourse
                 }
                 else
                 {
-                    var ptTestResult = _testGroupResults?.Where(h => h.ProgramId == program.Id)
+                    var ptTestResult = _testGroupResults?.Where(h => h.ProgramId == program.Id || h.ProgramIdOfPt == program.Id)
                                                            .OrderByDescending(x => x.CurrentLevel?.LevelOrder ?? 0)
                                                            .FirstOrDefault();
                     program.PtResultId = ptTestResult?.Id;
@@ -142,15 +142,18 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.ChangeCourse
 
                 var conditionValues = new List<ConditionValue>();
 
-                var ptResultWithHighestLevel = _testGroupResults.Where(x => x.CurrentLevel != null)
-                    .GroupBy(g => g.ProgramId)
-                    .Select(g => g.OrderByDescending(t => t.CurrentLevel?.LevelOrder ?? 0)
-                    .First())
+                var ptReachedLevelIds = _testGroupResults.Where(x => x.CurrentLevelId.HasValue)
+                    .Select(g => g.CurrentLevelId ?? Guid.Empty)
                     .ToList();
 
-                foreach (var ptResult in ptResultWithHighestLevel)
+                var courseReachedLevelIds = _courseResults?
+                    .Where(cr => cr.Course != null && cr.Course.Level != null && cr.Status == EnumResultStatus.Done)
+                    .Select(cr => cr.Course?.Level?.Id ?? Guid.Empty)
+                    .ToList() ?? new List<Guid>();
+
+                foreach (var levelId in ptReachedLevelIds.Concat(courseReachedLevelIds))
                 {
-                    conditionValues = conditionValues.Concat(rules.GetMatchConditionRules(DateTimeHelper.GetYearOld(_user.Birthday), ptResult.CurrentLevelId.Value)
+                    conditionValues = conditionValues.Concat(rules.GetMatchConditionRules(DateTimeHelper.GetYearOld(_user.Birthday), levelId)
                         .SelectMany(x => x.ConditionValues ?? new List<ConditionValue>())).ToList();
                 }
 

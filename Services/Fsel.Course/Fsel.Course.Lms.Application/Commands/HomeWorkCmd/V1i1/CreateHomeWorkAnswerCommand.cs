@@ -665,36 +665,16 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             // Streak: chuỗi dài nhất các câu đúng liên tiếp (Status = Done)
             var answers = await _homeWorkAnswerRepository.Queryable
                 .Where(x => x.HomeWorkResultId == homeWorkResultId)
-                .Where(x => x.Status == EnumAnswerStatus.Done && x.IsFirstSubmit)
+                .Where(x => x.Status == EnumAnswerStatus.Done)
                 .OrderBy(x => x.CreatedDate)
-                .Select(x => x.IsCorrect)
+                .Select(x => x.IsCorrect == true && x.IsFirstSubmit)
                 .ToListAsync(cancellationToken);
 
             if (!answers.Any())
             {
                 return 0;
             }
-
-            var currentStreak = 0;
-            var maxStreak = 0;
-
-            foreach (var isCorrect in answers)
-            {
-                if (isCorrect == true)
-                {
-                    currentStreak++;
-                    if (currentStreak > maxStreak)
-                    {
-                        maxStreak = currentStreak;
-                    }
-                }
-                else
-                {
-                    currentStreak = 0;
-                }
-            }
-
-            return maxStreak;
+            return answers.GetHighestStreak();
         }
 
         #endregion HomeWorkAnswer Finalization & Streak

@@ -6,6 +6,7 @@ namespace Fsel.System.Application.Services.CourseServices
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using Fsel.System.Application.Services.CourseServices.Models;
+    using Fsel.System.Application.Services.CourseServices.QueryModels;
     using global::System;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
@@ -50,5 +51,14 @@ namespace Fsel.System.Application.Services.CourseServices
 
         [Post("/v1.1/admin/course")]
         Task<IApiResponse<MethodResult<IList<CourseModel>>>> GetCoursesByIdsAsync([FromBody] IList<Guid> courseIds);
+
+        [Get("/v1.1/admin/course")]
+        Task<IApiResponse<MethodResult<AICriteriaConfigsModel>>> GetById([FromBody] IList<Guid> courseIds);
+
+        [Get("/v1.1/ai-criteria-configs/by-id")]
+        Task<IApiResponse<MethodResult<AICriteriaConfigsModel>>> GetConfigByIdAsync([FromQuery] GetAICriteriaConfigsQueryModel query);
+
+        [Post("/v1.1/ai-criteria-configs/by-ids")]
+        Task<IApiResponse<MethodResult<IList<AICriteriaConfigsModel>>>> GetConfigByIdsAsync([FromBody] GetAICriteriaConfigsQueryModel query);
     }
 }

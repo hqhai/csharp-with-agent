@@ -63,6 +63,7 @@ namespace Fsel.Course.Application.Commands.UnitCmd
                     oldEntity.Name = newEntity.Name;
                     oldEntity.Description = newEntity.Description;
                     oldEntity.LessonCount = newEntity.LessonCount;
+                    oldEntity.IsAIPracticeGymEnabled = newEntity.IsAIPracticeGymEnabled;
                     oldEntity.TestCount = newEntity.TestCount;
                     oldEntity.LevelId = newEntity.LevelId;
                     oldEntity.ProgramId = newEntity.ProgramId;

@@ -9,6 +9,7 @@ namespace Fsel.Shared.Models.ShareModels.EntityModels
     {
         public EnumUserCourseType Type { get; set; }
         public int Value { get; set; }
+        public Guid? LevelId { get; set; }
         public EnumCourseLevel? CourseLevel { get; set; }
         public Guid UserId { get; set; }
     }

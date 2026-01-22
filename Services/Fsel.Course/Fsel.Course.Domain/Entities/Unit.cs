@@ -42,6 +42,8 @@ namespace Fsel.Course.Domain.Entities
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Description { get; set; }
 
+        public bool IsAIPracticeGymEnabled { get; set; }
+
         /// <summary>
         /// Trình dộ Level
         /// </summary>

@@ -30,21 +30,15 @@ namespace Fsel.Course.Infrastructure.Configs
                     .HasForeignKey<ExtraPractice>(p => p.VideoId)
                     .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasIndex(x => x.VideoId).IsUnique(false);
-
             builder.HasOne(a => a.PlacementTest)
                     .WithOne(b => b.ExtraPractice)
                     .HasForeignKey<ExtraPractice>(p => p.PlacementTestId)
                     .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasIndex(x => x.PlacementTestId).IsUnique(false);
-
             builder.HasOne(a => a.MockTest)
                    .WithOne(b => b.ExtraPractice)
                    .HasForeignKey<ExtraPractice>(p => p.MockTestId)
                    .OnDelete(DeleteBehavior.Cascade);
-
-            builder.HasIndex(x => x.MockTestId).IsUnique(false);
         }
     }
 }
