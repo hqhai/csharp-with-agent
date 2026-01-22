@@ -77,6 +77,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
         {
             return await _aiConfigSubmitService.SubmitByObjectIdAsync(
                 null,
+                null,
                 gradingAlFeedback,
                 EnumSubFeatureType.AiResponseTranslation,
                 EnumFeatureMultiple.Lesson,
@@ -102,6 +103,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             await _translationResultPublisher.Publish(result, cancellationToken);
         }
 
-        #endregion
+        #endregion Private Methods
     }
 }

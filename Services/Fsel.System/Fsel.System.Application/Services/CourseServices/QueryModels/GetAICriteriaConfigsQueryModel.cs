@@ -6,6 +6,7 @@ namespace Fsel.System.Application.Services.CourseServices.QueryModels
 
     public class GetAICriteriaConfigsQueryModel
     {
+        public Guid? Id { get; set; }
         public Guid? ObjectId { get; set; }
         public IList<Guid>? ObjectIds { get; set; }
         public EnumSubFeatureType SubFeatureType { get; set; }

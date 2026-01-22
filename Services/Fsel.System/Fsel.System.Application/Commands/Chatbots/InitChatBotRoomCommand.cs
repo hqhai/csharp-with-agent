@@ -131,7 +131,7 @@ namespace Fsel.System.Application.Commands.Chatbots
             var result = await _courseService.GetConfigByIdAsync(
                 new GetAICriteriaConfigsQueryModel
                 {
-                    ObjectId = configId.Value
+                    Id = configId.Value
                 });
 
             return result?.Content?.Result;

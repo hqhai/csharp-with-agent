@@ -26,13 +26,13 @@ namespace Fsel.Course.Infrastructure.Maps
             CreateMap<AICriteriaConfigsModel, AICriteriaConfigs>().IgnoreAllNonExisting();
             CreateMap<AICriteriaConfigs, AICriteriaConfigsModel>()
                 .ForMember(d => d.AiCriteriaModels, o => o.Ignore())
+                .ForMember(d => d.AiModel, o => o.MapFrom(s => s.AiPromptManager != null ? s.AiPromptManager.AiModel : null))
                 .IgnoreAllNonExisting();
             CreateMap<AICriteriaConfigs, AiCriteriaModel>().IgnoreAllNonExisting();
             CreateMap<AICriteriaConfigs, CreateAiCriteriaConfigCommandModel>().IgnoreAllNonExisting();
             CreateMap<UpdateSettingAiFeatureCommandModel, AICriteriaConfigs>().IgnoreAllNonExisting();
             CreateMap<CreateOrUpdateAiCriteriaCommandModel, AICriteriaConfigs>()
                 .IgnoreAllNonExisting();
-
         }
     }
 }

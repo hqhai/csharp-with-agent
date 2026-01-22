@@ -13,6 +13,9 @@ namespace Fsel.System.Application.Commands.Chatbots
     using Fsel.System.Application.Queues.Publisher;
     using Fsel.System.Application.Services.AIServices;
     using Fsel.System.Application.Services.AIServices.Models;
+    using Fsel.System.Application.Services.CourseServices;
+    using Fsel.System.Application.Services.CourseServices.Models;
+    using Fsel.System.Application.Services.CourseServices.QueryModels;
     using Fsel.System.Application.Services.StorageServices;
     using Fsel.System.Application.Services.StorageServices.Models;
     using Fsel.System.Domain.Entities.Chatbots;
@@ -29,7 +32,7 @@ namespace Fsel.System.Application.Commands.Chatbots
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Logging;
 
-    public class SaveChatBotMessageCommand : SaveChatBotMessageModel, IRequest<MethodResult<ChatBotModel>>
+    public class SaveChatBotMessageCommand : IRequest<MethodResult<ChatBotModel>>
     {
         [MaxLength(4000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Content { get; set; }
@@ -48,6 +51,7 @@ namespace Fsel.System.Application.Commands.Chatbots
         private const int Number_Of_Config = 2;
         private readonly ILogger<SaveChatBotMessageCommandHandler> _logger;
         private readonly IMediator _mediator;
+        private readonly ICourseService _courseService;
 
         public SaveChatBotMessageCommandHandler(IMapper mapper,
             IChatBotRepository chatBotRepository,
@@ -56,7 +60,8 @@ namespace Fsel.System.Application.Commands.Chatbots
             IChatbotConfigRepository chatbotConfigRepository,
             IOpenAIService openAIService,
             ILogger<SaveChatBotMessageCommandHandler> logger,
-            IMediator mediator)
+            IMediator mediator,
+            ICourseService courseService)
         {
             _mapper = mapper;
             _chatBotRepository = chatBotRepository;
@@ -66,6 +71,7 @@ namespace Fsel.System.Application.Commands.Chatbots
             _openAIService = openAIService;
             _logger = logger;
             _mediator = mediator;
+            _courseService = courseService;
         }
 
         public async Task<MethodResult<ChatBotModel>> Handle(SaveChatBotMessageCommand request, CancellationToken cancellationToken)
@@ -91,6 +97,8 @@ namespace Fsel.System.Application.Commands.Chatbots
                 methodResult.AddErrorBadRequest(nameof(EnumOutOfAIToken.TheNumberOfTokensHasReachedTheLimit));
                 return methodResult;
             }
+            // 3️⃣ Load AI criteria config
+            var aiConfig = await LoadAiCriteriaConfigAsync(chatbotSkillConfig?.AICriteriaConfigId);
 
             #region chatgpt
 
@@ -101,12 +109,12 @@ namespace Fsel.System.Application.Commands.Chatbots
 
             var chatGptResponse = await _openAIService.SubmitAICompletionsAsync(new RequestAIModel
             {
-                Model = ValueSettings.ChatBotSetup.Model,
+                Model = aiConfig?.AiModel ?? ValueSettings.ChatBotSetup.Model,
                 Messages = chatBotMessageModel,
-                Temperature = ValueSettings.ChatBotSetup.Temperature,
+                Temperature = aiConfig?.SettingTemperature ?? ValueSettings.ChatBotSetup.Temperature,
                 MaxTokens = chatbotMessage.RemainToken,
-                PresencePenalty = ValueSettings.ChatBotSetup.PresencePenalty,
-                TopP = ValueSettings.ChatBotSetup.TopP
+                PresencePenalty = aiConfig?.SettingPresence ?? ValueSettings.ChatBotSetup.PresencePenalty,
+                TopP = aiConfig?.SettingTopP ?? ValueSettings.ChatBotSetup.TopP
             });
 
             string response = chatGptResponse?.Content?.Choices?.Select(x => x.Message?.Content).FirstOrDefault() ?? string.Empty;
@@ -155,6 +163,22 @@ namespace Fsel.System.Application.Commands.Chatbots
             });
 
             return methodResult;
+        }
+
+        private async Task<AICriteriaConfigsModel?> LoadAiCriteriaConfigAsync(Guid? configId)
+        {
+            if (!configId.HasValue)
+            {
+                return null;
+            }
+
+            var result = await _courseService.GetConfigByIdAsync(
+                new GetAICriteriaConfigsQueryModel
+                {
+                    Id = configId.Value
+                });
+
+            return result?.Content?.Result;
         }
 
         private async Task<ChatBot> GetChatBotAsync(Guid chatBotId, MethodResult<ChatBotModel> result, CancellationToken ct)

@@ -15,6 +15,7 @@ namespace Fsel.System.Application.Services.CourseServices.Models
         public Guid? OriginalId { get; set; }
 
         public Guid AiPromptManagerId { get; set; }
+        public string? AiModel { get; set; }
         public string? SchemaType { get; set; }
         public string? SchemaName { get; set; }
         public double? SettingTemperature { get; set; }

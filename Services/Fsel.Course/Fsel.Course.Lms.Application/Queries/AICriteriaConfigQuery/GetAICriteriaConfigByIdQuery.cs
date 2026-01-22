@@ -12,7 +12,8 @@ namespace Fsel.Course.Lms.Application.Queries.AICriteriaConfigQuery
 
     public class GetAICriteriaConfigByIdQuery : IRequest<MethodResult<AICriteriaConfigsModel>>
     {
-        public Guid ObjectId { get; set; }
+        public Guid? Id { get; set; }
+        public Guid? ObjectId { get; set; }
         public EnumSubFeatureType SubFeatureType { get; set; }
         public EnumFeatureMultiple FeatureMultiple { get; set; }
     }
@@ -33,7 +34,12 @@ namespace Fsel.Course.Lms.Application.Queries.AICriteriaConfigQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<AICriteriaConfigsModel>();
-            var aiCriteria = await _aIConfigSubmitService.FindAIConfigByIdAsync(request.ObjectId, request.SubFeatureType, request.FeatureMultiple, cancellationToken);
+            var aiCriteria = await _aIConfigSubmitService.FindAIConfigByIdAsync(request.Id, request.ObjectId, request.SubFeatureType, request.FeatureMultiple, cancellationToken);
+            if (aiCriteria == null)
+            {
+                return methodResult;
+            }
+
             var result = _mapper.Map<AICriteriaConfigsModel>(aiCriteria);
             if (result.AiCriteriaModels == null)
             {

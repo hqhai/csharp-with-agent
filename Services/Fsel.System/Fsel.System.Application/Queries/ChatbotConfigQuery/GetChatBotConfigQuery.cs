@@ -2,9 +2,6 @@
 
 using AutoMapper;
 using Fsel.Common.ActionResults;
-using Fsel.Common.Helpers;
-using Fsel.Common.Models;
-using Fsel.Shared.Enums;
 using Fsel.System.Domain.IRepositories;
 using Fsel.System.Domain.Models.EntityModels;
 using MediatR;
@@ -22,6 +19,7 @@ namespace Fsel.System.Application.Queries.ChatbotConfigQuery
     {
         private readonly IChatbotConfigRepository _chatbotConfigRepository;
         private readonly IMapper _mapper;
+
         public GetChatBotConfigQueryHandler(IChatbotConfigRepository chatbotConfigRepository, IMapper mapper)
         {
             _chatbotConfigRepository = chatbotConfigRepository;

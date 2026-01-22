@@ -19,14 +19,14 @@ namespace Fsel.Course.Lms.Application.Services.AIConfigService
         /// <param name="featureMultiple">Loại feature lớn (Unit, Lesson, Test)</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>AI Response string, null nếu không tìm thấy config</returns>
-        Task<string?> SubmitByObjectIdAsync(
+        Task<string?> SubmitByObjectIdAsync(Guid? id,
             Guid? objectId,
             string content,
             EnumSubFeatureType subFeatureType,
             EnumFeatureMultiple featureMultiple,
             CancellationToken cancellationToken);
 
-        Task<AICriteriaConfigs?> FindAIConfigByIdAsync(Guid objectId,
+        Task<AICriteriaConfigs?> FindAIConfigByIdAsync(Guid? id, Guid? objectId,
             EnumSubFeatureType subFeatureType,
             EnumFeatureMultiple featureMultiple,
             CancellationToken cancellationToken);
