@@ -262,6 +262,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
                 Status = EnumClassForumResultStatus.PendingSpeechToText,
                 SubmissionCount = submissionCount,
                 ClassForumResultId = classForumResultId,
+                ProcessDate = submissionCount == EnumSubmissionCount.FirstSubmit ? DateTime.UtcNow : null,
                 ClassForumResultFiles = new List<ClassForumResultFile>
                 {
                     new ClassForumResultFile { FilePath = filePath }

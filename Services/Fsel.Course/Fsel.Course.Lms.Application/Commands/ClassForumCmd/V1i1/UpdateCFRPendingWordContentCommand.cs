@@ -113,7 +113,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
                 return methodResult;
             }
 
-            var classForum = await _classForumRepository.Queryable.FirstOrDefaultAsync(x => x.LessonId == classForumResult.LessonResult.LessonId, cancellationToken);
+            var classForum = await _classForumRepository.Queryable.FirstOrDefaultAsync(x => x.Id == classForumResult.ClassForumId, cancellationToken);
             if (classForum == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForum));
