@@ -23,8 +23,7 @@ namespace Fsel.System.Application.Commands.Chatbots
     {
     }
 
-    public class InitChatBotRoomCommandHandler
-        : IRequestHandler<InitChatBotRoomCommand, MethodResult<ChatBotModel>>
+    public class InitChatBotRoomCommandHandler : IRequestHandler<InitChatBotRoomCommand, MethodResult<ChatBotModel>>
     {
         private readonly IMapper _mapper;
         private readonly IChatBotRepository _chatBotRepository;
@@ -60,35 +59,34 @@ namespace Fsel.System.Application.Commands.Chatbots
         {
             var result = new MethodResult<ChatBotModel>();
 
-            // 1️⃣ Load chatbot config
             var chatbotConfig = await _chatBotConfigRepository.ReadQueryable
-                .Include(x => x.ChatbotSkillConfigs)
-                .FirstOrDefaultAsync(
-                    x => x.UnitId == request.UnitId &&
-                         x.Status == EnumChatbotConfigStatus.Completed,
-                    ct);
-
+                                                              .Include(x => x.ChatbotSkillConfigs)
+                                                              .Where(x => x.UnitId == request.UnitId)
+                                                              .Where(x => x.Status == EnumChatbotConfigStatus.Completed)
+                                                              .FirstOrDefaultAsync(ct);
             if (chatbotConfig == null)
             {
-                result.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                result.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(chatbotConfig));
                 return result;
             }
 
             // 2️⃣ Load skill config
-            var chatBotSkill = chatbotConfig.ChatbotSkillConfigs
-                .FirstOrDefault(x => x.SkillId == request.SkillId);
+            var chatBotSkill = chatbotConfig.ChatbotSkillConfigs.FirstOrDefault(x => x.SkillId == request.SkillId);
+            if (chatBotSkill == null)
+            {
+                result.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(chatBotSkill));
+                return result;
+            }
 
             // 3️⃣ Load AI criteria config
-            var aiConfig = await LoadAiCriteriaConfigAsync(chatBotSkill?.AICriteriaConfigId);
+            var aiConfig = await LoadAiCriteriaConfigAsync(chatBotSkill.AICriteriaConfigId);
 
             // 4️⃣ Check existing chatbot
-            var existingChatbot = await _chatBotRepository.Queryable
-                .FirstOrDefaultAsync(
-                    x => x.UnitId == request.UnitId &&
-                         x.StudentId == request.StudentId &&
-                         x.SkillId == request.SkillId,
-                    ct);
-
+            var existingChatbot = await _chatBotRepository.ReadQueryable
+                                                          .Where(x => x.UnitId == request.UnitId)
+                                                          .Where(x => x.StudentId == request.StudentId)
+                                                          .Where(x => x.UnitResultId == request.UnitResultId)
+                                                          .FirstOrDefaultAsync(x => x.SkillId == request.SkillId, ct);
             if (existingChatbot != null)
             {
                 result.Result = MapChatbot(existingChatbot);
@@ -98,16 +96,14 @@ namespace Fsel.System.Application.Commands.Chatbots
 
             // 5️⃣ Build initial conversation
             var initConversation = BuildInitConversation(aiConfig, chatBotSkill);
-            var maxToken = chatBotSkill?.Token ?? default;
+            var maxToken = chatBotSkill.Token;
 
             // 6️⃣ Call AI
-            var aiResponse = await _mediator.Send(
-                new SubmitAICommand
-                {
-                    MaxToken = maxToken,
-                    ChatBotMessages = initConversation
-                },
-                ct);
+            var aiResponse = await _mediator.Send(new SubmitAICommand
+            {
+                MaxToken = maxToken,
+                ChatBotMessages = initConversation
+            }, ct);
 
             initConversation.Add(new ChatBotMessageModel
             {
@@ -115,12 +111,9 @@ namespace Fsel.System.Application.Commands.Chatbots
                 Content = aiResponse
             });
 
-            return await CreateChatbotAsync(request, initConversation, maxToken, ct);
+            return await CreateChatbotAsync(request, chatBotSkill, initConversation, maxToken, ct);
         }
 
-        // =====================================================
-        // HELPERS
-        // =====================================================
         private async Task<AICriteriaConfigsModel?> LoadAiCriteriaConfigAsync(Guid? configId)
         {
             if (!configId.HasValue)
@@ -128,18 +121,15 @@ namespace Fsel.System.Application.Commands.Chatbots
                 return null;
             }
 
-            var result = await _courseService.GetConfigByIdAsync(
-                new GetAICriteriaConfigsQueryModel
-                {
-                    Id = configId.Value
-                });
+            var result = await _courseService.GetConfigByIdAsync(new GetAICriteriaConfigsQueryModel
+            {
+                Id = configId.Value
+            });
 
             return result?.Content?.Result;
         }
 
-        private static IList<ChatBotMessageModel> BuildInitConversation(
-            AICriteriaConfigsModel? aiConfig,
-            ChatbotSkillConfig? skillConfig)
+        private static IList<ChatBotMessageModel> BuildInitConversation(AICriteriaConfigsModel? aiConfig, ChatbotSkillConfig? skillConfig)
         {
             return new List<ChatBotMessageModel>
             {
@@ -158,19 +148,20 @@ namespace Fsel.System.Application.Commands.Chatbots
 
         private async Task<MethodResult<ChatBotModel>> CreateChatbotAsync(
             InitChatBotRoomCommand request,
+            ChatbotSkillConfig chatBotSkill,
             IList<ChatBotMessageModel> conversation,
             int maxToken,
             CancellationToken ct)
         {
             MethodResult<ChatBotModel> methodResult = new MethodResult<ChatBotModel>();
-            ChatBot chatBot = new();
-
             await _chatBotRepository.ExecuteTransactionAsync(async () =>
             {
-                chatBot = _mapper.Map<ChatBot>(request);
+                var chatBot = _mapper.Map<ChatBot>(request);
                 chatBot.Conversations = _mapper.Map<List<ChatBotMessage>>(conversation);
                 chatBot.LastestAnswer = _mapper.Map<ChatBotMessage>(conversation.Last());
                 chatBot.RemainToken = maxToken;
+                chatBot.SkillFilePath = chatBotSkill.SkillFilePath;
+                chatBot.SkillName = chatBotSkill.SkillName;
 
                 _chatBotRepository.Add(chatBot);
                 await _chatBotRepository.UnitOfWork.SaveChangesAsync(ct);
@@ -200,9 +191,7 @@ namespace Fsel.System.Application.Commands.Chatbots
                 return instruction ?? string.Empty;
             }
 
-            var baseConfig = instruction == null
-                ? criteria.UserRole
-                : criteria.SettingAiJson;
+            var baseConfig = instruction == null ? criteria.UserRole : criteria.SettingAiJson;
 
             baseConfig ??= string.Empty;
             return string.IsNullOrEmpty(instruction)
@@ -214,10 +203,9 @@ namespace Fsel.System.Application.Commands.Chatbots
             IList<ChatBotMessage>? conversations)
         {
             return conversations == null
-                ? null
-                : ArrayHelper.RemoveFirstTwoElements(
-                    conversations,
-                    ValueSettings.ChatBotSetup.NumberDeletedElement);
+                ? null : ArrayHelper.RemoveFirstTwoElements(
+                        conversations,
+                        ValueSettings.ChatBotSetup.NumberDeletedElement);
         }
     }
 }

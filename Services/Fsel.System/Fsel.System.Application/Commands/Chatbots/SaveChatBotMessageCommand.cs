@@ -98,7 +98,7 @@ namespace Fsel.System.Application.Commands.Chatbots
                 return methodResult;
             }
             // 3️⃣ Load AI criteria config
-            var aiConfig = await LoadAiCriteriaConfigAsync(chatbotSkillConfig?.AICriteriaConfigId);
+            var aiConfig = await LoadAiCriteriaConfigAsync(chatbotSkillConfig.AICriteriaConfigId);
 
             #region chatgpt
 
@@ -199,9 +199,9 @@ namespace Fsel.System.Application.Commands.Chatbots
         MethodResult<ChatBotModel> result,
         CancellationToken ct)
         {
-            var config = await _chatbotConfigRepository.Queryable
-                .Include(x => x.ChatbotSkillConfigs)
-                .FirstOrDefaultAsync(x => x.UnitId == chatbot.UnitId, ct);
+            var config = await _chatbotConfigRepository.ReadQueryable
+                                                       .Include(x => x.ChatbotSkillConfigs)
+                                                       .FirstOrDefaultAsync(x => x.UnitId == chatbot.UnitId, ct);
 
             if (config == null)
             {
@@ -210,7 +210,6 @@ namespace Fsel.System.Application.Commands.Chatbots
             }
 
             var skill = config.ChatbotSkillConfigs.FirstOrDefault(x => x.SkillId == chatbot.SkillId);
-
             if (skill == null)
             {
                 result.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(ChatbotSkillConfig));

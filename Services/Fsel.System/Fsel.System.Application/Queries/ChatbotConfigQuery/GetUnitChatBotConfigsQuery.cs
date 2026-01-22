@@ -38,9 +38,8 @@ namespace Fsel.System.Application.Queries.ChatbotConfigQuery
                 return methodResult;
             }
 
-            var chatbotConfigs = await _chatbotConfigRepository.Queryable
+            var chatbotConfigs = await _chatbotConfigRepository.ReadQueryable
                                                                .Include(x => x.ChatbotSkillConfigs)
-                                                               .Include(x => x.ChatbotTokenConfigs)
                                                                .Where(x => request.UnitIds.Contains(x.UnitId))
                                                                .ToListAsync(cancellationToken);
 

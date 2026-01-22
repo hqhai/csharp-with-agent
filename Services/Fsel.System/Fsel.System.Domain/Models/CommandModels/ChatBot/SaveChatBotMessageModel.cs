@@ -6,7 +6,7 @@ namespace Fsel.System.Domain.Models.CommandModels.ChatBot
     {
         public Guid UnitId { get; set; }
         public Guid StudentId { get; set; }
-        public string? SkillName { get; set; }
-        public Guid? SkillId { get; set; }
+        public Guid SkillId { get; set; }
+        public Guid UnitResultId { get; set; }
     }
 }

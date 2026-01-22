@@ -32,11 +32,11 @@ namespace Fsel.Course.Application.Queries.LevelQuery
 
         public async Task<MethodResult<IList<LevelModel>>> Handle(GetLevelByProgramIdQuery request, CancellationToken cancellationToken)
         {
-
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<LevelModel>> methodResult = new MethodResult<IList<LevelModel>>();
 
-            var levels = await _levelRepository.Queryable
+            var levels = await _levelRepository.ReadQueryable.Include(x => x.SkillLevels)
+                                               .ThenInclude(x => x.Skill)
                                                .Where(x => x.ProgramId == request.ProgramId)
                                                .AsNoTracking()
                                                .ToListAsync(cancellationToken);

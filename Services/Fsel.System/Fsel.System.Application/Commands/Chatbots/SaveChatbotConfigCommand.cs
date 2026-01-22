@@ -65,7 +65,6 @@ namespace Fsel.System.Application.Commands.Chatbots
                     vocabPart,
                     vocabFull,
                     grammarPart,
-                    grammarFull,
                     skill.Configs);
             }
 
@@ -114,7 +113,6 @@ namespace Fsel.System.Application.Commands.Chatbots
         string vocabPart,
         string vocabFull,
         string grammarPart,
-        string grammarFull,
         IList<SkillConfigCommandModel>? currentConfigs)
         {
             var configs = new List<string>(baseConfigs);
@@ -122,7 +120,7 @@ namespace Fsel.System.Application.Commands.Chatbots
             switch (layout)
             {
                 case EnumChatbotLayout.Vocabulary:
-                    configs.Add(grammarFull);
+                    configs.Add(vocabFull);
                     break;
 
                 case EnumChatbotLayout.Grammar:
