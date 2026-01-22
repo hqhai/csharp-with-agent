@@ -16,6 +16,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public int LevelOrder { get; set; }
 
+        public bool LearnedBefore { get; set; }
+
         public IList<SkillViewModel>? Skils { get; set; }
 
     }

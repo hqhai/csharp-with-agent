@@ -8,6 +8,8 @@ namespace Fsel.Course.Domain.Models.EntityModels.ChangeCourseModels
 
     public abstract class ChangeCourseComposite : ChangeCourseComponent
     {
+        public Category Category { get; set; }
+
         public List<ChangeCourseComponent> Children { get; set; } = new List<ChangeCourseComponent>();
 
         public Guid Id { get; set; }
@@ -37,7 +39,6 @@ namespace Fsel.Course.Domain.Models.EntityModels.ChangeCourseModels
 
         public abstract ChangeProgramDirective? ChangeProgram(ChangeProgramRequest request);
 
-
         public override ChangeSubjectDirective? ChangeSubject(ChangeProgramRequest request)
         {
             return Children
@@ -50,6 +51,49 @@ namespace Fsel.Course.Domain.Models.EntityModels.ChangeCourseModels
         public override bool IsCurrentLearning()
         {
             return Children.Any(child => child.IsCurrentLearning());
+        }
+
+        public virtual SubjectModel GetSubjectTree(bool isIncludeLevel = false)
+        {
+            var subjectModel = new SubjectModel
+            {
+                Id = Id,
+                Name = Category.Name,
+                Thumbnail = Category.Thumbnail,
+                Type = Category.Type.ToString(),
+                TestMode = Category.TestMode,
+                ChildSubjects = Children
+                    .OfType<ChangeCourseComposite>()
+                    .Select(child => child.GetSubjectTree(isIncludeLevel))
+                    .ToList(),
+                Levels = Children
+                    .OfType<LevelChangeCourse>()
+                    .Select(child => new SelectionLevelModel
+                    {
+                        Id = child.LevelId,
+                        Name = child.Name,
+                        Code = child.Level.Code,
+                        Description = child.Level.Description,
+                        LevelOrder = child.Level.LevelOrder,
+                        LearnedBefore = child.LearnedBefore,
+                        CanSelect = child.CanSelect,
+                        ProgramId = child.Level.ProgramId,
+                        IsCurrentLevel = child.IsCurrentLearningLevel,
+                    } as LevelModel)
+                    .ToList()
+            };
+
+            if (Children.Any(c => c is ProgramChangeCourse || c is LevelChangeCourse))
+            {
+                subjectModel.HadLearnedBefore = subjectModel.ChildSubjects.Any(c => c.HadLearnedBefore) || subjectModel.Levels.Any(l => l.LearnedBefore);
+
+                if (!isIncludeLevel)
+                {
+                    subjectModel.Levels = new List<LevelModel>();
+                }
+            }
+
+            return subjectModel;
         }
 
         public override FromInfo? GetCurrentInfo()
