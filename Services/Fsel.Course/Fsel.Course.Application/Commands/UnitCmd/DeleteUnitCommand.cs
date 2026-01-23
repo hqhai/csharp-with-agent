@@ -2,6 +2,7 @@
 
 using Fsel.Common.ActionResults;
 using Fsel.Common.Enums.ErrorCodes;
+using Fsel.Course.Application.Services.SystemServices;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using MediatR;
@@ -18,10 +19,12 @@ namespace Fsel.Course.Application.Commands.UnitCmd
     public class DeleteUnitCommandHandler : IRequestHandler<DeleteUnitCommand, MethodResult<bool>>
     {
         private readonly IUnitRepository _unitRepository;
+        private readonly ISystemService _systemService;
 
-        public DeleteUnitCommandHandler(IUnitRepository unitRepository, IUnitResultRepository unitResultRepository)
+        public DeleteUnitCommandHandler(IUnitRepository unitRepository, ISystemService systemService)
         {
             _unitRepository = unitRepository;
+            _systemService = systemService;
         }
 
         public async Task<MethodResult<bool>> Handle(DeleteUnitCommand request, CancellationToken cancellationToken)
@@ -49,7 +52,8 @@ namespace Fsel.Course.Application.Commands.UnitCmd
             await _unitRepository.ExecuteTransactionAsync(async () =>
             {
                 var result = await _unitRepository.DeleteAsync(unit);
-                await _unitRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                await _unitRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _systemService.DeleteChatbotConfigAsync(request.Id).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = result;

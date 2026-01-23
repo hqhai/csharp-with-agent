@@ -1,7 +1,10 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.System.Domain.Models.CommandModels.ChatbotConfigs
+namespace Fsel.Course.Application.Services.SystemServices.CommandModels
 {
+    using System;
+    using System.Collections.Generic;
+
     public class SaveChatbotConfigCommandModel
     {
         public string? ProgramName { get; set; }
@@ -12,6 +15,6 @@ namespace Fsel.System.Domain.Models.CommandModels.ChatbotConfigs
         public int NumberSkill { get; set; }
         public Guid UnitId { get; set; }
         public string? UnitTopic { get; set; }
-        public IList<ChatbotSkillConfigsCommandModel>? ChatbotSkillConfigs { get; set; }
+        public IList<SaveChatbotSkillConfigsCommandModel> ChatbotSkillConfigs { get; set; } = new List<SaveChatbotSkillConfigsCommandModel>();
     }
 }

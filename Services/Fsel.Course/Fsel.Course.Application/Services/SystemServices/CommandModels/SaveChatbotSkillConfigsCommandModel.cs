@@ -1,10 +1,10 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.System.Domain.Models.CommandModels.ChatbotConfigs
+namespace Fsel.Course.Application.Services.SystemServices.CommandModels
 {
     using Fsel.Shared.Enums;
 
-    public class ChatbotSkillConfigsCommandModel
+    public class SaveChatbotSkillConfigsCommandModel
     {
         public Guid? Id { get; set; }
         public EnumCourseSkill? Skill { get; set; }

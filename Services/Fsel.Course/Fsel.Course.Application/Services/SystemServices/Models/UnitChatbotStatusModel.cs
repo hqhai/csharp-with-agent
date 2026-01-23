@@ -8,7 +8,6 @@ namespace Fsel.Course.Application.Services.SystemServices.Models
     public class UnitChatbotStatusModel
     {
         public Guid UnitId { get; set; }
-
         public EnumChatbotConfigStatus Status { get; set; }
     }
 }
