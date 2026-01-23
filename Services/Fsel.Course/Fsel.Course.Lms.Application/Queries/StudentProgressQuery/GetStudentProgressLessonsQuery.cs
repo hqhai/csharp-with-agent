@@ -20,6 +20,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
     using MediatR;
+    using Microsoft.AspNetCore.Cors.Infrastructure;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
@@ -41,11 +42,12 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
         private readonly IMockTestRepository _mockTestRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly IUnitRepository _unitRepository;
+        private readonly ICourseResultRepository _courseResultRepository;
         private readonly IUserService _userService;
         private readonly ISystemService _systemService;
         private const int MaxModuleLesson = 3;
 
-        public GetStudentProgressLessonsQueryHandler(ICourseRepository courseRepository, ManagerProgressHelper managerProgressHelper, ISectionGroupRepository sectionGroupRepository, IMockTestSectionRepository mockTestSectionRepository, IMockTestScoreRepository mockTestScoreRepository, IMockTestResultRepository mockTestResultRepository, IMockTestRepository mockTestRepository, ILessonResultRepository lessonResultRepository, IUnitRepository unitRepository, IUserService userService, ISystemService systemService)
+        public GetStudentProgressLessonsQueryHandler(ICourseRepository courseRepository, ManagerProgressHelper managerProgressHelper, ISectionGroupRepository sectionGroupRepository, IMockTestSectionRepository mockTestSectionRepository, IMockTestScoreRepository mockTestScoreRepository, IMockTestResultRepository mockTestResultRepository, IMockTestRepository mockTestRepository, ILessonResultRepository lessonResultRepository, IUnitRepository unitRepository, IUserService userService, ISystemService systemService, ICourseResultRepository courseResultRepository)
         {
             _courseRepository = courseRepository;
             _managerProgressHelper = managerProgressHelper;
@@ -58,6 +60,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             _unitRepository = unitRepository;
             _userService = userService;
             _systemService = systemService;
+            _courseResultRepository = courseResultRepository;
         }
 
         public async Task<MethodResult<IList<LessonStudentProgressModel>>> Handle(GetStudentProgressLessonsQuery request, CancellationToken cancellationToken)
@@ -81,6 +84,12 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             var userId = student.UserId;
             var course = await _courseRepository.GetByIdAsync(request.CourseId);
             if (course == null)
+            {
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
+            var courseResult = await _courseResultRepository.Queryable.FirstOrDefaultAsync(x => x.CourseId == request.CourseId && x.StudentId == request.StudentId && x.WorkingStatus == Shared.Enums.EnumWorkingStatus.Active, cancellationToken);
+            if (courseResult == null)
             {
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
@@ -126,7 +135,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 {
                     continue;
                 }
-                var lessonProgress = await GetLessonAsync(request, lesson);
+                var lessonProgress = await GetLessonAsync(request, courseResult.Id, lesson);
 
                 var featureAccessTime = featureAccessTimes?.FirstOrDefault(x => x.LessonId == lesson.Id);
                 lessonProgress.Type = nameof(Lesson);
@@ -167,11 +176,11 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             return methodResult;
         }
 
-        private async Task<LessonStudentProgressModel> GetLessonAsync(GetStudentProgressLessonsQuery request, Lesson lesson)
+        private async Task<LessonStudentProgressModel> GetLessonAsync(GetStudentProgressLessonsQuery request, Guid? courseResultId, Lesson lesson)
         {
             LessonStudentProgressModel lessonProgress = new LessonStudentProgressModel();
             var lessonResult = await _lessonResultRepository.Queryable
-                                    .Where(x => x.CourseId == request.CourseId && x.UnitId == request.UnitId)
+                                    .Where(x => x.CourseResultId == courseResultId && x.UnitId == request.UnitId)
                                     .FirstOrDefaultAsync(x => x.LessonId == lesson.Id && x.StudentId == request.StudentId);
 
             lessonProgress.ObjectId = lesson.Id;

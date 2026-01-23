@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -33,8 +34,9 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
         private readonly ISystemService _systemService;
         private readonly IClassForumResultRepository _classForumResultRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
+        private readonly ICourseResultRepository _courseResultRepository;
 
-        public GetStudentProgressClassForumQueryHandler(IUserService userService, IVideoResultRepository videoResultRepository, IClassForumRepository classForumRepository, ISystemService systemService, IClassForumResultRepository classForumResultRepository, ILessonResultRepository lessonResultRepository)
+        public GetStudentProgressClassForumQueryHandler(IUserService userService, IVideoResultRepository videoResultRepository, IClassForumRepository classForumRepository, ISystemService systemService, IClassForumResultRepository classForumResultRepository, ILessonResultRepository lessonResultRepository, ICourseResultRepository courseResultRepository)
         {
             _userService = userService;
             _videoResultRepository = videoResultRepository;
@@ -42,6 +44,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             _systemService = systemService;
             _classForumResultRepository = classForumResultRepository;
             _lessonResultRepository = lessonResultRepository;
+            _courseResultRepository = courseResultRepository;
         }
 
         public async Task<MethodResult<ClassForumStudentProgressModel>> Handle(GetStudentProgressClassForumQuery request, CancellationToken cancellationToken)
@@ -63,7 +66,15 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             }
 
             var userId = student?.UserId ?? default;
-            var lessonResult = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.UnitId == request.UnitId && x.CourseId == request.CourseId && x.LessonId == request.LessonId && x.StudentId == request.StudentId, cancellationToken);
+
+            var courseResult = await _courseResultRepository.Queryable.FirstOrDefaultAsync(x => x.CourseId == request.CourseId && x.StudentId == request.StudentId && x.WorkingStatus == EnumWorkingStatus.Active, cancellationToken);
+            if (courseResult == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                return methodResult;
+            }
+
+            var lessonResult = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.CourseResultId == courseResult.Id && x.UnitId == request.UnitId && x.LessonId == request.LessonId, cancellationToken);
             if (lessonResult == null || lessonResult.Status == EnumResultStatus.Unfinished)
             {
                 methodResult.StatusCode = StatusCodes.Status200OK;

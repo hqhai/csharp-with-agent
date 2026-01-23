@@ -21,6 +21,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
     {
         private readonly IUserService _userService;
         private readonly ICourseRepository _courseRepository;
+        private readonly ICourseResultRepository _courseResultRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly IVideoResultRepository _videoResultRepository;
         private readonly IVideoRepository _videoRepository;
@@ -29,13 +30,15 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             ICourseRepository courseRepository,
             ILessonResultRepository lessonResultRepository,
             IVideoResultRepository videoResultRepository,
-            IVideoRepository videoRepository)
+            IVideoRepository videoRepository,
+            ICourseResultRepository courseResultRepository)
         {
             _userService = userService;
             _courseRepository = courseRepository;
             _lessonResultRepository = lessonResultRepository;
             _videoResultRepository = videoResultRepository;
             _videoRepository = videoRepository;
+            _courseResultRepository = courseResultRepository;
         }
 
         public async Task<MethodResult<IList<TeacherModel>>> Handle(GetListTeacherByCourseQuery request, CancellationToken cancellationToken)
@@ -45,7 +48,8 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             var course = from baseQ in _videoRepository.Queryable
                          join vr in _videoResultRepository.Queryable on baseQ.Id equals vr.VideoId
                          join lr in _lessonResultRepository.Queryable on vr.LessonResultId equals lr.Id
-                         join c in _courseRepository.Queryable on lr.CourseId equals c.Id
+                         join cr in _courseResultRepository.Queryable on lr.CourseResultId equals cr.Id
+                         join c in _courseRepository.Queryable on cr.CourseId equals c.Id
                          where c.Id == request.CourseId
                          select new
                          {

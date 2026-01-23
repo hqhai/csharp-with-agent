@@ -78,7 +78,7 @@ namespace Fsel.Course.Infrastructure.Common
             var courseResultActive = await _courseResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.WorkingStatus == EnumWorkingStatus.Active);
             if (courseResultActive != null && courseResultActive.Status != EnumResultStatus.Done)
             {
-                var groupUnitResultStatus = await _unitResultRepository.Queryable.Where(x => x.CourseId == courseResultActive.CourseId && x.StudentId == courseResultActive.StudentId).GroupBy(x => x.Status)
+                var groupUnitResultStatus = await _unitResultRepository.Queryable.Where(x => x.CourseResultId == courseResultActive.Id).GroupBy(x => x.Status)
                        .Select(x => new
                        {
                            StatusResult = x.Key,

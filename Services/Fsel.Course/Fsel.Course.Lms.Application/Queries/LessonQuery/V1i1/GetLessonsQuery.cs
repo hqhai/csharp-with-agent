@@ -112,7 +112,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
                 return methodResult;
             }
             var data = new List<LessonMockTestResultModel>();
-            data.AddRange(await UpdateLessonResults(request, student.Id, unit, cancellationToken));
+            data.AddRange(await UpdateLessonResults(unitResult, student.Id, unit, cancellationToken));
             if (unit.UnitSkillMockTests.Any())
             {
                 data.Add(await UpdateMockTestResults(request, student.Id, unit, course, cancellationToken));
@@ -122,16 +122,16 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
             return methodResult;
         }
 
-        private async Task<IList<LessonMockTestResultModel>> UpdateLessonResults(GetLessonsQuery request, Guid? studentId, Domain.Entities.Unit unit, CancellationToken cancellationToken)
+        private async Task<IList<LessonMockTestResultModel>> UpdateLessonResults(UnitResult unitResult, Guid? studentId, Domain.Entities.Unit unit, CancellationToken cancellationToken)
         {
-            var lessonResults = await _lessonResultRepository.Queryable.Where(x => x.UnitId == request.UnitId && x.CourseId == request.CourseId && x.StudentId == studentId).ToListAsync(cancellationToken);
+            var lessonResults = await _lessonResultRepository.Queryable.Where(x => x.UnitResultId == unitResult.Id && x.StudentId == studentId).ToListAsync(cancellationToken);
             if (!lessonResults.Any())
             {
                 lessonResults = unit.UnitLessons.OrderBy(x => x.DisplayOrder).Select((x, index) => new LessonResult
                 {
                     UnitId = x.UnitId,
                     LessonId = x.LessonId,
-                    CourseId = request.CourseId,
+                    CourseId = unitResult.CourseId,
                     Status = index == 0 ? EnumResultStatus.New : EnumResultStatus.Unfinished,
                     StudentId = studentId ?? default
                 }).ToList();

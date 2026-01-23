@@ -14,6 +14,8 @@ namespace Fsel.Course.Infrastructure.Repositories
 
     public class CourseResultRepository : BaseRepository<CourseResult>, ICourseResultRepository
     {
+        public override IQueryable<CourseResult> Queryable => base.Queryable.Where(x => x.WorkingStatus != Shared.Enums.EnumWorkingStatus.NotWorking);
+
         public CourseResultRepository(CourseDbContext dbContext, CourseReadDbContext readDbContext, AuthContext authContext, IMapper mapper): base(dbContext, readDbContext, authContext, mapper)
         {
         }

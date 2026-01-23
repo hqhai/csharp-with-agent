@@ -202,7 +202,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                                           join cum in _courseUnitMockTestRepository.Queryable on baseQ.CourseId equals cum.CourseId
                                           join ur in _unitResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done)
                                           .Where(x => (!request.EndDate.HasValue || (x.UpdatedDate ?? x.CreatedDate).Date <= request.EndDate.Value.Date))
-                                          on new { baseQ.StudentId, baseQ.CourseId, UnitId = cum.UnitId } equals new { ur.StudentId, ur.CourseId, UnitId = (Guid?)ur.UnitId } into unitGroup
+                                          on baseQ.Id equals ur.CourseResultId into unitGroup
                                           from ur in unitGroup.DefaultIfEmpty()
                                           where baseQ.WorkingStatus == EnumWorkingStatus.Active
                                           group new { baseQ, ur }

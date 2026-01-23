@@ -188,7 +188,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
                 return methodResult;
             }
 
-            var unitResult = await _unitResultRepository.Queryable.Where(x => x.CourseId == request.CourseId && x.StudentId == studentId)
+            var unitResult = await _unitResultRepository.Queryable.Where(x => x.CourseResultId == courseResult.Id)
                                                                   .FirstOrDefaultAsync(x => x.UnitId == request.UnitId, cancellationToken);
             if (unitResult == null)
             {
@@ -217,7 +217,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lesson.LessonHomeWorks));
                 return methodResult;
             }
-            var lessonResult = await _lessonResultRepository.Queryable.Where(x => x.LessonId == request.LessonId && x.UnitId == request.UnitId)
+            var lessonResult = await _lessonResultRepository.Queryable.Where(x => x.LessonId == request.LessonId && x.UnitResultId == unitResult.Id)
                                                                          .FirstOrDefaultAsync(x => x.CourseId == request.CourseId && x.StudentId == studentId, cancellationToken);
             if (lessonResult == null)
             {

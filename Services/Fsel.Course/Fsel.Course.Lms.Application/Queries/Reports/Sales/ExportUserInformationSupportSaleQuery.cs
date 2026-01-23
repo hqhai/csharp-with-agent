@@ -285,7 +285,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports.Sales
         private async Task<Dictionary<Guid, List<LessonResult>>> GetLessonResultGroupsAsync(List<CourseResultModel> lists, CancellationToken cancellationToken)
         {
             var results = await _lessonResultRepository.Queryable.AsNoTracking()
-                .WhereBulkContains(lists.Select(x => new { x.StudentId, x.CourseId }), new[] { "StudentId", "CourseId" })
+                .WhereBulkContains(lists.Select(x => x.Id), x => x.CourseResultId)
                 .ToListAsync(cancellationToken);
             return results.GroupBy(x => x.StudentId).ToDictionary(x => x.Key, x => x.Where(x => x.Status == EnumResultStatus.Done).OrderBy(x => x.CreatedDate).ToList());
         }
@@ -309,7 +309,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports.Sales
         private async Task<Dictionary<Guid, UnitResult?>> GetUnitResultGroupsAsync(List<CourseResultModel> lists, CancellationToken cancellationToken)
         {
             var results = await _unitResultRepository.Queryable.AsNoTracking()
-                            .WhereBulkContains(lists.Select(x => new { x.StudentId, x.CourseId }), new[] { "StudentId", "CourseId" })
+                            .WhereBulkContains(lists.Select(x => x.Id), x => x.CourseResultId)
                             .ToListAsync(cancellationToken);
             return results.GroupBy(x => x.StudentId)
                 .Select(x => new { StudentId = x.Key, UnitResult = x.OrderBy(y => y.CreatedDate).FirstOrDefault() })
@@ -319,7 +319,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports.Sales
         private async Task<Dictionary<Guid, double>> GetOverallScoreGroupsAsync(List<CourseResultModel> lists, CancellationToken cancellationToken)
         {
             var results = await _unitResultRepository.Queryable.AsNoTracking().Where(x => x.Status == EnumResultStatus.Done)
-                .WhereBulkContains(lists.Select(x => new { x.StudentId, x.CourseId }), new[] { "StudentId", "CourseId" })
+                .WhereBulkContains(lists.Select(x => x.Id), x => x.CourseResultId)
                 .ToListAsync(cancellationToken);
             return results.GroupBy(x => x.StudentId)
                 .Select(x => new { StudentId = x.Key, Score = NumberHelper.ConvertRound(x.Average(x => x.Percent)) })
