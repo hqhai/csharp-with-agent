@@ -5,6 +5,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Lms.Application.Queues.Publishers;
@@ -24,8 +25,8 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
         private readonly IClassForumDetailResultRepository _classForumDetailResultRepository;
 
         public SubmitTranslationAICommandHandler(IAIConfigSubmitService aiConfigSubmitService,
-                                                  TranslationResultPublisher translationResultPublisher,
-                                                  IClassForumDetailResultRepository classForumDetailResultRepository)
+            TranslationResultPublisher translationResultPublisher,
+            IClassForumDetailResultRepository classForumDetailResultRepository)
         {
             _aiConfigSubmitService = aiConfigSubmitService;
             _translationResultPublisher = translationResultPublisher;
@@ -45,18 +46,19 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             };
 
             // Get GradingAlFeedback from database
-            var gradingAlFeedback = await GetGradingAlFeedbackAsync(request.ClassForumDetailResultId, cancellationToken);
+            var classForumDetailResult = await _classForumDetailResultRepository.Queryable
+                .FirstOrDefaultAsync(x => x.Id == request.ClassForumDetailResultId, cancellationToken);
 
-            if (string.IsNullOrEmpty(gradingAlFeedback))
+            if (classForumDetailResult == null || string.IsNullOrEmpty(classForumDetailResult.GradingAlFeedback))
             {
-                return result;
+                return new AITranslationResultModel { ClassForumDetailResultId = request.ClassForumDetailResultId };
             }
 
-            var translatedContent = await ExecuteTranslationAsync(gradingAlFeedback, cancellationToken);
+            var translatedContent = await ExecuteTranslationAsync(classForumDetailResult.GradingAlFeedback, cancellationToken);
             result.TranslatedContent = translatedContent;
 
             // Save translated content to database
-            await UpdateClassForumDetailResultAsync(request.ClassForumDetailResultId, translatedContent, cancellationToken);
+            await UpdateClassForumDetailResultAsync(classForumDetailResult, translatedContent, cancellationToken);
 
             await PublishTranslationResultAsync(result, cancellationToken);
 
@@ -84,17 +86,25 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             );
         }
 
-        private async Task UpdateClassForumDetailResultAsync(Guid classForumDetailResultId, string? translatedContent, CancellationToken cancellationToken)
+        private async Task UpdateClassForumDetailResultAsync(ClassForumDetailResult classForumDetailResult, string? translatedContent, CancellationToken cancellationToken)
         {
-            var classForumDetailResult = await _classForumDetailResultRepository.Queryable
-                .FirstOrDefaultAsync(x => x.Id == classForumDetailResultId, cancellationToken);
+            classForumDetailResult.AITranslationContent = translatedContent;
 
-            if (classForumDetailResult != null)
+            await _classForumDetailResultRepository.BulkUpdateList(new List<ClassForumDetailResult> { classForumDetailResult }, bulk =>
             {
-                classForumDetailResult.AITranslationContent = translatedContent;
-                _classForumDetailResultRepository.Update(classForumDetailResult);
-                await _classForumDetailResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
-            }
+                bulk.IgnoreOnUpdateExpression = c => new
+                {
+                    c.WordContent,
+                    c.Content,
+                    c.WordCount,
+                    c.SubmissionCount,
+                    c.ProcessDate,
+                    c.CompletionDate,
+                    c.Status,
+                    c.ClassForumResultId,
+                    c.PronunciationAlFeedback
+                };
+            });
         }
 
         private async Task PublishTranslationResultAsync(AITranslationResultModel result, CancellationToken cancellationToken)
