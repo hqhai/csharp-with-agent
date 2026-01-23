@@ -7,11 +7,14 @@ using Fsel.Realtime.Application.Hubs.Test;
 using Fsel.Realtime.Application.Queues.Consumers;
 using Fsel.Realtime.Application.Queues.Consumers.Test;
 using Fsel.Realtime.Application.Queues.Publishers;
+using Fsel.Realtime.Application.Services.SpeechToText;
+using Fsel.Realtime.Application.ValueSettings;
+using Fsel.Realtime.Domain.SpeechToTextModel;
 using Fsel.Shared.Constants;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var appSetting = builder.AddAppSettings<BaseAppSetting>();
+var appSetting = builder.AddAppSettings<AppSetting>();
 builder.AddServices(appSetting);
 builder.AddOpenIdSwaggerGens(appSetting);
 builder.AddOpenIdAuthenticationJwtBearers(appSetting);
@@ -39,6 +42,12 @@ builder.Services.AddScoped<QuestionTypeHub>();
 builder.Services.AddScoped<SendStudentsFromFileHub>();
 builder.Services.AddScoped<TestSpeakingHub>();
 builder.Services.AddScoped<TestWritingHub>();
+builder.Services.AddScoped<SpeechToTextHub>();
+
+// Speech-to-Text services (SOLID: DIP - depend on abstractions)
+// Use Singleton to share session dictionary across all SignalR calls
+builder.Services.AddSingleton<ISpeechRecognitionEventHandler, SpeechRecognitionEventNotifier>();
+builder.Services.AddSingleton<ISpeechRecognitionService, AzureSpeechRecognitionService>();
 
 builder.AddMassTransit(appSetting,
 multicastQueues: new Dictionary<string, Type>
@@ -88,10 +97,10 @@ app.UseHubs<DictionaryHub>(RealtimeSettings.SendDictionaryHub.Pattern);
 app.UseHubs<ExamPracticeSpeakingHub>(RealtimeSettings.ExamPracticeSpeakingAIFeedBackHub.Pattern);
 app.UseHubs<ExamPracticeWritingHub>(RealtimeSettings.ExamPracticeWritingAIFeedBackHub.Pattern);
 app.UseHubs<SetTimeExamPracticeHub>(RealtimeSettings.SetTimeExamPracticeHub.Pattern);
-app.UseHubs<QuestionTypeHub>(RealtimeSettings.SetTimeExamPracticeHub.Pattern);
 app.UseHubs<QuestionTypeHub>(RealtimeSettings.QuestionTypeHub.Pattern);
 app.UseHubs<TestWritingHub>(RealtimeSettings.TestWritingAIFeedBackHub.Pattern);
 app.UseHubs<TestSpeakingHub>(RealtimeSettings.TestSpeakingAIFeedBackHub.Pattern);
 app.UseHubs<TranslationHub>(RealtimeSettings.TranslationHub.Pattern);
+app.UseHubs<SpeechToTextHub>(RealtimeSettings.SpeechToTextHub.Pattern);
 
 app.Run();
