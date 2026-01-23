@@ -5,8 +5,8 @@ namespace Fsel.System.Application.Commands.Chatbots
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
     using Fsel.System.Domain.Entities.Chatbots;
-    using Fsel.System.Domain.Enums;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.CommandModels.ChatbotConfigs;
     using Fsel.System.Domain.Models.EntityModels;

@@ -1,10 +1,10 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.System.Domain.Models.EntityModels
+namespace Fsel.Course.Application.Services.SystemServices.Models
 {
+    using System;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
-    using global::System;
 
     public class ChatbotConfigModel : BaseModel
     {
@@ -17,7 +17,5 @@ namespace Fsel.System.Domain.Models.EntityModels
         public int NumberSkill { get; set; }
         public EnumChatbotConfigStatus Status { get; set; }
         public Guid UnitId { get; set; }
-        public IList<ChatbotSkillConfigModel>? ChatbotSkillConfigs { get; set; }
-        public ChatbotTokenConfigsModel? ChatbotTokenConfigs { get; set; }
     }
 }

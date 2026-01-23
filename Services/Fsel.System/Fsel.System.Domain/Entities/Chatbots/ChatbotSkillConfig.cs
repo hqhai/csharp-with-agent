@@ -6,7 +6,6 @@ namespace Fsel.System.Domain.Entities.Chatbots
     using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
     using Fsel.Shared.Enums;
-    using Fsel.System.Domain.Enums;
     using global::System.ComponentModel.DataAnnotations;
     using global::System.ComponentModel.DataAnnotations.Schema;
 

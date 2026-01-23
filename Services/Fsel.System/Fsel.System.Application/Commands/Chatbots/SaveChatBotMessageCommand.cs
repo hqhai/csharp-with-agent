@@ -19,7 +19,6 @@ namespace Fsel.System.Application.Commands.Chatbots
     using Fsel.System.Application.Services.StorageServices;
     using Fsel.System.Application.Services.StorageServices.Models;
     using Fsel.System.Domain.Entities.Chatbots;
-    using Fsel.System.Domain.Enums;
     using Fsel.System.Domain.Enums.ErrorCodes;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.CommandModels.ChatBot;
