@@ -1,6 +1,5 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using Fsel.Common.ValueSettings;
 using Fsel.Core.Extensions;
 using Fsel.Realtime.Application.Hubs;
 using Fsel.Realtime.Application.Hubs.Test;
@@ -10,6 +9,7 @@ using Fsel.Realtime.Application.Queues.Publishers;
 using Fsel.Realtime.Application.Services.SpeechToText;
 using Fsel.Realtime.Application.ValueSettings;
 using Fsel.Realtime.Domain.SpeechToTextModel;
+using Fsel.Realtime.Infrastructure.Services;
 using Fsel.Shared.Constants;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -48,6 +48,9 @@ builder.Services.AddScoped<SpeechToTextHub>();
 // Use Singleton to share session dictionary across all SignalR calls
 builder.Services.AddSingleton<ISpeechRecognitionEventHandler, SpeechRecognitionEventNotifier>();
 builder.Services.AddSingleton<ISpeechRecognitionService, AzureSpeechRecognitionService>();
+
+// Refit clients for storage service
+builder.AddRefitClients(typeof(IStorageService), appSetting?.Services?.StorageApiUrl);
 
 builder.AddMassTransit(appSetting,
 multicastQueues: new Dictionary<string, Type>

@@ -4,13 +4,17 @@ namespace Fsel.Realtime.Application.Services.SpeechToText
 {
     using System;
     using System.Collections.Concurrent;
+    using System.IO;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Realtime.Application.ValueSettings;
     using Fsel.Realtime.Domain.SpeechToTextModel;
+    using Fsel.Realtime.Infrastructure.Services;
+    using Fsel.Shared.Enums;
     using Microsoft.AspNetCore.SignalR;
     using Microsoft.CognitiveServices.Speech;
     using Microsoft.CognitiveServices.Speech.Audio;
+    using Refit;
 
     /// <summary>
     /// Azure Speech Service implementation of ISpeechRecognitionService
@@ -23,11 +27,13 @@ namespace Fsel.Realtime.Application.Services.SpeechToText
         private readonly IHubContext<Hubs.SpeechToTextHub> _hubContext;
         private readonly AppSetting _appSetting;
         private readonly AudioStreamConfig _audioConfig;
+        private readonly IStorageService _storageService;
 
         public AzureSpeechRecognitionService(
             ISpeechRecognitionEventHandler eventHandler,
             IHubContext<Hubs.SpeechToTextHub> hubContext,
             AppSetting appSetting,
+            IStorageService storageApi,
             AudioStreamConfig? audioConfig = null)
         {
             _sessions = new ConcurrentDictionary<string, ISpeechRecognitionSession>();
@@ -35,6 +41,7 @@ namespace Fsel.Realtime.Application.Services.SpeechToText
             _hubContext = hubContext;
             _appSetting = appSetting;
             _audioConfig = audioConfig ?? AudioStreamConfig.DefaultPcm;
+            _storageService = storageApi;
         }
 
         public async Task<ISpeechRecognitionSession> CreateSessionAsync(
@@ -95,6 +102,55 @@ namespace Fsel.Realtime.Application.Services.SpeechToText
             if (_sessions.TryRemove(connectionId, out var session))
             {
                 await session.StopAsync(cancellationToken);
+
+                // Save audio to storage and notify client
+                if (session is AzureSpeechRecognitionSession azureSession)
+                {
+                    var audioData = azureSession.GetAudioData();
+                    if (audioData.Length > 0)
+                    {
+                        try
+                        {
+                            // Create WAV file
+                            var wavData = AzureSpeechRecognitionSession.CreateWavFile(
+                                audioData,
+                                _audioConfig.SampleRate,
+                                _audioConfig.Channels,
+                                _audioConfig.BitsPerSample);
+
+                            // Generate file name
+                            var fileName = $"speech_{azureSession.SessionId}_{DateTime.UtcNow:yyyyMMddHHmmss}.wav";
+
+                            // Upload to S3 via Refit
+                            using var stream = new MemoryStream(wavData);
+                            var streamPart = new StreamPart(stream, fileName, "audio/wav");
+                            var response = await _storageService.UploadFile(
+                                EnumFolderType.Files,
+                                EnumBucketType.FselPublic,
+                                streamPart,
+                                isResize: false,
+                                isValidEmpty: false,
+                                isAddSuffix: true);
+
+                            var audioUrl = response?.Content?.Result;
+                            if (!string.IsNullOrEmpty(audioUrl))
+                            {
+                                // Notify client with audio URL
+                                await _eventHandler.OnAudioSavedAsync(connectionId, azureSession.SessionId, audioUrl);
+                            }
+                        }
+                        catch (ApiException ex)
+                        {
+                            // Log error but don't fail the session cleanup
+                            await _eventHandler.OnErrorAsync(connectionId, "AUDIO_UPLOAD_ERROR", $"Failed to upload audio: {ex.Message}");
+                        }
+                        catch (Exception ex)
+                        {
+                            await _eventHandler.OnErrorAsync(connectionId, "AUDIO_UPLOAD_ERROR", $"Failed to upload audio: {ex.Message}");
+                        }
+                    }
+                }
+
                 session.Dispose();
             }
         }

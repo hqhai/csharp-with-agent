@@ -34,5 +34,10 @@ namespace Fsel.Realtime.Domain.SpeechToTextModel
         /// Handle error event
         /// </summary>
         Task OnErrorAsync(string connectionId, string errorCode, string errorDetails);
+
+        /// <summary>
+        /// Handle audio saved event
+        /// </summary>
+        Task OnAudioSavedAsync(string connectionId, string sessionId, string audioUrl);
     }
 }
