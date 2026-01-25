@@ -27,6 +27,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
         private readonly ICourseRepository _courseRepository;
         private readonly IClassForumResultRepository _classForumResultRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
+        private readonly IUnitResultRepository _unitResultRepository;
         private readonly ILessonRepository _lessonRepository;
         private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
         private readonly IUnitRepository _unitRepository;
@@ -34,7 +35,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
         private readonly IStudentFeedbackRepository _studentFeedbackRepository;
         private readonly IClassForumRepository _classForumRepository;
 
-        public SearchFeedbackAIQueryHandler(ICourseRepository courseRepository, IClassForumResultRepository classForumResultRepository, ILessonResultRepository lessonResultRepository, ILessonRepository lessonRepository, ICourseUnitMockTestRepository courseUnitMockTestRepository, IUnitRepository unitRepository, IUnitLessonRepository unitLessonRepository, IStudentFeedbackRepository studentFeedbackRepository, IClassForumRepository classForumRepository)
+        public SearchFeedbackAIQueryHandler(ICourseRepository courseRepository, IClassForumResultRepository classForumResultRepository, ILessonResultRepository lessonResultRepository, ILessonRepository lessonRepository, ICourseUnitMockTestRepository courseUnitMockTestRepository, IUnitRepository unitRepository, IUnitLessonRepository unitLessonRepository, IStudentFeedbackRepository studentFeedbackRepository, IClassForumRepository classForumRepository, IUnitResultRepository unitResultRepository)
         {
             _courseRepository = courseRepository;
             _classForumResultRepository = classForumResultRepository;
@@ -45,6 +46,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             _unitLessonRepository = unitLessonRepository;
             _studentFeedbackRepository = studentFeedbackRepository;
             _classForumRepository = classForumRepository;
+            _unitResultRepository = unitResultRepository;
         }
 
         public async Task<MethodResult<PagingItemsModel<FeedbackClassForumAIModel>>> Handle(SearchFeedbackAIQuery request, CancellationToken cancellationToken)
@@ -62,9 +64,10 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                         join cf in _classForumRepository.Queryable on baseQ.Id equals cf.LessonId
                         join ul in _unitLessonRepository.Queryable on baseQ.Id equals ul.LessonId
                         join u in _unitRepository.Queryable on ul.UnitId equals u.Id
+                        join ur in _unitResultRepository.Queryable on u.Id equals ur.UnitId
                         join cmt in _courseUnitMockTestRepository.Queryable on u.Id equals cmt.UnitId
                         join c in _courseRepository.Queryable on cmt.CourseId equals c.Id
-                        join lr in _lessonResultRepository.Queryable on new { LessonId = baseQ.Id, UnitId = u.Id, CourseId = c.Id } equals new { lr.LessonId, lr.UnitId, lr.CourseId }
+                        join lr in _lessonResultRepository.Queryable on ur.Id equals lr.UnitResultId
                         join cfr in _classForumResultRepository.Queryable on lr.Id equals cfr.LessonResultId
                         join s in _studentFeedbackRepository.Queryable on cfr.Id equals s.ObjectId
                         select new FeedbackClassForumAIModel

@@ -80,7 +80,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
 
             var classForumResults = from cfr in _classForumResultRepository.Queryable
                                     join lr in _lessonResultRepository.Queryable on cfr.LessonResultId equals lr.Id
-                                    where cfr.StudentId == studentId && lr.CourseId == request.CourseId
+                                    where cfr.StudentId == studentId && lr.CourseResultId == courseResult.Id
                                     select cfr;
 
             var classForumResultIds = classForumResults.Select(p => p.Id).ToList();

@@ -129,7 +129,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                                   on baseQ.CourseId equals cum.CourseId
 
                                   join ur in _unitResultRepository.Queryable
-                                  on new { baseQ.StudentId, baseQ.CourseId, UnitId = cum.UnitId } equals new { ur.StudentId, ur.CourseId, UnitId = (Guid?)ur.UnitId } into unitGroup
+                                  on baseQ.Id equals ur.CourseResultId into unitGroup
                                   from ur in unitGroup.DefaultIfEmpty()
 
                                   join skmt in _mockTestResultRepository.Queryable on new { ur.StudentId, UnitId = (Guid?)ur.UnitId, ur.CourseId } equals new { skmt.StudentId, UnitId = skmt.UnitId, skmt.CourseId } into skmtGroup
@@ -144,7 +144,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                                   from mtr in mtrGroup.DefaultIfEmpty()
 
                                   join lr in _lessonResultRepository.Queryable
-                                  on new { ur.StudentId, ur.UnitId, ur.CourseId } equals new { lr.StudentId, lr.UnitId, lr.CourseId } into lrGroup
+                                  on ur.Id equals lr.UnitResultId into lrGroup
                                   from lr in lrGroup.DefaultIfEmpty()
 
                                   join vr in _videoResultRepository.Queryable
@@ -573,7 +573,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                                       from ul in ulGroup.DefaultIfEmpty()
 
                                       join lr in _lessonResultRepository.Queryable
-                                      on new { baseQ.StudentId, ul.UnitId, baseQ.CourseId, ul.LessonId } equals new { lr.StudentId, lr.UnitId, lr.CourseId, lr.LessonId } into lrGroup
+                                      on baseQ.Id equals lr.CourseResultId into lrGroup
                                       from lr in lrGroup.DefaultIfEmpty()
                                       where baseQ.WorkingStatus == EnumWorkingStatus.Active
                                       group new { ul, courseUnitMockTest, ftr, lr } by new { baseQ.StudentId, DisplayOrder = (int?)ul.DisplayOrder, UnitDisplayOrder = courseUnitMockTest.DisplayOrder } into groupedData
@@ -602,7 +602,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                                       from ul in ulGroup.DefaultIfEmpty()
 
                                       join lr in _lessonResultRepository.Queryable
-                                      on new { baseQ.StudentId, ul.UnitId, baseQ.CourseId, ul.LessonId } equals new { lr.StudentId, lr.UnitId, lr.CourseId, lr.LessonId } into lrGroup
+                                      on baseQ.Id equals lr.CourseResultId into lrGroup
                                       from lr in lrGroup.DefaultIfEmpty()
 
                                       where
