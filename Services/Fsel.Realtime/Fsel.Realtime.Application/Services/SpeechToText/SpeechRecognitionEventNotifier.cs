@@ -2,7 +2,6 @@
 
 namespace Fsel.Realtime.Application.Services.SpeechToText
 {
-    using System;
     using System.Threading.Tasks;
     using Fsel.Realtime.Domain.SpeechToTextModel;
     using Fsel.Shared.Constants;
@@ -54,6 +53,13 @@ namespace Fsel.Realtime.Application.Services.SpeechToText
             return _hubContext.Clients.Client(connectionId).SendAsync(
                 RealtimeSettings.SpeechToTextHub.Methods.OnError,
                 new { errorCode = errorCode, errorDetails = errorDetails });
+        }
+
+        public Task OnAudioSavedAsync(string connectionId, string sessionId, string audioUrl)
+        {
+            return _hubContext.Clients.Client(connectionId).SendAsync(
+                RealtimeSettings.SpeechToTextHub.Methods.OnAudioSaved,
+                new { sessionId = sessionId, audioUrl = audioUrl });
         }
     }
 }

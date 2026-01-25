@@ -10,9 +10,12 @@ namespace Fsel.Realtime.Application.ValueSettings
     /// </summary>
     public class AppSetting : BaseAppSetting
     {
-        /// <summary>
-        /// Cấu hình Azure AI Services (Speech-to-Text, etc.)
-        /// </summary>
         public AzureAiConfig? AzureAiConfig { get; set; }
+        public new Services? Services { get; set; }
+    }
+
+    public class Services : BaseServices
+    {
+        public string? StorageApiUrl { get; set; }
     }
 }

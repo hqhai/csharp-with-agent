@@ -247,6 +247,7 @@ namespace Fsel.Shared.Constants
                 public const string OnStarted = $"OnStarted";
                 public const string OnStopped = $"OnStopped";
                 public const string OnError = $"OnError";
+                public const string OnAudioSaved = $"OnAudioSaved";
             }
         }
     }

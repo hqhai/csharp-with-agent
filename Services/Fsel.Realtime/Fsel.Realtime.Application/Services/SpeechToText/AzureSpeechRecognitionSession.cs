@@ -4,6 +4,7 @@ namespace Fsel.Realtime.Application.Services.SpeechToText
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Realtime.Domain.SpeechToTextModel;
@@ -23,6 +24,7 @@ namespace Fsel.Realtime.Application.Services.SpeechToText
         private readonly ISpeechRecognitionEventHandler _eventHandler;
         private readonly IHubContext<Hubs.SpeechToTextHub> _hubContext;
         private readonly List<string> _recognitionResults;
+        private readonly List<byte[]> _audioChunks;
         private bool _isActive;
 
         public string SessionId { get; }
@@ -47,6 +49,7 @@ namespace Fsel.Realtime.Application.Services.SpeechToText
             _eventHandler = eventHandler;
             _hubContext = hubContext;
             _recognitionResults = new List<string>();
+            _audioChunks = new List<byte[]>();
             StartTime = DateTime.UtcNow;
             _isActive = false;
 
@@ -67,8 +70,80 @@ namespace Fsel.Realtime.Application.Services.SpeechToText
 
         public Task WriteAudioAsync(byte[] audioData, CancellationToken cancellationToken = default)
         {
+            // Write to Azure push stream for recognition
             _pushStream.Write(audioData, audioData.Length);
+
+            // Collect audio data for WAV file creation
+            _audioChunks.Add(audioData);
+
             return Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Gets all collected audio data as a combined byte array
+        /// </summary>
+        public byte[] GetAudioData()
+        {
+            if (_audioChunks.Count == 0)
+                return Array.Empty<byte>();
+
+            var totalLength = 0;
+            foreach (var chunk in _audioChunks)
+            {
+                totalLength += chunk.Length;
+            }
+
+            var result = new byte[totalLength];
+            var offset = 0;
+
+            foreach (var chunk in _audioChunks)
+            {
+                Buffer.BlockCopy(chunk, 0, result, offset, chunk.Length);
+                offset += chunk.Length;
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Creates a WAV file from collected audio data
+        /// </summary>
+        /// <param name="pcmData">Raw PCM audio data</param>
+        /// <param name="sampleRate">Sample rate (default: 16000)</param>
+        /// <param name="channels">Number of channels (default: 1)</param>
+        /// <param name="bitsPerSample">Bits per sample (default: 16)</param>
+        /// <returns>WAV file as byte array</returns>
+        public static byte[] CreateWavFile(byte[] pcmData, int sampleRate = 16000, int channels = 1, int bitsPerSample = 16)
+        {
+            var byteRate = sampleRate * channels * bitsPerSample / 8;
+            var blockAlign = channels * bitsPerSample / 8;
+            var dataSize = pcmData.Length;
+            var fileSize = 36 + dataSize;
+
+            using var ms = new MemoryStream();
+            using var writer = new BinaryWriter(ms);
+
+            // RIFF header
+            writer.Write(new char[] { 'R', 'I', 'F', 'F' });
+            writer.Write(fileSize);
+            writer.Write(new char[] { 'W', 'A', 'V', 'E' });
+
+            // fmt sub-chunk
+            writer.Write(new char[] { 'f', 'm', 't', ' ' });
+            writer.Write(16); // Subchunk1Size (16 for PCM)
+            writer.Write((short)1); // AudioFormat (1 for PCM)
+            writer.Write((short)channels);
+            writer.Write(sampleRate);
+            writer.Write(byteRate);
+            writer.Write((short)blockAlign);
+            writer.Write((short)bitsPerSample);
+
+            // data sub-chunk
+            writer.Write(new char[] { 'd', 'a', 't', 'a' });
+            writer.Write(dataSize);
+            writer.Write(pcmData);
+
+            return ms.ToArray();
         }
 
         public void Dispose()
