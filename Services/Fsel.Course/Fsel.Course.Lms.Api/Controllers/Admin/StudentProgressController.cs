@@ -19,6 +19,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/student-progress")]
     [ApiController]
+    [Permission]
     public class StudentProgressController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -34,6 +35,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<StudentProgressModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [EncryptResponse]
         public async Task<IActionResult> Search([FromQuery] SearchStudentProgressQuery query)
         {
             MethodResult<PagingItemsModel<StudentProgressModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);

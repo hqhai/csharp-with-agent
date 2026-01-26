@@ -139,7 +139,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpGet("check-done-pt/{studentId}")]
         [ProducesResponseType(typeof(MethodResult<EnumResultStatus>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool), nameof(EnumRole.CSO), nameof(EnumRole.Student) })]
+        [Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool), nameof(EnumRole.CSO), nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
         public async Task<IActionResult> CheckDonePtByStudentId([FromRoute] Guid studentId)
         {
             var queryResult = await _mediator.Send(new CheckDonePtByStudentIdQuery { StudentId = studentId }).ConfigureAwait(false);
