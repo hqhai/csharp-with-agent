@@ -34,7 +34,6 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<StudentProgressModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [EncryptResponse]
         public async Task<IActionResult> Search([FromQuery] SearchStudentProgressQuery query)
         {
             MethodResult<PagingItemsModel<StudentProgressModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -141,11 +140,11 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         /// Get Student Progress HomeWork
         /// </summary>
         [HttpGet("class-forum")]
-        [ProducesResponseType(typeof(MethodResult<ClassForumStudentProgressModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<IList<ClassForumStudentProgressModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetStudentProgressClassForum([FromQuery] GetStudentProgressClassForumQuery query)
         {
-            MethodResult<ClassForumStudentProgressModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
@@ -153,11 +152,11 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         /// Get Student Progress Video
         /// </summary>
         [HttpGet("video")]
-        [ProducesResponseType(typeof(MethodResult<VideoStudentProgressModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<IList<VideoStudentProgressModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetStudentProgressVideo([FromQuery] GetStudentProgressVideoQuery query)
         {
-            MethodResult<VideoStudentProgressModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 

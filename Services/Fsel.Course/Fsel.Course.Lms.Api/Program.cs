@@ -232,6 +232,7 @@ builder.Services.AddScoped<IVideoCachingService, VideoCachingService>();
 builder.Services.AddScoped<IVideoTimeCodeService, VideoTimeCodeService>();
 builder.Services.AddScoped<ILearningGoalAggregateService, LearningGoalAggregateService>();
 builder.Services.AddScoped<IStudentGoalProgressService, StudentGoalProgressService>();
+builder.Services.AddScoped<ILearningService, LearningService>();
 
 builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();

@@ -13,5 +13,8 @@ namespace Fsel.Course.Lms.Application.Services.UserServices.Models
         public EnumCourseType Type { get; set; }
         public Guid? CourseId { get; set; }
         public EnumCourseLevel? CourseLevel { get; set; }
+        public Guid? ProgramId { get; set; }
+        public Guid? LevelId { get; set; }
+        public Guid? SubjectId { get; set; }
     }
 }

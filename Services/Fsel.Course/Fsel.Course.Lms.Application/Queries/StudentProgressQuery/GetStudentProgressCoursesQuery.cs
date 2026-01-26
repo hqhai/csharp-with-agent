@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Lms.Application.Services.ApplicationServices;
     using Fsel.Course.Lms.Application.Services.OrderServices;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
@@ -34,8 +35,11 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
         private readonly ITrainingService _trainingService;
         private readonly ICategoryRepository _categoryRepository;
         private readonly ILevelRepository _levelRepository;
+        private readonly IMediator _mediator;
+        private readonly IServiceProvider _serviceProvider;
+        private readonly ILearningService _learningService;
 
-        public GetStudentProgressCoursesQueryHandler(IUserService userService, ManagerProgressHelper managerProgressHelper, ICourseResultRepository courseResultRepository, ISystemService systemService, IOrderService orderService, ICourseRepository courseRepository, ITrainingService trainingService, ILevelRepository levelRepository, ICategoryRepository categoryRepository)
+        public GetStudentProgressCoursesQueryHandler(IUserService userService, ManagerProgressHelper managerProgressHelper, ICourseResultRepository courseResultRepository, ISystemService systemService, IOrderService orderService, ICourseRepository courseRepository, ITrainingService trainingService, ILevelRepository levelRepository, ICategoryRepository categoryRepository, IMediator mediator, IServiceProvider serviceProvider, ILearningService learningService)
         {
             _userService = userService;
             _managerProgressHelper = managerProgressHelper;
@@ -46,6 +50,9 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             _trainingService = trainingService;
             _levelRepository = levelRepository;
             _categoryRepository = categoryRepository;
+            _mediator = mediator;
+            _serviceProvider = serviceProvider;
+            _learningService = learningService;
         }
 
         public async Task<MethodResult<IList<CourseStudentProgressModel>>> Handle(GetStudentProgressCoursesQuery request, CancellationToken cancellationToken)
@@ -108,18 +115,32 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
 
             var featureAccessTimes = featureAccessTimeResults.Content?.Result?.ToList();
 
+            var model = courseIds.Select(p => new GetLearningTreeFromCourseToTestModel()
+            {
+                StudentId = request.StudentId,
+                CourseId = p
+            }).ToList();
+
+            var learningServices = await _learningService.GetLearningTreeFromCourseToTest(model, cancellationToken);
+
             var courseProgress = new List<CourseStudentProgressModel>();
 
             foreach (var item in query)
             {
-                var featureAccessTime = featureAccessTimes?.FirstOrDefault(x => x.CourseId == item.Course.Id);
+                var featureAccessTime = featureAccessTimes?
+                    .FirstOrDefault(x => x.CourseId == item.Course.Id);
 
-                courseProgress.Add(new CourseStudentProgressModel()
+                var learningService = learningServices.FirstOrDefault(p => p.StudentId == request.StudentId && p.LearningTemplateId == item.Course.Id);
+                var totalContentCompleted = learningService?.Children.SelectMany(p => p.Children)?.Sum(p => p.TotalContentCompleted) ?? 0;
+                var totalContent = learningService?.Children.SelectMany(p => p.Children)?.Sum(p => p.TotalContent) ?? 0;
+
+                courseProgress.Add(new CourseStudentProgressModel
                 {
                     CreatedDate = item.CourseResult.CreatedDate,
                     UpdatedDate = item.CourseResult.UpdatedDate,
                     CourseId = item.Course.Id,
                     CourseName = item.Course.Name,
+                    CourseCode = item.Course.Code,
                     StartDate = item.CourseResult.ProcessDate,
                     EndDate = item.CourseResult.Status == EnumResultStatus.Done ? (item.CourseResult.CompletionDate ?? item.CourseResult.UpdatedDate) : null,
                     Program = item.Program.Name,
@@ -129,7 +150,8 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     Subject = item.Subject.Name,
                     SubjectId = item.Subject.Id,
                     TimeSpent = featureAccessTime?.AccessTime ?? default,
-                    Visit = featureAccessTime?.Visit ?? default
+                    Visit = featureAccessTime?.Visit ?? default,
+                    ContentCompleted = $"{totalContentCompleted} / {totalContent}"
                 });
             }
 
