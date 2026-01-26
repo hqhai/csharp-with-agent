@@ -83,7 +83,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
             else
             {
                 var unitResults = await _unitResultRepository.Queryable.Include(x => x.Unit)
-                                                            .Where(x => x.StudentId == student.Id && x.Status == EnumResultStatus.Done && x.CourseId == courseResult.CourseId)
+                                                            .Where(x => x.StudentId == student.Id && x.Status == EnumResultStatus.Done && x.CourseResultId == courseResult.Id)
                                                             .ToArrayAsync(cancellationToken);
                 if (unitResults != null && unitResults.Any())
                 {

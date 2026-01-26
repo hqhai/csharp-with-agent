@@ -132,7 +132,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
         private async Task<UnitResult?> GetUnitResultProgressAsync(CourseResult courseResult, CancellationToken cancellationToken)
         {
             var unitResults = await _unitResultRepository.Queryable.Include(x => x.Unit)
-                                                        .Where(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId)
+                                                        .Where(x => x.StudentId == courseResult.StudentId && x.CourseResultId == courseResult.Id)
                                                         .Where(x => x.Status != EnumResultStatus.Unfinished)
                                                         .OrderByDescending(x => x.CreatedDate)
                                                         .ToListAsync(cancellationToken);
@@ -164,7 +164,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             reportProgress.LocationName = unitResult.Unit?.Name;
             var lessonResult = await _lessonResultRepository.Queryable.Include(x => x.Lesson)
                                               .Where(x => x.StudentId == courseResult.StudentId && x.Status != EnumResultStatus.Unfinished)
-                                              .Where(x => x.CourseId == courseResult.CourseId && x.UnitId == unitResult.UnitId)
+                                              .Where(x => x.UnitResultId == unitResult.Id)
                                               .OrderByDescending(x => x.CreatedDate)
                                               .ThenByDescending(x => x.UpdatedDate)
                                               .FirstOrDefaultAsync(cancellationToken);

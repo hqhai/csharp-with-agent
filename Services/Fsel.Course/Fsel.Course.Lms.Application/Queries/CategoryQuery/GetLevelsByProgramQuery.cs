@@ -174,6 +174,7 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
                 var selectionLevel = _mapper.Map<SelectionLevelModel>(x);
                 selectionLevel.ProgramId = x.ProgramId;
                 selectionLevel.ProgramLevelName = x.Category?.Name;
+                selectionLevel.ProgramDescription = x.Category?.Description;
 
                 var matchCondition = GetMatchConditionValue(matchestRule?.ConditionValues, x.Id);
                 if (matchCondition != null)

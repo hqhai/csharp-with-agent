@@ -7,9 +7,11 @@ namespace Fsel.Course.Domain.Models.EntityModels.ChangeCourseModels
 
     public class LevelChangeCourse : ChangeCourseComponent
     {
+        public Level Level { get; set; }
+
         public bool CanSelect => CanAccess || LearnedBefore || IsCurrentLearningLevel;
         public bool IsCurrentLearningLevel { get; set; }
-        private bool LearnedBefore => CourseResultId != null && CourseResultId != Guid.Empty;
+        public bool LearnedBefore => CourseResultId != null && CourseResultId != Guid.Empty;
         public Guid? CourseResultId { get; set; }
         public Guid LevelId { get; set; }
         public bool CanAccess { get; set; }

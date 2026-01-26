@@ -33,9 +33,8 @@ namespace Fsel.System.Application.Queries.ChatbotConfigQuery
 
             ChatbotConfigModel chatbotConfigModel = new ChatbotConfigModel();
 
-            var chatbotConfig = await _chatbotConfigRepository.Queryable
+            var chatbotConfig = await _chatbotConfigRepository.ReadQueryable
                                                               .Include(x => x.ChatbotSkillConfigs)
-                                                              .Include(x => x.ChatbotTokenConfigs)
                                                               .FirstOrDefaultAsync(x => x.UnitId == request.UnitId, cancellationToken);
             methodResult.Result = _mapper.Map<ChatbotConfigModel>(chatbotConfig);
             methodResult.StatusCode = StatusCodes.Status200OK;

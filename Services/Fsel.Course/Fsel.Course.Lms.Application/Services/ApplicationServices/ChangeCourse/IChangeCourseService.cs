@@ -592,7 +592,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.ChangeCourse
         {
             ArgumentNullException.ThrowIfNull(student?.Id);
 
-            var subjects = _categoryCachingService.GetAll(cancellationToken);
+            var subjects = await _categoryCachingService.GetAll(cancellationToken);
 
             var testGroupResults = await _testGroupResultRepository.ReadQueryable
                 .Include(x => x.CourseChangingHistories)
@@ -614,7 +614,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.ChangeCourse
                 .OrderByDescending(x => x.CreatedDate)
                 .FirstOrDefault();
 
-            var changeCourseAggregateBuilder = new ChangeCourseAggregateBuilder(subjects.Result,
+            var changeCourseAggregateBuilder = new ChangeCourseAggregateBuilder(subjects,
                                                                                 testGroupResults,
                                                                                 courseChangingHistories,
                                                                                 currentCourse,

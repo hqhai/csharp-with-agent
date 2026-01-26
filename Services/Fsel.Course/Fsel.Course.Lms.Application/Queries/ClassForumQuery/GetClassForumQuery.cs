@@ -14,6 +14,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Services.InteractionService;
     using Fsel.Course.Lms.Application.Services.InteractionService.Models;
     using Fsel.Course.Lms.Application.Services.NotificationServices;
@@ -46,6 +47,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
         private readonly INotificationService _notificationService;
         private readonly IClassForumResultRandomRepository _classForumResultRandomRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
+        private readonly ICourseResultRepository _courseResultRepository;
         private const int STUDENT_RANDOM_TAKE = 2; // lấy random 2 bài post của học sinh bất kì từ lớp khác, cùng unit, cùng level
 
         public GetClassForumQueryHandler(IStudentFeedbackRepository studentFeedbackRepository
@@ -59,7 +61,8 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
             , ITrainingService trainingService
             , INotificationService notificationService
             , IClassForumResultRandomRepository classForumResultRandomRepository
-            , ILessonResultRepository lessonResultRepository)
+            , ILessonResultRepository lessonResultRepository
+            , ICourseResultRepository courseResultRepository)
         {
             _studentFeedbackRepository = studentFeedbackRepository;
             _classForumRepository = classForumRepository;
@@ -73,6 +76,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
             _notificationService = notificationService;
             _classForumResultRandomRepository = classForumResultRandomRepository;
             _lessonResultRepository = lessonResultRepository;
+            _courseResultRepository = courseResultRepository;
         }
 
         public async Task<MethodResult<ClassForumByStudentModel>> Handle(GetClassForumQuery request, CancellationToken cancellationToken)
@@ -97,6 +101,13 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                 return methodResult;
             }
 
+            var courseResult = await _courseResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == student.Id && x.WorkingStatus == EnumWorkingStatus.Active, cancellationToken);
+            if (courseResult == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(courseResult));
+                return methodResult;
+            }
+
             var classForum = await _classForumRepository.Queryable
                 .Include(x => x.ClassForumFiles)
                 .FirstOrDefaultAsync(x => x.LessonId == request.LessonId, cancellationToken);
@@ -114,7 +125,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                         join lr in _lessonResultRepository.Queryable on cfr.LessonResultId equals lr.Id
                         where cfr.Status == EnumClassForumResultStatus.Graded
                             && cfr.ClassForumId == classForum.Id
-                            && lr.CourseId == student.CourseId
+                            && lr.CourseResultId == courseResult.Id
                         select cfr;
 
             var totalRecords = await query.CountAsync(cancellationToken);

@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -34,8 +35,9 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
         private readonly ISystemService _systemService;
         private readonly IHomeWorkResultRepository _homeWorkResultRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
+        private readonly ICourseResultRepository _courseResultRepository;
 
-        public GetStudentProgressHomeWorkQueryHandler(IUserService userService, IMapper mapper, IHomeWorkRepository homeWorkRepository, ISystemService systemService, IHomeWorkResultRepository homeWorkResultRepository, ILessonResultRepository lessonResultRepository)
+        public GetStudentProgressHomeWorkQueryHandler(IUserService userService, IMapper mapper, IHomeWorkRepository homeWorkRepository, ISystemService systemService, IHomeWorkResultRepository homeWorkResultRepository, ILessonResultRepository lessonResultRepository, ICourseResultRepository courseResultRepository)
         {
             _userService = userService;
             _mapper = mapper;
@@ -43,6 +45,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             _systemService = systemService;
             _homeWorkResultRepository = homeWorkResultRepository;
             _lessonResultRepository = lessonResultRepository;
+            _courseResultRepository = courseResultRepository;
         }
 
         public async Task<MethodResult<HomeWorkStudentProgressModel>> Handle(GetStudentProgressHomeWorkQuery request, CancellationToken cancellationToken)

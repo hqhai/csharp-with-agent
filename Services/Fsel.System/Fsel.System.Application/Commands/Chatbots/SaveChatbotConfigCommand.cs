@@ -5,8 +5,8 @@ namespace Fsel.System.Application.Commands.Chatbots
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
     using Fsel.System.Domain.Entities.Chatbots;
-    using Fsel.System.Domain.Enums;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.CommandModels.ChatbotConfigs;
     using Fsel.System.Domain.Models.EntityModels;
@@ -65,7 +65,6 @@ namespace Fsel.System.Application.Commands.Chatbots
                     vocabPart,
                     vocabFull,
                     grammarPart,
-                    grammarFull,
                     skill.Configs);
             }
 
@@ -114,7 +113,6 @@ namespace Fsel.System.Application.Commands.Chatbots
         string vocabPart,
         string vocabFull,
         string grammarPart,
-        string grammarFull,
         IList<SkillConfigCommandModel>? currentConfigs)
         {
             var configs = new List<string>(baseConfigs);
@@ -122,7 +120,7 @@ namespace Fsel.System.Application.Commands.Chatbots
             switch (layout)
             {
                 case EnumChatbotLayout.Vocabulary:
-                    configs.Add(grammarFull);
+                    configs.Add(vocabFull);
                     break;
 
                 case EnumChatbotLayout.Grammar:

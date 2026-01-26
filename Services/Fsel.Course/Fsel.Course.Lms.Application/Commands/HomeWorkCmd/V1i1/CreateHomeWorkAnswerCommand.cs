@@ -53,6 +53,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
         private readonly ILogger<CreateHomeWorkAnswerCommand> _logger;
         private readonly QuestBoardPublisher _questBoardPublisher;
         private readonly RankedStudentPublisher _rankedStudentPublisher;
+        private readonly IHomeWorkQuestionRepository _homeWorkQuestionRepository;
 
         public CreateHomeWorkAnswerCommandHandler(
             IHomeWorkResultRepository homeWorkResultRepository,
@@ -70,7 +71,8 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             CreateTokenHistoryPublisher createTokenHistoryPublisher,
             ILogger<CreateHomeWorkAnswerCommand> logger,
             QuestBoardPublisher questionBoardPublisher,
-            RankedStudentPublisher rankedStudentPublisher)
+            RankedStudentPublisher rankedStudentPublisher,
+            IHomeWorkQuestionRepository homeWorkQuestionRepository)
         {
             _homeWorkResultRepository = homeWorkResultRepository;
             _courseResultRepository = courseResultRepository;
@@ -88,6 +90,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             _logger = logger;
             _questBoardPublisher = questionBoardPublisher;
             _rankedStudentPublisher = rankedStudentPublisher;
+            _homeWorkQuestionRepository = homeWorkQuestionRepository;
         }
 
         public async Task<MethodResult<HomeWorkModel>> Handle(CreateHomeWorkAnswerCommand request, CancellationToken cancellationToken)
@@ -662,14 +665,11 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
 
         private async Task<int> CalculateHighestCorrectStreakAsync(Guid homeWorkResultId, CancellationToken cancellationToken)
         {
-            // Streak: chuỗi dài nhất các câu đúng liên tiếp (Status = Done)
-            var answers = await _homeWorkAnswerRepository.Queryable
-                .Where(x => x.HomeWorkResultId == homeWorkResultId)
-                .Where(x => x.Status == EnumAnswerStatus.Done)
-                .OrderBy(x => x.CreatedDate)
-                .Select(x => x.IsCorrect == true && x.IsFirstSubmit)
-                .ToListAsync(cancellationToken);
-
+            var answers = await (from baseQ in _homeWorkAnswerRepository.ReadQueryable
+                                 join hq in _homeWorkQuestionRepository.ReadQueryable on baseQ.HomeWorkQuestionId equals hq.Id
+                                 where baseQ.HomeWorkResultId == homeWorkResultId && baseQ.Status == EnumAnswerStatus.Done
+                                 orderby hq.CreatedDate
+                                 select baseQ.IsCorrect == true && baseQ.IsFirstSubmit).ToListAsync(cancellationToken);
             if (!answers.Any())
             {
                 return 0;

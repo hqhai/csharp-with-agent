@@ -6,13 +6,14 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
-    using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
-    using Fsel.Shared.Enums;
+    using Fsel.Course.Lms.Application.Services.ApplicationServices.ChangeCourse;
+    using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
-    using Microsoft.EntityFrameworkCore;
 
     public class GetAllSubjectsQuery : IRequest<MethodResult<IList<SubjectModel>>>
     {
@@ -20,37 +21,39 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
 
     public class GetAllSubjectsQueryHandler : IRequestHandler<GetAllSubjectsQuery, MethodResult<IList<SubjectModel>>>
     {
-        private readonly ICategoryCachingService _categoryCachingService;
+        private readonly IChangeCourseService _changeCourseService;
+        private readonly IUserService _userService;
+        private readonly AuthContext _authContext;
 
-        public GetAllSubjectsQueryHandler(ICategoryRepository categoryRepository, ICategoryCachingService categoryCachingService)
+        public GetAllSubjectsQueryHandler(IUserService userService,
+            IChangeCourseService changeCourseService,
+            AuthContext authContext)
         {
-            _categoryCachingService = categoryCachingService;
+            _changeCourseService = changeCourseService;
+            _userService = userService;
+            _authContext = authContext;
         }
 
         public async Task<MethodResult<IList<SubjectModel>>> Handle(GetAllSubjectsQuery request, CancellationToken cancellationToken)
         {
-            var subjects = await _categoryCachingService.GetAll(cancellationToken);
-            var subjectModels = subjects.Select(GetSubjectModels).ToList();
-            return new MethodResult<IList<SubjectModel>>() { Result = subjectModels, StatusCode = 200 };
-        }
-
-        private SubjectModel GetSubjectModels(Category category)
-        {
-            var subjectModel = new SubjectModel
+            var methodResult = new MethodResult<IList<SubjectModel>>();
+            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            if (!studentResult.IsSuccessStatusCode)
             {
-                Id = category.Id,
-                Name = category.Name,
-                Type = category.Type.ToString(),
-                TestMode = category.TestMode,
-                Thumbnail = category.Thumbnail,
-                ChildSubjects = new List<SubjectModel>()
-            };
-            foreach (var child in category.Categorys)
-            {
-                subjectModel.ChildSubjects.Add(GetSubjectModels(child));
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
+                return methodResult;
             }
 
-            return subjectModel;
+            var student = studentResult.Content?.Result;
+            if (student == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                return methodResult;
+            }
+
+            var subjectAggregate = await _changeCourseService.GetChangeSubjectAggreate(student, cancellationToken);
+            var subjectModels = subjectAggregate.GetSubjectTree();
+            return new MethodResult<IList<SubjectModel>>() { Result = subjectModels, StatusCode = 200 };
         }
     }
 }

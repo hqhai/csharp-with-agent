@@ -11,10 +11,7 @@ namespace Fsel.System.Domain.Entities.Chatbots
 
     public class ChatBot : Entity
     {
-        public Guid? UnitId { get; set; }
-
         public EnumCourseSkill Skill { get; set; }
-        public Guid? SkillId { get; set; }
 
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? SkillName { get; set; }
@@ -23,8 +20,6 @@ namespace Fsel.System.Domain.Entities.Chatbots
         public string? SkillFilePath { get; set; }
 
         public long RemainToken { get; set; }
-
-        public Guid StudentId { get; set; }
 
         public string? ContentStr { get; set; }
 
@@ -63,14 +58,17 @@ namespace Fsel.System.Domain.Entities.Chatbots
             }
             set { LastestQuestionStr = value.Serialize(); }
         }
+
+        public Guid SkillId { get; set; }
+        public Guid UnitId { get; set; }
+        public Guid UnitResultId { get; set; }
+        public Guid StudentId { get; set; }
     }
 
     public class ChatBotMessage
     {
         public string? Role { get; set; }
-
         public string? FilePath { get; set; }
-
         public string? Content { get; set; }
     }
 }

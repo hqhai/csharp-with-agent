@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -32,15 +33,17 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
         private readonly ISystemService _systemService;
         private readonly IVideoResultRepository _videoResultRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
+        private readonly ICourseResultRepository _courseResultRepository;
         private readonly VideoConverter _videoConverter;
 
-        public GetStudentProgressVideoQueryHandler(IUserService userService, ISystemService systemService, IVideoResultRepository videoResultRepository, ILessonResultRepository lessonResultRepository, VideoConverter videoConverter)
+        public GetStudentProgressVideoQueryHandler(IUserService userService, ISystemService systemService, IVideoResultRepository videoResultRepository, ILessonResultRepository lessonResultRepository, VideoConverter videoConverter, ICourseResultRepository courseResultRepository)
         {
             _userService = userService;
             _systemService = systemService;
             _videoResultRepository = videoResultRepository;
             _lessonResultRepository = lessonResultRepository;
             _videoConverter = videoConverter;
+            _courseResultRepository = courseResultRepository;
         }
 
         public async Task<MethodResult<IList<VideoStudentProgressModel>>> Handle(GetStudentProgressVideoQuery request, CancellationToken cancellationToken)

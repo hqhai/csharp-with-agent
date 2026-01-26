@@ -28,6 +28,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
     public class GetStudentProgressUnitQueryHandler : IRequestHandler<GetStudentProgressUnitQuery, MethodResult<UnitStudentProgressModel>>
     {
         private readonly ICourseRepository _courseRepository;
+        private readonly ICourseResultRepository _courseResultRepository;
         private readonly ManagerProgressHelper _managerProgressHelper;
         private readonly IUnitRepository _unitRepository;
         private readonly IUserService _userService;

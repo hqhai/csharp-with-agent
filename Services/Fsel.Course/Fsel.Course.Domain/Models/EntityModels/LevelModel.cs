@@ -10,11 +10,15 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public string? ProgramLevelName { get; set; }
 
+        public string? ProgramDescription { get; set; }
+
         public string? Code { get; set; }
 
         public string? Description { get; set; }
 
         public int LevelOrder { get; set; }
+
+        public bool LearnedBefore { get; set; }
 
         public IList<SkillViewModel>? Skils { get; set; }
 

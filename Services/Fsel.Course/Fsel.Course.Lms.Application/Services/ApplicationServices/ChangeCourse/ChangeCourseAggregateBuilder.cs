@@ -190,7 +190,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.ChangeCourse
         {
             if (category.Type == EnumTypeCategory.Subject)
             {
-                var subjectComponent = new SubjectChangeCourse { Id = category.Id, Children = new List<ChangeCourseComponent>(), Name = category.Name };
+                var subjectComponent = new SubjectChangeCourse { Id = category.Id, Category = category, Children = new List<ChangeCourseComponent>(), Name = category.Name };
 
                 foreach (var subject in category.Categorys)
                 {
@@ -204,6 +204,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.ChangeCourse
                 var programComponent = new ProgramChangeCourse
                 {
                     Id = category.Id,
+                    Category = category,
                     Name = category?.Name,
                     TestMode = category.TestMode ?? EnumTestMode.Not,
                     IsDefaultForTest = category.IsTestDefault,
@@ -212,7 +213,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.ChangeCourse
 
                 foreach (var level in category.Levels.OrderBy(x => x.LevelOrder))
                 {
-                    programComponent.Children.Add(new LevelChangeCourse { Name = level?.Name, LevelId = level.Id, LevelOrder = level.LevelOrder, CanAccess = category.TestMode == EnumTestMode.Not });
+                    programComponent.Children.Add(new LevelChangeCourse { Name = level?.Name, Level = level, LevelId = level.Id, LevelOrder = level.LevelOrder, CanAccess = category.TestMode == EnumTestMode.Not });
                 }
 
                 return programComponent;

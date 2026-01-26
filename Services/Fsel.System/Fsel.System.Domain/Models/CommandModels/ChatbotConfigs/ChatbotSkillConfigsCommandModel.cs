@@ -3,7 +3,6 @@
 namespace Fsel.System.Domain.Models.CommandModels.ChatbotConfigs
 {
     using Fsel.Shared.Enums;
-    using Fsel.System.Domain.Enums;
 
     public class ChatbotSkillConfigsCommandModel
     {

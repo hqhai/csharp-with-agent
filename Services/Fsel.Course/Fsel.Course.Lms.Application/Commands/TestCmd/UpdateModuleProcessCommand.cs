@@ -123,16 +123,16 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
                 case nameof(Domain.Entities.Unit):
                     if (request.UnitId.HasValue)
                     {
-                        await UpdateUnitResultAsync(request, student);
+                        await UpdateUnitResultAsync(courseResult.Result?.CourseResult?.Id, request, student);
                     }
                     break;
 
                 case nameof(Lesson):
-                    await UpdateLessonResultAsync(request, student, cancellationToken);
+                    await UpdateLessonResultAsync(courseResult.Result?.CourseResult?.Id, request, student, cancellationToken);
                     break;
 
                 case nameof(VideoTimeCode):
-                    var lessonVideoResult = await UpdateStartLessonAsync(request, student, cancellationToken);
+                    var lessonVideoResult = await UpdateStartLessonAsync(courseResult.Result?.CourseResult?.Id, request, student, cancellationToken);
                     if (lessonVideoResult != null)
                     {
                         await UpdateVideoTimeCodeResultAsync(request, lessonVideoResult, cancellationToken);
@@ -140,7 +140,7 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
                     break;
 
                 case nameof(ClassForum):
-                    var lessonResult = await UpdateStartLessonAsync(request, student, cancellationToken);
+                    var lessonResult = await UpdateStartLessonAsync(courseResult.Result?.CourseResult?.Id, request, student, cancellationToken);
                     if (lessonResult != null)
                     {
                         await UpdateVideoDoneAsync(lessonResult, cancellationToken);
@@ -152,11 +152,11 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
                     break;
 
                 case nameof(EnumMockTestType.SkillMockTest):
-                    await UpdateMockTestResultAsync(request, student, cancellationToken);
+                    await UpdateMockTestResultAsync(courseResult.Result?.CourseResult?.Id, request, student, cancellationToken);
                     break;
 
                 case nameof(EnumMockTestType.FullMockTest):
-                    await UpdateMockTestResultAsync(request, student, cancellationToken);
+                    await UpdateMockTestResultAsync(courseResult.Result?.CourseResult?.Id, request, student, cancellationToken);
                     break;
             }
             methodResult.Result = true;
@@ -164,9 +164,9 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
             return methodResult;
         }
 
-        private async Task CreateModuleResultForUnitAsync(UpdateModuleProcessCommand request, StudentModel student, CancellationToken cancellationToken)
+        private async Task CreateModuleResultForUnitAsync(Guid? courseResultId, UpdateModuleProcessCommand request, StudentModel student, CancellationToken cancellationToken)
         {
-            await UpdateUnitResultAsync(request, student);
+            await UpdateUnitResultAsync(courseResultId, request, student);
             if (request.UnitId.HasValue)
             {
                 await _mediator.Send(new GetLessonsQuery { CourseId = request.CourseId, UnitId = request.UnitId.Value, UserId = student?.UserId ?? default }, cancellationToken);
@@ -206,12 +206,12 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
             }
         }
 
-        private async Task<LessonResult?> UpdateStartLessonAsync(UpdateModuleProcessCommand request, StudentModel student, CancellationToken cancellationToken)
+        private async Task<LessonResult?> UpdateStartLessonAsync(Guid? courseResultId, UpdateModuleProcessCommand request, StudentModel student, CancellationToken cancellationToken)
         {
             LessonResult? lessonResult = default;
             if (request.UnitId.HasValue)
             {
-                lessonResult = await UpdateLessonResultAsync(request, student, cancellationToken);
+                lessonResult = await UpdateLessonResultAsync(courseResultId, request, student, cancellationToken);
                 if (lessonResult != null && lessonResult.Status == EnumResultStatus.New)
                 {
                     await _mediator.Send(new StartLessonCommand
@@ -227,10 +227,10 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
             return lessonResult;
         }
 
-        private async Task<LessonResult?> UpdateLessonResultAsync(UpdateModuleProcessCommand request, StudentModel student, CancellationToken cancellationToken)
+        private async Task<LessonResult?> UpdateLessonResultAsync(Guid? courseResultId, UpdateModuleProcessCommand request, StudentModel student, CancellationToken cancellationToken)
         {
-            await CreateModuleResultForUnitAsync(request, student, cancellationToken);
-            var lessonResult = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.CourseId == request.CourseId && x.UnitId == request.UnitId && x.LessonId == request.LessonId && x.StudentId == student.Id, cancellationToken);
+            await CreateModuleResultForUnitAsync(courseResultId, request, student, cancellationToken);
+            var lessonResult = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.CourseResultId == courseResultId && x.UnitId == request.UnitId && x.LessonId == request.LessonId && x.StudentId == student.Id, cancellationToken);
             if (lessonResult != null && lessonResult.Status == EnumResultStatus.Unfinished)
             {
                 lessonResult.Status = EnumResultStatus.New;
@@ -242,9 +242,9 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
             return lessonResult;
         }
 
-        private async Task UpdateUnitResultAsync(UpdateModuleProcessCommand request, StudentModel student)
+        private async Task UpdateUnitResultAsync(Guid? courseResultId, UpdateModuleProcessCommand request, StudentModel student)
         {
-            var unitResult = await _unitResultRepository.Queryable.FirstOrDefaultAsync(x => x.CourseId == request.CourseId && x.UnitId == request.UnitId && x.StudentId == student.Id);
+            var unitResult = await _unitResultRepository.Queryable.FirstOrDefaultAsync(x => x.CourseResultId == courseResultId && x.UnitId == request.UnitId && x.StudentId == student.Id);
             if (unitResult != null && unitResult.Status == EnumResultStatus.Unfinished)
             {
                 unitResult.Status = EnumResultStatus.New;
@@ -268,11 +268,11 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
             }
         }
 
-        private async Task UpdateMockTestResultAsync(UpdateModuleProcessCommand request, StudentModel student, CancellationToken cancellationToken)
+        private async Task UpdateMockTestResultAsync(Guid? courseResultId, UpdateModuleProcessCommand request, StudentModel student, CancellationToken cancellationToken)
         {
-            if (request.UnitId.HasValue)
+            if (request.UnitId.HasValue && courseResultId.HasValue)
             {
-                await CreateModuleResultForUnitAsync(request, student, cancellationToken);
+                await CreateModuleResultForUnitAsync(courseResultId, request, student, cancellationToken);
             }
             var mockTestResult = await _mockTestResultRepository.Queryable.Where(x => !request.UnitId.HasValue || x.UnitId == request.UnitId)
                 .FirstOrDefaultAsync(x => x.CourseId == request.CourseId && x.MockTestId == request.ObjectId && x.StudentId == student.Id, cancellationToken);

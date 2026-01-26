@@ -12,11 +12,16 @@ using Unit = Fsel.Course.Domain.Entities.Unit;
 
 namespace Fsel.Course.Application.Commands.UnitCmd
 {
+    using System.Threading;
+    using Fsel.Common.Enums;
     using Fsel.Core.Base.Interfaces;
+    using Fsel.Course.Application.Services.SystemServices;
+    using Fsel.Course.Application.Services.SystemServices.CommandModels;
     using Microsoft.AspNetCore.Http;
 
     public class UpdateUnitCommand : UpdateUnitCommandModel, IRequest<MethodResult<UnitModel>>
     {
+        public SaveChatbotConfigCommandModel? ChatbotConfig { get; set; }
     }
 
     public class UpdateUnitCommandHandler : IRequestHandler<UpdateUnitCommand, MethodResult<UnitModel>>
@@ -24,18 +29,22 @@ namespace Fsel.Course.Application.Commands.UnitCmd
         private readonly IUnitRepository _unitRepository;
         private readonly IVersionEntityUpdater<Unit> _versionEntityUpdater;
         private readonly IServiceProvider _serviceProvider;
+        private readonly ISystemService _systemService;
 
         public UpdateUnitCommandHandler(IUnitRepository unitTestRepository,
             IVersionEntityUpdater<Unit> versionEntityUpdater,
-            IServiceProvider serviceProvider)
+            IServiceProvider serviceProvider,
+            ISystemService systemService)
         {
             _unitRepository = unitTestRepository;
             _versionEntityUpdater = versionEntityUpdater;
             _serviceProvider = serviceProvider;
+            _systemService = systemService;
         }
 
         public async Task<MethodResult<UnitModel>> Handle(UpdateUnitCommand request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<UnitModel>();
 
             var unit = await _unitRepository.Queryable
@@ -54,9 +63,9 @@ namespace Fsel.Course.Application.Commands.UnitCmd
                 methodResult.AddErrorBadRequest(newVersionUnit.ErrorMessages);
                 return methodResult;
             }
-
+            var isUsingByClient = await _unitRepository.IsUsingByClient(unit.Id);
             await _versionEntityUpdater.UpdateEntity(unit, newVersionUnit,
-                async (_, entity) => await _unitRepository.IsUsingByClient(entity.Id),
+                async (_, entity) => isUsingByClient,
                 async (oldEntity, newEntity) =>
                 {
                     oldEntity.Code = newEntity.Code;
@@ -101,9 +110,34 @@ namespace Fsel.Course.Application.Commands.UnitCmd
                     await Task.Yield();
                 }
             );
-
+            await UpdateChatbotConfigAsync(request, methodResult, isUsingByClient);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
+        }
+
+        private async Task UpdateChatbotConfigAsync(UpdateUnitCommand request, MethodResult<UnitModel> methodResult, bool isUsingByClient)
+        {
+            if (request.ChatbotConfig != null && methodResult.Result != null)
+            {
+                if (isUsingByClient)
+                {
+                    var unitNew = await _unitRepository.ReadQueryable
+                                                       .Where(x => x.VersionStatus == EnumVersionStatus.LastVersion)
+                                                       .Where(x => x.OriginalId == methodResult.Result.OriginalId)
+                                                       .FirstOrDefaultAsync();
+                    if (unitNew != null)
+                    {
+                        request.ChatbotConfig.UnitId = unitNew.Id;
+                        request.ChatbotConfig.ChatbotSkillConfigs.ForEach(x => x.Id = null);
+                        await _systemService.SaveChatBotConfigAsync(request.ChatbotConfig);
+                    }
+                }
+                else
+                {
+                    request.ChatbotConfig.UnitId = methodResult.Result.Id;
+                    await _systemService.SaveChatBotConfigAsync(request.ChatbotConfig);
+                }
+            }
         }
     }
 }

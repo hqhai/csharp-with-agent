@@ -88,6 +88,7 @@ namespace Fsel.Course.Application.Queries.ProgramQuery
                                          Skils = _skillLevelRepository.Queryable
                                                                       .Include(x => x.Skill)
                                                                       .Where(sl => sl.LevelId == b.Id)
+                                                                      .OrderBy(x => x.CreatedDate)
                                                                       .Select(sl => new SkillViewModel
                                                                       {
                                                                           Id = sl.SkillId,

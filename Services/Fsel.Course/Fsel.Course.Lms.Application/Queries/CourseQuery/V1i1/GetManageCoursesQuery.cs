@@ -228,7 +228,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
 
         private async Task SetProgressModuleAsync(CourseManagerModel courseManager, CourseResult courseResult)
         {
-            var unitResult = await _unitResultRepository.Queryable.Where(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId && x.Status != EnumResultStatus.Unfinished)
+            var unitResult = await _unitResultRepository.Queryable.Where(x => x.CourseResultId == courseResult.Id && x.CourseId == courseResult.CourseId && x.Status != EnumResultStatus.Unfinished)
                                                         .OrderByDescending(x => x.CreatedDate)
                                                         .ThenByDescending(x => x.UpdatedDate)
                                                         .FirstOrDefaultAsync();
@@ -251,7 +251,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
                 courseManager.Type = nameof(Unit);
                 courseManager.ObjectId = unitResult.UnitId;
 
-                var lessonResults = await _lessonResultRepository.Queryable.Where(x => x.StudentId == courseResult.StudentId && x.UnitId == unitResult.UnitId && x.CourseId == courseResult.CourseId).OrderBy(x => x.CreatedDate).ToListAsync();
+                var lessonResults = await _lessonResultRepository.Queryable.Where(x => x.StudentId == courseResult.StudentId && x.UnitResultId == unitResult.Id).OrderBy(x => x.CreatedDate).ToListAsync();
                 if (lessonResults != null && lessonResults.Any())
                 {
                     courseManager.LessonDisplayOrder = lessonResults.Count(x => x.Status == EnumResultStatus.Done) + 1;

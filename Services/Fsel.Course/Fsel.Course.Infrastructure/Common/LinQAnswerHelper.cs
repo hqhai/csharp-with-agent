@@ -151,8 +151,8 @@ namespace Fsel.Course.Infrastructure.Common
                 return false;
             }
             // Dùng TextCleaner để làm sạch input
-            string cleanedQuestion = " " + TextCleaner.CleanText(question) + " ";
-            string cleanedAnswer = " " + TextCleaner.CleanText(answer) + " ";
+            string cleanedQuestion = " " + TextCleaner.CleanTextV2(question) + " ";
+            string cleanedAnswer = " " + TextCleaner.CleanTextV2(answer) + " ";
 
             // So sánh phần chứa
             return cleanedAnswer.Contains(cleanedQuestion, StringComparison.OrdinalIgnoreCase);

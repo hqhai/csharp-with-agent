@@ -610,7 +610,6 @@ namespace Fsel.Course.Infrastructure.Common
             var videoTimeCodeResults = await _videoTimeCodeResultRepository.ReadQueryable
                                                 .Include(x => x.VideoTimeCode)
                                                 .Where(x => x.VideoResultId == videoResult.Id && x.CreatedDate >= videoResult.CreatedDate)
-                                                .Where(x => !(videoResult.Status == EnumResultStatus.Done) || x.UpdatedDate <= videoResult.UpdatedDate)
                                                 .ToListAsync(cancellationToken);
 
             // Tính token cho Standalone TimeCode
@@ -775,7 +774,6 @@ namespace Fsel.Course.Infrastructure.Common
             var videoTimeCodeResults = await _videoTimeCodeResultRepository.ReadQueryable
                     .Include(x => x.VideoTimeCode)
                     .Where(x => x.VideoResultId == videoResult.Id && x.CreatedDate >= videoResult.CreatedDate)
-                    .Where(x => !(videoResult.Status == EnumResultStatus.Done) || x.UpdatedDate <= videoResult.UpdatedDate)
                     .ToListAsync(cancellationToken);
 
             var answers = videoTimeCodeResults.Where(x => x.CorrectTotal > 0 && x.SkillScores != null && x.SkillScores.Any())

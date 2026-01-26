@@ -138,7 +138,7 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
             // delete lesson result va lesson note
             var lessonResults = await _lessonResultRepository.Queryable
                                                             .Include(x => x.LessonNotes)
-                                                            .Where(x => x.StudentId == student.Id && x.CourseId == student.CourseId)
+                                                            .Where(x => x.StudentId == student.Id && unitResult.Select(n => n.Id).Contains(x.UnitResultId ?? Guid.Empty))
                                                             .ToListAsync(cancellationToken);
             if (lessonResults.Count != 0)
             {

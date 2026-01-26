@@ -1301,7 +1301,7 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<Guid?>("SkillId")
+                    b.Property<Guid>("SkillId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("SkillName")
@@ -1316,7 +1316,10 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("UnitId")
+                    b.Property<Guid>("UnitId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UnitResultId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("UpdatedDate")

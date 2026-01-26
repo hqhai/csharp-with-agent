@@ -45,7 +45,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.ChangeCourseModels
 
         public ChangeSubjectDirective? SelectProjectSubject(ChangeProgramRequest request)
         {
-            foreach(var subject in RootSubjects)
+            foreach (var subject in RootSubjects)
             {
                 var directive = subject.SelectProjectSubject(request);
                 if (directive != null)
@@ -55,6 +55,11 @@ namespace Fsel.Course.Domain.Models.EntityModels.ChangeCourseModels
             }
 
             return null;
+        }
+
+        public List<SubjectModel> GetSubjectTree(bool isIncludeLevel = false)
+        {
+            return RootSubjects.Select(s => s.GetSubjectTree(isIncludeLevel)).ToList();
         }
     }
 }
