@@ -123,7 +123,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
 
         private async Task<int> GetTotalLessonCompleteAsync(CourseResult courseResult, CancellationToken cancellationToken)
         {
-            return await _lessonResultRepository.Queryable.Where(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId)
+            return await _lessonResultRepository.Queryable.Where(x => x.StudentId == courseResult.StudentId && x.CourseResultId == courseResult.Id)
                                                 .Where(x => x.Status == EnumResultStatus.Done)
                                                 .CountAsync(cancellationToken);
         }

@@ -46,18 +46,18 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             }
 
             var unitResultEntities = await (from ur in _unitResultRepository.Queryable.WhereBulkContains(studentIds, p => p.StudentId)
-                                            join cr in _courseResultRepository.Queryable on new { ur.StudentId, ur.CourseId } equals new { cr.StudentId, cr.CourseId }
+                                            join cr in _courseResultRepository.Queryable on ur.CourseResultId equals cr.Id
                                             where cr.WorkingStatus == EnumWorkingStatus.Active && ur.Status == EnumResultStatus.Done && ur.CompletionDate >= request.StartDate && ur.CompletionDate <= request.EndDate
                                             select ur).ToListAsync(cancellationToken);
 
             var lessonResultEntities = await (from lr in _lessonResultRepository.Queryable.WhereBulkContains(studentIds, p => p.StudentId)
-                                              join cr in _courseResultRepository.Queryable on new { lr.StudentId, lr.CourseId } equals new { cr.StudentId, cr.CourseId }
+                                              join cr in _courseResultRepository.Queryable on lr.CourseResultId equals cr.Id
                                               where cr.WorkingStatus == EnumWorkingStatus.Active && lr.Status == EnumResultStatus.Done && lr.UpdatedDate >= request.StartDate && lr.UpdatedDate <= request.EndDate
                                               select lr).ToListAsync(cancellationToken);
 
             var classForumResultEntities = await (from lr in _lessonResultRepository.Queryable.WhereBulkContains(studentIds, p => p.StudentId)
                                                   join cfr in _classForumResultRepository.Queryable on lr.Id equals cfr.LessonResultId
-                                                  join cr in _courseResultRepository.Queryable on new { lr.StudentId, lr.CourseId } equals new { cr.StudentId, cr.CourseId }
+                                                  join cr in _courseResultRepository.Queryable on lr.CourseResultId equals cr.Id
                                                   where cr.WorkingStatus == EnumWorkingStatus.Active && cfr.Status.HasValue && cfr.UpdatedDate >= request.StartDate && cfr.UpdatedDate <= request.EndDate
                                                   select cfr).ToListAsync(cancellationToken);
 

@@ -71,7 +71,7 @@ namespace Fsel.Course.Lms.Application.Queries.NavigationCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
                 return methodResult;
             }
-            var lessonResult = await GetLessonResultAsync(course.Id, student.Id, cancellationToken);
+            var lessonResult = await GetLessonResultAsync(courseResult.Id, student.Id, cancellationToken);
             if (lessonResult == null || lessonResult.Status != EnumResultStatus.Done)
             {
                 methodResult.StatusCode = StatusCodes.Status200OK;
@@ -119,7 +119,7 @@ namespace Fsel.Course.Lms.Application.Queries.NavigationCmd
                 {
                     // Lesson Tiếp Theo
                     var lessonNext = unitLessons[unitLessons.IndexOf(unitLesson) + 1];
-                    var lessonResultNext = await _lessonResultRepository.Queryable.Where(x => x.CourseId == lessonResult.CourseId && x.UnitId == lessonResult.UnitId)
+                    var lessonResultNext = await _lessonResultRepository.Queryable.Where(x => x.CourseResultId == lessonResult.CourseResultId && x.UnitResultId == lessonResult.UnitResultId)
                         .FirstOrDefaultAsync(x => x.LessonId == lessonNext.LessonId && x.StudentId == student.Id && x.Status == EnumResultStatus.New, cancellationToken);
                     if (lessonResultNext != null)
                     {
@@ -140,10 +140,10 @@ namespace Fsel.Course.Lms.Application.Queries.NavigationCmd
             return methodResult;
         }
 
-        private async Task<LessonResult?> GetLessonResultAsync(Guid courseId, Guid studentId, CancellationToken cancellationToken)
+        private async Task<LessonResult?> GetLessonResultAsync(Guid courseResultId, Guid studentId, CancellationToken cancellationToken)
         {
             var lessonResult = await _lessonResultRepository.Queryable
-                                                   .Where(x => x.CourseId == courseId && x.StudentId == studentId)
+                                                   .Where(x => x.CourseResultId == courseResultId && x.StudentId == studentId)
                                                    .OrderByDescending(x => x.UpdatedDate)
                                                    .ThenByDescending(x => x.CreatedDate)
                                                    .FirstOrDefaultAsync(cancellationToken);
@@ -151,7 +151,7 @@ namespace Fsel.Course.Lms.Application.Queries.NavigationCmd
             if (lessonResult != null && lessonResult.Status == EnumResultStatus.New)
             {
                 lessonResult = await _lessonResultRepository.Queryable
-                                   .Where(x => x.CourseId == courseId && x.Status == EnumResultStatus.Done && x.StudentId == studentId)
+                                   .Where(x => x.CourseResultId == courseResultId && x.Status == EnumResultStatus.Done && x.StudentId == studentId)
                                    .OrderByDescending(x => x.CreatedDate)
                                    .FirstOrDefaultAsync(cancellationToken);
             }

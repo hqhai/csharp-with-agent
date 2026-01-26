@@ -79,9 +79,11 @@ namespace Fsel.Course.Lms.Application.Queries.LeaderBoardCollectiveAwardQuery
                                                                                      .ToListAsync(cancellationToken);
 
             List<Guid> courseIds = courseResults.Select(x => x.CourseId).Distinct().ToList();
+            List<Guid> courseResultIds = courseResults.Select(x => x.Id).Distinct().ToList();
             var unitResults = await _unitResultRepository.Queryable
                                                          .WhereBulkContains(studentIds, x => x.StudentId)
                                                          .WhereBulkContains(courseIds, x => x.CourseId)
+                                                         .WhereBulkContains(courseResultIds, x => x.CourseResultId)
                                                          .Where(x => x.Status == EnumResultStatus.Done)
                                                          .ToListAsync(cancellationToken);
 

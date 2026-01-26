@@ -78,7 +78,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
                                           }).ToListAsync(cancellationToken);
 
                 var lessonResultModels = await (from cr in _courseResultRepository.Queryable.WhereBulkContains(studentIds, p => p.StudentId)
-                                                join lr in _lessonResultRepository.Queryable on new { cr.CourseId, cr.StudentId } equals new { lr.CourseId, lr.StudentId }
+                                                join lr in _lessonResultRepository.Queryable on cr.Id equals lr.CourseResultId
                                                 where cr.WorkingStatus == Shared.Enums.EnumWorkingStatus.Active && lr.Status == EnumResultStatus.Done
                                                 select new
                                                 {

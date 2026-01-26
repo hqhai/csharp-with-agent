@@ -138,7 +138,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
                 }).ToListAsync(cancellationToken);
             var unitResultGroups = await (from baseQ in _courseResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId)
                                           join cum in _courseUnitMockTestRepository.Queryable on baseQ.CourseId equals cum.CourseId
-                                          join ur in _unitResultRepository.Queryable on new { cum.CourseId, baseQ.StudentId, UnitId = cum.UnitId } equals new { ur.CourseId, ur.StudentId, UnitId = (Guid?)ur.UnitId }
+                                          join ur in _unitResultRepository.Queryable on baseQ.Id equals ur.CourseResultId
                                           where baseQ.WorkingStatus == EnumWorkingStatus.Active && ur.Status == EnumResultStatus.Done
                                           group ur by ur.StudentId into g
                                           select new
@@ -159,7 +159,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
 
             var skillMockTestResultGroups = await (from baseQ in _courseResultRepository.Queryable
                                                    join cum in _courseUnitMockTestRepository.Queryable on baseQ.CourseId equals cum.CourseId
-                                                   join ur in _unitResultRepository.Queryable on new { cum.CourseId, baseQ.StudentId, UnitId = cum.UnitId } equals new { ur.CourseId, ur.StudentId, UnitId = (Guid?)ur.UnitId }
+                                                   join ur in _unitResultRepository.Queryable on baseQ.Id equals ur.CourseResultId
                                                    join mtr in _mockTestResultRepository.Queryable on new { ur.CourseId, ur.StudentId, UnitId = (Guid?)ur.UnitId } equals new { mtr.CourseId, mtr.StudentId, UnitId = mtr.UnitId }
                                                    where baseQ.WorkingStatus == EnumWorkingStatus.Active && mtr.Status == EnumResultStatus.Done
                                                    group mtr by mtr.StudentId into g

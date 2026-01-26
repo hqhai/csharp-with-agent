@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
     using Fsel.Core.Base;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -23,11 +24,13 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
     {
         private readonly AuthContext _authContext;
         private readonly IUnitResultRepository _unitResultRepository;
+        private readonly ICourseResultRepository _courseResultRepository;
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
 
         public GetUnitByLessonTotalQueryHandler(AuthContext authContext
             , IUnitResultRepository unitResultRepository
+            , ICourseResultRepository courseResultRepository
             , IMapper mapper
             , IUserService userService)
         {
@@ -35,6 +38,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             _unitResultRepository = unitResultRepository;
             _mapper = mapper;
             _userService = userService;
+            _courseResultRepository = courseResultRepository;
         }
 
         public async Task<MethodResult<UnitResultModel>> Handle(GetUnitByLessonTotalQuery request, CancellationToken cancellationToken)
@@ -55,7 +59,13 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 return methodResult;
             }
             var studentId = student.Id;
-            var unitResult = await _unitResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.UnitId == request.UnitId && x.CourseId == request.CourseId, cancellationToken);
+            var courseResult = await _courseResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.CourseId == request.CourseId && x.WorkingStatus == Shared.Enums.EnumWorkingStatus.Active, cancellationToken);
+            if (courseResult == null)
+            {
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
+            var unitResult = await _unitResultRepository.Queryable.FirstOrDefaultAsync(x => x.CourseResultId == courseResult.Id && x.UnitId == request.UnitId, cancellationToken);
             if (unitResult == null)
             {
                 return methodResult;

@@ -159,7 +159,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             {
                 return new object();
             }
-            var lessonResultIds = await _lessonResultRepository.Queryable.Where(x => request.UnitId.HasValue && x.StudentId == courseResult.StudentId && x.UnitId == request.UnitId && x.CourseId == courseResult.CourseId).Select(x => x.Id).ToListAsync();
+            var lessonResultIds = await _lessonResultRepository.Queryable.Where(x => request.UnitId.HasValue && x.StudentId == courseResult.StudentId && x.UnitId == request.UnitId && x.CourseResultId == courseResult.Id).Select(x => x.Id).ToListAsync();
             if (courseType == EnumCourseType.Academic)
             {
                 var (videoSkillScores, percentVideo) = await GetVideoSkillScores(lessonResultIds, EnumTimeCodeType.Standalone, OverallPercentUnit.OverallAcaPercentVideo);

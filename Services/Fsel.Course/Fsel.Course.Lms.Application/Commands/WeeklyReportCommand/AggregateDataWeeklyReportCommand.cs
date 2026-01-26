@@ -227,7 +227,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
 
                         weeklyReport.SenderTemplate = EnumSenderTemplate.WeeklyReport3;
 
-                        var unitResultNext = unitResultsNext.Where(x => x.StudentId == item.Id && x.CourseId == item.CourseId).OrderBy(x => x.UpdatedDate).FirstOrDefault();
+                        var unitResultNext = unitResultsNext.Where(x => x.StudentId == item.Id && x.CourseResultId == courseResult.Id).OrderBy(x => x.UpdatedDate).FirstOrDefault();
 
                         if (unitResultNext != null)
                         {
