@@ -33,6 +33,8 @@ namespace Fsel.Course.Domain.Models.CommandModels.Programs
 
         public string? Description { get; set; }
 
+        public string? PTDescription { get; set; }
+
         public int LevelOrder { get; set; }
 
         public IList<Guid>? SkillIds { get; set; }

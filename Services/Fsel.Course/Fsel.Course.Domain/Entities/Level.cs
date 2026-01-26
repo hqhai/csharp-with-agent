@@ -23,6 +23,9 @@ namespace Fsel.Course.Domain.Entities
         [RegexValid(Regex = @"^[^<>]*$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
         public string? Description { get; set; }
 
+        [MaxLength(2000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? PTDescription { get; set; }
+
         public int LevelOrder { get; set; }
 
         public Guid ProgramId { get; set; }
