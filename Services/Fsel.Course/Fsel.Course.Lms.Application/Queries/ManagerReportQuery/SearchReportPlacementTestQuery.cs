@@ -17,6 +17,10 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
 
     public class SearchReportPlacementTestQuery : SearchReportPlacementTestQueryModel, IRequest<MethodResult<SearchReportPlacementTestModel>>
     {
+        public SearchReportPlacementTestQuery()
+        {
+            ManagerReportType = EnumManagerReportType.ReportManagerPT;
+        }
     }
 
     public class SearchReportPlacementTestQueryHandler : IRequestHandler<SearchReportPlacementTestQuery, MethodResult<SearchReportPlacementTestModel>>
@@ -44,53 +48,9 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            var dataOverallResult = await _mediator.Send(new GetOverallReportPlacementTestQuery
-            {
-                ListDistrict = request.ListDistrict,
-                ListProvince = request.ListProvince,
-                ListSchool = request.ListSchool,
-                ListSchoolClass = request.ListSchoolClass,
-                ListSchoolGrade = request.ListSchoolGrade,
-                ListCourseLevel = request.ListCourseLevel,
-                ListCompletionStatus = request.ListCompletionStatus,
-                ListLearningStatus = request.ListLearningStatus,
-                ListCurrentLevel = request.ListCurrentLevel,
-                CourseType = request.CourseType,
-                IsLearning = request.IsLearning,
-                ListOverallScore = request.ListOverallScore,
-
-                Keyword = request.Keyword,
-                StartDate = request.StartDate,
-                EndDate = request.EndDate,
-            }, cancellationToken);
+            var dataOverallResult = await _mediator.Send(new GetOverallReportPlacementTestQuery(request), cancellationToken);
             var reportPlacementTest = _mapper.Map<SearchReportPlacementTestModel>(dataOverallResult.Result);
-
-            var userResults = await _mediator.Send(new GetStudentReportQuery
-            {
-                ListDistrict = request.ListDistrict,
-                ListProvince = request.ListProvince,
-                ListSchool = request.ListSchool,
-                ListSchoolClass = request.ListSchoolClass,
-                ListSchoolGrade = request.ListSchoolGrade,
-                ListCourseLevel = request.ListCourseLevel,
-                IsLearning = request.IsLearning,
-                CourseType = request.CourseType,
-                ListLearningStatus = request.ListLearningStatus,
-                ListCompletionStatus = request.ListCompletionStatus,
-                ListCurrentLevel = request.ListCurrentLevel,
-                ListOverallScore = request.ListOverallScore,
-
-                Filters = request.Filters,
-                IncludePaths = request.IncludePaths,
-                Keyword = request.Keyword,
-                Page = request.Page,
-                SortBy = request.SortBy,
-                PageSize = request.PageSize,
-                StartDate = request.StartDate,
-                EndDate = request.EndDate,
-                ManagerReportType = EnumManagerReportType.ReportManagerPT,
-                IsSearchReport = true
-            }, cancellationToken);
+            var userResults = await _mediator.Send(new GetStudentReportQuery(request), cancellationToken);
             if (!userResults.IsOK)
             {
                 methodResult.AddError(userResults.ErrorMessages);

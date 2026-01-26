@@ -15,94 +15,37 @@ namespace Fsel.Identity.Domain.Models.QueryModels.ManagerReports
         public string? SchoolIdsStr { get; set; }
         public string? ListProvince { get; set; }
         public string? ListStudentId { get; set; }
-        public string? ListCourseType { get; set; }
-        public string? ListCourseLevel { get; set; }
         public string? ListLearningStatus { get; set; }
+        public Guid? ProgramId { get; set; }
+        public Guid? SubjectId { get; set; }
+        public Guid? LevelId { get; set; }
+        public string? LevelIdStr { get; set; }
 
         [JsonIgnore]
-        public IList<EnumCourseLevel>? CourseLevels
-        {
-            get
-            {
-                return ListCourseLevel.ToList<EnumCourseLevel>();
-            }
-        }
+        public IList<string>? SchoolClasses => ListSchoolClass.ToList<string>();
 
         [JsonIgnore]
-        public IList<string>? SchoolClasses
-        {
-            get
-            {
-                return ListSchoolClass.ToList<string>();
-            }
-        }
+        public IList<Guid>? LevelIds => LevelIdStr.ToList<Guid>();
 
         [JsonIgnore]
-        public IList<string>? SchoolGrades
-        {
-            get
-            {
-                return ListSchoolGrade.ToList<string>();
-            }
-        }
+        public IList<string>? SchoolGrades => ListSchoolGrade.ToList<string>();
 
         [JsonIgnore]
-        public IList<Guid>? SchoolIds
-        {
-            get
-            {
-                return SchoolIdsStr.ToList<Guid>();
-            }
-        }
+        public IList<Guid>? SchoolIds => SchoolIdsStr.ToList<Guid>();
 
         [JsonIgnore]
-        public IList<Guid>? DistrictIds
-        {
-            get
-            {
-                return ListDistrict.ToList<Guid>();
-            }
-        }
+        public IList<Guid>? DistrictIds => ListDistrict.ToList<Guid>();
 
         [JsonIgnore]
-        public IList<Guid>? ProvinceIds
-        {
-            get
-            {
-                return ListProvince.ToList<Guid>();
-            }
-        }
+        public IList<Guid>? ProvinceIds => ListProvince.ToList<Guid>();
 
         [JsonIgnore]
-        public IList<Guid>? StudentIds
-        {
-            get
-            {
-                return ListStudentId.ToList<Guid>();
-            }
-        }
+        public IList<Guid>? StudentIds => ListStudentId.ToList<Guid>();
 
         [JsonIgnore]
-        public IList<EnumCourseType>? CourseTypes
-        {
-            get
-            {
-                return ListCourseType.ToList<EnumCourseType>();
-            }
-        }
-
-        [JsonIgnore]
-        public IList<EnumLearningStatus>? LearningStatuses
-        {
-            get
-            {
-                return ListLearningStatus.ToList<EnumLearningStatus>();
-            }
-        }
+        public IList<EnumLearningStatus>? LearningStatuses => ListLearningStatus.ToList<EnumLearningStatus>();
 
         public bool? IsLearning { get; set; }
-        public EnumCourseType? CourseType { get; set; }
-        public EnumCourseLevel? CourseLevel { get; set; }
         public bool IsCheckDate { get; set; }
     }
 }

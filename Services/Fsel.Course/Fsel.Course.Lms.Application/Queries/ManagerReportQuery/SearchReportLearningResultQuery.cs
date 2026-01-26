@@ -14,14 +14,19 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
     using Fsel.Course.Lms.Application.Services.SenderService;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.SenderTemplates;
+    using Fsel.Shared.Models.ShareModels.EntityModels;
     using Fsel.Shared.Models.ShareModels.QueryModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
-    using static Fsel.Shared.Constants.ValueSettings;
 
     public class SearchReportLearningResultQuery : SearchReportLearningResultQueryModel, IRequest<MethodResult<SearchReportLearningResultModel>>
     {
+        public SearchReportLearningResultQuery()
+        {
+            ManagerReportType = EnumManagerReportType.ReportLearningResults;
+        }
     }
 
     public class SearchReportLearningResultQueryHandler : IRequestHandler<SearchReportLearningResultQuery, MethodResult<SearchReportLearningResultModel>>
@@ -29,254 +34,228 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
         private readonly IMediator _mediator;
         private readonly IMapper _mapper;
         private readonly ICourseResultRepository _courseResultRepository;
-        private readonly ICourseRepository _courseRepository;
         private readonly IUnitResultRepository _unitResultRepository;
-        private readonly IMockTestResultRepository _mockTestResultRepository;
-        private readonly IFinalTestResultRepository _finalTestResultRepository;
-        private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
+        private readonly ICourseModuleRepository _courseModuleRepository;
+        private readonly IUnitRepository _unitRepository;
         private readonly ISenderService _senderService;
+        private readonly ICategoryRepository _categoryRepository;
 
         public SearchReportLearningResultQueryHandler(
             IMediator mediator,
             IMapper mapper,
             ICourseResultRepository courseResultRepository,
-            ICourseRepository courseRepository,
             IUnitResultRepository unitResultRepository,
-            IMockTestResultRepository mockTestResultRepository,
-            IFinalTestResultRepository finalTestResultRepository,
-            ICourseUnitMockTestRepository courseUnitMockTestRepository
-,
-            ISenderService senderService)
+            ICourseModuleRepository courseModuleRepository,
+            IUnitRepository unitRepository,
+            ISenderService senderService,
+            ICategoryRepository categoryRepository)
         {
             _mediator = mediator;
             _mapper = mapper;
             _courseResultRepository = courseResultRepository;
-            _courseRepository = courseRepository;
             _unitResultRepository = unitResultRepository;
-            _mockTestResultRepository = mockTestResultRepository;
-            _finalTestResultRepository = finalTestResultRepository;
-            _courseUnitMockTestRepository = courseUnitMockTestRepository;
+            _courseModuleRepository = courseModuleRepository;
+            _unitRepository = unitRepository;
             _senderService = senderService;
+            _categoryRepository = categoryRepository;
         }
 
         public async Task<MethodResult<SearchReportLearningResultModel>> Handle(SearchReportLearningResultQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<SearchReportLearningResultModel>();
+            var result = new MethodResult<SearchReportLearningResultModel>();
+
             if (request.PageSize > 100)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                return methodResult;
-            }
-            var dataOverallResult = await _mediator.Send(new GetOverallReportLearningResultQuery
-            {
-                Keyword = request.Keyword,
-                ListDistrict = request.ListDistrict,
-                ListProvince = request.ListProvince,
-                ListSchool = request.ListSchool,
-                ListSchoolClass = request.ListSchoolClass,
-                ListSchoolGrade = request.ListSchoolGrade,
-                ListCourseLevel = request.ListCourseLevel,
-                ListCompletionStatus = request.ListCompletionStatus,
-                ListLearningStatus = request.ListLearningStatus,
-                ListOverallScore = request.ListOverallScore,
-                IsLearning = request.IsLearning,
-                ListCurrentLevel = request.ListCurrentLevel,
-
-                EndDate = request.EndDate,
-                CourseType = request.CourseType,
-            }, cancellationToken);
-            var reportLearningResult = _mapper.Map<SearchReportLearningResultModel>(dataOverallResult.Result);
-            var userResults = await _mediator.Send(new GetStudentReportQuery
-            {
-                ListDistrict = request.ListDistrict,
-                ListProvince = request.ListProvince,
-                ListSchool = request.ListSchool,
-                ListSchoolClass = request.ListSchoolClass,
-                ListSchoolGrade = request.ListSchoolGrade,
-                ListCourseLevel = request.ListCourseLevel,
-                IsLearning = request.IsLearning,
-                ListLearningStatus = request.ListLearningStatus,
-                ListCompletionStatus = request.ListCompletionStatus,
-                ListCurrentLevel = request.ListCurrentLevel,
-                ListOverallScore = request.ListOverallScore,
-
-                EndDate = request.EndDate,
-                PageSize = request.PageSize,
-                Filters = request.Filters,
-                IncludePaths = request.IncludePaths,
-                SortBy = request.SortBy,
-                Keyword = request.Keyword,
-                Page = request.Page,
-                CourseType = request.CourseType,
-                ManagerReportType = EnumManagerReportType.ReportLearningResults,
-                IsSearchReport = true
-            }, cancellationToken);
-
-            if (!userResults.IsOK)
-            {
-                methodResult.AddError(userResults.ErrorMessages);
-                return methodResult;
-            }
-            var students = userResults?.Result;
-            if (students == null || !students.Any())
-            {
-                methodResult.Result = reportLearningResult;
-                return methodResult;
+                result.StatusCode = StatusCodes.Status400BadRequest;
+                return result;
             }
 
-            if (request.StudentIds != null && request.StudentIds.Any())
+            var report = await GetOverallReportAsync(request, cancellationToken);
+            var students = await GetStudentsAsync(request, result, cancellationToken);
+            if (!students.Any())
             {
-                students = students.Where(p => request.StudentIds.Contains(p.Id)).ToList();
+                result.Result = report;
+                return result;
             }
 
-            var userIds = students.Where(p => p.UserId.HasValue).Select(x => x.UserId ?? default).ToList();
+            var program = await _categoryRepository.GetProgramLevelsAsync(request.ProgramId, cancellationToken);
+
             var studentIds = students.Select(x => x.Id).ToList();
-            var courseIds = students.Select(x => x.CourseId).ToList();
-            var dataStudent = students.Select(x => new { StudentId = x.Id, CourseId = x.CourseId.GetValueOrDefault() }).ToList();
+            var userIds = students
+                .Where(x => x.UserId.HasValue)
+                .Select(x => x.UserId!.Value)
+                .ToList();
 
-            var historiesSendMailResult = await _senderService.GetHistoriesSendMailLearningProgress(new GetHistoriesSendMailLearningProgressModel()
-            {
-                UserIds = userIds
-            });
+            var mailHistories = await GetMailHistoriesAsync(userIds);
+            var unitResultDict = await GetUnitResultsAsync(studentIds, request.EndDate, cancellationToken);
 
-            var historiesSendMail = historiesSendMailResult.Content?.Result;
+            var learningResults = BuildLearningResults(
+                students,
+                program,
+                unitResultDict,
+                mailHistories);
 
-            var unitResultGroups = await (from baseQ in _courseResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId)
-                                          join cum in _courseUnitMockTestRepository.Queryable on baseQ.CourseId equals cum.CourseId
-                                          join ur in _unitResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId, UnitId = cum.UnitId } equals new { ur.StudentId, ur.CourseId, UnitId = (Guid?)ur.UnitId } into unitGroup
-                                          from ur in unitGroup.DefaultIfEmpty()
-                                          where baseQ.WorkingStatus == EnumWorkingStatus.Active &&
-                                          (!request.EndDate.HasValue || (ur.UpdatedDate ?? ur.CreatedDate).Date <= request.EndDate.Value.Date) && ur.Status == EnumResultStatus.Done
-                                          group new { baseQ, ur }
-                                          by new { baseQ.CourseId, baseQ.StudentId } into g
-                                          select new
-                                          {
-                                              StudentId = g.Key.StudentId,
-                                              OverallPercent = g.Select(x => x.ur).Any() ? g.Select(x => x.ur).Average(x => x.Percent) : default,
-                                              UnitResults = g.Select(x => x.ur).ToList(),
-                                          }).ToListAsync(cancellationToken);
+            report.PagingItems = new PagingItemsModel<LearningResultModel>(
+                learningResults,
+                request,
+                report.TotalStudent);
 
-            var mockTestResults = await (from baseQ in _courseResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId)
-                                         join cum in _courseUnitMockTestRepository.Queryable on baseQ.CourseId equals cum.CourseId
-                                         join c in _courseRepository.Queryable on cum.CourseId equals c.Id
-                                         join mtr in _mockTestResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId, MockTestId = cum.MockTestId } equals new { mtr.StudentId, mtr.CourseId, MockTestId = (Guid?)mtr.MockTestId } into mockTestGroup
-                                         from mtr in mockTestGroup.DefaultIfEmpty()
-                                         where baseQ.WorkingStatus == EnumWorkingStatus.Active &&
-                                         (!request.EndDate.HasValue || (mtr.UpdatedDate ?? mtr.CreatedDate).Date <= request.EndDate.Value.Date) && mtr.Status == EnumResultStatus.Done && !mtr.UnitId.HasValue
-                                         select mtr).ToListAsync(cancellationToken);
-
-            var mockTestGroupResults = mockTestResults.GroupBy(x => x.StudentId)
-                                          .Select(x => new
-                                          {
-                                              StudentId = x.Key,
-                                              MockTestResults = x.OrderBy(x => x.CreatedDate).Select((y, index) => new
-                                              {
-                                                  Index = index + 1,
-                                                  MockTestResult = y
-                                              }).ToList(),
-                                          }).ToList();
-
-            var finalTestResults = await (from baseQ in _courseResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId)
-                                          join cum in _courseUnitMockTestRepository.Queryable on baseQ.CourseId equals cum.CourseId
-                                          join ftr in _finalTestResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId, FinalTestId = cum.FinalTestId } equals new { ftr.StudentId, ftr.CourseId, FinalTestId = (Guid?)ftr.FinalTestId } into finalTestGroup
-                                          from ftr in finalTestGroup.DefaultIfEmpty()
-                                          where baseQ.WorkingStatus == EnumWorkingStatus.Active &&
-                                          (!request.EndDate.HasValue || (ftr.UpdatedDate ?? ftr.CreatedDate).Date <= request.EndDate.Value.Date) && ftr.Status == EnumResultStatus.Done
-                                          select new FinalTestResult
-                                          {
-                                              Percent = ftr.Percent,
-                                              CorrectCount = ftr.CorrectCount,
-                                              CorrectTotal = ftr.CorrectTotal,
-                                              StudentId = ftr.StudentId,
-                                          }).ToListAsync(cancellationToken);
-
-            var datas = new List<LearningResultModel>();
-            foreach (var item in students)
-            {
-                var countUnit = request.CourseType == EnumCourseType.Academic ? CourseProgressValue.CountUnitAca :
-                                request.CourseType == EnumCourseType.Ielts ? CourseProgressValue.CountUnitIELTS :
-                                request.CourseType == EnumCourseType.EnglishFoundation ? CourseProgressValue.CountUnitRFIA2 : default;
-
-                var unitResultGroup = unitResultGroups.FirstOrDefault(x => x.StudentId == item.Id);
-                var courseUnitResults = unitResultGroup?.UnitResults.OrderBy(x => x.CreatedDate).Select((y, index) => new
-                {
-                    Percent = y.Percent,
-                    Index = index + 1
-                });
-                var overallPercent = NumberHelper.ConvertRound(unitResultGroup?.OverallPercent ?? default);
-                var overallModuleReports = new List<OverallModuleReportModel>();
-
-                var result = mockTestGroupResults.FirstOrDefault(x => x.StudentId == item.Id);
-                for (int i = 1; i <= countUnit; i++)
-                {
-                    var unit = courseUnitResults?.FirstOrDefault(x => x.Index == i);
-                    overallModuleReports.Add(new OverallModuleReportModel
-                    {
-                        Index = i,
-                        DisplayOrder = request.CourseType == EnumCourseType.Ielts && i == CourseProgressValue.MockTestPosition ? i + 1 : i,
-                        Percent = unit?.Percent,
-                        Type = nameof(Domain.Entities.Unit)
-                    });
-                }
-                if (request.CourseType == EnumCourseType.Academic || request.CourseType == EnumCourseType.EnglishFoundation)
-                {
-                    var finalTestResult = finalTestResults.FirstOrDefault(x => x.StudentId == item.Id);
-                    int displayOrder = overallModuleReports.Count + 1;
-                    overallModuleReports.Add(new OverallModuleReportModel
-                    {
-                        Index = displayOrder,
-                        DisplayOrder = displayOrder,
-                        Percent = finalTestResult?.Percent,
-                        Type = nameof(FinalTest)
-                    });
-                }
-                else
-                {
-                    for (int i = 1; i <= CourseProgressValue.CountFullMockTest; i++)
-                    {
-                        var mockTestResult = result?.MockTestResults.FirstOrDefault(x => x.Index == i);
-                        var skillScores = mockTestResult?.MockTestResult.SkillScores;
-                        overallModuleReports.Add(new OverallModuleReportModel
-                        {
-                            Index = mockTestResult?.Index ?? i,
-                            DisplayOrder = CourseProgressValue.MockTestPosition * i,
-                            Score = skillScores != null && skillScores.Any() ? NumberHelper.RoundNumberDouble(skillScores.Average(x => x.Scores)) : null,
-                            Type = nameof(MockTest)
-                        });
-                    }
-                }
-                var learningResult = new LearningResultModel
-                {
-                    StudentId = item.Id,
-                    Email = item.Email,
-                    FullName = item.FullName,
-                    PhoneNumber = item.PhoneNumber,
-                    SchoolClass = item.SchoolClass,
-                    SchoolGrade = item.SchoolGrade,
-                    SchoolName = item.School,
-                    Status = item.ExpiredDate > DateTime.UtcNow ? EnumLearningStatus.InProgress : EnumLearningStatus.Expired,
-                    CourseLevel = item.CourseLevel,
-                    ProcessDate = item.CreatedDate,
-                    ExpiredDate = item.ExpiredDate,
-                    UserName = item.UserName,
-                    OverallPercent = overallPercent,
-                    OverallModules = overallModuleReports.OrderBy(x => x.DisplayOrder).ToList(),
-                    NumberOfEmailsSent = historiesSendMail?.Where(p => item.UserId.HasValue && item.UserId == p.ReceiverId && p.Template == EnumSenderTemplate.LearningProgressWarning).Count() ?? 0,
-                };
-
-                datas.Add(learningResult);
-            }
-
-            if (request.LearningStatus.HasValue)
-            {
-                datas = datas.Where(p => p.LearningStatus == request.LearningStatus).ToList();
-            }
-
-            reportLearningResult.PagingItems = new PagingItemsModel<LearningResultModel>(datas, request, reportLearningResult.TotalStudent);
-            methodResult.Result = reportLearningResult;
-            methodResult.StatusCode = StatusCodes.Status200OK;
-            return methodResult;
+            result.Result = report;
+            result.StatusCode = StatusCodes.Status200OK;
+            return result;
         }
+
+        #region Private methods
+
+        private async Task<SearchReportLearningResultModel> GetOverallReportAsync(
+        SearchReportLearningResultQuery request,
+        CancellationToken cancellationToken)
+        {
+            var overallResult = await _mediator.Send(new GetOverallReportLearningResultQuery(request), cancellationToken);
+            return _mapper.Map<SearchReportLearningResultModel>(overallResult.Result);
+        }
+
+        private async Task<List<StudentDtoModel>> GetStudentsAsync(
+            SearchReportLearningResultQuery request,
+            MethodResult<SearchReportLearningResultModel> result,
+            CancellationToken cancellationToken)
+        {
+            var studentResult = await _mediator.Send(new GetStudentReportQuery(request), cancellationToken);
+            if (!studentResult.IsOK)
+            {
+                result.AddError(studentResult.ErrorMessages);
+                return new List<StudentDtoModel>();
+            }
+            var students = studentResult.Result?.ToList() ?? new List<StudentDtoModel>();
+            if (request.StudentIds?.Any() == true)
+            {
+                students = students.Where(x => request.StudentIds.Contains(x.Id)).ToList();
+            }
+            return students;
+        }
+
+        private async Task<IList<HistorySendMailLearningProgressModel>> GetMailHistoriesAsync(
+            List<Guid> userIds)
+        {
+            return (await _senderService.GetHistoriesSendMailLearningProgress(
+                    new GetHistoriesSendMailLearningProgressModel
+                    {
+                        UserIds = userIds
+                    })).Content?.Result ?? new List<HistorySendMailLearningProgressModel>();
+        }
+
+        private async Task<Dictionary<Guid, UnitResultAggregateDto>> GetUnitResultsAsync(
+            List<Guid> studentIds,
+            DateTime? endDate,
+            CancellationToken cancellationToken)
+        {
+            var unitResults = await (
+                from cr in _courseResultRepository.ReadQueryable
+                    .WhereBulkContains(studentIds, x => x.StudentId)
+
+                join ur in _unitResultRepository.ReadQueryable
+                    on cr.Id equals ur.CourseResultId
+
+                join u in _unitRepository.ReadQueryable
+                    on ur.UnitId equals u.Id
+
+                join cm in _courseModuleRepository.ReadQueryable
+                    on new { ur.CourseId, u.OriginalId }
+                    equals new { cm.CourseId, cm.OriginalId }
+
+                where cr.WorkingStatus == EnumWorkingStatus.Active
+                      && ur.Status == EnumResultStatus.Done
+                      && (!endDate.HasValue ||
+                          (ur.UpdatedDate ?? ur.CreatedDate).Date <= endDate.Value.Date)
+
+                group new { ur, cm } by cr.StudentId
+                into g
+
+                select new UnitResultAggregateDto
+                {
+                    StudentId = g.Key,
+                    OverallPercent = g.Average(x => x.ur.Percent),
+                    Units = g.Select(x => new UnitPercentDto
+                    {
+                        DisplayOrder = x.cm.DisplayOrder,
+                        Percent = x.ur.Percent
+                    })
+                    .Distinct()
+                    .OrderBy(x => x.DisplayOrder)
+                    .ToList()
+                }).ToListAsync(cancellationToken);
+
+            return unitResults.ToDictionary(x => x.StudentId);
+        }
+
+        private List<LearningResultModel> BuildLearningResults(
+            List<StudentDtoModel> students,
+            Category? program,
+            Dictionary<Guid, UnitResultAggregateDto> unitResultDict,
+            IList<HistorySendMailLearningProgressModel> mailHistories)
+        {
+            var results = new List<LearningResultModel>();
+
+            foreach (var student in students)
+            {
+                unitResultDict.TryGetValue(student.Id, out var unitData);
+
+                var levelName = program?.Levels
+                    .FirstOrDefault(x => x.Id == student.LevelId)
+                    ?.Code;
+
+                results.Add(new LearningResultModel
+                {
+                    StudentId = student.Id,
+                    Email = student.Email,
+                    FullName = student.FullName,
+                    PhoneNumber = student.PhoneNumber,
+                    SchoolClass = student.SchoolClass,
+                    SchoolGrade = student.SchoolGrade,
+                    SchoolName = student.School,
+                    LevelName = levelName,
+                    UserName = student.UserName,
+                    ProcessDate = student.CreatedDate,
+                    ExpiredDate = student.ExpiredDate,
+                    Status = student.ExpiredDate > DateTime.UtcNow
+                        ? EnumLearningStatus.InProgress
+                        : EnumLearningStatus.Expired,
+                    OverallPercent = NumberHelper.ConvertRound(unitData?.OverallPercent ?? 0),
+                    OverallModules = unitData?.Units.Select(x => new OverallModuleReportModel
+                    {
+                        Index = x.DisplayOrder,
+                        DisplayOrder = x.DisplayOrder,
+                        Percent = x.Percent,
+                        Type = nameof(Domain.Entities.Unit)
+                    }).ToList() ?? new(),
+                    NumberOfEmailsSent = mailHistories.Count(x =>
+                        student.UserId.HasValue &&
+                        x.ReceiverId == student.UserId &&
+                        x.Template == EnumSenderTemplate.LearningProgressWarning)
+                });
+            }
+
+            return results;
+        }
+
+        #endregion Private methods
     }
+
+    #region Internal DTOs
+
+    public class UnitResultAggregateDto
+    {
+        public Guid StudentId { get; set; }
+        public double OverallPercent { get; set; }
+        public IList<UnitPercentDto> Units { get; set; } = new List<UnitPercentDto>();
+    }
+
+    public class UnitPercentDto
+    {
+        public int DisplayOrder { get; set; }
+        public double Percent { get; set; }
+    }
+
+    #endregion Internal DTOs
 }

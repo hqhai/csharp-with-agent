@@ -12,13 +12,13 @@ namespace Fsel.Course.Lms.Application.Services.UserServices.QueryModels
         public string? ListSchool { get; set; }
         public string? ListDistrict { get; set; }
         public string? ListProvince { get; set; }
-        public string? ListCourseLevel { get; set; }
         public string? ListLearningStatus { get; set; }
         public bool IsCheckDate { get; set; }
         public bool? IsLearning { get; set; }
         public EnumCompletionStatus? Status { get; set; }
         public EnumLearningStatus? LearningStatus { get; set; }
-        public EnumCourseType? CourseType { get; set; }
-        public EnumCourseLevel? CourseLevel { get; set; }
+        public Guid? ProgramId { get; set; }
+        public Guid? SubjectId { get; set; }
+        public string? LevelIdStr { get; set; }
     }
 }
