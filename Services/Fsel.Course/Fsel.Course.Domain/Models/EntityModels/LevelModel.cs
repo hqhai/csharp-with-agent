@@ -18,6 +18,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public string? Description { get; set; }
 
+        public string? PTDescription { get; set; }
+
         public int LevelOrder { get; set; }
 
         public bool LearnedBefore { get; set; }
