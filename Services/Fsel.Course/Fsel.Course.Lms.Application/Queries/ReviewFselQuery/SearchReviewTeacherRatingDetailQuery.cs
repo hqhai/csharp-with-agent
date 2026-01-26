@@ -30,13 +30,14 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
         private readonly IVideoRepository _videoRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly ICourseRepository _courseRepository;
+        private readonly ICourseResultRepository _courseResultRepository;
         private readonly IClassForumRepository _classForumRepository;
         private readonly IClassForumResultRepository _classForumResultRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly IMockTestRepository _mockTestRepository;
         private readonly IStudentFeedbackRepository _studentFeedbackRepository;
 
-        public SearchReviewTeacherRatingDetailQueryHandler(IUserService userService, IVideoResultRepository videoResultRepository, IVideoRepository videoRepository, ILessonResultRepository lessonResultRepository, ICourseRepository courseRepository, IClassForumRepository classForumRepository, IClassForumResultRepository classForumResultRepository, IMockTestResultRepository mockTestResultRepository, IMockTestRepository mockTestRepository, IStudentFeedbackRepository studentFeedbackRepository)
+        public SearchReviewTeacherRatingDetailQueryHandler(IUserService userService, IVideoResultRepository videoResultRepository, IVideoRepository videoRepository, ILessonResultRepository lessonResultRepository, ICourseRepository courseRepository, IClassForumRepository classForumRepository, IClassForumResultRepository classForumResultRepository, IMockTestResultRepository mockTestResultRepository, IMockTestRepository mockTestRepository, IStudentFeedbackRepository studentFeedbackRepository, ICourseResultRepository courseResultRepository)
         {
             _userService = userService;
             _videoResultRepository = videoResultRepository;
@@ -48,6 +49,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             _mockTestResultRepository = mockTestResultRepository;
             _mockTestRepository = mockTestRepository;
             _studentFeedbackRepository = studentFeedbackRepository;
+            _courseResultRepository = courseResultRepository;
         }
 
         public async Task<MethodResult<ReviewTeacherRatingDetailSearchModel>> Handle(SearchReviewTeacherRatingDetailQuery request, CancellationToken cancellationToken)
@@ -77,7 +79,8 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             var videoResultQuery = from baseQ in _videoResultRepository.Queryable
                                    join v in _videoRepository.Queryable on baseQ.VideoId equals v.Id
                                    join lr in _lessonResultRepository.Queryable on baseQ.LessonResultId equals lr.Id
-                                   join c in _courseRepository.Queryable on lr.CourseId equals c.Id
+                                   join cr in _courseResultRepository.Queryable on lr.CourseResultId equals cr.Id
+                                   join c in _courseRepository.Queryable on cr.CourseId equals c.Id
                                    where v.TeacherId == request.TeacherId && baseQ.Status == EnumResultStatus.Done
                                    select new ReviewTeacherRatingDetailModel
                                    {
@@ -94,7 +97,8 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             var classFormQuery = from baseQ in _classForumResultRepository.Queryable
                                  join cl in _classForumRepository.Queryable on baseQ.ClassForumId equals cl.Id
                                  join lr in _lessonResultRepository.Queryable on baseQ.LessonResultId equals lr.Id
-                                 join c in _courseRepository.Queryable on lr.CourseId equals c.Id
+                                 join cr in _courseResultRepository.Queryable on lr.CourseResultId equals cr.Id
+                                 join c in _courseRepository.Queryable on cr.CourseId equals c.Id
                                  join s in _studentFeedbackRepository.Queryable on baseQ.Id equals s.ObjectId
                                  where baseQ.GradingTeacherId == request.TeacherId && baseQ.Status == EnumClassForumResultStatus.Graded
                                  select new ReviewTeacherRatingDetailModel

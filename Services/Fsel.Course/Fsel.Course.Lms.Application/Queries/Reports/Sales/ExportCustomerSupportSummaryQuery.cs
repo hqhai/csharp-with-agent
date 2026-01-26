@@ -176,7 +176,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports.Sales
         private async Task<Dictionary<Guid, int>> GetLessonResultGroupsAsync(List<CourseResultModel> lists, CancellationToken cancellationToken)
         {
             var results = await _lessonResultRepository.Queryable
-                .WhereBulkContains(lists.Select(x => new { x.StudentId, x.CourseId }), new[] { "StudentId", "CourseId" })
+                .WhereBulkContains(lists.Select(x => x.Id), x => x.CourseResultId)
                 .ToListAsync(cancellationToken);
             return results.GroupBy(x => x.StudentId).ToDictionary(x => x.Key, x => x.Count(x => x.Status == EnumResultStatus.Done));
         }
@@ -184,7 +184,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports.Sales
         private async Task<Dictionary<Guid, UnitResult?>> GetUnitResultGroupsAsync(List<CourseResultModel> lists, CancellationToken cancellationToken)
         {
             var results = await _unitResultRepository.Queryable
-                .WhereBulkContains(lists.Select(x => new { x.StudentId, x.CourseId }), new[] { "StudentId", "CourseId" })
+                .WhereBulkContains(lists.Select(x => x.Id), x => x.CourseResultId)
                 .ToListAsync(cancellationToken);
             return results.GroupBy(x => x.StudentId)
                 .Select(x => new { StudentId = x.Key, UnitResult = x.OrderBy(y => y.CreatedDate).FirstOrDefault() })

@@ -8,6 +8,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
     public class TestGroupResultModels
     {
         public Guid TestGroupResultId { get; set; }
+        public DateTime CreatedDate { get; set; }
+        public DateTime? UpdatedDate { get; set; }
         public Guid? SubjectId { get; set; }
         public string? SubjectName { get; set; }
         public Guid? SuggestLevelId { get; set; }

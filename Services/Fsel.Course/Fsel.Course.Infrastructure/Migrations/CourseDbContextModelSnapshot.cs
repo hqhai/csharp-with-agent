@@ -4646,6 +4646,10 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<string>("PTDescription")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
                     b.Property<Guid>("ProgramId")
                         .HasColumnType("uniqueidentifier");
 

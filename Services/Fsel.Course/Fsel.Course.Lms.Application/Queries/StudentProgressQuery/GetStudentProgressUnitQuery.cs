@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -25,18 +26,20 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
     public class GetStudentProgressUnitQueryHandler : IRequestHandler<GetStudentProgressUnitQuery, MethodResult<UnitStudentProgressModel>>
     {
         private readonly ICourseRepository _courseRepository;
+        private readonly ICourseResultRepository _courseResultRepository;
         private readonly ManagerProgressHelper _managerProgressHelper;
         private readonly IUnitRepository _unitRepository;
         private readonly IUserService _userService;
         private readonly ISystemService _systemService;
 
-        public GetStudentProgressUnitQueryHandler(ICourseRepository courseRepository, ManagerProgressHelper managerProgressHelper, IUnitRepository unitRepository, IUserService userService, ISystemService systemService)
+        public GetStudentProgressUnitQueryHandler(ICourseRepository courseRepository, ManagerProgressHelper managerProgressHelper, IUnitRepository unitRepository, IUserService userService, ISystemService systemService, ICourseResultRepository courseResultRepository)
         {
             _courseRepository = courseRepository;
             _managerProgressHelper = managerProgressHelper;
             _unitRepository = unitRepository;
             _userService = userService;
             _systemService = systemService;
+            _courseResultRepository = courseResultRepository;
         }
 
         public async Task<MethodResult<UnitStudentProgressModel>> Handle(GetStudentProgressUnitQuery request, CancellationToken cancellationToken)
@@ -62,13 +65,19 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
+            var courseResult = await _courseResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == request.StudentId && x.CourseId == request.CourseId && x.WorkingStatus == Shared.Enums.EnumWorkingStatus.Active, cancellationToken);
+            if (courseResult == null)
+            {
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
             var unit = await _unitRepository.GetByIdAsync(request.UnitId);
             if (unit == null)
             {
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-            var unitProgress = await _managerProgressHelper.GetUnitManager(course.Id, unit.Id, student.Id);
+            var unitProgress = await _managerProgressHelper.GetUnitManager(courseResult.Id, course.Id, unit.Id, student.Id);
             if (unitProgress == null)
             {
                 methodResult.StatusCode = StatusCodes.Status200OK;

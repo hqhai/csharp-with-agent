@@ -243,7 +243,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd.V1i1
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(unit));
                 return methodResult;
             }
-            var unitResult = await _unitResultRepository.Queryable.Where(x => x.CourseId == course.Id && x.StudentId == studentId)
+            var unitResult = await _unitResultRepository.Queryable.Where(x => x.CourseResultId == courseResult.Id)
                                                                   .FirstOrDefaultAsync(x => x.UnitId == unit.Id, cancellationToken);
             if (unitResult == null)
             {
