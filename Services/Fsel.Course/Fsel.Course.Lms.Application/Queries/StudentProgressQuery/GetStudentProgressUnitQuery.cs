@@ -33,7 +33,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
         private readonly IUnitRepository _unitRepository;
         private readonly IUserService _userService;
         private readonly ISystemService _systemService;
-        private readonly ICourseResultRepository _courseResultRepository;
         private readonly ILearningService _learningService;
 
         public GetStudentProgressUnitQueryHandler(ICourseRepository courseRepository, ManagerProgressHelper managerProgressHelper, IUnitRepository unitRepository, IUserService userService, ISystemService systemService, ICourseResultRepository courseResultRepository, ILearningService learningService)
