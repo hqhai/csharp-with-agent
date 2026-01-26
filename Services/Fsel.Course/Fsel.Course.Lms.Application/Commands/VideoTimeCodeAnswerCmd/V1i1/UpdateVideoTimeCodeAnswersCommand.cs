@@ -64,14 +64,14 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
 
             foreach (var videoTimeCodeAnswer in videoTimeCodeAnswers)
             {
-                var mission = GetTokenMission(tokenConfigs, videoTimeCodeResult.VideoTimeCode.TimeCodeType, videoTimeCodeAnswer.IsFirstSubmit);
-                var tokenConfig = tokenConfigs.FirstOrDefault(x => x.Mission == mission);
-                var token = tokenConfig.GetTokenConfig<TokenCoinConfigs>()?.BaseValue ?? default;
-                videoTimeCodeAnswer.TokenReceived = (int)token * videoTimeCodeAnswer.CorrectCount;
                 if (videoTimeCodeAnswer.Status != EnumAnswerStatus.Done)
                 {
                     videoTimeCodeAnswer.IsFirstSubmit = isFirstSubmit;
                 }
+                var mission = GetTokenMission(tokenConfigs, videoTimeCodeResult.VideoTimeCode.TimeCodeType, videoTimeCodeAnswer.IsFirstSubmit);
+                var tokenConfig = tokenConfigs.FirstOrDefault(x => x.Mission == mission);
+                var token = tokenConfig.GetTokenConfig<TokenCoinConfigs>()?.BaseValue ?? default;
+                videoTimeCodeAnswer.TokenReceived = (int)token * videoTimeCodeAnswer.CorrectCount;
             }
             await _videoTimeCodeAnswerRepository.ExecuteTransactionAsync(async () =>
             {
