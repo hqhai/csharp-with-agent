@@ -4,7 +4,7 @@ namespace Fsel.System.Infrastructure.Repositories
 {
     using AutoMapper;
     using Fsel.Core.Base;
-    using Fsel.System.Domain.Entities.ChatBot;
+    using Fsel.System.Domain.Entities.Chatbots;
     using Fsel.System.Domain.IRepositories;
 
     public class ChatBotRepository : BaseRepository<ChatBot>, IChatBotRepository

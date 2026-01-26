@@ -19,6 +19,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public UnitResultModel? UnitResult { get; set; }
         public MockTestModel? SkillMockTest { get; set; }
         public double Percent { get; set; }
+        public bool IsAIPracticeGymEnabled { get; set; }
         public int Version { get; set; }
         public Guid OriginalId { get; set; }
         public Guid? ProgramId { get; set; }

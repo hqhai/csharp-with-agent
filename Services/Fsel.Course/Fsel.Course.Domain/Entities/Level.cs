@@ -23,6 +23,9 @@ namespace Fsel.Course.Domain.Entities
         [RegexValid(Regex = @"^[^<>]*$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
         public string? Description { get; set; }
 
+        [MaxLength(2000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? PTDescription { get; set; }
+
         public int LevelOrder { get; set; }
 
         public Guid ProgramId { get; set; }
@@ -41,6 +44,7 @@ namespace Fsel.Course.Domain.Entities
 
         public ICollection<TestGroupResult> TestGroupResults { get; set; } = new List<TestGroupResult>();
         public ICollection<TestGroupResult> TestGroupResultsForCurrentLevel { get; set; } = new List<TestGroupResult>();
+        public ICollection<TestGroupResult> TestGroupResultsForEmailLevel { get; set; } = new List<TestGroupResult>();
         public ICollection<StudentGoalAggregate> StudentGoalAggregates { get; set; } = new List<StudentGoalAggregate>();
     }
 }

@@ -13,7 +13,6 @@ namespace Fsel.Course.Lcms.Api.Controllers
     using Fsel.Course.Application.Commands.FlowCmd;
     using Fsel.Course.Application.Commands.ProgramCmd;
     using Fsel.Course.Application.Queries.CategoryQuery;
-    using Fsel.Course.Application.Queries.LevelQuery;
     using Fsel.Course.Application.Queries.ProgramQuery;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Shared.Constants;
@@ -64,6 +63,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// Get All Course type and Course level
         /// </summary>
         [HttpGet("all-course-level")]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
         [ProducesResponseType(typeof(MethodResult<object>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetEnumCourseLevelsAsync()

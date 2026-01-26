@@ -583,36 +583,16 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
             // chỉ tính các answer FirstSubmit và đã Done.
             var answers = await _homeWorkExtraPracticeAnswerRepository.ReadQueryable
                 .Where(x => x.HomeWorkExtraPracticeResultId == homeWorkExtraPracticeResultId)
-                .Where(x => x.Status == EnumAnswerStatus.Done && x.IsFirstSubmit)
+                .Where(x => x.Status == EnumAnswerStatus.Done)
                 .OrderBy(x => x.CreatedDate)
-                .Select(x => x.IsCorrect)
+                .Select(x => x.IsCorrect == true && x.IsFirstSubmit)
                 .ToListAsync(cancellationToken);
 
             if (!answers.Any())
             {
                 return 0;
             }
-
-            var currentStreak = 0;
-            var maxStreak = 0;
-
-            foreach (var isCorrect in answers)
-            {
-                if (isCorrect == true)
-                {
-                    currentStreak++;
-                    if (currentStreak > maxStreak)
-                    {
-                        maxStreak = currentStreak;
-                    }
-                }
-                else
-                {
-                    currentStreak = 0;
-                }
-            }
-
-            return maxStreak;
+            return answers.GetHighestStreak();
         }
 
         #endregion Finalize Answers & HighestStreak

@@ -59,7 +59,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
                 return methodResult;
             }
 
-            var navigateActionResult = await _mediator.Send(new GetUserNavigationQuery(), cancellationToken);
+            var navigateActionResult = await _mediator.Send(new GetUserNavigationQuery() { UserId = request.UserId ?? _authContext.CurrentUserId }, cancellationToken);
             if (!navigateActionResult.IsOK
                 || navigateActionResult.Result?.Status != EnumNavigateActionStatus.ContinueLearning)
             {

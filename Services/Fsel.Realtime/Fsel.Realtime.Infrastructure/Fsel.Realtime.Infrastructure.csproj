@@ -8,6 +8,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Fsel.Realtime.Domain\Fsel.Realtime.Domain.csproj" />
+    <ProjectReference Include="..\..\Shared\Fsel.Shared\Fsel.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0" />
   </ItemGroup>
 
 </Project>

@@ -30,6 +30,7 @@ namespace Fsel.Course.Application.Queries.AiCriteriaConfigQuery
             _aiCriteriaConfigRepository = aiCriteriaConfigRepository;
             _mapper = mapper;
         }
+
         public async Task<MethodResult<AICriteriaConfigsModel>> Handle(GetAiCriteriaByIdQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);

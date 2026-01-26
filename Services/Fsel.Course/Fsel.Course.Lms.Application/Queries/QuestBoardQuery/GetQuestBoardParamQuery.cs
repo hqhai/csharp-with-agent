@@ -485,14 +485,14 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
             var currentUnit = await _unitResultRepository.Queryable
                                                          .Include(x => x.Unit)
                                                          .ThenInclude(x => x.CourseUnitMockTests)
-                                                         .Where(x => x.StudentId == studentId && x.CourseId == currentCourse.CourseId && (x.Status == EnumResultStatus.Process || x.Status == EnumResultStatus.New))
+                                                         .Where(x => x.StudentId == studentId && x.CourseResultId == currentCourse.Id && (x.Status == EnumResultStatus.Process || x.Status == EnumResultStatus.New))
                                                          .OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate)
                                                          .FirstOrDefaultAsync();
 
             if (currentUnit != null)
             {
                 var currentLesson = await _lessonResultRepository.Queryable
-                                                                 .Where(x => x.StudentId == studentId && x.CourseId == currentCourse.CourseId && x.UnitId == currentUnit.UnitId && (x.Status == EnumResultStatus.Process || x.Status == EnumResultStatus.New))
+                                                                 .Where(x => x.StudentId == studentId && x.CourseResultId == currentCourse.Id && x.UnitResultId == currentUnit.Id && (x.Status == EnumResultStatus.Process || x.Status == EnumResultStatus.New))
                                                                  .OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate)
                                                                  .FirstOrDefaultAsync();
 

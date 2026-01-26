@@ -16,6 +16,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
         Task<Category?> GetProgramContainPtBySelectedProject(Guid projectId, CancellationToken cancellationToken = default);
 
         Task<IList<SkillScores>> GetDefaultSkillScoresAsync(Guid? programId, CancellationToken cancellationToken = default);
+
+        Task<Level?> LoadPreviousOrMinLevelAsync(Guid programId, Guid levelId);
     }
 
     public class CategoryService : ICategoryService
@@ -24,17 +26,20 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
         private readonly IProgramSkillScoresCachingService _programSkillScoresCachingService;
         private readonly ICategoryRepository _categoryRepository;
         private readonly ISkillLevelRepository _skillLevelRepository;
+        private readonly ILevelRepository _levelRepository;
 
         public CategoryService(
             ICategoryCachingService categoryCachingService,
             IProgramSkillScoresCachingService programSkillScoresCachingService,
             ICategoryRepository categoryRepository,
-            ISkillLevelRepository skillLevelRepository)
+            ISkillLevelRepository skillLevelRepository,
+            ILevelRepository levelRepository)
         {
             _categoryCachingService = categoryCachingService;
             _programSkillScoresCachingService = programSkillScoresCachingService;
             _categoryRepository = categoryRepository;
             _skillLevelRepository = skillLevelRepository;
+            _levelRepository = levelRepository;
         }
 
         public async Task<IList<SkillScores>> GetDefaultSkillScoresAsync(Guid? programId, CancellationToken cancellationToken = default)
@@ -114,6 +119,35 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             {
                 await LoadChildren(child);
             }
+        }
+
+        public async Task<Level?> LoadPreviousOrMinLevelAsync(Guid programId, Guid levelId)
+        {
+            var currentLevel = await _levelRepository.ReadQueryable
+                .Where(x => x.ProgramId == programId && x.Id == levelId)
+                .Select(x => new { x.LevelOrder })
+                .FirstOrDefaultAsync();
+
+            if (currentLevel == null)
+            {
+                return await LoadMinLevelAsync(programId);
+            }
+
+            return await _levelRepository.ReadQueryable
+                .Where(x => x.ProgramId == programId
+                         && x.LevelOrder < currentLevel.LevelOrder)
+                .OrderByDescending(x => x.LevelOrder)
+                .ThenByDescending(x => x.UpdatedDate ?? x.CreatedDate)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<Level?> LoadMinLevelAsync(Guid programId)
+        {
+            return await _levelRepository.ReadQueryable
+                .Where(x => x.ProgramId == programId)
+                .OrderBy(x => x.LevelOrder)
+                .ThenByDescending(x => x.UpdatedDate ?? x.CreatedDate)
+                .FirstOrDefaultAsync();
         }
     }
 }

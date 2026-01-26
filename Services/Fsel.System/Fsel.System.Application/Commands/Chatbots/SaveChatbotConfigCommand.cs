@@ -11,6 +11,7 @@ namespace Fsel.System.Application.Commands.Chatbots
     using Fsel.System.Domain.Models.CommandModels.ChatbotConfigs;
     using Fsel.System.Domain.Models.EntityModels;
     using global::System.Globalization;
+    using global::System.Text;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -43,68 +44,49 @@ namespace Fsel.System.Application.Commands.Chatbots
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<ChatbotConfigModel>();
 
-
             //Config chung
-            string programConfig = BuildTemplatePrompt(Program_Name, nameof(request.ProgramName), request.ProgramName?.ToString() ?? string.Empty);
-            string courseConfig = BuildTemplatePrompt(Course_Name, nameof(request.CourseName), request.CourseName?.ToString() ?? string.Empty);
-            string cefrConfig = BuildTemplatePrompt(CEFR_Level, nameof(request.CEFRLevel), request.CEFRLevel?.ToString() ?? string.Empty);
-            string unitTopicConfig = BuildTemplatePrompt(Unit_Topic, nameof(request.UnitTopic), request.UnitTopic?.ToString() ?? string.Empty);
-            string unitNumberConfig = BuildTemplatePrompt(Unit_Number, nameof(request.UnitNumber), request.UnitNumber?.ToString() ?? string.Empty);
-            List<string> aiConfig = new List<string> { programConfig, courseConfig, cefrConfig, unitNumberConfig };
+            List<string> baseConfigs = BuildBaseAiConfigs(request);
 
+            var vocabConfigs = GetSkillConfigs(request, EnumChatbotLayout.Vocabulary);
+            var grammarConfigs = GetSkillConfigs(request, EnumChatbotLayout.Grammar);
 
-            var vocabConfigs = request.ChatbotSkillConfigs?.FirstOrDefault(x => x.Skill == EnumCourseSkill.Vocabulary)?.Configs ?? new List<SkillConfigCommandModel>();
-            string vocabConfigsPart = BuildTemplateConfigPrompt(Vocabulary_Lists, vocabConfigs, false, true);
-            string vocabConfigsFull = BuildTemplateConfigPrompt(Vocabulary_Lists, vocabConfigs, true, true);
+            var vocabPart = BuildTemplateConfigPrompt(Vocabulary_Lists, vocabConfigs, false, true);
+            var vocabFull = BuildTemplateConfigPrompt(Vocabulary_Lists, vocabConfigs, true, true);
 
-            var grammarConfigs = request.ChatbotSkillConfigs?.FirstOrDefault(x => x.Skill == EnumCourseSkill.Grammar)?.Configs ?? new List<SkillConfigCommandModel>();
-            string grammarPart = BuildTemplateConfigPrompt(Grammar_TopicList, vocabConfigs, false, true);
-            string grammarFull = BuildTemplateConfigPrompt(Grammar_TopicList, vocabConfigs, true, true);
+            var grammarPart = BuildTemplateConfigPrompt(Grammar_TopicList, grammarConfigs, false, true);
+            var grammarFull = BuildTemplateConfigPrompt(Grammar_TopicList, grammarConfigs, true, true);
 
             //Config động
-            foreach (var item in request.ChatbotSkillConfigs!)
+            foreach (var skill in request.ChatbotSkillConfigs ?? Enumerable.Empty<ChatbotSkillConfigsCommandModel>())
             {
-                if (item.Skill == EnumCourseSkill.Vocabulary)
-                {
-                    aiConfig.Add(grammarFull);
-                    item.AiConfig = string.Join("\n", aiConfig);
-
-                }
-                else if (item.Skill == EnumCourseSkill.Grammar)
-                {
-                    aiConfig.Add(BuildTemplateConfigPrompt(Grammar_TopicList, item.Configs!, true, true));
-                    item.AiConfig = string.Join("\n", aiConfig);
-                }
-                else
-                {
-                    aiConfig.Add(Unit_Topic);
-                    aiConfig.Add(grammarPart);
-                    aiConfig.Add(vocabConfigsPart);
-                    item.AiConfig = string.Join("\n", aiConfig);
-                }
+                skill.AiConfig = BuildAiConfigByLayout(
+                    skill.ChatbotLayout,
+                    baseConfigs,
+                    vocabPart,
+                    vocabFull,
+                    grammarPart,
+                    skill.Configs);
             }
 
-            bool isUpdate = false;
-            var existChatBot = await _chatbotConfigRepository.Queryable.FirstOrDefaultAsync(x => x.UnitId == request.UnitId, cancellationToken);
-            ChatbotConfig chatbotConfig = new ChatbotConfig();
-            chatbotConfig = _mapper.Map<ChatbotConfig>(request);
-
-            if (existChatBot != null)
+            var chatbotConfig = await _chatbotConfigRepository.Queryable.FirstOrDefaultAsync(x => x.UnitId == request.UnitId, cancellationToken);
+            if (chatbotConfig == null)
             {
-                isUpdate = true;
-                existChatBot = _mapper.Map(request, existChatBot);
+                chatbotConfig = _mapper.Map<ChatbotConfig>(request);
+            }
+            else
+            {
+                _mapper.Map(request, chatbotConfig);
             }
 
             await _chatbotConfigRepository.ExecuteTransactionAsync(async () =>
             {
-                if (!isUpdate)
+                if (chatbotConfig.Id == Guid.Empty)
                 {
                     _chatbotConfigRepository.Add(chatbotConfig);
                 }
                 else
                 {
-                    existChatBot = _chatbotConfigRepository.Update(existChatBot!);
-
+                    chatbotConfig = _chatbotConfigRepository.Update(chatbotConfig!);
                 }
 
                 await _chatbotConfigRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
@@ -115,6 +97,61 @@ namespace Fsel.System.Application.Commands.Chatbots
             return methodResult;
         }
 
+        private static IList<SkillConfigCommandModel> GetSkillConfigs(
+        SaveChatbotConfigCommand request,
+        EnumChatbotLayout layout)
+        {
+            return request.ChatbotSkillConfigs?
+                .FirstOrDefault(x => x.ChatbotLayout == layout)?
+                .Configs
+                ?? new List<SkillConfigCommandModel>();
+        }
+
+        private string BuildAiConfigByLayout(
+        EnumChatbotLayout layout,
+        IEnumerable<string> baseConfigs,
+        string vocabPart,
+        string vocabFull,
+        string grammarPart,
+        IList<SkillConfigCommandModel>? currentConfigs)
+        {
+            var configs = new List<string>(baseConfigs);
+
+            switch (layout)
+            {
+                case EnumChatbotLayout.Vocabulary:
+                    configs.Add(vocabFull);
+                    break;
+
+                case EnumChatbotLayout.Grammar:
+                    configs.Add(BuildTemplateConfigPrompt(
+                        Grammar_TopicList,
+                        currentConfigs ?? new List<SkillConfigCommandModel>(),
+                        true,
+                        true));
+                    break;
+
+                default:
+                    configs.Add(Unit_Topic);
+                    configs.Add(grammarPart);
+                    configs.Add(vocabPart);
+                    break;
+            }
+
+            return string.Join("\n", configs);
+        }
+
+        private List<string> BuildBaseAiConfigs(SaveChatbotConfigCommand request)
+        {
+            return new List<string>
+            {
+                BuildTemplatePrompt(Program_Name, nameof(request.ProgramName), request.ProgramName?.ToString() ?? string.Empty),
+                BuildTemplatePrompt(Course_Name, nameof(request.CourseName), request.CourseName?.ToString() ?? string.Empty),
+                BuildTemplatePrompt(CEFR_Level, nameof(request.CEFRLevel), request.CEFRLevel?.ToString() ?? string.Empty),
+                BuildTemplatePrompt(Unit_Topic, nameof(request.UnitTopic), request.UnitTopic?.ToString() ?? string.Empty),
+                BuildTemplatePrompt(Unit_Number, nameof(request.UnitNumber), request.UnitNumber?.ToString() ?? string.Empty),
+            };
+        }
 
         /// <summary>
         /// Convert về dạng chung
@@ -124,7 +161,6 @@ namespace Fsel.System.Application.Commands.Chatbots
         private static string ConvertToAiPrompt(string property, string value)
         {
             string result = "{\n" + ConvertToCamelCase(property) + ":" + value + "\n}";
-
             return result;
         }
 
@@ -144,74 +180,87 @@ namespace Fsel.System.Application.Commands.Chatbots
         /// <summary>
         /// tạo template cho các kĩ năng
         /// </summary>
-        /// <param name="skillType" desciption="tiêu đề"></param> 
-        /// <param name="configs" desciption="giá trị config"></param> 
+        /// <param name="skillType" desciption="tiêu đề"></param>
+        /// <param name="configs" desciption="giá trị config"></param>
         /// <param name="getTopic" desciption="chỉ hiển thị TopicName"></param>
         /// <param name="getItem" desciption="chỉ hiển thị Item"></param>
         /// <returns></returns>
-        private static string BuildTemplateConfigPrompt(string skillType, IList<SkillConfigCommandModel> configs, bool getTopic, bool getItem)
+        private static string BuildTemplateConfigPrompt(
+        string skillType,
+        IList<SkillConfigCommandModel> configs,
+        bool getTopic,
+        bool getItem)
         {
-            string topicName = string.Empty;
-            string itemName = string.Empty;
-            string fullPrompt = string.Empty;
-
-            int configCount = configs?.Count ?? 0;
-
-            for (int i = 0; i < configCount; i++)
+            if (configs == null || configs.Count == 0)
             {
-                var listContent = configs?[i]?.ItemSkillContent ?? default;
-                int countList = listContent?.Count ?? 0;
+                return $"{skillType}:";
+            }
+            var fullPrompt = new StringBuilder();
+            var topicBuilder = new StringBuilder();
 
-                for (int j = 0; j < countList; j++)
+            foreach (var config in configs)
+            {
+                if (config == null)
                 {
-                    if (!getItem)
-                    {
-                        break;
+                    continue;
+                }
+                // ===== Build Item =====
+                if (getItem && config.ItemSkillContent?.Any() == true)
+                {
+                    var itemBuilder = new StringBuilder();
 
+                    foreach (var item in config.ItemSkillContent)
+                    {
+                        if (!string.IsNullOrWhiteSpace(item?.Content))
+                        {
+                            itemBuilder.AppendLine(item.Content + ",");
+                        }
                     }
 
-                    itemName += "\n" + listContent?[j]?.Content ?? string.Empty;
+                    if (itemBuilder.Length > 0)
+                    {
+                        // Remove last comma
+                        itemBuilder.Length -= 3;
 
-                    if (j < countList - 1)
-                    {
-                        itemName += ",\n";
-                    }
-                    else
-                    {
-                        itemName += "\n";
+                        fullPrompt.AppendLine()
+                                  .AppendLine("[")
+                                  .AppendLine("{")
+                                  .AppendLine(itemBuilder.ToString())
+                                  .AppendLine("}")
+                                  .AppendLine("]");
                     }
                 }
 
-                if (getTopic && !getItem)
+                // ===== Build Topic =====
+                if (getTopic)
                 {
-                    topicName += $"{configs?[i]?.Name ?? string.Empty}";
-                    if (i < countList - 1)
+                    if (!string.IsNullOrWhiteSpace(config.Name))
                     {
-                        topicName += ",\n";
+                        topicBuilder.AppendLine(config.Name + ",");
                     }
-                    else
-                    {
-                        topicName += "\n";
-                    }
-                }
-                else if (!getTopic && getItem)
-                {
-                    fullPrompt += "\n[\n{" + $"{itemName}" + "}\n]\n";
-                }
-                else if (getTopic && getItem)
-                {
-                    fullPrompt += "\n[\n{\n" + $"{configs?[i]?.Name ?? string.Empty}" + "\n}\n]\n" + "\n[\n{" + $"{itemName}" + "}\n]\n";
                 }
 
-                itemName = string.Empty;
+                // ===== Topic + Item =====
+                if (getTopic && getItem && !string.IsNullOrWhiteSpace(config.Name))
+                {
+                    fullPrompt.Insert(0, $"\n[\n{{\n{config.Name}\n}}\n]\n");
+                }
             }
 
-            if (getTopic && !getItem)
+            // ===== Final Topic Only =====
+            if (getTopic && !getItem && topicBuilder.Length > 0)
             {
-                fullPrompt += "\n[\n{\n" + topicName + "}\n]\n";
+                topicBuilder.Length -= 3;
+
+                fullPrompt.AppendLine()
+                          .AppendLine("[")
+                          .AppendLine("{")
+                          .AppendLine(topicBuilder.ToString())
+                          .AppendLine("}")
+                          .AppendLine("]");
             }
-            string result = skillType + ":" + fullPrompt;
-            return result;
+
+            return $"{skillType}:{fullPrompt}";
         }
 
         /// <summary>
@@ -222,17 +271,13 @@ namespace Fsel.System.Application.Commands.Chatbots
         private static string ConvertToCamelCase(string input)
         {
             TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
-            string titleCaseInput = textInfo.ToTitleCase(input?.ToLower() ?? string.Empty);
+            string titleCaseInput = textInfo.ToTitleCase(input?.ToLower(CultureInfo.CurrentCulture) ?? string.Empty);
 
             string[] words = titleCaseInput.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             string camelCase = string.Join("", words);
 
-            camelCase = char.ToLower(camelCase[0]) + camelCase.Substring(1);
-
+            camelCase = char.ToLower(camelCase[0], CultureInfo.CurrentCulture) + camelCase.Substring(1);
             return camelCase;
         }
-
-
-
     }
 }

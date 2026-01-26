@@ -30,7 +30,7 @@ namespace Fsel.Course.Lms.Application.Test
 
             // Assert
             Assert.NotNull(directive);
-            Assert.Equivalent(directive.Action, EnumChangeCourseAction.ChangeAndStartPt);
+            Assert.Equivalent(directive.Action, EnumChangeProgramAction.ChangeAndStartPt);
             Assert.Equivalent(directive.ToProgramId, Data.englishSubject.Categorys.ElementAt(0).Categorys.First(x => x.Name == "Academic English").Id);
             Assert.Equivalent(directive.ProgramOwnPt, Data.englishSubject.Categorys.ElementAt(0).Categorys.First(x => x.Name == "Academic English").Id);
         }
@@ -56,7 +56,7 @@ namespace Fsel.Course.Lms.Application.Test
 
             // Assert
             Assert.NotNull(directive);
-            Assert.Equivalent(directive.Action, EnumChangeCourseAction.ChangeAndStartPt);
+            Assert.Equivalent(directive.Action, EnumChangeProgramAction.ChangeAndStartPt);
             Assert.Equivalent(directive.ToProgramId, Data.englishSubject.Categorys.ElementAt(0).Categorys.First(x => x.Name == "IELTS").Id);
             Assert.Equivalent(directive.ProgramOwnPt, Data.englishSubject.Categorys.ElementAt(0).Categorys.First(x => x.Name == "Academic English").Id);
         }

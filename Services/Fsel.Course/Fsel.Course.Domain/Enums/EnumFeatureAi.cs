@@ -3,14 +3,15 @@
 namespace Fsel.Course.Domain.Enums
 {
     using System.ComponentModel;
+    using System.ComponentModel.DataAnnotations;
 
     public enum EnumFeatureMultiple
     {
-        [Description("Unit")]
+        [Description("Unit"), Display(Name = "Unit")]
         Unit,
-        [Description("Lesson")]
+        [Description("Lesson"), Display(Name = "Lesson")]
         Lesson,
-        [Description("Test")]
+        [Description("Test"), Display(Name = "Test")]
         Test,
     }
 }

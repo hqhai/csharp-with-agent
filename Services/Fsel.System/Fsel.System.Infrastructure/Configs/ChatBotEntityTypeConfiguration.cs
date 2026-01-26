@@ -4,7 +4,7 @@ namespace Fsel.System.Infrastructure.Configs
 {
     using Fsel.Common.Helpers;
     using Fsel.Shared.Enums;
-    using Fsel.System.Domain.Entities.ChatBot;
+    using Fsel.System.Domain.Entities.Chatbots;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

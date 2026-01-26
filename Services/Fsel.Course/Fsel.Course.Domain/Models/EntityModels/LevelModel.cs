@@ -2,22 +2,29 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
+    using System.Text.Json.Serialization;
     using Fsel.Core.Base.BaseModels;
 
+    [JsonDerivedType(typeof(SelectionLevelModel))]
     public class LevelModel : BaseModel
     {
         public string? Name { get; set; }
 
         public string? ProgramLevelName { get; set; }
 
+        public string? ProgramDescription { get; set; }
+
         public string? Code { get; set; }
 
         public string? Description { get; set; }
 
+        public string? PTDescription { get; set; }
+
         public int LevelOrder { get; set; }
 
-        public IList<SkillViewModel>? Skils { get; set; }
+        public bool LearnedBefore { get; set; }
 
+        public IList<SkillViewModel>? Skils { get; set; }
     }
 
     public class SelectionLevelModel : LevelModel

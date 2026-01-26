@@ -233,5 +233,22 @@ namespace Fsel.Shared.Constants
                 public const string TranslationResultHub = $"TranslationResultHub";
             }
         }
+
+        public static class SpeechToTextHub
+        {
+            public const string Pattern = $"/speech-to-text";
+
+            public static class Methods
+            {
+                public const string OnRecognizing = $"OnRecognizing";
+                public const string OnRecognized = $"OnRecognized";
+                public const string OnSessionStarted = $"OnSessionStarted";
+                public const string OnSessionStopped = $"OnSessionStopped";
+                public const string OnStarted = $"OnStarted";
+                public const string OnStopped = $"OnStopped";
+                public const string OnError = $"OnError";
+                public const string OnAudioSaved = $"OnAudioSaved";
+            }
+        }
     }
 }

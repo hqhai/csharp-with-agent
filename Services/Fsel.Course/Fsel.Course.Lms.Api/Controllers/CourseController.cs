@@ -141,5 +141,22 @@ namespace Fsel.Course.Lms.Api.Controllers
             var queryResult = await _mediator.Send(request).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        [HttpPost("change-subject")]
+        [Permission(role: nameof(EnumRole.Student))]
+        public async Task<IActionResult> ChangeSubject([FromBody] ChangeSubjectCommand request)
+        {
+            var queryResult = await _mediator.Send(request).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+
+        [HttpGet("get-levels-for-change")]
+        [Permission(role: nameof(EnumRole.Student))]
+        public async Task<IActionResult> GetLevelsForChange()
+        {
+            var queryResult = await _mediator.Send(new GetLevelsForChangeQuery()).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }

@@ -2,7 +2,6 @@
 
 namespace Fsel.System.Domain.Models.CommandModels.ChatbotConfigs
 {
-
     public class ChatbotTokenConfigsCommandModel
     {
         public int ReadingToken { get; set; }

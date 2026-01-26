@@ -179,8 +179,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
         private async Task<Dictionary<Guid, VideoTimeCodeResult?>> LoadVideoTimeCodeResultDictAsync(VideoResult videoResult)
         {
             var videoTimeCodeResults = await _videoTimeCodeResultRepository.ReadQueryable.Where(x => x.VideoResultId == videoResult.Id && x.CreatedDate >= videoResult.CreatedDate)
-                                                                                     .Where(x => !(videoResult.Status == EnumResultStatus.Done) || x.UpdatedDate <= videoResult.UpdatedDate)
-                                                                                     .ToListAsync();
+                                                                           .ToListAsync();
             return videoTimeCodeResults.ToDictionary(x => x.VideoTimeCodeId, x => (VideoTimeCodeResult?)x);
         }
 

@@ -43,7 +43,6 @@ namespace Fsel.Course.Application.Queries.AiPromptManagerQuery
 
             methodResult.Result = _mapper.Map<AiPromptManagerModel>(aiModelManager);
             methodResult.StatusCode = StatusCodes.Status200OK;
-
             return methodResult;
         }
     }

@@ -8,13 +8,16 @@ namespace Fsel.System.Application.Commands.Chatbots
     using Fsel.Common.Helpers;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
     using Fsel.System.Application.Queues.Publisher;
     using Fsel.System.Application.Services.AIServices;
     using Fsel.System.Application.Services.AIServices.Models;
+    using Fsel.System.Application.Services.CourseServices;
+    using Fsel.System.Application.Services.CourseServices.Models;
+    using Fsel.System.Application.Services.CourseServices.QueryModels;
     using Fsel.System.Application.Services.StorageServices;
     using Fsel.System.Application.Services.StorageServices.Models;
-    using Fsel.System.Domain.Entities.ChatBot;
     using Fsel.System.Domain.Entities.Chatbots;
     using Fsel.System.Domain.Enums.ErrorCodes;
     using Fsel.System.Domain.IRepositories;
@@ -22,18 +25,18 @@ namespace Fsel.System.Application.Commands.Chatbots
     using Fsel.System.Domain.Models.EntityModels;
     using global::System.ComponentModel.DataAnnotations;
     using global::System.Text.RegularExpressions;
+    using global::System.Threading;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Logging;
-    using Fsel.Shared.Helpers;
 
-    public class SaveChatBotMessageCommand : SaveChatBotMessageModel, IRequest<MethodResult<ChatBotModel>>
+    public class SaveChatBotMessageCommand : IRequest<MethodResult<ChatBotModel>>
     {
         [MaxLength(4000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Content { get; set; }
 
-        public Guid? ChatBotId { get; set; }
+        public Guid ChatBotId { get; set; }
     }
 
     public class SaveChatBotMessageCommandHandler : IRequestHandler<SaveChatBotMessageCommand, MethodResult<ChatBotModel>>
@@ -47,6 +50,7 @@ namespace Fsel.System.Application.Commands.Chatbots
         private const int Number_Of_Config = 2;
         private readonly ILogger<SaveChatBotMessageCommandHandler> _logger;
         private readonly IMediator _mediator;
+        private readonly ICourseService _courseService;
 
         public SaveChatBotMessageCommandHandler(IMapper mapper,
             IChatBotRepository chatBotRepository,
@@ -55,7 +59,8 @@ namespace Fsel.System.Application.Commands.Chatbots
             IChatbotConfigRepository chatbotConfigRepository,
             IOpenAIService openAIService,
             ILogger<SaveChatBotMessageCommandHandler> logger,
-            IMediator mediator)
+            IMediator mediator,
+            ICourseService courseService)
         {
             _mapper = mapper;
             _chatBotRepository = chatBotRepository;
@@ -65,6 +70,7 @@ namespace Fsel.System.Application.Commands.Chatbots
             _openAIService = openAIService;
             _logger = logger;
             _mediator = mediator;
+            _courseService = courseService;
         }
 
         public async Task<MethodResult<ChatBotModel>> Handle(SaveChatBotMessageCommand request, CancellationToken cancellationToken)
@@ -72,30 +78,28 @@ namespace Fsel.System.Application.Commands.Chatbots
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<ChatBotModel>();
 
-            var chatbotMessage = _chatBotRepository.Queryable.FirstOrDefault(x => x.Id == request.ChatBotId);
-
-            if (chatbotMessage == null)
+            var chatbotMessage = await GetChatBotAsync(request.ChatBotId, methodResult, cancellationToken);
+            if (!methodResult.IsOK)
             {
-                methodResult.AddError(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
             }
 
-            var chatbotConfig = _chatbotConfigRepository.Queryable.Include(x => x.ChatbotSkillConfigs).Include(x => x.ChatbotTokenConfigs).FirstOrDefault(x => x.UnitId == chatbotMessage.UnitId);
-
-            if (chatbotConfig == null)
+            var chatbotSkillConfig = await GetSkillConfigAsync(chatbotMessage, methodResult, cancellationToken);
+            if (!methodResult.IsOK)
             {
-                methodResult.AddError(nameof(EnumSystemErrorCode.DataNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(chatbotSkillConfig));
                 return methodResult;
             }
 
-            double tokenRatio = CalculateTokenRatio(chatbotMessage.RemainToken, chatbotMessage.Skill, chatbotConfig);
-
-            // Khi token còn dưới 20% so với số lượng token ban đầu
             if (chatbotMessage.RemainToken == 0)
             {
-                methodResult.AddError(nameof(EnumOutOfAIToken.TheNumberOfTokensHasReachedTheLimit));
+                methodResult.AddErrorBadRequest(nameof(EnumOutOfAIToken.TheNumberOfTokensHasReachedTheLimit));
                 return methodResult;
             }
+            // 3️⃣ Load AI criteria config
+            var aiConfig = await LoadAiCriteriaConfigAsync(chatbotSkillConfig.AICriteriaConfigId);
+
+            #region chatgpt
 
             ///Bổ sung câu hỏi của học sinh vào đoạn hội thoại
             ChatbotResponseModel newQuestion = CompletionElement("user", request.Content);
@@ -104,21 +108,23 @@ namespace Fsel.System.Application.Commands.Chatbots
 
             var chatGptResponse = await _openAIService.SubmitAICompletionsAsync(new RequestAIModel
             {
-                Model = ValueSettings.ChatBotSetup.Model,
+                Model = aiConfig?.AiModel ?? ValueSettings.ChatBotSetup.Model,
                 Messages = chatBotMessageModel,
-                Temperature = ValueSettings.ChatBotSetup.Temperature,
+                Temperature = aiConfig?.SettingTemperature ?? ValueSettings.ChatBotSetup.Temperature,
                 MaxTokens = chatbotMessage.RemainToken,
-                PresencePenalty = ValueSettings.ChatBotSetup.PresencePenalty,
-                TopP = ValueSettings.ChatBotSetup.TopP
+                PresencePenalty = aiConfig?.SettingPresence ?? ValueSettings.ChatBotSetup.PresencePenalty,
+                TopP = aiConfig?.SettingTopP ?? ValueSettings.ChatBotSetup.TopP
             });
 
             string response = chatGptResponse?.Content?.Choices?.Select(x => x.Message?.Content).FirstOrDefault() ?? string.Empty;
             response = Shared.Helpers.StringHelper.TextCleaner.NormalizeListeningContent(response);
 
+            #endregion chatgpt
+
             string tokenInUse = chatGptResponse?.Content?.Usage?.ToString() ?? string.Empty;
             var totalTokenUse = ConvertHelper.Deserialize<TokenAIModel>(tokenInUse);
             bool isContainAudioScript = response.Contains("Click to listen", StringComparison.OrdinalIgnoreCase);
-            string filePath = await TextToSpeech(chatbotMessage.Skill, isContainAudioScript, response);
+            string filePath = await TextToSpeech(chatbotSkillConfig.ChatbotLayout, isContainAudioScript, response);
 
             // Bổ sung câu trả lời của GPT vào đoạn hội thoại
             var chatBotResponse = _mapper.Map<List<ChatbotResponseModel>>(chatbotMessage.Conversations);
@@ -133,13 +139,12 @@ namespace Fsel.System.Application.Commands.Chatbots
 
             int tokenCount = matches.Count + (totalTokenUse?.Completion_Tokens ?? default);
             chatbotMessage.RemainToken = chatbotMessage.RemainToken > tokenCount ? chatbotMessage.RemainToken - tokenCount : 0;
-            tokenRatio = CalculateTokenRatio(chatbotMessage.RemainToken, chatbotMessage.Skill, chatbotConfig);
+            var tokenRatio = CalculateTokenRatio(chatbotMessage.RemainToken, chatbotSkillConfig.Token);
 
             // Push to Socket
             await PushToWebSocket(request.ChatBotId, newMessage.Content, newMessage.FilePath, tokenRatio, cancellationToken);
 
             //Lưu đoạn hội thoại vào database
-            ChatBot chatBot = new ChatBot();
             await _chatBotRepository.ExecuteTransactionAsync(async () =>
             {
                 if (chatbotMessage.RemainToken == 0)
@@ -156,8 +161,60 @@ namespace Fsel.System.Application.Commands.Chatbots
                 return methodResult;
             });
 
-            methodResult.StatusCode = StatusCodes.Status201Created;
             return methodResult;
+        }
+
+        private async Task<AICriteriaConfigsModel?> LoadAiCriteriaConfigAsync(Guid? configId)
+        {
+            if (!configId.HasValue)
+            {
+                return null;
+            }
+
+            var result = await _courseService.GetConfigByIdAsync(
+                new GetAICriteriaConfigsQueryModel
+                {
+                    Id = configId.Value
+                });
+
+            return result?.Content?.Result;
+        }
+
+        private async Task<ChatBot> GetChatBotAsync(Guid chatBotId, MethodResult<ChatBotModel> result, CancellationToken ct)
+        {
+            var chatbot = await _chatBotRepository.Queryable
+                .FirstOrDefaultAsync(x => x.Id == chatBotId, ct);
+
+            if (chatbot == null)
+            {
+                result.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                return new ChatBot();
+            }
+            return chatbot;
+        }
+
+        private async Task<ChatbotSkillConfig> GetSkillConfigAsync(
+        ChatBot chatbot,
+        MethodResult<ChatBotModel> result,
+        CancellationToken ct)
+        {
+            var config = await _chatbotConfigRepository.ReadQueryable
+                                                       .Include(x => x.ChatbotSkillConfigs)
+                                                       .FirstOrDefaultAsync(x => x.UnitId == chatbot.UnitId, ct);
+
+            if (config == null)
+            {
+                result.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(ChatbotConfig));
+                return new ChatbotSkillConfig();
+            }
+
+            var skill = config.ChatbotSkillConfigs.FirstOrDefault(x => x.SkillId == chatbot.SkillId);
+            if (skill == null)
+            {
+                result.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(ChatbotSkillConfig));
+                return new ChatbotSkillConfig();
+            }
+            return skill;
         }
 
         #region Func
@@ -188,9 +245,9 @@ namespace Fsel.System.Application.Commands.Chatbots
         /// <param name="skill"></param>
         /// <param name="chatbotConfig"></param>
         /// <returns></returns>
-        private static double CalculateTokenRatio(double remainToken, EnumCourseSkill skill, ChatbotConfig chatbotConfig)
+        private static double CalculateTokenRatio(double remainToken, double token = default)
         {
-            return (double)remainToken / GetSkillToken(skill, chatbotConfig);
+            return (double)remainToken / token;
         }
 
         /// <summary>
@@ -201,10 +258,10 @@ namespace Fsel.System.Application.Commands.Chatbots
         /// <param name="script"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        private async Task<string> TextToSpeech(EnumCourseSkill skill, bool isContainAudioScript, string? script)
+        private async Task<string> TextToSpeech(EnumChatbotLayout layout, bool isContainAudioScript, string? script)
         {
             string filePath = string.Empty;
-            if (skill == EnumCourseSkill.Listening && isContainAudioScript)
+            if (layout == EnumChatbotLayout.Listening && isContainAudioScript)
             {
                 string scriptListening = ExtractTranscript(script);
                 var audioResult = await _storageService.TextToSpeech(new CreateChatbotAudioModel
@@ -240,7 +297,7 @@ namespace Fsel.System.Application.Commands.Chatbots
         /// <param name="filePath"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        private async Task PushToWebSocket(Guid? chatBotId, string? message, string? filePath, double tokenRation, CancellationToken cancellationToken)
+        private async Task PushToWebSocket(Guid chatBotId, string? message, string? filePath, double tokenRation, CancellationToken cancellationToken)
         {
             ChatBotSendingMessageModel model = new ChatBotSendingMessageModel
             {
@@ -294,44 +351,6 @@ namespace Fsel.System.Application.Commands.Chatbots
             {
                 return string.Empty;
             }
-        }
-
-        /// <summary>
-        /// Lấy số lượng token theo skill
-        /// </summary>
-        /// <param name="skill"></param>
-        /// <param name="chatbotConfig"></param>
-        /// <returns></returns>
-        public static int GetSkillToken(EnumCourseSkill skill, ChatbotConfig chatbotConfig)
-        {
-            int token = 0;
-            switch (skill)
-            {
-                case (EnumCourseSkill.Vocabulary):
-                    token = chatbotConfig?.ChatbotTokenConfigs?.VocabularyToken ?? default;
-                    break;
-
-                case (EnumCourseSkill.Grammar):
-                    token = chatbotConfig?.ChatbotTokenConfigs?.GrammarToken ?? default;
-                    break;
-
-                case (EnumCourseSkill.Listening):
-                    token = chatbotConfig?.ChatbotTokenConfigs?.ListeningToken ?? default;
-                    break;
-
-                case (EnumCourseSkill.Reading):
-                    token = chatbotConfig?.ChatbotTokenConfigs?.ReadingToken ?? default;
-                    break;
-
-                case (EnumCourseSkill.Writing):
-                    token = chatbotConfig?.ChatbotTokenConfigs?.WritingToken ?? default;
-                    break;
-
-                case (EnumCourseSkill.Speaking):
-                    token = chatbotConfig?.ChatbotTokenConfigs?.SpeakingToken ?? default;
-                    break;
-            }
-            return token;
         }
 
         #endregion Func

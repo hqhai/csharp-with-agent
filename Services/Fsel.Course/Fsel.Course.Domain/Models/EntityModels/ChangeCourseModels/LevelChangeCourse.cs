@@ -7,13 +7,17 @@ namespace Fsel.Course.Domain.Models.EntityModels.ChangeCourseModels
 
     public class LevelChangeCourse : ChangeCourseComponent
     {
+        public Level Level { get; set; }
+
         public bool CanSelect => CanAccess || LearnedBefore || IsCurrentLearningLevel;
         public bool IsCurrentLearningLevel { get; set; }
-        private bool LearnedBefore => CourseResultId != null && CourseResultId != Guid.Empty;
+        public bool LearnedBefore => CourseResultId != null && CourseResultId != Guid.Empty;
         public Guid? CourseResultId { get; set; }
         public Guid LevelId { get; set; }
         public bool CanAccess { get; set; }
         public int LevelOrder { get; set; }
+
+        public DateTime? CreatedOrUpdatedDate { get; set; }
 
         public override ChangeCourseDirective? ChangeCourse(ChangeCourseRequest request)
         {
@@ -61,6 +65,39 @@ namespace Fsel.Course.Domain.Models.EntityModels.ChangeCourseModels
         public override bool Contain(Guid targetLevelId)
         {
             return LevelId == targetLevelId;
+        }
+
+        public override ChangeSubjectDirective? ChangeSubject(ChangeProgramRequest request)
+        {
+            if (LearnedBefore)
+            {
+                return new ChangeSubjectDirective
+                {
+                    Action = EnumChangeSubjectAction.ChangeToRecentCourse,
+                    CourseResultId = CourseResultId,
+                    CreatedOrUpdatedDate = CreatedOrUpdatedDate
+                };
+            }
+            return null;
+        }
+
+        public override ChangeSubjectDirective? SelectProjectSubject(ChangeProgramRequest request)
+        {
+            if (LearnedBefore)
+            {
+                return new ChangeSubjectDirective
+                {
+                    Action = EnumChangeSubjectAction.ChangeToRecentCourse,
+                    CourseResultId = CourseResultId,
+                    CreatedOrUpdatedDate = CreatedOrUpdatedDate
+                };
+            }
+            return null;
+        }
+
+        public override bool IsCurrentLearning()
+        {
+            return IsCurrentLearningLevel;
         }
     }
 }

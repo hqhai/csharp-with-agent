@@ -11,6 +11,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public long TimeSpent { get; set; }
         public DateTime? LastVisited { get; set; }
         public int Visit { get; set; }
+        public int? DisplayOrder { get; set; }
         public Guid ClassForumId { get; set; }
         public SkillScores? SkillScores { get; set; }
     }

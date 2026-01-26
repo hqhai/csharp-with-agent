@@ -32,6 +32,7 @@ namespace Fsel.Course.Infrastructure.Common.UnitHelper
                 TestCount = _createRequest.Modules?.Count(m => m.ModuleType == EnumUnitConfigType.Test) ?? 0,
                 VersionStatus = EnumVersionStatus.LastVersion,
                 Version = version,
+                IsAIPracticeGymEnabled = _createRequest.IsAIPracticeGymEnabled,
                 LevelId = _createRequest.LevelId,
                 ProgramId = _createRequest.ProgramId,
                 HighlightRanges = _createRequest.HighlightRanges,

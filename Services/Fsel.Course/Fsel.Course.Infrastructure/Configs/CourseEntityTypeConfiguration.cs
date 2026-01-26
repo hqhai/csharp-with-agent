@@ -42,8 +42,6 @@ namespace Fsel.Course.Infrastructure.Configs
                    .WithMany(x => x.Courses)
                    .HasForeignKey(x => x.ProgramId)
                    .OnDelete(DeleteBehavior.NoAction);
-
-            builder.HasIndex(c => new { c.ParentCourseId, c.Priority }).IsUnique().HasFilter("ParentCourseId IS NOT NULL AND [IsDeleted] = 0");
         }
     }
 }

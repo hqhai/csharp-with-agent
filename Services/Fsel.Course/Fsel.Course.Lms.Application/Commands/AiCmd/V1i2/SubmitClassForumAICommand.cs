@@ -109,7 +109,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd.V1i2
                         classForumDetailResult.RetryTime += 1;
                     });
 
-
                 var retryResult = await retryAI.ExecuteAsync(async () =>
                 {
                     var emailUserNeedSupportResult = classForumDetailResultOwner?.CreatedUserId != null
@@ -153,11 +152,10 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd.V1i2
                         _ => throw new InvalidOperationException($"Unknown ClassForumLayout: {classForum.Layout}")
                     };
 
-
                     // Sử dụng AIConfigSubmitService để gửi request lên AI
 
-
                     var aIResponse = await _aiConfigSubmitService.SubmitByObjectIdAsync(
+                        null,
                         objectId: classForum.Id,
                         content: request.WordContent!,
                         subFeatureType: subFeatureType,

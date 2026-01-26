@@ -1,23 +1,25 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.System.Domain.Entities.ChatBot
+namespace Fsel.System.Domain.Entities.Chatbots
 {
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
     using Fsel.Shared.Enums;
+    using global::System.ComponentModel.DataAnnotations;
     using global::System.ComponentModel.DataAnnotations.Schema;
 
     public class ChatBot : Entity
     {
-        public Guid? UnitId { get; set; }
-
         public EnumCourseSkill Skill { get; set; }
-        public Guid? SkillId { get; set; }
+
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? SkillName { get; set; }
 
-        public long RemainToken { get; set; }
+        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? SkillFilePath { get; set; }
 
-        public Guid StudentId { get; set; }
+        public long RemainToken { get; set; }
 
         public string? ContentStr { get; set; }
 
@@ -32,9 +34,9 @@ namespace Fsel.System.Domain.Entities.ChatBot
         {
             get
             {
-                return ConvertHelper.Deserialize<IList<ChatBotMessage>>(ContentStr);
+                return ContentStr.Deserialize<IList<ChatBotMessage>>();
             }
-            set { ContentStr = ConvertHelper.Serialize(value); }
+            set { ContentStr = value.Serialize(); }
         }
 
         [NotMapped]
@@ -42,9 +44,9 @@ namespace Fsel.System.Domain.Entities.ChatBot
         {
             get
             {
-                return ConvertHelper.Deserialize<ChatBotMessage>(LastestAnswerStr);
+                return LastestAnswerStr.Deserialize<ChatBotMessage>();
             }
-            set { LastestAnswerStr = ConvertHelper.Serialize(value); }
+            set { LastestAnswerStr = value.Serialize(); }
         }
 
         [NotMapped]
@@ -52,18 +54,21 @@ namespace Fsel.System.Domain.Entities.ChatBot
         {
             get
             {
-                return ConvertHelper.Deserialize<ChatBotMessage>(LastestQuestionStr);
+                return LastestQuestionStr.Deserialize<ChatBotMessage>();
             }
-            set { LastestQuestionStr = ConvertHelper.Serialize(value); }
+            set { LastestQuestionStr = value.Serialize(); }
         }
+
+        public Guid SkillId { get; set; }
+        public Guid UnitId { get; set; }
+        public Guid UnitResultId { get; set; }
+        public Guid StudentId { get; set; }
     }
 
     public class ChatBotMessage
     {
         public string? Role { get; set; }
-
         public string? FilePath { get; set; }
-
         public string? Content { get; set; }
     }
 }
