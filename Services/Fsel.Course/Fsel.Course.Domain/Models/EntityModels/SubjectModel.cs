@@ -12,6 +12,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public string? Thumbnail { get; set; }
         public string? Type { get; set; }
+        public string Description { get; set; }
 
         public EnumTestMode? TestMode { get; set; }
 
