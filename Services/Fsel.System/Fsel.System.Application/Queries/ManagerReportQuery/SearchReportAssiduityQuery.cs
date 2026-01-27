@@ -48,13 +48,11 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
                 ListDistrict = request.ListDistrict,
                 ListProvince = request.ListProvince,
                 ListSchool = request.ListSchool,
-                ListCourseLevel = request.ListCourseLevel,
                 ListSchoolClass = request.ListSchoolClass,
                 ListSchoolGrade = request.ListSchoolGrade,
                 IsLearning = request.IsLearning,
                 ListLearningStatus = request.ListLearningStatus,
                 ListCompletionStatus = request.ListCompletionStatus,
-                ListCourseType = request.ListCourseType,
 
                 PageSize = request.PageSize,
                 Filters = request.Filters,
@@ -63,7 +61,6 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
                 Page = request.Page,
                 StartDate = request.StartDate,
                 EndDate = request.EndDate,
-                CourseType = request.CourseType,
                 IsSearchReport = true,
             }, cancellationToken);
 
@@ -98,13 +95,10 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
                 ListSchoolGrade = request.ListSchoolGrade,
                 IsLearning = request.IsLearning,
                 ListCompletionStatus = request.ListCompletionStatus,
-                ListCourseLevel = request.ListCourseLevel,
                 ListLearningStatus = request.ListLearningStatus,
-                ListCourseType = request.ListCourseType,
 
                 StartDate = request.StartDate,
                 EndDate = request.EndDate,
-                CourseType = request.CourseType,
             }, cancellationToken);
             var reportStudentAssiduity = _mapper.Map<SearchReportStudentAssiduityModel>(dataOverallResult.Result);
             var studentIds = students.Select(x => x.Id).ToList();

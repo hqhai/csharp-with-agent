@@ -12,15 +12,22 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.ShareModels.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
     public class SearchReportLearningProgressQuery : SearchReportLearningProgressQueryModel, IRequest<MethodResult<SearchReportLearningProgressModel>>
     {
+        public SearchReportLearningProgressQuery()
+        {
+            ManagerReportType = EnumManagerReportType.ReportLearningProgress;
+        }
     }
 
     public class SearchReportLearningProgressQueryHandler : IRequestHandler<SearchReportLearningProgressQuery, MethodResult<SearchReportLearningProgressModel>>
     {
+        private const int MaxPageSize = 100;
+
         private readonly IMediator _mediator;
         private readonly IMapper _mapper;
         private readonly ManagerProgressHelper _managerProgressHelper;
@@ -35,110 +42,107 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             _managerProgressHelper = managerProgressHelper;
         }
 
-        public async Task<MethodResult<SearchReportLearningProgressModel>> Handle(SearchReportLearningProgressQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<SearchReportLearningProgressModel>> Handle(
+            SearchReportLearningProgressQuery request,
+            CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
+
             var methodResult = new MethodResult<SearchReportLearningProgressModel>();
 
-            if (request.PageSize > 100)
+            if (request.PageSize > MaxPageSize)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
 
-            var dataOverallResult = await _mediator.Send(new GetOverallReportLearningProgressQuery
+            var overallReport = await GetOverallReportAsync(request, cancellationToken);
+            var studentResult = await _mediator.Send(new GetStudentReportQuery(request), cancellationToken);
+
+            if (!studentResult.IsOK)
             {
-                Keyword = request.Keyword,
-                ListSchoolClass = request.ListSchoolClass,
-                ListSchoolGrade = request.ListSchoolGrade,
-                ListDistrict = request.ListDistrict,
-                ListProvince = request.ListProvince,
-                ListSchool = request.ListSchool,
-                ListCourseLevel = request.ListCourseLevel,
-                ListLearningStatus = request.ListLearningStatus,
-                ListCompletionStatus = request.ListCompletionStatus,
-                ListCurrentLevel = request.ListCurrentLevel,
-                ListOverallScore = request.ListOverallScore,
-                IsLearning = request.IsLearning,
-
-                EndDate = request.EndDate,
-                CourseType = request.CourseType,
-            }, cancellationToken);
-            var reportLearningProgress = _mapper.Map<SearchReportLearningProgressModel>(dataOverallResult.Result);
-
-            var userResults = await _mediator.Send(new GetStudentReportQuery
-            {
-                Keyword = request.Keyword,
-                ListSchoolClass = request.ListSchoolClass,
-                ListSchoolGrade = request.ListSchoolGrade,
-                ListDistrict = request.ListDistrict,
-                ListProvince = request.ListProvince,
-                ListSchool = request.ListSchool,
-                ListCourseLevel = request.ListCourseLevel,
-                ListLearningStatus = request.ListLearningStatus,
-                ListCompletionStatus = request.ListCompletionStatus,
-                IsLearning = request.IsLearning,
-                ListCurrentLevel = request.ListCurrentLevel,
-                ListOverallScore = request.ListOverallScore,
-
-                EndDate = request.EndDate,
-                PageSize = request.PageSize,
-                Filters = request.Filters,
-                SortBy = request.SortBy,
-                IncludePaths = request.IncludePaths,
-                Page = request.Page,
-                CourseType = request.CourseType,
-                ManagerReportType = EnumManagerReportType.ReportLearningProgress,
-                IsSearchReport = true
-            }, cancellationToken);
-
-            if (!userResults.IsOK)
-            {
-                methodResult.AddError(userResults.ErrorMessages);
+                methodResult.AddErrorBadRequest(studentResult.ErrorMessages);
                 return methodResult;
             }
 
-            var students = userResults?.Result;
-            if (students == null || !students.Any())
+            if (studentResult.Result == null || !studentResult.Result.Any())
             {
-                methodResult.Result = reportLearningProgress;
+                methodResult.Result = overallReport;
+                methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
 
-            var lists = students.Select(x => new CourseResultModel { CourseId = x.CourseId.GetValueOrDefault(), StudentId = x.Id }).ToList();
-            var courseCompletes = await _managerProgressHelper.GetProgressCompleteLessonAsync(lists, request.EndDate);
+            var learningProgresses = await BuildLearningProgressAsync(
+                studentResult.Result,
+                request.EndDate);
 
-            var datas = new List<LearningProgressModel>();
-            var courseCompleteDict = courseCompletes.ToDictionary(x => x.StudentId);
-            var dateTimeUTC = DateTime.UtcNow;
+            overallReport.PagingItems = new PagingItemsModel<LearningProgressModel>(
+                learningProgresses,
+                request,
+                overallReport.TotalStudent);
 
-            foreach (var item in students)
-            {
-                courseCompleteDict.TryGetValue(item.Id, out var courseComplete);
-                var learningProgress = new LearningProgressModel
-                {
-                    StudentId = item.Id,
-                    FullName = item.FullName,
-                    UserName = item.UserName,
-                    PhoneNumber = item.PhoneNumber,
-                    Email = item.Email,
-                    SchoolGrade = item.SchoolGrade,
-                    SchoolClass = item.SchoolClass,
-                    CourseType = item.CourseLevel.GetEnumCourseType(),
-                    CourseLevel = item.CourseLevel,
-                    ContentProgress = $"{courseComplete?.TotalLessonDone} / {courseComplete?.TotalLesson}",
-                    UnitName = $"{nameof(Domain.Entities.Unit)} {courseComplete?.UnitDisplayOrder}",
-                    LessonName = $"{nameof(Lesson)} {courseComplete?.LessonDisplayOrder}",
-                    SchoolName = item.School,
-                    Status = item.ExpiredDate > dateTimeUTC ? EnumLearningStatus.InProgress : EnumLearningStatus.Expired,
-                };
-                datas.Add(learningProgress);
-            }
-
-            reportLearningProgress.PagingItems = new PagingItemsModel<LearningProgressModel>(datas, request, reportLearningProgress.TotalStudent);
-            methodResult.Result = reportLearningProgress;
+            methodResult.Result = overallReport;
             methodResult.StatusCode = StatusCodes.Status200OK;
+
             return methodResult;
+        }
+
+        private async Task<SearchReportLearningProgressModel> GetOverallReportAsync(
+            SearchReportLearningProgressQuery request,
+            CancellationToken cancellationToken)
+        {
+            var overallResult = await _mediator.Send(new GetOverallReportLearningProgressQuery(request), cancellationToken);
+            return _mapper.Map<SearchReportLearningProgressModel>(overallResult.Result);
+        }
+
+        private async Task<List<LearningProgressModel>> BuildLearningProgressAsync(
+            IEnumerable<StudentDtoModel> students,
+            DateTime? endDate)
+        {
+            var courseRequests = students
+                .Select(student => new CourseResultModel
+                {
+                    CourseId = student.CourseId.GetValueOrDefault(),
+                    StudentId = student.Id
+                })
+                .ToList();
+
+            var courseCompletes = await _managerProgressHelper
+                .GetProgressCompleteLessonAsync(courseRequests, endDate);
+
+            var courseCompleteLookup = courseCompletes
+                .ToDictionary(x => x.StudentId);
+
+            var nowUtc = DateTime.UtcNow;
+
+            var result = new List<LearningProgressModel>();
+
+            foreach (var student in students)
+            {
+                courseCompleteLookup.TryGetValue(student.Id, out var progress);
+
+                result.Add(new LearningProgressModel
+                {
+                    StudentId = student.Id,
+                    FullName = student.FullName,
+                    UserName = student.UserName,
+                    PhoneNumber = student.PhoneNumber,
+                    Email = student.Email,
+                    SchoolGrade = student.SchoolGrade,
+                    SchoolClass = student.SchoolClass,
+                    SchoolName = student.School,
+                    CourseLevel = student.CourseLevel,
+                    CourseType = student.CourseLevel.GetEnumCourseType(),
+                    ContentProgress = $"{progress?.TotalLessonDone} / {progress?.TotalLesson}",
+                    UnitName = $"{nameof(Domain.Entities.Unit)} {progress?.UnitDisplayOrder}",
+                    LessonName = $"{nameof(Lesson)} {progress?.LessonDisplayOrder}",
+                    Status = student.ExpiredDate > nowUtc
+                        ? EnumLearningStatus.InProgress
+                        : EnumLearningStatus.Expired
+                });
+            }
+
+            return result;
         }
     }
 }
