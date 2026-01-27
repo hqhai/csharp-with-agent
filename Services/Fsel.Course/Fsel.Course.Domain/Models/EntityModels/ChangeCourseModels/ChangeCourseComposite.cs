@@ -62,6 +62,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.ChangeCourseModels
                 Thumbnail = Category.Thumbnail,
                 Type = Category.Type.ToString(),
                 TestMode = Category.TestMode,
+                Description = Category?.Description,
                 ChildSubjects = Children
                     .OfType<ChangeCourseComposite>()
                     .Select(child => child.GetSubjectTree(isIncludeLevel))

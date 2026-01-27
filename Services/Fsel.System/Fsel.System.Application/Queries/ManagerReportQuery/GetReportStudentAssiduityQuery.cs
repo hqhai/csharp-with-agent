@@ -42,15 +42,12 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
                 ListSchoolClass = request.ListSchoolClass,
                 ListSchoolGrade = request.ListSchoolGrade,
                 ListSchool = request.ListSchool,
-                ListCourseLevel = request.ListCourseLevel,
                 IsLearning = request.IsLearning,
                 ListCompletionStatus = request.ListCompletionStatus,
                 ListLearningStatus = request.ListLearningStatus,
-                ListCourseType = request.ListCourseType,
 
                 StartDate = request.StartDate,
                 EndDate = request.EndDate,
-                CourseType = request.CourseType,
             }, cancellationToken);
 
             if (!userResults.IsOK)

@@ -4,20 +4,12 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
 {
     using System.Threading;
     using System.Threading.Tasks;
-    using AutoMapper;
     using Common.ActionResults;
-    using Core.Base.Interfaces;
-    using Domain.Entities;
-    using Domain.Entities.SubjectConditionRuleConfigs;
-    using Domain.Entities.TestConfigs;
-    using Domain.Enums;
-    using Domain.IRepositories;
     using Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.EntityModels.UserNavigationActionModels;
     using Fsel.Course.Lms.Application.Queries.CourseChangeQuery;
-    using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
+    using Fsel.Course.Lms.Application.Services.ApplicationServices;
     using MediatR;
-    using Microsoft.EntityFrameworkCore;
     using Services.UserServices;
     using Shared.Helpers;
 
@@ -28,33 +20,18 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
 
     public class GetLevelsByProgramQueryHandler : IRequestHandler<GetLevelsByProgramQuery, MethodResult<List<SelectionLevelModel>>>
     {
-        private readonly IMapper _mapper;
-        private readonly MediatR.IMediator _mediator;
-        private readonly ILevelRepository _levelRepository;
-        private readonly ICourseCachingService _courseCachingService;
-        private readonly IRepository<TestGroupResult> _testGroupResult;
-        private readonly ICategoryRepository _categoryRepository;
-        private readonly ISubjectConditionRepository _subjectConditionRepository;
+        private readonly IMediator _mediator;
+        private readonly ITestService _testService;
         private readonly IUserService _userService;
 
         public GetLevelsByProgramQueryHandler(
-            ICategoryRepository categoryRepository,
-            IRepository<TestGroupResult> testGroupResult,
-            ISubjectConditionRepository subjectConditionRepository,
             IUserService userService,
-            ILevelRepository levelRepository,
             IMediator mediator,
-            ICourseCachingService courseCachingService,
-            IMapper mapper)
+            ITestService testService)
         {
-            _categoryRepository = categoryRepository;
-            _testGroupResult = testGroupResult;
-            _subjectConditionRepository = subjectConditionRepository;
             _userService = userService;
-            _mapper = mapper;
             _mediator = mediator;
-            _levelRepository = levelRepository;
-            _courseCachingService = courseCachingService;
+            _testService = testService;
         }
 
         public async Task<MethodResult<List<SelectionLevelModel>>> Handle(GetLevelsByProgramQuery request, CancellationToken cancellationToken)
@@ -102,169 +79,13 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
                 return methodResult;
             }
 
-            var ptTestResult = await _testGroupResult.ReadQueryable
-                .FirstOrDefaultAsync(x => x.Id == navigateAction.PtResultId, cancellationToken);
-
-            if (ptTestResult == null || !IsDonePt(ptTestResult))
-            {
-                methodResult.AddErrorBadRequest("PT is not completed");
-                return methodResult;
-            }
-
-            var levelsFromPtOnSameProgram = await _testGroupResult.ReadQueryable
-                .Where(x => x.ProgramId == ptTestResult.ProgramId
-                            && x.StudentId == student.Id
-                            && x.TestType == EnumTestType.PlacementTest
-                            && x.Status == EnumResultStatus.Done)
-                .Include(x => x.CurrentLevel)
-                .Select(x => x.CurrentLevel)
-                .ToListAsync(cancellationToken);
-
-            var highestLevelFromPt = levelsFromPtOnSameProgram.Where(x => x != null)
-                .OrderByDescending(x => x.LevelOrder)
-                .FirstOrDefault();
-
-            var highestLevelId = highestLevelFromPt?.Id ?? ptTestResult.CurrentLevelId;
-
-            var program = await _categoryRepository.ReadQueryable
-                .Include(x => x.Levels)
-                .FirstOrDefaultAsync(x => x.Id == ptTestResult.ProgramId, cancellationToken);
-
-            if (program == null)
-            {
-                return new MethodResult<List<SelectionLevelModel>>();
-            }
-
-            var sliblingPrograms = await _categoryRepository.ReadQueryable
-                .Include(x => x.Levels)
-                .Where(x => x.ParentId == program.ParentId)
-                .ToListAsync(cancellationToken);
-
-            var age = DateTimeHelper.GetYearOld(user.Birthday);
-            var suggestCondition = await _subjectConditionRepository.ReadQueryable
-                .Where(x => x.CategoryId == program.ParentId && x.Status && x.Type == EnumConditionType.CourseSuggest)
-                .Include(x => x.SubjectConditionRules)
-                .FirstOrDefaultAsync(cancellationToken);
-
-            var matchestRule = suggestCondition?.SubjectConditionRules.Where(x => IsMatchRule(x, age, highestLevelId))
-                .OrderBy(x =>
-                {
-                    var ageCondition = x?.ConditionRules?.FirstOrDefault(x => x.Type == EnumSubjectConditionRuleType.Age);
-                    return ageCondition?.FromAge == null ? 999 : Math.Abs(age - ageCondition.FromAge.Value);
-                })
-                .FirstOrDefault();
-
-            var levelIdsOfMatchRule = matchestRule?.ConditionValues?.SelectMany(x => x.LevelIds ?? new List<Guid>()).Distinct().ToList() ?? new List<Guid>();
-            var levelsOfMatchRule = new List<Level>();
-            if (levelIdsOfMatchRule.Any())
-            {
-                levelsOfMatchRule = await _levelRepository.ReadQueryable.Where(x => levelIdsOfMatchRule.Contains(x.Id)).Include(x => x.Category).ToListAsync(cancellationToken);
-            }
-
-            foreach (var level in sliblingPrograms.SelectMany(x => x.Levels).DistinctBy(x => x.Id))
-            {
-                if (!levelsOfMatchRule.Any(x => x.Id == level.Id))
-                {
-                    levelsOfMatchRule.Add(level);
-                }
-            }
-
-            var suggestLevels = levelsOfMatchRule.Select(x =>
-            {
-                var selectionLevel = _mapper.Map<SelectionLevelModel>(x);
-                selectionLevel.ProgramId = x.ProgramId;
-                selectionLevel.ProgramLevelName = x.Category?.Name;
-                selectionLevel.ProgramDescription = x.Category?.Description;
-
-                var matchCondition = GetMatchConditionValue(matchestRule?.ConditionValues, x.Id);
-                if (matchCondition != null)
-                {
-                    selectionLevel.CanSelect = true;
-                    selectionLevel.CourseType = matchCondition.Type.ToString();
-                }
-
-                if (!selectionLevel.CanSelect)
-                {
-                    if (program.TestMode == EnumTestMode.Not && program.Levels.Any(l => l.Id == x.Id))
-                    {
-                        selectionLevel.CanSelect = true;
-                    }
-                    else
-                    {
-                        selectionLevel.CanSelect = highestLevelId == x.Id;
-                    }
-                }
-
-                selectionLevel.IsCurrentLevel = highestLevelId == x.Id;
-
-                return selectionLevel;
-            }).ToList();
-
-            var availableCourses = await _courseCachingService.GetAllAvailableCoursesAsync();
-            suggestLevels.ForEach(x => x.IsAvailableCourse = availableCourses.Any(c => c.LevelId == x.Id));
+            var suggestLevels = await _testService.GetSuggestLevels(
+                navigateAction.PtResultId.Value,
+                DateTimeHelper.GetYearOld(student.User.Birthday),
+                useHighestLevelIdOfPt: false,
+                cancellationToken: cancellationToken);
 
             return new MethodResult<List<SelectionLevelModel>> { Result = suggestLevels, StatusCode = 200 };
-        }
-
-        public static ConditionValue? GetMatchConditionValue(IList<ConditionValue>? conditionValues, Guid levelId)
-        {
-            if (conditionValues == null)
-            {
-                return null;
-            }
-
-            return conditionValues.FirstOrDefault(x => x.LevelIds != null && x.LevelIds.Contains(levelId));
-        }
-
-        public static bool IsDonePt(TestGroupResult? ptTestResult)
-        {
-            return ptTestResult?.Status == EnumResultStatus.Done || ptTestResult?.Status == EnumResultStatus.ByPass;
-        }
-
-        public static bool IsMatchRule(SubjectConditionRule rule, int age, Guid? levelId)
-        {
-            var ageCondition = rule?.ConditionRules?.FirstOrDefault(x => x.Type == EnumSubjectConditionRuleType.Age);
-            if (ageCondition != null)
-            {
-                if (!ageCondition.FromAge.HasValue)
-                {
-                    return false;
-                }
-
-                switch (ageCondition.OperatorType)
-                {
-                    case EnumOperatorType.Include:
-                    case EnumOperatorType.Exclude:
-                        break;
-
-                    case EnumOperatorType.Equal when ageCondition.FromAge != age:
-                    case EnumOperatorType.GreaterThan when age <= ageCondition.FromAge.Value:
-                    case EnumOperatorType.LessThan when age >= ageCondition.FromAge.Value:
-                    case EnumOperatorType.GreaterThanEqual when age < ageCondition.FromAge.Value:
-                    case EnumOperatorType.LessThanEqual when age > ageCondition.FromAge.Value:
-                    case EnumOperatorType.Between when !ageCondition.ToAge.HasValue || age > ageCondition.ToAge.Value ||
-                                                       age < ageCondition.FromAge.Value:
-                        return false;
-                }
-            }
-
-            var levelCondition = rule?.ConditionRules?.FirstOrDefault(x => x.Type == EnumSubjectConditionRuleType.CurrentLevel);
-            if (levelCondition == null)
-            {
-                return true;
-            }
-
-            if (!levelId.HasValue)
-            {
-                return false;
-            }
-
-            return levelCondition.OperatorType switch
-            {
-                EnumOperatorType.Include => levelCondition.LevelIds != null && levelCondition.LevelIds.Contains(levelId.Value),
-                EnumOperatorType.Exclude => levelCondition.LevelIds == null || !levelCondition.LevelIds.Contains(levelId.Value),
-                _ => true
-            };
         }
     }
 }

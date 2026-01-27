@@ -19,6 +19,10 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
 
     public class ExportFileExcelReportLearningProgressCommand : SearchReportLearningProgressQueryModel, IRequest<MethodResult<Stream>>
     {
+        public ExportFileExcelReportLearningProgressCommand()
+        {
+            ManagerReportType = EnumManagerReportType.ReportLearningProgress;
+        }
     }
 
     public class ExportFileExcelReportLearningProgressCommandHandler : IRequestHandler<ExportFileExcelReportLearningProgressCommand, MethodResult<Stream>>
@@ -37,44 +41,8 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<Stream>();
 
-            var dataResult = await _mediator.Send(new GetReportLearningProgressStudentQuery()
-            {
-                ListDistrict = request.ListDistrict,
-                ListProvince = request.ListProvince,
-                ListSchool = request.ListSchool,
-                ListSchoolClass = request.ListSchoolClass,
-                ListSchoolGrade = request.ListSchoolGrade,
-                ListCourseLevel = request.ListCourseLevel,
-                ListLearningStatus = request.ListLearningStatus,
-                ListCompletionStatus = request.ListCompletionStatus,
-                ListCurrentLevel = request.ListCurrentLevel,
-                ListOverallScore = request.ListOverallScore,
-
-                IsLearning = request.IsLearning,
-                CourseType = request.CourseType,
-
-                EndDate = request.EndDate,
-                Keyword = request.Keyword,
-                SortBy = request.SortBy,
-            }, cancellationToken);
-            var dataOverallResult = await _mediator.Send(new GetOverallReportLearningProgressQuery
-            {
-                ListDistrict = request.ListDistrict,
-                ListProvince = request.ListProvince,
-                ListSchool = request.ListSchool,
-                ListSchoolClass = request.ListSchoolClass,
-                ListSchoolGrade = request.ListSchoolGrade,
-                ListCourseLevel = request.ListCourseLevel,
-                ListLearningStatus = request.ListLearningStatus,
-                ListCompletionStatus = request.ListCompletionStatus,
-                ListCurrentLevel = request.ListCurrentLevel,
-                ListOverallScore = request.ListOverallScore,
-                IsLearning = request.IsLearning,
-                CourseType = request.CourseType,
-
-                EndDate = request.EndDate,
-                Keyword = request.Keyword,
-            }, cancellationToken);
+            var dataResult = await _mediator.Send(new GetReportLearningProgressStudentQuery(request), cancellationToken);
+            var dataOverallResult = await _mediator.Send(new GetOverallReportLearningProgressQuery(request), cancellationToken);
             var userResult = await _userService.GetUserProfileAsync();
             string schoolName = userResult.Content?.Result?.SchoolName ?? string.Empty;
 
@@ -116,7 +84,6 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
                 excelWorksheet.Cells["I2"].Value = Format(excelWorksheet.Cells["I2"].Value, request.ListLearningStatus ?? string.Empty);
                 excelWorksheet.Cells["J2"].Value = Format(excelWorksheet.Cells["J2"].Value, request.ListSchoolGrade ?? string.Empty);
                 excelWorksheet.Cells["K2"].Value = Format(excelWorksheet.Cells["K2"].Value, request.ListSchoolClass ?? string.Empty);
-                excelWorksheet.Cells["L2"].Value = Format(excelWorksheet.Cells["L2"].Value, request.ListCourseLevel ?? string.Empty);
 
                 //FillCourseLevelData(excelWorksheet, request.CourseType.GetValueOrDefault(), overallReportLearningProgress);
                 if (learningProgressReports != null && learningProgressReports.Any())

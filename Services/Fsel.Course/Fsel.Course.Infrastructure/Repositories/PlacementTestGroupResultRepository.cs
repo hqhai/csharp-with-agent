@@ -21,7 +21,7 @@ namespace Fsel.Course.Infrastructure.Repositories
         {
         }
 
-        public async Task<IList<Guid>> GetStudentIdsAsync(IList<EnumCompletionStatus>? completionStatuses, IList<Guid> studentIds, IList<EnumCourseLevel>? suggetLevels, IList<EnumCourseLevel>? courseLevels)
+        public async Task<IList<Guid>> GetStudentIdsAsync(IList<EnumCompletionStatus>? completionStatuses, IList<Guid> studentIds)
         {
             var query = Queryable.WhereBulkContains(studentIds, x => x.StudentId);
             if (completionStatuses?.Any() == true)
@@ -30,15 +30,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                 var hasInProgress = completionStatuses.Contains(EnumCompletionStatus.InProgress);
                 query = query.Where(x => (hasCompleted && x.Status == EnumResultStatus.Done) || (hasInProgress && x.Status != EnumResultStatus.Done));
             }
-            if (suggetLevels?.Any() == true)
-            {
-                query = query.Where(x => x.SuggetLevel.HasValue && suggetLevels.Contains(x.SuggetLevel.Value));
-            }
 
-            if (courseLevels?.Any() == true)
-            {
-                query = query.Where(x => x.ChooseLevel.HasValue && courseLevels.Contains(x.ChooseLevel.Value));
-            }
             return await query.Select(x => x.StudentId).ToListAsync();
         }
     }

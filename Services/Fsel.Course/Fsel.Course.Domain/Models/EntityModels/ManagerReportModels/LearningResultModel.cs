@@ -15,18 +15,8 @@ namespace Fsel.Course.Domain.Models.EntityModels.ManagerReportModels
         public string? SchoolName { get; set; }
         public string? SchoolGrade { get; set; }
         public string? SchoolClass { get; set; }
-        public EnumCourseLevel? CourseLevel { get; set; }
-
-        public string? CourseLevelStr
-        {
-            get
-            {
-                return CourseLevel.HasValue ? CourseLevel.Value.GetDescription() : null;
-            }
-        }
-
+        public string? LevelName { get; set; }
         public double OverallPercent { get; set; }
-        public IList<OverallModuleReportModel> OverallModules { get; set; } = new List<OverallModuleReportModel>();
         public DateTime? ProcessDate { get; set; }
         public EnumLearningStatus Status { get; set; }
 
@@ -44,7 +34,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.ManagerReportModels
         }
 
         public DateTime? ExpiredDate { get; set; }
-
         public int NumberOfEmailsSent { get; set; }
+        public IList<OverallModuleReportModel> OverallModules { get; set; } = new List<OverallModuleReportModel>();
     }
 }

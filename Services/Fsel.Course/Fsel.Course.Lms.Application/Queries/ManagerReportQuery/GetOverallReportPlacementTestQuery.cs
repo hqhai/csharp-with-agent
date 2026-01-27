@@ -17,6 +17,16 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
 
     public class GetOverallReportPlacementTestQuery : SearchReportPlacementTestQueryModel, IRequest<MethodResult<OverallReportPlacementTestModel>>
     {
+        public GetOverallReportPlacementTestQuery()
+        {
+            ManagerReportType = EnumManagerReportType.ReportManagerPT;
+        }
+
+        public GetOverallReportPlacementTestQuery(SearchReportPlacementTestQueryModel source)
+        {
+            ManagerReportType = EnumManagerReportType.ReportManagerPT;
+            CopyFrom(source);
+        }
     }
 
     public class GetOverallReportPlacementTestQueryHandler : IRequestHandler<GetOverallReportPlacementTestQuery, MethodResult<OverallReportPlacementTestModel>>
@@ -36,27 +46,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<OverallReportPlacementTestModel>();
-            var userResults = await _mediator.Send(new GetStudentReportQuery
-            {
-                ListDistrict = request.ListDistrict,
-                ListProvince = request.ListProvince,
-                ListSchool = request.ListSchool,
-                ListSchoolClass = request.ListSchoolClass,
-                ListSchoolGrade = request.ListSchoolGrade,
-                ListCourseLevel = request.ListCourseLevel,
-                CourseType = request.CourseType,
-                ListCompletionStatus = request.ListCompletionStatus,
-                ListLearningStatus = request.ListLearningStatus,
-                ListOverallScore = request.ListOverallScore,
-                ListCurrentLevel = request.ListCurrentLevel,
-                IsLearning = request.IsLearning,
-
-                EndDate = request.EndDate,
-                Keyword = request.Keyword,
-                SortBy = request.SortBy,
-                StartDate = request.StartDate,
-                ManagerReportType = EnumManagerReportType.ReportManagerPT,
-            }, cancellationToken);
+            var userResults = await _mediator.Send(new GetStudentReportQuery(request), cancellationToken);
             if (!userResults.IsOK)
             {
                 methodResult.AddError(userResults.ErrorMessages);
@@ -93,7 +83,6 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                         .Count();
             }
 
-            var courseLevels = EnumCourseLevelHelper.GetEnumCourseLevels(EnumCourseType.Academic);
             var testGroupResults = placementTestGroupResults.Where(x => x.Status == EnumResultStatus.Done && x.CurrentLevel.HasValue)
                                                             .GroupBy(x => x.SuggetLevel)
                                                             .Select(x => new
@@ -103,15 +92,15 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                                                             })
                                                             .ToList();
 
-            foreach (var item in courseLevels)
-            {
-                var studentLevel = testGroupResults.FirstOrDefault(x => x.CurrentLevel == item);
-                overallReportPlacementTest.CourseLevelProgresses.Add(new CourseLevelProgressModel
-                {
-                    CourseLevel = item,
-                    TotalStudent = studentLevel?.CountStudent ?? default
-                });
-            }
+            //foreach (var item in courseLevels)
+            //{
+            //    var studentLevel = testGroupResults.FirstOrDefault(x => x.CurrentLevel == item);
+            //    overallReportPlacementTest.CourseLevelProgresses.Add(new CourseLevelProgressModel
+            //    {
+            //        CourseLevel = item,
+            //        TotalStudent = studentLevel?.CountStudent ?? default
+            //    });
+            //}
             methodResult.Result = overallReportPlacementTest;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

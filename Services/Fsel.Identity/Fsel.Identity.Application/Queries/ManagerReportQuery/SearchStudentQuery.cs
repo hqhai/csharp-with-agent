@@ -56,7 +56,7 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            var queryStudent = _studentRepository.Queryable;
+            var queryStudent = _studentRepository.ReadQueryable;
             if (request.SchoolGrades != null && request.SchoolGrades.Count > 0)
             {
                 queryStudent = queryStudent.WhereBulkContains(request.SchoolGrades, x => x.SchoolGrade);
@@ -95,20 +95,22 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
             {
                 queryStudent = queryStudent.Where(x => request.IsLearning.Value ? x.CourseId.HasValue : !x.CourseId.HasValue);
             }
-            if (request.CourseType.HasValue)
+            if (request.ProgramId.HasValue)
             {
-                var courseLevels = EnumCourseLevelHelper.GetEnumCourseLevels(request.CourseType.Value);
-                queryStudent = queryStudent.Where(x => x.CourseLevel.HasValue && courseLevels.Contains(x.CourseLevel.Value));
+                queryStudent = queryStudent.Where(x => x.ProgramId.HasValue && x.ProgramId == request.ProgramId);
             }
-            if (request.CourseLevels != null && request.CourseLevels.Any())
+            if (request.SubjectId.HasValue)
             {
-                queryStudent = queryStudent.Where(x => x.CourseLevel.HasValue && request.CourseLevels.Contains(x.CourseLevel.Value));
+                queryStudent = queryStudent.Where(x => x.SubjectId.HasValue && x.SubjectId == request.SubjectId);
             }
-            if (request.CourseLevel.HasValue)
+            if (request.LevelId.HasValue)
             {
-                queryStudent = queryStudent.Where(x => x.CourseLevel.HasValue && x.CourseLevel == request.CourseLevel.Value);
+                queryStudent = queryStudent.Where(x => x.LevelId.HasValue && x.LevelId == request.LevelId);
             }
-
+            if (request.LevelIds != null && request.LevelIds.Any())
+            {
+                queryStudent = queryStudent.Where(x => x.LevelId.HasValue && request.LevelIds.Contains(x.LevelId.Value));
+            }
             var query = from u in _userManager.Users
                         join s in queryStudent on u.Id equals s.UserId
                         select new { User = u, Student = s };
@@ -162,6 +164,9 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
                 SchoolGrade = i.Student.SchoolGrade,
                 SchoolId = i.Student.SchoolId,
                 CourseId = i.Student.CourseId,
+                SubjectId = i.Student.SubjectId,
+                ProgramId = i.Student.ProgramId,
+                LevelId = i.Student.LevelId,
                 UserId = i.Student.UserId,
                 CreatedDate = i.Student.CreatedDate,
                 BaseCourseLevel = i.Student.BaseCourseLevel,
