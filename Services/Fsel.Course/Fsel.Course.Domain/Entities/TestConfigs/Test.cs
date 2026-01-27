@@ -71,27 +71,64 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
             return !ErrorMessages.Any();
         }
 
+        private static bool IsInvalidBasicLayout(EnumTestLayoutType layoutType, TestSection testSection)
+        {
+            return layoutType == EnumTestLayoutType.Basic
+                   && testSection.TestAISettings.Any();
+        }
+
+        private const int SpeakingMocktestSectionCount = 1;
+        private const int WritingMocktestSectionCount = 2;
+
+        private static bool IsInvalidNonBasicLayout(EnumTestLayoutType layoutType, TestSection testSection)
+        {
+            return layoutType != EnumTestLayoutType.Basic && testSection.TestSectionQuestions.Any();
+        }
+
+        private static bool IsInvalidSpeakingMocktest(EnumTestLayoutType layoutType, TestSection testSection)
+        {
+            return layoutType == EnumTestLayoutType.SpeakingMocktest
+                   && testSection.TestSections.Count != SpeakingMocktestSectionCount;
+        }
+
+        private static bool IsInvalidWritingMocktest(EnumTestLayoutType layoutType, TestSection testSection)
+        {
+            return layoutType == EnumTestLayoutType.WritingMocktest
+                   && testSection.TestSections.Count != WritingMocktestSectionCount;
+        }
+
         private void ValidateTestLayout(TestSection testSection)
         {
-            if (testSection.LayoutType.HasValue)
+            if (!testSection.LayoutType.HasValue)
             {
-                var isLayOutBasicError = testSection.LayoutType == EnumTestLayoutType.Basic && testSection.TestAISettings.Any();
-                var isLayOutError = testSection.LayoutType != EnumTestLayoutType.Basic && testSection.TestSectionQuestions.Any();
-                if (isLayOutError || isLayOutBasicError)
-                {
-                    AddErrorResults(new ErrorResult
-                    {
-                        ErrorCode = nameof(EnumSystemErrorCode.InValidFormat),
-                        Errors =
-                        {
-                            new Error
-                            {
-                                FieldName =nameof(testSection.LayoutType),
-                            }
-                        }
-                    });
-                }
+                return;
             }
+
+            var layoutType = testSection.LayoutType.Value;
+
+            if (IsInvalidBasicLayout(layoutType, testSection)
+                || IsInvalidNonBasicLayout(layoutType, testSection)
+                || IsInvalidSpeakingMocktest(layoutType, testSection)
+                || IsInvalidWritingMocktest(layoutType, testSection))
+            {
+                AddLayoutTypeError(layoutType);
+            }
+        }
+
+        private void AddLayoutTypeError(EnumTestLayoutType layoutType)
+        {
+            AddErrorResults(new ErrorResult
+            {
+                ErrorCode = nameof(EnumSystemErrorCode.InValidFormat),
+                Errors =
+                {
+                    new Error
+                    {
+                        FieldName = nameof(TestSection.LayoutType),
+                        ErrorValues = new List<object>{ layoutType }
+                    }
+                }
+            });
         }
 
         private void ValidateTestSectionRecursively(TestSection section)
