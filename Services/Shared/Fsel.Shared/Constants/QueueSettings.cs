@@ -71,6 +71,7 @@ namespace Fsel.Shared.Constants
 
                 public const string TestSpeaking = $"{KeyQueue}_TestSpeaking";
                 public const string TestWriting = $"{KeyQueue}_TestWriting";
+                public const string SemanticDictionary = $"{KeyQueue}_SemanticDictionary";
             }
         }
 
