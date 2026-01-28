@@ -51,7 +51,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             ILessonNoteRepository lessonNoteRepository,
             NotificationMessagePublisher notificationMessagePublisher,
             IStudentGoalAggregateRepository studentGoalAggregateRepository,
-            IStudentGoalSummaryRepository studentGoalSummaryRepository) : base(systemService, appSetting, courseUnitMockTestRepository, mediator, userService, logger, saveUserCourseSettingPublisher, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher, orderService, lessonNoteRepository, lessonResultRepository, notificationMessagePublisher)
+            IStudentGoalSummaryRepository studentGoalSummaryRepository, SendMailFinishCoursePublisher sendMailFinishCoursePublisher) : base(systemService, appSetting, courseUnitMockTestRepository, mediator, userService, logger, saveUserCourseSettingPublisher, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher, orderService, lessonNoteRepository, lessonResultRepository, notificationMessagePublisher, sendMailFinishCoursePublisher)
         {
             _lessonResultRepository = lessonResultRepository;
             _studentGoalAggregateRepository = studentGoalAggregateRepository;
