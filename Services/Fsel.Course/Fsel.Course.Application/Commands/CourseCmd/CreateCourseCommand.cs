@@ -83,6 +83,22 @@ namespace Fsel.Course.Application.Commands.CourseCmd
                 return methodResult;
             }
 
+            foreach (var courseModule in request.CourseModules)
+            {
+                if (courseModule.Percent < 0 || courseModule.Percent > 100)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.TotalPercentModuleInvalid), nameof(courseModule), courseModule.Percent);
+                    return methodResult;
+                }
+            }
+
+            var totalPercentModule = request.CourseModules.Sum(p => p.Percent);
+            if (totalPercentModule <= 99 || totalPercentModule > 100)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.TotalPercentModuleInvalid), nameof(totalPercentModule), totalPercentModule);
+                return methodResult;
+            }
+
             var teachers = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = request.CourseTeachers?.Select(x => x.TeacherId).ToList() });
             if (!teachers.IsSuccessStatusCode)
             {
