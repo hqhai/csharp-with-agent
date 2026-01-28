@@ -125,20 +125,20 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
         {
             var currentLevel = await _levelRepository.ReadQueryable
                 .Where(x => x.ProgramId == programId && x.Id == levelId)
-                .Select(x => new { x.LevelOrder })
                 .FirstOrDefaultAsync();
 
             if (currentLevel == null)
             {
                 return await LoadMinLevelAsync(programId);
             }
-
-            return await _levelRepository.ReadQueryable
+            var emailLevel = await _levelRepository.ReadQueryable
                 .Where(x => x.ProgramId == programId
                          && x.LevelOrder < currentLevel.LevelOrder)
                 .OrderByDescending(x => x.LevelOrder)
                 .ThenByDescending(x => x.UpdatedDate ?? x.CreatedDate)
                 .FirstOrDefaultAsync();
+
+            return emailLevel ?? currentLevel;
         }
 
         public async Task<Level?> LoadMinLevelAsync(Guid programId)

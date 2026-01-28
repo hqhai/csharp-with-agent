@@ -67,7 +67,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                         var minLevel = await categoryService.LoadPreviousOrMinLevelAsync(level.ProgramId, level.Id);
                         FlowTestResult.EmailLevelId = minLevel?.Id;
                     }
-
+                    FlowTestResult.CompletionDate = DateTime.UtcNow;
                     FlowTestResult.Status = EnumResultStatus.Done;
                     foreach (var item in FlowTestResult.CourseChangingHistories)
                     {
