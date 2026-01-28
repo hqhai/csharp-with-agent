@@ -63,6 +63,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.ChangeCourseModels
                 Type = Category.Type.ToString(),
                 TestMode = Category.TestMode,
                 Description = Category?.Description,
+                IsCurrentLearning = IsCurrentLearning(),
                 ChildSubjects = Children
                     .OfType<ChangeCourseComposite>()
                     .Select(child => child.GetSubjectTree(isIncludeLevel))
@@ -87,7 +88,6 @@ namespace Fsel.Course.Domain.Models.EntityModels.ChangeCourseModels
             if (Children.Any(c => c is ProgramChangeCourse || c is LevelChangeCourse))
             {
                 subjectModel.HadLearnedBefore = subjectModel.ChildSubjects.Any(c => c.HadLearnedBefore) || subjectModel.Levels.Any(l => l.LearnedBefore);
-
                 if (!isIncludeLevel)
                 {
                     subjectModel.Levels = new List<LevelModel>();

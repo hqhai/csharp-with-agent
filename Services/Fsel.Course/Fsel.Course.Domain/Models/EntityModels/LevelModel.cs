@@ -38,5 +38,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public bool IsCurrentLevel { get; set; }
 
         public bool IsAvailableCourse { get; set; }
+
+        public bool IsCurrentLearning { get; set; }
     }
 }
