@@ -153,6 +153,8 @@ namespace Fsel.Shared.Constants
 
                 public const string SetTimeRetryTest = $"{KeyQueue}_SetTimeRetryTest";
                 public const string SubmitTestAi = $"{KeyQueue}_SubmitTestAi";
+
+                public const string SendMailFinishCourse = $"{KeyQueue}_SendMailFinishCourse";
             }
         }
 
