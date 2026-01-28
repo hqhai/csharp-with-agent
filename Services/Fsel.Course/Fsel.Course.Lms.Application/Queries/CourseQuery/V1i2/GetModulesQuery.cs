@@ -165,7 +165,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i2
             {
                 if (lessonResultDic.TryGetValue(unit.UnitResult.Id, out var countDone))
                 {
-                    dto.ProgressPrecent = (int)NumberHelper.GetPercent(countDone, unit.Unit.LessonCount);
+                    dto.ProgressPrecent = (int)NumberHelper.GetPercent(countDone, unit.Unit.LessonCount + unit.Unit.TestCount);
                 }
                 dto.Name = unit.Unit.Name;
                 dto.Code = unit.Unit.Code;
