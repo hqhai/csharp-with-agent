@@ -36,7 +36,9 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i2
         private readonly ITestRepository _testRepository;
         private readonly ICourseResultRepository _courseResultRepository;
         private readonly ICourseModuleCachingService _courseModuleCachingService;
+        private readonly ITestResultRepository _testResultRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
+        private readonly ITestGroupResultRepository _testGroupResultRepository;
 
         public GetModulesQueryHandler(
             AuthContext authContext,
@@ -47,7 +49,9 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i2
             ITestRepository testRepository,
             ICourseResultRepository courseResultRepository,
             ICourseModuleCachingService courseModuleCachingService,
-            ILessonResultRepository lessonResultRepository)
+            ITestResultRepository testResultRepository,
+            ILessonResultRepository lessonResultRepository,
+            ITestGroupResultRepository testGroupResultRepository)
         {
             _authContext = authContext;
             _userService = userService;
@@ -57,7 +61,9 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i2
             _testRepository = testRepository;
             _courseResultRepository = courseResultRepository;
             _courseModuleCachingService = courseModuleCachingService;
+            _testResultRepository = testResultRepository;
             _lessonResultRepository = lessonResultRepository;
+            _testGroupResultRepository = testGroupResultRepository;
         }
 
         public async Task<MethodResult<IList<ModuleCourseModel>>> Handle(GetModulesQuery request, CancellationToken cancellationToken)
@@ -94,10 +100,30 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i2
             var lessonResults = await _lessonResultRepository.ReadQueryable
                                                              .Where(x => courseResult.Id == x.CourseResultId)
                                                              .Where(x => x.CourseId == courseResult.CourseId)
+                                                             .Where(x => x.Status == EnumResultStatus.Done)
+                                                             .Select(x => new
+                                                             {
+                                                                 x.UnitResultId,
+                                                                 x.Id
+                                                             })
                                                              .ToListAsync(cancellationToken);
 
-            var lessonResultDic = lessonResults.Where(x => x.UnitResultId.HasValue).GroupBy(x => x.UnitResultId!.Value)
-                                     .ToDictionary(x => x.Key, x => x.Count(y => y.Status == EnumResultStatus.Done));
+            var testGroupResults = await _testGroupResultRepository.ReadQueryable
+                                                      .Where(x => courseResult.Id == x.CourseResultId)
+                                                      .Where(x => x.CourseId == courseResult.CourseId && x.UnitResultId.HasValue)
+                                                      .Where(x => x.Status == EnumResultStatus.Done)
+                                                      .Select(x => new
+                                                      {
+                                                          x.UnitResultId,
+                                                          x.Id
+                                                      })
+                                                      .ToListAsync(cancellationToken);
+
+            var allResults = lessonResults.Concat(testGroupResults).ToList();
+
+            var lessonResultDic = allResults.Where(x => x.UnitResultId.HasValue)
+                                            .GroupBy(x => x.UnitResultId!.Value)
+                                            .ToDictionary(x => x.Key, x => x.Count());
 
             return courseModules.OrderBy(x => x.DisplayOrder)
                 .Select(module => ProcessModule(module, unitResultsByOriginalId, unitDics, testResultsByOriginalId, testDics, lessonResultDic))
