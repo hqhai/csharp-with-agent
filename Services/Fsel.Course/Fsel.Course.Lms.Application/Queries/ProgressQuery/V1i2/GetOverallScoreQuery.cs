@@ -3,7 +3,6 @@
 namespace Fsel.Course.Lms.Application.Queries.ProgressQuery.V1i2
 {
     using System.Linq.Dynamic.Core;
-    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums;
     using Fsel.Common.Enums.ErrorCodes;
@@ -36,8 +35,6 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery.V1i2
         private readonly ITestGroupResultRepository _testGroupResultRepository;
         private readonly ITestResultRepository _testResultRepository;
         private readonly ILessonRepository _lessonRepository;
-        private readonly ICourseModuleRepository _courseModuleRepository;
-        private readonly ICourseModuleCachingService _courseModuleCachingService;
         private readonly ICourseSkillScoresCachingService _courseSkillScoresCachingService;
         private readonly ICourseService _courseService;
 
@@ -49,9 +46,6 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery.V1i2
             , ITestGroupResultRepository testGroupResultRepository
             , ITestResultRepository testResultRepository
             , ILessonRepository lessonRepository
-            , ICourseModuleRepository courseModuleRepository
-            , ICourseModuleCachingService courseModuleCachingService
-            , IUnitRepository unitRepository
             , ICourseSkillScoresCachingService courseSkillScoresCachingService
             , ICourseService courseService
             )
@@ -64,8 +58,6 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery.V1i2
             _testGroupResultRepository = testGroupResultRepository;
             _testResultRepository = testResultRepository;
             _lessonRepository = lessonRepository;
-            _courseModuleRepository = courseModuleRepository;
-            _courseModuleCachingService = courseModuleCachingService;
             _courseSkillScoresCachingService = courseSkillScoresCachingService;
             _courseService = courseService;
         }
@@ -134,19 +126,23 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery.V1i2
                     if (testGroupResult != null && testGroupResult.Status == EnumResultStatus.ByPass)
                     {
                         overallScoreModel.SkillScores = await GetSkillScoresAsync(request.CourseId);
-                        overallScoreModel.IsPlacement = true;
                     }
                     else
                     {
                         var testResult = await _testResultRepository.ReadQueryable
-                           .Where(x => testGroupResult != null && x.TestGroupResultId == testGroupResult.Id && x.Status == EnumResultStatus.Done)
-                           .OrderByDescending(x => x.CreatedDate).FirstOrDefaultAsync(cancellationToken);
+                                                   .Include(x => x.Test)
+                                                   .Where(x => testGroupResult != null && x.TestGroupResultId == testGroupResult.Id)
+                                                   .Where(x => x.Status == EnumResultStatus.Done)
+                                                   .OrderByDescending(x => x.CreatedDate)
+                                                   .FirstOrDefaultAsync(cancellationToken);
                         if (testResult == null)
                         {
                             return methodResult;
                         }
+                        overallScoreModel.ScoringFormulaType = testResult.Test?.ScoringFormulaType;
                         overallScoreModel.SkillScores = testResult.SkillScores;
                         overallScoreModel.IsPlacement = true;
+                        overallScoreModel.Score = testResult.Score;
                         overallScoreModel.Percent = testResult.Percent;
                     }
                 }
@@ -156,9 +152,6 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery.V1i2
 
             overallScoreModel.LevelId = course.LevelId;
             overallScoreModel.LevelName = course.Level?.Name;
-
-            overallScoreModel.CourseLevel = course.CourseLevel;
-            overallScoreModel.CourseType = course.CourseType;
 
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = overallScoreModel;

@@ -9,7 +9,9 @@ namespace Fsel.Course.Domain.Models.EntityModels
     {
         public IList<SkillScores>? SkillScores { get; set; }
         public double Percent { get; set; }
+        public double? Score { get; set; }
         public bool IsPlacement { get; set; }
+        public EnumScoringFormulaType? ScoringFormulaType { get; set; } = EnumScoringFormulaType.Percent;
         public EnumCourseLevel CourseLevel { get; set; }
 
         public Guid? ProgramId { get; set; }
@@ -17,11 +19,12 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public Guid? LevelId { get; set; }
         public string? LevelName { get; set; }
-        public EnumCourseType CourseType { get; set; }
-        public EnumCourseLevel NextCourseLevel { get; set; }
         public Guid? NextLevelId { get; set; }
         public string? NextLevelName { get; set; }
         public double TargetBandScores { get; set; }
         public double BandScores { get; set; }
+
+        public EnumCourseType CourseType { get; set; }
+        public EnumCourseLevel NextCourseLevel { get; set; }
     }
 }
