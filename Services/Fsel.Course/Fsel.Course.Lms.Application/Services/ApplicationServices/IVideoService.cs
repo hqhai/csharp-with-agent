@@ -525,7 +525,6 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                 CorrectCount = correctCount,
                 CorrectQuestion = allAnswers.Count(a => a.IsCorrect == true),
                 CountQuestion = allAnswers.Count,
-                Skill = courseSkill,
                 TotalCount = totalCount,
                 SkillId = skill?.Id,
                 SkillName = skill?.Name,

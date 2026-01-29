@@ -610,7 +610,6 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
 
             var skillScores = new SkillScores
             {
-                Skill = statistics.CourseSkill,
                 CorrectCount = statistics.CorrectCount,
                 TotalCount = statistics.CorrectTotal,
                 CountQuestion = statistics.TotalAnswer,

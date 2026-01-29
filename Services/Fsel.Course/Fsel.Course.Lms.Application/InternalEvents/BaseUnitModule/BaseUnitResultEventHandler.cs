@@ -119,7 +119,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseUnitModule
                 .Concat(testResults.SelectMany(x => x.SkillScores ?? Enumerable.Empty<SkillScores>()));
 
             var aggregatedSkillScores = allSkillScores
-                .GroupBy(s => new { s.SkillId, s.Skill })
+                .GroupBy(s => new { s.SkillId })
                 .Select(g =>
                 {
                     var first = g.First();
