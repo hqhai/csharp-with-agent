@@ -13,6 +13,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
     using Fsel.Course.Domain.Models.EntityModels.ChangeCourseModels;
     using Fsel.Course.Domain.Models.EntityModels.UserNavigationActionModels;
     using Fsel.Course.Lms.Application.Queries.CourseChangeQuery;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.ChangeCourse;
     using MediatR;
@@ -39,13 +40,15 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
         private readonly IMediator _mediator;
         private readonly IServiceProvider _serviceProvider;
         private readonly ICategoryRepository _categoryRepository;
+        private readonly SendMailFinishPTPublisher _sendMailFinishPTPublisher;
 
         public ChosePtFlowCommandHandler(AuthContext authContext,
             IUserService userService,
             IChangeCourseService changeCourseService,
             IMediator mediator,
             IServiceProvider serviceProvider,
-            ICategoryRepository categoryRepository)
+            ICategoryRepository categoryRepository,
+            SendMailFinishPTPublisher sendMailFinishPTPublisher)
         {
             _authContext = authContext;
             _userService = userService;
@@ -53,6 +56,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             _mediator = mediator;
             _serviceProvider = serviceProvider;
             _categoryRepository = categoryRepository;
+            _sendMailFinishPTPublisher = sendMailFinishPTPublisher;
         }
 
         public async Task<MethodResult<PtStateModel>> Handle(ChosePtFlowCommand request, CancellationToken cancellationToken)
@@ -109,7 +113,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                         Age = DateTimeHelper.GetYearOld(student.User.Birthday),
                     });
 
-                    var aggregate = new FlowTestResultAggregate(testGroupResult, _serviceProvider);
+                    var aggregate = new FlowTestResultAggregate(testGroupResult, _serviceProvider, _sendMailFinishPTPublisher);
                     await aggregate.Start();
                     methodResult.Result = await aggregate.ExpotStateData();
                 }
