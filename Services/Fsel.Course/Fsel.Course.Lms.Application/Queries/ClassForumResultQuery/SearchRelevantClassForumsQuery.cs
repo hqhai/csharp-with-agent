@@ -95,6 +95,9 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                         where cfr.Status == EnumClassForumResultStatus.Graded
                         && cfr.ClassForumId == classForumResult.ClassForumId
                         && cfr.Id != request.ClassForumResultId
+                        && lr.CourseId == lessonResult.CourseId
+                        && lr.UnitId == lessonResult.UnitId
+                        && cfr.StudentId != student.Id
                         select cfr;
 
             int totalItem = await query.CountAsync(cancellationToken).ConfigureAwait(false);
