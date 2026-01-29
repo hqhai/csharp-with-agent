@@ -71,9 +71,11 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 return methodResult;
             }
 
-            var classForumResult = await _classForumResultRepository.Queryable
-                .Include(x => x.ClassForumDetailResults).Include(x => x.LessonResult)
-                .FirstOrDefaultAsync(x => x.Id == request.ClassForumResultId, cancellationToken);
+            var classForumResult = await _classForumResultRepository.ReadQueryable
+                                                                    .Include(x => x.ClassForumDetailResults)
+                                                                    .Include(x => x.LessonResult)
+                                                                    .Where(x => x.Id == request.ClassForumResultId)
+                                                                    .FirstOrDefaultAsync(cancellationToken);
 
             var lessonResult = classForumResult?.LessonResult;
             if (classForumResult == null || lessonResult == null)
@@ -88,26 +90,29 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 return methodResult;
             }
 
-            var query = from cfr in _classForumResultRepository.Queryable
-                        join lr in _lessonResultRepository.Queryable on cfr.LessonResultId equals lr.Id
+            var query = from cfr in _classForumResultRepository.ReadQueryable
+                        join lr in _lessonResultRepository.ReadQueryable on cfr.LessonResultId equals lr.Id
                         where cfr.Status == EnumClassForumResultStatus.Graded
-                            && cfr.ClassForumId == classForumResult.ClassForumId
-                            && cfr.Id != request.ClassForumResultId
-                            && lr.UnitResultId == lessonResult.UnitResultId
+                        && cfr.ClassForumId == classForumResult.ClassForumId
+                        && cfr.Id != request.ClassForumResultId
+                        && lr.CourseId == lessonResult.CourseId
+                        && lr.UnitId == lessonResult.UnitId
+                        && cfr.StudentId != student.Id
                         select cfr;
 
             int totalItem = await query.CountAsync(cancellationToken).ConfigureAwait(false);
             var lists = await query.ApplySortAndPaging(request)
-                .AsNoTracking()
-                .ToListAsync(cancellationToken)
-                .ConfigureAwait(false);
+                                   .AsNoTracking()
+                                   .ToListAsync(cancellationToken)
+                                   .ConfigureAwait(false);
 
             var classForumResultIds = lists.Select(x => x.Id).ToList();
 
             if (lists.Any())
             {
-                var classForumResultFileEntities = await _classForumResultFileRepository.Queryable.WhereBulkContains(classForumResultIds, p => p.ClassForumResultId).ToListAsync(cancellationToken);
-
+                var classForumResultFileEntities = await _classForumResultFileRepository.ReadQueryable
+                                                                                        .WhereBulkContains(classForumResultIds, p => p.ClassForumResultId)
+                                                                                        .ToListAsync(cancellationToken);
                 lists.ForEach(p =>
                 {
                     var classForumResultFiles = classForumResultFileEntities.Where(x => x.ClassForumResultId == p.Id).ToList();

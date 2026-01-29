@@ -152,7 +152,7 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery.V1i2
                 dto.ObjectId = testResult.Item1.Id;
                 dto.Name = testResult.Item1.Name;
                 dto.Code = testResult.Item1.Code;
-                dto.Result = _mapper.Map<ResultModel>(testResult.Item2);
+                dto.Result = _mapper.Map<ResultModel>(testResult.Item3);
                 moduleResults.Add(dto);
                 return;
             }
