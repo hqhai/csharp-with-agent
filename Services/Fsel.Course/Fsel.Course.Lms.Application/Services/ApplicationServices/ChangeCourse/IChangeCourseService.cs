@@ -138,6 +138,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.ChangeCourse
                 waitSelectProgramHistory.ToLevelId = changeCourseRequest.ToLevelId;
                 waitSelectProgramHistory.ToProgramId = changeCourseRequest.ToProgramId;
                 waitSelectProgramHistory.Status = EnumChangingStatus.InProgressPt;
+                waitSelectProgramHistory.PtResultId = testGroupResult.Id;
             }
 
             var courseResults = await _courseResultRepository.Queryable
