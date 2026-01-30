@@ -54,4 +54,13 @@ namespace Fsel.Shared.Models.ShareModels
         public string? UserId { get; set; }
         public SemanticDictionaryResultModel? Result { get; set; }
     }
+
+    /// <summary>
+    /// Queue model for Semantic Dictionary AI processing (includes request)
+    /// </summary>
+    public class SemanticDictionaryAIQueueModel
+    {
+        public string? UserId { get; set; }
+        public SemanticDictionaryRequestModel? Request { get; set; }
+    }
 }

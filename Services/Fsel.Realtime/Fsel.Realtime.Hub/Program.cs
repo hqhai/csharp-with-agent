@@ -74,12 +74,11 @@ multicastQueues: new Dictionary<string, Type>
     { QueueSettings.RealtimeQueue.NameQueue.BannerRealTime, typeof(BannerConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.SpeechToTextRealTime, typeof(SpeechToTextConsumer) },
     { QueueSettings.SystemQueue.NameQueue.SendNotifyBuyBlindBox, typeof(SendNotifyBuyBlindBoxConsumer) },
-    { QueueSettings.SystemQueue.NameQueue.SendDictionary, typeof(SendDictionaryConsumer) },
+    { QueueSettings.SystemQueue.NameQueue.SendDictionary, typeof(SendSemanticDictionaryConsumer) },
     { QueueSettings.ExamPracticeQueue.NameQueue.GetTimeExamPractice, typeof(GetTimeExamPracticeConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.TestSpeaking, typeof(TestAISpeakingConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.TestWriting, typeof(TestAIFeedBackConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.AITranslationResponse, typeof(AITranslationResultConsumer) },
-    { QueueSettings.RealtimeQueue.NameQueue.SemanticDictionary, typeof(SendSemanticDictionaryConsumer) },
 });
 
 var app = builder.Build();
