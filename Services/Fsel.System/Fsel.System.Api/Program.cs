@@ -192,25 +192,25 @@ builder.Services.AddRefitClient<ICourseService>().ConfigureHttpClient(x =>
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {
-    //{ QueueSettings.SystemQueue.NameQueue.CompleteApprovalPostTimeOut, typeof(CompleteApprovalConsumer) },
-    //{ QueueSettings.LmsQueue.NameQueue.CreateTokenHistory, typeof(CreateTokenHistoryConsumer) },
-    //{ QueueSettings.UserQueue.NameQueue.CreateTokenHistory, typeof(CreateTokenHistoryConsumer) },
-    //{ QueueSettings.RealtimeQueue.NameQueue.FeatureAccessTime, typeof(FeatureAccessTimeConsumer) },
-    //{ QueueSettings.RealtimeQueue.NameQueue.ChatBot, typeof(ChatBotConsumer) },
-    //{ QueueSettings.LmsQueue.NameQueue.DoQuestBoard, typeof(CreateTokenHistoryConsumer) },
-    //{ QueueSettings.SystemQueue.NameQueue.QuestBoard, typeof(DoQuestBoardConsumer) },
-    //{ QueueSettings.RealtimeQueue.NameQueue.TechieAction, typeof(TechieConsumer) },
-    //{ QueueSettings.LmsQueue.NameQueue.Techie, typeof(TechieConsumer) },
-    //{ QueueSettings.SystemQueue.NameQueue.CreateLuckyTicket, typeof(CreateLuckyTicketConsumer) },
-    //{ QueueSettings.SystemQueue.NameQueue.NoticeAccessTime, typeof(NoticeAccessFeatureConsumer) },
-    //{ QueueSettings.InteractionQueue.NameQueue.CreateTokenHistory, typeof(CreateTokenHistoryConsumer) },
-    //{ QueueSettings.RealtimeQueue.NameQueue.Banner, typeof(BannerConsumer) },
-    //{ QueueSettings.SystemQueue.NameQueue.BuyBlindBox, typeof(BuyBlindBoxConsumer) },
-    //{ QueueSettings.SystemQueue.NameQueue.ChooseDailyQuizWinners, typeof(ChooseDailyQuizWinnersConsumer) },
+    { QueueSettings.SystemQueue.NameQueue.CompleteApprovalPostTimeOut, typeof(CompleteApprovalConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.CreateTokenHistory, typeof(CreateTokenHistoryConsumer) },
+    { QueueSettings.UserQueue.NameQueue.CreateTokenHistory, typeof(CreateTokenHistoryConsumer) },
+    { QueueSettings.RealtimeQueue.NameQueue.FeatureAccessTime, typeof(FeatureAccessTimeConsumer) },
+    { QueueSettings.RealtimeQueue.NameQueue.ChatBot, typeof(ChatBotConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.DoQuestBoard, typeof(CreateTokenHistoryConsumer) },
+    { QueueSettings.SystemQueue.NameQueue.QuestBoard, typeof(DoQuestBoardConsumer) },
+    { QueueSettings.RealtimeQueue.NameQueue.TechieAction, typeof(TechieConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.Techie, typeof(TechieConsumer) },
+    { QueueSettings.SystemQueue.NameQueue.CreateLuckyTicket, typeof(CreateLuckyTicketConsumer) },
+    { QueueSettings.SystemQueue.NameQueue.NoticeAccessTime, typeof(NoticeAccessFeatureConsumer) },
+    { QueueSettings.InteractionQueue.NameQueue.CreateTokenHistory, typeof(CreateTokenHistoryConsumer) },
+    { QueueSettings.RealtimeQueue.NameQueue.Banner, typeof(BannerConsumer) },
+    { QueueSettings.SystemQueue.NameQueue.BuyBlindBox, typeof(BuyBlindBoxConsumer) },
+    { QueueSettings.SystemQueue.NameQueue.ChooseDailyQuizWinners, typeof(ChooseDailyQuizWinnersConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.DictionaryRealTime, typeof(DictionaryConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.SemanticDictionary, typeof(SemanticDictionaryConsumer) },
-    //{ QueueSettings.SystemQueue.NameQueue.CrawDictionaryData, typeof(CrawDictionaryDataConsumer) },
-    //{ QueueSettings.OrderingQueue.NameQueue.AddCoinWhenCoursePurchased, typeof(AddCoinWhenCoursePurchasedConsumer) }
+    { QueueSettings.SystemQueue.NameQueue.CrawDictionaryData, typeof(CrawDictionaryDataConsumer) },
+    { QueueSettings.OrderingQueue.NameQueue.AddCoinWhenCoursePurchased, typeof(AddCoinWhenCoursePurchasedConsumer) }
 });
 
 var app = builder.Build();
