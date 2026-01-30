@@ -24,9 +24,11 @@ namespace Fsel.System.Infrastructure
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.ApplyConfiguration(new DictionaryAIEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new DictionarySearchHistoryEntityTypeConfiguration());
         }
 
         public DbSet<DictionaryAI> DictionaryAIs { get; set; }
+        public DbSet<DictionarySearchHistory> DictionarySearchHistories { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
