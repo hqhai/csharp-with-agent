@@ -10,13 +10,9 @@ namespace Fsel.Realtime.Application.Queues.Consumers
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.SignalR;
 
-    /// <summary>
-    /// Consumer for Semantic Dictionary queue - sends results back to client via SignalR
-    /// </summary>
     public class SendSemanticDictionaryConsumer : BaseConsumer<SemanticDictionaryQueueModel>
     {
         private readonly IHubContext<SemanticDictionaryHub> _hubContext;
-        private readonly AuthContext _authContext;
 
         public SendSemanticDictionaryConsumer(
             AuthContext authContext,
@@ -25,7 +21,6 @@ namespace Fsel.Realtime.Application.Queues.Consumers
             : base(authContext, httpContextAccessor)
         {
             _hubContext = hubContext;
-            _authContext = authContext;
         }
 
         public override async Task ConsumeQueue(SemanticDictionaryQueueModel? message)
