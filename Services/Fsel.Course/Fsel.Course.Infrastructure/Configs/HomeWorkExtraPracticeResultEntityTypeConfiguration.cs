@@ -42,6 +42,8 @@ namespace Fsel.Course.Infrastructure.Configs
                    .WithMany(b => b.HomeWorkExtraPracticeResults)
                    .HasForeignKey(b => b.HomeWorkId)
                    .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasIndex(c => new { c.StudentId, c.HomeWorkId, c.HomeWorkRetryId, c.WorkingStatus, c.IsDeleted });
         }
     }
 }

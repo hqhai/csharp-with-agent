@@ -37,6 +37,8 @@ namespace Fsel.Course.Infrastructure.Configs
                   .HasConversion(
                       v => v.ToString(),
                       v => v.EnumParse<EnumAnswerStatus>());
+
+            builder.HasIndex(c => new { c.TestSectionResultId, c.TestSectionId, c.QuestionId, c.IsDeleted });
         }
     }
 }

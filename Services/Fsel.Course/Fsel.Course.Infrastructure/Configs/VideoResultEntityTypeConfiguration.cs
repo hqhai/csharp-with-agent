@@ -37,6 +37,7 @@ namespace Fsel.Course.Infrastructure.Configs
 
             builder.HasIndex(c => new { c.Status, c.StudentId });
             builder.HasIndex(c => new { c.StudentId });
+            builder.HasIndex(c => new { c.LessonModuleId, c.LessonResultId, c.IsDeleted });
         }
     }
 }
