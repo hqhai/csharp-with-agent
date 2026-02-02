@@ -157,6 +157,7 @@ namespace Fsel.Shared.Constants
                 public const string SubmitTestAi = $"{KeyQueue}_SubmitTestAi";
 
                 public const string SendMailFinishCourse = $"{KeyQueue}_SendMailFinishCourse";
+                public const string SendMailFinishPT = $"{KeyQueue}_SendMailFinishPT";
             }
         }
 

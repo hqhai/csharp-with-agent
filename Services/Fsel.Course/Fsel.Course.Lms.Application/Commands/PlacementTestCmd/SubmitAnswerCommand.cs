@@ -12,6 +12,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
     using Fsel.Course.Domain.Models.EntityModels.PlacementTestModels;
     using Fsel.Course.Domain.Models.EntityModels.UserNavigationActionModels;
     using Fsel.Course.Lms.Application.Queries.CourseChangeQuery;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
@@ -36,16 +37,19 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
         private readonly IServiceProvider _serviceProvider;
         private readonly ITestSectionResultRepository _testSectionResultRepository;
         private readonly MediatR.IMediator _mediator;
+        private readonly SendMailFinishPTPublisher _sendMailFinishPTPublisher;
 
         public SubmitAnswerCommandHandler(IRepository<TestGroupResult> testGroupResult,
             ITestSectionResultRepository testSectionResultRepository,
             IServiceProvider serviceProvider,
-            IMediator mediator)
+            IMediator mediator,
+            SendMailFinishPTPublisher sendMailFinishPTPublisher)
         {
             _testGroupResult = testGroupResult;
             _serviceProvider = serviceProvider;
             _testSectionResultRepository = testSectionResultRepository;
             _mediator = mediator;
+            _sendMailFinishPTPublisher = sendMailFinishPTPublisher;
         }
 
         public async Task<MethodResult<PtStateModel>> Handle(SubmitAnswerCommand request, CancellationToken cancellationToken)
@@ -106,7 +110,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 return result;
             }
 
-            var aggregate = new FlowTestResultAggregate(flowTestResult, _serviceProvider);
+            var aggregate = new FlowTestResultAggregate(flowTestResult, _serviceProvider, _sendMailFinishPTPublisher);
 
             await aggregate.MakeAnswers(new SubmitAnswerCommandModel
             {

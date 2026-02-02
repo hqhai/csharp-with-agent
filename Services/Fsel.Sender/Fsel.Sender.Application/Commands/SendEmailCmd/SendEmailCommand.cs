@@ -43,43 +43,43 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
-            //if (request.Template.HasValue)
-            //{
-            //    var checkSenderSetting = await CheckSenderSetting(request.ToEmails.ToList() ?? new List<string>(), request.Template.Value);
-            //    request.ToEmails = checkSenderSetting;
-            //}
+            if (request.Template.HasValue)
+            {
+                var checkSenderSetting = await CheckSenderSetting(request.ToEmails.ToList() ?? new List<string>(), request.Template.Value);
+                request.ToEmails = checkSenderSetting;
+            }
 
-            //var bccEmail = _appSetting.EmailConfig?.BCCEmail;
-            //if (bccEmail != null && bccEmail.Count > 0)
-            //{
-            //    bccEmail.ForEach(request.BccEmails.Add);
-            //}
+            var bccEmail = _appSetting.EmailConfig?.BCCEmail;
+            if (bccEmail != null && bccEmail.Count > 0)
+            {
+                bccEmail.ForEach(request.BccEmails.Add);
+            }
 
             #region Get CC Email
 
-            //if (request.IsCCEmail.HasValue && request.IsCCEmail.Value)
-            //{
-            //    var listCCEmailResult = await _systemService.GetCCEmail();
-            //    if (listCCEmailResult.IsSuccessStatusCode)
-            //    {
-            //        var listCCEmail = listCCEmailResult.Content?.Result;
-            //        var ccEmail = listCCEmail?.Where(p => !string.IsNullOrEmpty(p.StudentEmail) && request.ToEmails.Contains(p.StudentEmail)).ToList();
-            //        if (ccEmail != null && ccEmail.Count > 0)
-            //        {
-            //            foreach (var item in ccEmail)
-            //            {
-            //                if (!string.IsNullOrEmpty(item.OCEmail) && item.OCEmail.IsValidEmail())
-            //                {
-            //                    request.CcEmails.Add(item.OCEmail);
-            //                }
-            //                if (!string.IsNullOrEmpty(item.OMEmail) && item.OMEmail.IsValidEmail())
-            //                {
-            //                    request.CcEmails.Add(item.OMEmail);
-            //                }
-            //            }
-            //        }
-            //    }
-            //}
+            if (request.IsCCEmail.HasValue && request.IsCCEmail.Value)
+            {
+                var listCCEmailResult = await _systemService.GetCCEmail();
+                if (listCCEmailResult.IsSuccessStatusCode)
+                {
+                    var listCCEmail = listCCEmailResult.Content?.Result;
+                    var ccEmail = listCCEmail?.Where(p => !string.IsNullOrEmpty(p.StudentEmail) && request.ToEmails.Contains(p.StudentEmail)).ToList();
+                    if (ccEmail != null && ccEmail.Count > 0)
+                    {
+                        foreach (var item in ccEmail)
+                        {
+                            if (!string.IsNullOrEmpty(item.OCEmail) && item.OCEmail.IsValidEmail())
+                            {
+                                request.CcEmails.Add(item.OCEmail);
+                            }
+                            if (!string.IsNullOrEmpty(item.OMEmail) && item.OMEmail.IsValidEmail())
+                            {
+                                request.CcEmails.Add(item.OMEmail);
+                            }
+                        }
+                    }
+                }
+            }
 
             #endregion Get CC Email
 
