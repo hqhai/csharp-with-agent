@@ -164,7 +164,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                     {
                         FullName = item.User?.FullName,
                         StartDate = lastFridayAt13.ToString("dd-MM-yyyy", CultureInfo.CurrentCulture),
-                        EndDate = currentDate.AddDays(-1).ToString("dd-MM-yyyy", CultureInfo.CurrentCulture),
+                        EndDate = currentDate.ToString("dd-MM-yyyy", CultureInfo.CurrentCulture),
                         TotalDay = studentDailyStreaks?.Count.ToString(CultureInfo.CurrentCulture),
                         ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl
                     };
