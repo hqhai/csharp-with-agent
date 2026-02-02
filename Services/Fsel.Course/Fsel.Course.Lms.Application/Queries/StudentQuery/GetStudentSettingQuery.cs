@@ -22,6 +22,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class GetStudentSettingQuery : IRequest<MethodResult<StudentSettingModel>>
     {
@@ -62,7 +63,10 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<StudentSettingModel>();
-            var studentResult = await _userService.GetStudentByUserIdAsync(request.UserId ?? _authContext.CurrentUserId);
+
+            var userId = request.UserId ?? _authContext.CurrentUserId;
+
+            var studentResult = await _userService.GetStudentByUserIdAsync(userId);
             if (!studentResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentResult));
@@ -86,7 +90,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                 ClassId = student.ClassId,
                 EmailConfirmed = student.User?.EmailConfirmed ?? default,
                 TurnOnTouchpoint = _appSetting.TouchpointConfig?.TurnOnTouchpoint ?? false,
-                UserStatus = student?.User?.Status
+                UserStatus = student.User?.Status
             };
             var role = _authContext.Roles?.FirstOrDefault();
             NavigateAction? navigateAction = null;
@@ -100,7 +104,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                 navigateAction = await GetPlacementTestAsync(settingStudentModel, student, cancellationToken);
             }
 
-            var @eventResults = await _userService.GetEventByUserId(request.UserId ?? _authContext.CurrentUserId);
+            var @eventResults = await _userService.GetEventByUserId(userId);
 
             var requestCheckSurvey = new CheckSurveyBySurveyFormTypeModel()
             {
@@ -122,7 +126,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                 settingStudentModel.CompetitionEventId = events?.FirstOrDefault()?.Id;
             }
 
-            var status = await _orderService.GetCurrentStatusAsync(request.UserId ?? _authContext.CurrentUserId);
+            var status = await _orderService.GetCurrentStatusAsync(userId);
             if (!status.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallOrderServiceError), nameof(status));
@@ -132,8 +136,14 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
             settingStudentModel.Status = status?.Content?.Result;
             if (student.CourseId.HasValue && (navigateAction == null || navigateAction.Status == EnumNavigateActionStatus.ContinueLearning))
             {
-                var course = await _courseRepository.GetByIdAsync(student.CourseId.Value);
+                var course = await _courseRepository.Queryable.Include(p => p.Program).ThenInclude(p => p.CategoryParent).FirstOrDefaultAsync(p => p.Id == student.CourseId.Value, cancellationToken);
                 settingStudentModel.Course = _mapper.Map<CourseModel>(course);
+
+                settingStudentModel.Course.ProgramId = course?.Program?.Id;
+                settingStudentModel.Course.ProgramName = course?.Program?.Name;
+
+                settingStudentModel.Course.SubjectId = course?.Program?.CategoryParent?.Id;
+                settingStudentModel.Course.SubjectName = course?.Program?.CategoryParent?.Name;
 
                 if (course != null)
                 {
