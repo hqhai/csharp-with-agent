@@ -3,7 +3,6 @@
 namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
 {
     using System;
-    using System.Diagnostics;
     using System.Linq;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
@@ -19,12 +18,10 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Course.Lms.Application.Services.UserServices.QueryModels;
-    using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.DependencyInjection;
 
     public class SearchStudentProgressQuery : SearchStudentProgressQueryModel, IRequest<MethodResult<PagingItemsModel<StudentProgressModel>>>
     {
@@ -73,8 +70,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
 
             long totalItem = default;
 
-            var studentProgress = new List<StudentProgressModel>();
-
             var searchField = request.Serialize().Deserialize<SearchStudentsQueryModel>();
 
             if (searchField == null)
@@ -91,7 +86,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             var students = studentKeyResult.Content?.Result?.Items ?? new List<StudentSearchAdminModel>();
             totalItem = studentKeyResult.Content?.Result?.PagingInfo?.TotalItems ?? default;
 
-            var subjects = await _categoryRepository.ReadQueryable.Where(p => p.Type == EnumTypeCategory.Subject).ToListAsync(cancellationToken);
+            var subjects = await _categoryRepository.ReadQueryable.ToListAsync(cancellationToken);
 
             var learningTrees = await _learningService.GetLearningTreeFromCourseToTest(
                                      students.Where(p => p.CourseId.HasValue).Select(p => new GetLearningTreeFromCourseToTestModel
@@ -101,11 +96,10 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                                      }).ToList(),
                                       cancellationToken);
 
-            var tasks = students.Select(async student =>
-            {
-                using var rootScope = _serviceProvider.CreateScope();
-                var learningService = rootScope.ServiceProvider.GetRequiredService<ILearningService>();
+            var studentProgress = new List<StudentProgressModel>();
 
+            foreach (var student in students)
+            {
                 var model = new StudentProgressModel
                 {
                     StudentId = student.Id,
@@ -114,7 +108,8 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     Level = student.CourseLevel ?? default,
                     CourseType = student.CourseLevel.GetEnumCourseType(),
                     CourseId = student.CourseId,
-                    Subject = subjects.FirstOrDefault(p => p.Id == student.SubjectId)?.Name
+                    Subject = subjects.FirstOrDefault(p => p.Id == student.SubjectId)?.Name,
+                    Program = subjects.FirstOrDefault(p => p.Id == student.ProgramId)?.Name
                 };
 
                 if (student.CourseId.HasValue)
@@ -133,10 +128,8 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     }
                 }
 
-                return model;
-            });
-
-            studentProgress = (await Task.WhenAll(tasks)).ToList();
+                studentProgress.Add(model);
+            }
 
             methodResult.Result = new PagingItemsModel<StudentProgressModel>(studentProgress, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
