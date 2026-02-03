@@ -43,6 +43,8 @@ builder.Services.AddScoped<SendStudentsFromFileHub>();
 builder.Services.AddScoped<TestSpeakingHub>();
 builder.Services.AddScoped<TestWritingHub>();
 builder.Services.AddScoped<SpeechToTextHub>();
+builder.Services.AddScoped<SemanticDictionaryHub>();
+builder.Services.AddScoped<SemanticDictionaryPublisher>();
 
 // Speech-to-Text services (SOLID: DIP - depend on abstractions)
 // Use Singleton to share session dictionary across all SignalR calls
@@ -72,7 +74,7 @@ multicastQueues: new Dictionary<string, Type>
     { QueueSettings.RealtimeQueue.NameQueue.BannerRealTime, typeof(BannerConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.SpeechToTextRealTime, typeof(SpeechToTextConsumer) },
     { QueueSettings.SystemQueue.NameQueue.SendNotifyBuyBlindBox, typeof(SendNotifyBuyBlindBoxConsumer) },
-    { QueueSettings.SystemQueue.NameQueue.SendDictionary, typeof(SendDictionaryConsumer) },
+    { QueueSettings.SystemQueue.NameQueue.SendDictionary, typeof(SendSemanticDictionaryConsumer) },
     { QueueSettings.ExamPracticeQueue.NameQueue.GetTimeExamPractice, typeof(GetTimeExamPracticeConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.TestSpeaking, typeof(TestAISpeakingConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.TestWriting, typeof(TestAIFeedBackConsumer) },
@@ -105,5 +107,6 @@ app.UseHubs<TestWritingHub>(RealtimeSettings.TestWritingAIFeedBackHub.Pattern);
 app.UseHubs<TestSpeakingHub>(RealtimeSettings.TestSpeakingAIFeedBackHub.Pattern);
 app.UseHubs<TranslationHub>(RealtimeSettings.TranslationHub.Pattern);
 app.UseHubs<SpeechToTextHub>(RealtimeSettings.SpeechToTextHub.Pattern);
+app.UseHubs<SemanticDictionaryHub>(RealtimeSettings.SemanticDictionaryHub.Pattern);
 
 app.Run();

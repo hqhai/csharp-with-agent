@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
@@ -36,8 +37,9 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
         private readonly IHomeWorkResultRepository _homeWorkResultRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly ICourseResultRepository _courseResultRepository;
+        private readonly ILessonRepository _lessonRepository;
 
-        public GetStudentProgressHomeWorkQueryHandler(IUserService userService, IMapper mapper, IHomeWorkRepository homeWorkRepository, ISystemService systemService, IHomeWorkResultRepository homeWorkResultRepository, ILessonResultRepository lessonResultRepository, ICourseResultRepository courseResultRepository)
+        public GetStudentProgressHomeWorkQueryHandler(IUserService userService, IMapper mapper, IHomeWorkRepository homeWorkRepository, ISystemService systemService, IHomeWorkResultRepository homeWorkResultRepository, ILessonResultRepository lessonResultRepository, ICourseResultRepository courseResultRepository, ILessonRepository lessonRepository)
         {
             _userService = userService;
             _mapper = mapper;
@@ -46,6 +48,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             _homeWorkResultRepository = homeWorkResultRepository;
             _lessonResultRepository = lessonResultRepository;
             _courseResultRepository = courseResultRepository;
+            _lessonRepository = lessonRepository;
         }
 
         public async Task<MethodResult<HomeWorkStudentProgressModel>> Handle(GetStudentProgressHomeWorkQuery request, CancellationToken cancellationToken)
@@ -53,9 +56,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<HomeWorkStudentProgressModel> methodResult = new MethodResult<HomeWorkStudentProgressModel>();
 
-            var homeWorkStudentProgress = new HomeWorkStudentProgressModel();
-
-            var studentResults = await _userService.GetUserByStudentId(request.StudentId);
+            var studentResults = await _userService.GetUserByStudentIdWithCache(request.StudentId);
             if (!studentResults.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResults));
@@ -69,6 +70,22 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             }
             var userId = student.UserId;
 
+            var lesson = await _lessonRepository.Queryable.Include(p => p.LessonModules).FirstOrDefaultAsync(p => p.Id == request.LessonId, cancellationToken);
+            if (lesson == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                return methodResult;
+            }
+
+            var modules = lesson.LessonModules.Where(p => p.LessonConfigType == EnumLessonConfigType.HomeWork).OrderBy(p => p.DisplayOrder).ToList();
+            if (modules == null || modules.Count == 0)
+            {
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
+
+            var originalIds = modules.Select(p => p.OriginalId).ToList();
+
             var lessonResult = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.LessonResultId && x.StudentId == request.StudentId, cancellationToken);
 
             if (lessonResult == null || lessonResult.Status == EnumResultStatus.Unfinished)
@@ -77,13 +94,11 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 return methodResult;
             }
 
-            var homeWorkResults = await _homeWorkResultRepository.Queryable.Include(p => p.LessonModule).Where(x => x.LessonResultId == lessonResult.Id && x.StudentId == request.StudentId).ToListAsync(cancellationToken);
+            var homeWorkResults = await _homeWorkResultRepository.Queryable
+                                        .Include(p => p.HomeWork).ThenInclude(p => p.HomeWorkQuestions)
+                                        .Include(p => p.HomeWork).ThenInclude(p => p.Skill)
+                                        .Where(x => x.LessonResultId == lessonResult.Id && x.StudentId == request.StudentId).ToListAsync(cancellationToken);
 
-            if (homeWorkResults == null)
-            {
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                return methodResult;
-            }
             var homeWorkResultIds = homeWorkResults.Select(x => x.Id).ToList();
 
             var featureAccessTimeResults = await _systemService.GetFeatureAccessTimesAsync(new FeatureAccessTimesQueryModel
@@ -105,29 +120,57 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallSystemServiceError), nameof(featureAccessTimeResults));
                 return methodResult;
             }
+
             var featureAccessTimes = featureAccessTimeResults.Content?.Result;
 
-            var homeWorks = await _homeWorkRepository.Queryable.Include(p => p.Skill)
-                                      .Where(x => x.LessonHomeWorks.Any(x => x.LessonId == lessonResult.LessonId))
-                                      .AsNoTracking()
-                                      .Select(h => new LessonHomeWorkResultModel
-                                      {
-                                          Id = h.Id,
-                                          CreatedDate = h.LessonHomeWorks.FirstOrDefault(x => x.HomeWorkId == h.Id)!.CreatedDate,
-                                          Code = h.Code,
-                                          Name = h.Name,
-                                          SkillId = h.SkillId,
-                                          SkillName = h.Skill != null ? h.Skill.Name : null,
-                                          SkillFilePath = h.Skill != null ? h.Skill.FilePath : null,
-                                          CourseSkill = h.CourseSkill,
-                                          CourseLevel = h.CourseLevel,
-                                          QuestionTotal = h.HomeWorkQuestions.Select(x => x.Question).Count(),
-                                          QuestionCompleted = h.HomeWorkResults.Where(x => x.HomeWorkId == h.Id && x.LessonResultId == lessonResult.Id).SelectMany(x => x.HomeWorkAnswers).Where(x => x.IsCorrect.HasValue).Count(),
-                                          HomeWorkResult = _mapper.Map<HomeWorkResultModel>(h.HomeWorkResults.FirstOrDefault(x => x.HomeWorkId == h.Id && x.LessonResultId == lessonResult.Id))
-                                      }).OrderBy(x => x.CreatedDate)
-                                      .ToListAsync(cancellationToken);
+            var homeWorks = await _homeWorkRepository.ReadQueryable.Include(p => p.HomeWorkQuestions).Include(p => p.Skill).Where(p => originalIds.Contains(p.OriginalId) && p.VersionStatus == EnumVersionStatus.LastVersion).ToListAsync(cancellationToken);
 
-            homeWorkStudentProgress.Status = GetStatusHomeWorks(homeWorks.Select(x => x.HomeWorkResult ?? new HomeWorkResultModel()).ToList());
+            var lessonHomeWorkResultModels = new List<LessonHomeWorkResultModel>();
+
+            foreach (var module in modules)
+            {
+                var lessonHomeWorkResultModel = new LessonHomeWorkResultModel();
+
+                var homeWorkResult = homeWorkResults.FirstOrDefault(p => p.LessonModuleId == module.Id);
+
+                if (homeWorkResult != null && homeWorkResult.HomeWork != null)
+                {
+                    var homework = homeWorkResult.HomeWork;
+                    lessonHomeWorkResultModel.Id = homework.Id;
+                    lessonHomeWorkResultModel.Code = homework.Code;
+                    lessonHomeWorkResultModel.Name = homework.Name;
+                    lessonHomeWorkResultModel.SkillId = homework.SkillId;
+                    lessonHomeWorkResultModel.SkillName = homework.Skill?.Name;
+                    lessonHomeWorkResultModel.SkillFilePath = homework.Skill?.FilePath;
+                    lessonHomeWorkResultModel.QuestionTotal = homework.HomeWorkQuestions.Count;
+                    lessonHomeWorkResultModel.QuestionCompleted = homeWorkResult.HomeWorkAnswers.Where(x => x.IsCorrect.HasValue).Count();
+                    lessonHomeWorkResultModel.HomeWorkResult = _mapper.Map<HomeWorkResultModel>(homeWorkResult);
+
+                    lessonHomeWorkResultModels.Add(lessonHomeWorkResultModel);
+                }
+                else
+                {
+                    var homework = homeWorks.FirstOrDefault(p => p.OriginalId == module.OriginalId);
+                    if (homework != null)
+                    {
+                        lessonHomeWorkResultModel.Id = homework.Id;
+                        lessonHomeWorkResultModel.Code = homework.Code;
+                        lessonHomeWorkResultModel.Name = homework.Name;
+                        lessonHomeWorkResultModel.SkillId = homework.SkillId;
+                        lessonHomeWorkResultModel.SkillName = homework.Skill?.Name;
+                        lessonHomeWorkResultModel.SkillFilePath = homework.Skill?.FilePath;
+                        lessonHomeWorkResultModel.QuestionTotal = homework.HomeWorkQuestions.Count;
+
+                        lessonHomeWorkResultModels.Add(lessonHomeWorkResultModel);
+                    }
+                }
+            }
+
+            var homeWorkStudentProgress = new HomeWorkStudentProgressModel();
+
+            var homeWorkResultModels = lessonHomeWorkResultModels.Where(p => p.HomeWorkResult != null).Select(x => x.HomeWorkResult ?? new HomeWorkResultModel()).ToList();
+
+            homeWorkStudentProgress.Status = GetStatusHomeWorks(homeWorkResultModels, modules.Count);
 
             if (featureAccessTimes != null && featureAccessTimes.Any())
             {
@@ -136,8 +179,8 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 homeWorkStudentProgress.TimeSpent = featureAccessTimes.Sum(x => x.AccessTime);
             }
 
-            homeWorkStudentProgress.HomeWorks = homeWorks;
-            homeWorkStudentProgress.DisplayOrder = homeWorkResults.FirstOrDefault()?.LessonModule?.DisplayOrder;
+            homeWorkStudentProgress.HomeWorks = lessonHomeWorkResultModels;
+            homeWorkStudentProgress.DisplayOrder = modules.FirstOrDefault()?.DisplayOrder;
 
             methodResult.Result = homeWorkStudentProgress;
 
@@ -145,24 +188,22 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             return methodResult;
         }
 
-        private static EnumResultStatus GetStatusHomeWorks(IList<HomeWorkResultModel>? homeWorkResults)
+        private static EnumResultStatus GetStatusHomeWorks(IList<HomeWorkResultModel>? homeWorkResults, int numberHomework)
         {
             var statusHomeWork = EnumResultStatus.Unfinished;
+
             if (homeWorkResults != null && homeWorkResults.Count > 0)
             {
-                if (homeWorkResults.All(x => x.Status == EnumResultStatus.Done))
+                if (homeWorkResults.All(x => x.Status == EnumResultStatus.Done) && homeWorkResults.Count == numberHomework)
                 {
                     return EnumResultStatus.Done;
                 }
-                else if (homeWorkResults.All(x => x.Status == EnumResultStatus.New))
-                {
-                    return EnumResultStatus.New;
-                }
-                else if (homeWorkResults.Any(x => x.Status == EnumResultStatus.Process))
+                else
                 {
                     return EnumResultStatus.Process;
                 }
             }
+
             return statusHomeWork;
         }
     }

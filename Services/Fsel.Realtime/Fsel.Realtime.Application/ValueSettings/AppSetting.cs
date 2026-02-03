@@ -17,5 +17,6 @@ namespace Fsel.Realtime.Application.ValueSettings
     public class Services : BaseServices
     {
         public string? StorageApiUrl { get; set; }
+        public string? SystemApiUrl { get; set; }
     }
 }

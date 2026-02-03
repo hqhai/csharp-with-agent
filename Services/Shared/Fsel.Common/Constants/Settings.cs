@@ -36,6 +36,8 @@ namespace Fsel.Common.Constants
 
         public const string DefaultConnection = "DefaultConnection";
 
+        public const string PostgreConnection = "PostgreConnection";
+
         public const string CorsPolicy = "CorsPolicy";
     }
 }

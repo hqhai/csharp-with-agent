@@ -101,7 +101,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
             {
                 return commandResult.GetActionResult();
             }
-            return File(commandResult.Result, Settings.Excels.ContentType, $"Export_Report_LearningProgress_{command.CourseType}_{NumberHelper.GenerateCodeNumber(4)}.xlsx");
+            return File(commandResult.Result, Settings.Excels.ContentType, $"Export_Report_LearningProgress_{NumberHelper.GenerateCodeNumber(4)}.xlsx");
         }
 
         /// <summary>
@@ -119,7 +119,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
             {
                 return commandResult.GetActionResult();
             }
-            return File(commandResult.Result, Settings.Excels.ContentType, $"Export_Report_LearningResult_{command.CourseType}_{NumberHelper.GenerateCodeNumber(4)}.xlsx");
+            return File(commandResult.Result, Settings.Excels.ContentType, $"Export_Report_LearningResult_{NumberHelper.GenerateCodeNumber(4)}.xlsx");
         }
     }
 }

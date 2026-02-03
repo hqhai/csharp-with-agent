@@ -16,7 +16,6 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
 
     public class ChangeSubjectCommand : IRequest<MethodResult<ChangeSubjectDirective>>
     {
-        public Guid SubjectId { get; set; }
         public Guid? UserId { get; set; }
     }
 
@@ -61,37 +60,39 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
             if (!navigateActionResult.IsOK
                 || navigateActionResult.Result?.Status != EnumNavigateActionStatus.ContinueLearning)
             {
-                methodResult.AddErrorBadRequest("Cant not select subject this time");
+                methodResult.AddErrorBadRequest("Cant not change subject this time");
                 return methodResult;
             }
 
-            var changeCourseAggregate = await _changeCourseService.GetChangeSubjectAggreate(student, cancellationToken);
+            await _changeCourseService.InitForChangeSubject(student.Id);
 
-            var currentLearningSubjectId = changeCourseAggregate.GetCurrentLearningSubject();
-            if (currentLearningSubjectId == request.SubjectId)
-            {
-                methodResult.AddErrorBadRequest("This subject is already the current learning subject");
-                return methodResult;
-            }
+            //var changeCourseAggregate = await _changeCourseService.GetChangeSubjectAggreate(student, cancellationToken);
 
-            var changeCourseDirective = changeCourseAggregate.ChangeSubject(new ChangeProgramRequest { ProgramId = request.SubjectId });
+            //var currentLearningSubjectId = changeCourseAggregate.GetCurrentLearningSubject();
+            //if (currentLearningSubjectId == request.SubjectId)
+            //{
+            //    methodResult.AddErrorBadRequest("This subject is already the current learning subject");
+            //    return methodResult;
+            //}
 
-            switch (changeCourseDirective?.Action)
-            {
-                case EnumChangeSubjectAction.ChangeAndStartPt:
-                    await _changeCourseService.InitForChangeSubject(student.Id);
-                    break;
+            //var changeCourseDirective = changeCourseAggregate.ChangeSubject(new ChangeProgramRequest { ProgramId = request.SubjectId });
 
-                case EnumChangeSubjectAction.ChangeToRecentCourse:
-                    await _changeCourseService.SwitchDirectlyToExistCourseForChangeLevel(changeCourseDirective.CourseResultId.Value, student.Id);
-                    break;
+            //switch (changeCourseDirective?.Action)
+            //{
+            //    case EnumChangeSubjectAction.ChangeAndStartPt:
+            //        await _changeCourseService.InitForChangeSubject(student.Id);
+            //        break;
 
-                case EnumChangeSubjectAction.None:
-                    methodResult.AddErrorBadRequest("Subject change not allowed");
-                    break;
-            }
+            //    case EnumChangeSubjectAction.ChangeToRecentCourse:
+            //        await _changeCourseService.SwitchDirectlyToExistCourseForChangeLevel(changeCourseDirective.CourseResultId.Value, student.Id);
+            //        break;
 
-            methodResult.Result = changeCourseDirective;
+            //    case EnumChangeSubjectAction.None:
+            //        methodResult.AddErrorBadRequest("Subject change not allowed");
+            //        break;
+            //}
+
+            //methodResult.Result = changeCourseDirective;
 
             return methodResult;
         }

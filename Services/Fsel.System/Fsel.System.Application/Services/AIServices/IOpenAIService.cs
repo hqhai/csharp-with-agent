@@ -2,7 +2,6 @@
 
 namespace Fsel.System.Application.Services.AIServices
 {
-    using Fsel.System.Application.Services.AiServices.Models;
     using Fsel.System.Application.Services.AIServices.Models;
     using Refit;
 
@@ -13,5 +12,8 @@ namespace Fsel.System.Application.Services.AIServices
 
         [Post("/v1/chat/completions")]
         Task<IApiResponse<AIResponseModel>> SubmitAICompletionsAsync([Body] RequestAIModel command);
+
+        [Post("/v1/embeddings")]
+        Task<IApiResponse<EmbeddingResponseModel>> GenerateEmbeddingAsync([Body] EmbeddingRequest request);
     }
 }

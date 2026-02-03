@@ -71,6 +71,8 @@ namespace Fsel.Shared.Constants
 
                 public const string TestSpeaking = $"{KeyQueue}_TestSpeaking";
                 public const string TestWriting = $"{KeyQueue}_TestWriting";
+                public const string SemanticDictionary = $"{KeyQueue}_SemanticDictionary";
+                public const string SemanticDictionaryAI = $"{KeyQueue}_SemanticDictionaryAI";
             }
         }
 
@@ -153,6 +155,9 @@ namespace Fsel.Shared.Constants
 
                 public const string SetTimeRetryTest = $"{KeyQueue}_SetTimeRetryTest";
                 public const string SubmitTestAi = $"{KeyQueue}_SubmitTestAi";
+
+                public const string SendMailFinishCourse = $"{KeyQueue}_SendMailFinishCourse";
+                public const string SendMailFinishPT = $"{KeyQueue}_SendMailFinishPT";
             }
         }
 

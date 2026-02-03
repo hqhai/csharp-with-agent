@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.System.Application.Services.AiServices.Models
+namespace Fsel.System.Application.Services.AIServices.Models
 {
     using global::System.Text.Json.Serialization;
     using Refit;

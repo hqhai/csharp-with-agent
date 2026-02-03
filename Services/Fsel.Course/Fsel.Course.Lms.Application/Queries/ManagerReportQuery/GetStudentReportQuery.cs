@@ -21,48 +21,24 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
 
     public class GetStudentReportQuery : SearchStudentReportQueryModel, IRequest<MethodResult<IList<StudentDtoModel>>>
     {
-        public IList<EnumCompletionStatus>? CompletionStatuses
+        public GetStudentReportQuery()
         {
-            get
-            {
-                return ListCompletionStatus.ToList<EnumCompletionStatus>();
-            }
         }
 
-        public IList<EnumLearningStatus>? LearningStatuses
+        public GetStudentReportQuery(SearchReportLearningResultQueryModel source)
         {
-            get
-            {
-                return ListLearningStatus.ToList<EnumLearningStatus>();
-            }
+            CopyFrom(source);
         }
 
-        public IList<EnumOverallScore>? OverallScores
+        public GetStudentReportQuery(SearchReportLearningProgressQueryModel source)
         {
-            get
-            {
-                return ListOverallScore.ToList<EnumOverallScore>();
-            }
+            CopyFrom(source);
         }
 
-        public IList<EnumCourseLevel>? CurrentLevels
+        public GetStudentReportQuery(SearchReportPlacementTestQueryModel source)
         {
-            get
-            {
-                return ListCurrentLevel.ToList<EnumCourseLevel>();
-            }
+            CopyFrom(source);
         }
-
-        public IList<EnumCourseLevel>? CourseLevels
-        {
-            get
-            {
-                return ListCourseLevel.ToList<EnumCourseLevel>();
-            }
-        }
-
-        public bool IsSearchReport { get; set; }
-        public EnumManagerReportType ManagerReportType { get; set; }
     }
 
     public class GetStudentReportQueryHandler : IRequestHandler<GetStudentReportQuery, MethodResult<IList<StudentDtoModel>>>
@@ -72,7 +48,6 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
         private readonly IPlacementTestGroupResultRepository _placementTestGroupResultRepository;
         private readonly ICourseResultRepository _courseResultRepository;
         private readonly IUnitResultRepository _unitResultRepository;
-        private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
         private readonly ManagerProgressHelper _managerProgressHelper;
 
         public GetStudentReportQueryHandler(IUserService userService,
@@ -80,7 +55,6 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             IPlacementTestGroupResultRepository placementTestGroupResultRepository,
             ICourseResultRepository courseResultRepository,
             IUnitResultRepository unitResultRepository,
-            ICourseUnitMockTestRepository courseUnitMockTestRepository,
             ManagerProgressHelper managerProgressHelper)
         {
             _userService = userService;
@@ -88,7 +62,6 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             _placementTestGroupResultRepository = placementTestGroupResultRepository;
             _courseResultRepository = courseResultRepository;
             _unitResultRepository = unitResultRepository;
-            _courseUnitMockTestRepository = courseUnitMockTestRepository;
             _managerProgressHelper = managerProgressHelper;
         }
 
@@ -104,7 +77,6 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             switch (request.ManagerReportType)
             {
                 case EnumManagerReportType.ReportManagerPT:
-                    request.ListCourseLevel = string.Empty;
                     students = await FilterPlacementTestStudentsAsync(request, students, cancellationToken);
                     break;
 
@@ -119,7 +91,10 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
 
             if (!request.SortBy.Any())
             {
-                students = students.OrderBy(x => int.TryParse(x.SchoolGrade, out int graded) ? graded : 0).ThenBy(x => x.SchoolClass).ThenBy(x => x.FullName).ToList();
+                students = students.OrderBy(x => int.TryParse(x.SchoolGrade, out int graded) ? graded : 0)
+                                   .ThenBy(x => x.SchoolClass)
+                                   .ThenBy(x => x.FullName)
+                                   .ToList();
                 if (request.IsSearchReport)
                 {
                     students = students.ApplyPaging(request).ToList();
@@ -135,10 +110,9 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
         {
             var studentIds = students.Select(x => x.Id).ToList();
             bool isCheckDate = request.StartDate.HasValue || request.EndDate.HasValue;
-            bool hasLevelFilter = request.CurrentLevels?.Any() == true || request.CourseLevels?.Any() == true;
             bool hasCompletionFilter = request.CompletionStatuses?.Any() == true;
 
-            if (!hasCompletionFilter && !isCheckDate && !hasLevelFilter)
+            if (!hasCompletionFilter && !isCheckDate)
             {
                 return students;
             }
@@ -148,11 +122,11 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 studentIds = await _placementTestResultRepository.GetStudentPtIdsAsync(request.StartDate, request.EndDate, studentIds);
             }
 
-            var studentPtGroups = await _placementTestGroupResultRepository.GetStudentIdsAsync(request.CompletionStatuses, studentIds, request.CurrentLevels, request.CourseLevels);
+            var studentPtGroups = await _placementTestGroupResultRepository.GetStudentIdsAsync(request.CompletionStatuses, studentIds);
             var studentPTIds = studentPtGroups.ToHashSet();
 
             bool filterInProgress = hasCompletionFilter && request.CompletionStatuses != null && request.CompletionStatuses.Contains(EnumCompletionStatus.InProgress);
-            if (filterInProgress && !hasLevelFilter && studentIds.Any())
+            if (filterInProgress && studentIds.Any())
             {
                 var studentHasLearned = await _placementTestGroupResultRepository.Queryable
                     .WhereBulkContains(studentIds, x => x.StudentId)
@@ -168,7 +142,11 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
 
         private async Task<IList<StudentDtoModel>> FilterLearningProgressStudentsAsync(GetStudentReportQuery request, IList<StudentDtoModel> students)
         {
-            var courseResults = students.Select(x => new CourseResultModel { CourseId = x.CourseId.GetValueOrDefault(), StudentId = x.Id }).ToList();
+            var courseResults = students.Select(x => new CourseResultModel
+            {
+                CourseId = x.CourseId.GetValueOrDefault(),
+                StudentId = x.Id
+            }).ToList();
 
             if (!request.SortBy.Any())
             {
@@ -195,27 +173,44 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
         private async Task<IList<StudentDtoModel>> FilterLearningResultStudentsAsync(GetStudentReportQuery request, IList<StudentDtoModel> students, CancellationToken cancellationToken)
         {
             var studentIds = students.Select(x => x.Id).ToList();
+            if (!studentIds.Any())
+            {
+                return new List<StudentDtoModel>();
+            }
+
             var is75OrMore = request.OverallScores?.Contains(EnumOverallScore.Accuracy75OrMore) == true;
             var isLessThan75 = request.OverallScores?.Contains(EnumOverallScore.AccuracyBelow75) == true;
 
-            var query = (from baseQ in _courseResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId)
-                         join cum in _courseUnitMockTestRepository.Queryable on baseQ.CourseId equals cum.CourseId
-                         join ur in _unitResultRepository.Queryable on baseQ.Id equals ur.CourseResultId into unitGroup
-                         from ur in unitGroup.DefaultIfEmpty()
-                         where baseQ.WorkingStatus == EnumWorkingStatus.Active &&
-                         (!request.EndDate.HasValue || (ur.UpdatedDate ?? ur.CreatedDate).Date <= request.EndDate.Value.Date)
-                         group new { baseQ, ur } by new { baseQ.CourseId, baseQ.StudentId } into g
-                         select new
-                         {
-                             StudentId = g.Key.StudentId,
-                             OverallPercent = g.Select(x => x.ur).Where(x => x.Status == EnumResultStatus.Done).Any()
-                                 ? Math.Round(g.Select(x => x.ur).Where(x => x.Status == EnumResultStatus.Done).Average(x => x.Percent))
-                                 : default,
-                         })
-                        .Where(x => request.OverallScores == null || !request.OverallScores.Any() ||
-                               (is75OrMore && x.OverallPercent >= (int)EnumOverallScore.Accuracy75OrMore) ||
-                               (isLessThan75 && x.OverallPercent < (int)EnumOverallScore.Accuracy75OrMore));
+            var courseResultQuery = _courseResultRepository.ReadQueryable.Where(x => x.WorkingStatus == EnumWorkingStatus.Active)
+                                                           .WhereBulkContains(studentIds, x => x.StudentId);
+            var unitResultQuery = _unitResultRepository.ReadQueryable;
+            if (request.EndDate.HasValue)
+            {
+                unitResultQuery = unitResultQuery.Where(x => (x.UpdatedDate ?? x.CreatedDate).Date <= request.EndDate.Value.Date);
+            }
 
+            var queryResult = from baseQ in courseResultQuery
+                              join ur in _unitResultRepository.ReadQueryable on baseQ.Id equals ur.CourseResultId into unitGroup
+                              from ur in unitGroup.DefaultIfEmpty()
+                              select new
+                              {
+                                  baseQ.StudentId,
+                                  ur.Status,
+                                  ur.Percent
+                              };
+
+            var query = queryResult.GroupBy(x => x.StudentId).Select(g => new
+            {
+                StudentId = g.Key,
+                OverallPercent = g.Where(x => x.Status == EnumResultStatus.Done).Any() ?
+                                  Math.Round(g.Where(x => x.Status == EnumResultStatus.Done).Average(x => x.Percent)) : default,
+            });
+
+            if (request.OverallScores != null && request.OverallScores.Any() && (is75OrMore || isLessThan75))
+            {
+                query = query.Where(x => (is75OrMore && x.OverallPercent >= (int)EnumOverallScore.Accuracy75OrMore) ||
+                                         (isLessThan75 && x.OverallPercent < (int)EnumOverallScore.Accuracy75OrMore));
+            }
             if (request.SortBy.Any())
             {
                 query = query.ApplySortAndPaging(request);
@@ -237,11 +232,11 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 ListDistrict = request.ListDistrict,
                 ListProvince = request.ListProvince,
                 ListSchool = request.ListSchool,
-                ListCourseLevel = request.ListCourseLevel,
                 Keyword = request.Keyword,
+                ProgramId = request.ProgramId,
+                SubjectId = request.SubjectId,
+                LevelIdStr = request.LevelIdStr,
                 ListLearningStatus = request.ListLearningStatus,
-
-                CourseType = request.CourseType,
                 IsLearning = request.ManagerReportType != EnumManagerReportType.ReportManagerPT ? true : null,
             };
 

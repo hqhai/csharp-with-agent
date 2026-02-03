@@ -8,6 +8,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
     using Domain.Enums;
     using Domain.Models.CommandModels.Tests;
     using Domain.Models.EntityModels.PlacementTestModels;
+    using Fsel.Course.Lms.Application.Commands.OtherCmd;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
 
@@ -17,12 +19,15 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
         public IServiceProvider ServiceProvider { get; set; }
 
+        private readonly SendMailFinishPTPublisher _sendMailFinishPTPublisher;
+
         public ICollection<TestResultComposite> TestResultComposites { get; set; } = new List<TestResultComposite>();
 
-        public FlowTestResultAggregate(TestGroupResult testGroupResult, IServiceProvider serviceProvider)
+        public FlowTestResultAggregate(TestGroupResult testGroupResult, IServiceProvider serviceProvider, SendMailFinishPTPublisher sendMailFinishPTPublisher)
         {
             FlowTestResult = testGroupResult;
             ServiceProvider = serviceProvider;
+            _sendMailFinishPTPublisher = sendMailFinishPTPublisher;
         }
 
         public async Task Submit(Guid id)
@@ -53,6 +58,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             if (!FlowTestResult.TestResults.Any() || FlowTestResult.TestResults.All(x => x.Status == EnumResultStatus.Done))
             {
                 var flowService = ServiceProvider.GetRequiredService<IFlowService>();
+
                 var node = await flowService.GetNextStep(x => x.Id == FlowTestResult.FlowId, FlowTestResult.TestResults);
 
                 if (node?.StepFlow?.Id == null || node?.IsLeft == true)
@@ -67,7 +73,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                         var minLevel = await categoryService.LoadPreviousOrMinLevelAsync(level.ProgramId, level.Id);
                         FlowTestResult.EmailLevelId = minLevel?.Id;
                     }
-
+                    FlowTestResult.CompletionDate = DateTime.UtcNow;
                     FlowTestResult.Status = EnumResultStatus.Done;
                     foreach (var item in FlowTestResult.CourseChangingHistories)
                     {
@@ -77,6 +83,9 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                         }
                     }
                     await Commit();
+
+                    await _sendMailFinishPTPublisher.Publish(new SendMailFinishPTModel() { TestGroupResultId = FlowTestResult.Id }, CancellationToken.None);
+
                     return;
                 }
 

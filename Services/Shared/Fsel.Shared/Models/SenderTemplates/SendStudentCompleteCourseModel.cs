@@ -6,6 +6,7 @@ namespace Fsel.Shared.Models.SenderTemplates
     {
         public string? CoursePhoto { get; set; }
         public string? CourseLevel { get; set; }
+        public string? CourseName { get; set; }
         public string? Percent { get; set; }
         public string? MockTestMidCourse { get; set; }
         public string? MockTestEndCourse { get; set; }
@@ -39,7 +40,8 @@ namespace Fsel.Shared.Models.SenderTemplates
         public string? ContinueLearn { get; set; }
         public string? Display { get; set; }
         public string? BackgroundVertical { get; set; }
-
         public string? AccessLink { get; set; }
+        public string? AverageLearnLesson { get; set; }
+        public string? CountUnit { get; set; }
     }
 }

@@ -88,7 +88,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
 
                 await _testResultRepository.BulkMergeAsync(new List<TestResult> { testResult }, bulk =>
                 {
-                    bulk.ColumnPrimaryKeyExpression = c => new { c.TestGroupResultId, c.TestId, c.StudentId, c.IsDeleted };
+                    bulk.ColumnPrimaryKeyExpression = c => new { c.TestGroupResultId, c.TestId, c.IsDeleted };
                 });
             }
 

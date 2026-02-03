@@ -138,6 +138,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.ChangeCourse
                 waitSelectProgramHistory.ToLevelId = changeCourseRequest.ToLevelId;
                 waitSelectProgramHistory.ToProgramId = changeCourseRequest.ToProgramId;
                 waitSelectProgramHistory.Status = EnumChangingStatus.InProgressPt;
+                waitSelectProgramHistory.PtResultId = testGroupResult.Id;
             }
 
             var courseResults = await _courseResultRepository.Queryable
@@ -407,6 +408,22 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.ChangeCourse
                     }
                 });
 
+                if (!request.PtResultId.HasValue)
+                {
+                    var testGroupResult = new TestGroupResult
+                    {
+                        Id = Guid.NewGuid(),
+                        ProgramId = request.ToProgramId,
+                        ProgramIdOfPt = request.ToProgramId,
+                        StudentId = request.StudentId,
+                        TestType = EnumTestType.PlacementTest,
+                        Status = EnumResultStatus.ByPass
+                    };
+                    request.PtResultId = testGroupResult.Id;
+                    _testGroupResultRepository.Add(testGroupResult);
+                }
+
+
                 var history = new CourseChangingHistory
                 {
                     Id = Guid.NewGuid(),
@@ -422,6 +439,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.ChangeCourse
                     PtResultId = request.PtResultId,
                     ToCourseResultId = createCourseResult.Result.Id
                 };
+
 
                 _courseChangingHistoryRepository.Add(history);
                 await _testGroupResultRepository.UnitOfWork.SaveChangesAsync();
@@ -547,7 +565,6 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.ChangeCourse
         public async Task<ChangeCourseAggregate> GetChangeCourseAggreate(StudentModel student, Guid? levelId, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(student?.Id);
-            ArgumentNullException.ThrowIfNull(levelId);
 
             var subjects = await _categoryCachingService.GetAll(cancellationToken);
 

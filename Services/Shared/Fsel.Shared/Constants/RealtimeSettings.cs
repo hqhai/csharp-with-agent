@@ -250,5 +250,15 @@ namespace Fsel.Shared.Constants
                 public const string OnAudioSaved = $"OnAudioSaved";
             }
         }
+
+        public static class SemanticDictionaryHub
+        {
+            public const string Pattern = $"/semantic-dictionary";
+
+            public static class Methods
+            {
+                public const string SearchSemanticDictionaryHub = $"SearchSemanticDictionaryHub";
+            }
+        }
     }
 }

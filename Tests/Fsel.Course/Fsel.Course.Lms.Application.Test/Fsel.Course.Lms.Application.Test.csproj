@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Services\Fsel.Course\Fsel.Course.Lms.Application\Fsel.Course.Lms.Application.csproj" />
+    <ProjectReference Include="..\..\..\Services\Fsel.Course\Fsel.Course.Lms.Application\Fsel.Course.Lms.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>

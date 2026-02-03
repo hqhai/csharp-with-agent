@@ -95,5 +95,38 @@ namespace Fsel.Shared.Constants
 
         public const string Section = "Resources//MailTemplates//Section.html";
         public const string SkillPercent = "Resources//MailTemplates//SkillPercent.html";
+
+        public const string SkillUnder50i1 = "Bạn đã bắt đầu làm quen và hiểu được những điểm quan trọng. Luyện tập thêm sẽ giúp bạn tự tin hơn từng ngày.";
+        public const string SkillUnder50i2 = "Nền tảng của bạn đang được xây dựng từng bước. Mỗi lần luyện tập đều góp phần tạo nên sự tiến bộ.";
+        public const string SkillUnder50i3 = "Bạn đã có những bước khởi đầu tích cực với kỹ năng này. Tiếp tục duy trì sẽ giúp bạn tiến bộ rõ ràng hơn.";
+        public const string SkillUnder50i4 = "Bạn đang dần nắm được cách tiếp cận phù hợp. Thực hành đều đặn sẽ mang lại kết quả tốt hơn.";
+        public const string SkillUnder50i5 = "Bạn đã hiểu được những yếu tố cơ bản cần thiết. Luyện tập thêm sẽ giúp bạn ghi nhớ chắc chắn hơn.";
+        public const string SkillUnder50i6 = "Kỹ năng này đang trong giai đoạn hình thành nền tảng. Duy trì thói quen luyện tập sẽ giúp bạn tiến xa hơn.";
+        public const string SkillUnder50i7 = "Bạn đã bắt đầu áp dụng được trong những tình huống đơn giản. Tiếp tục luyện tập sẽ giúp bạn tự tin hơn.";
+        public const string SkillUnder50i8 = "Bạn đang làm quen khá tốt với cách vận dụng kỹ năng này. Mỗi bước nhỏ đều mang lại tiến bộ đáng kể.";
+        public const string SkillUnder50i9 = "Nền tảng ban đầu của bạn đang được củng cố dần. Luyện tập đều đặn sẽ giúp bạn ổn định hơn.";
+        public const string SkillUnder50i10 = "Bạn đang đi đúng hướng trong quá trình học tập. Kiên trì luyện tập sẽ giúp bạn đạt kết quả tốt hơn.";
+
+        public const string SkillUnder80i1 = "Bạn xử lý tốt các tình huống quen thuộc và có tiến bộ rõ rệt. Chỉ cần thêm luyện tập để đạt độ linh hoạt cao hơn.";
+        public const string SkillUnder80i2 = "Kỹ năng này của bạn đang phát triển khá ổn định. Duy trì nhịp học sẽ giúp bạn ngày càng vững vàng hơn.";
+        public const string SkillUnder80i3 = "Bạn đã sử dụng kỹ năng này khá hiệu quả trong nhiều trường hợp. Luyện tập thêm sẽ giúp bạn tự tin hơn khi áp dụng.";
+        public const string SkillUnder80i4 = "Bạn đang thể hiện sự hiểu biết tốt và tiến bộ đều đặn. Đây là giai đoạn rất thuận lợi để nâng cao hơn nữa.";
+        public const string SkillUnder80i5 = "Bạn đã nắm vững phần lớn các nội dung cốt lõi. Tiếp tục luyện tập sẽ giúp bạn linh hoạt hơn.";
+        public const string SkillUnder80i6 = "Kỹ năng này đang được bạn vận dụng ngày càng chính xác. Duy trì thói quen luyện tập sẽ mang lại kết quả rõ rệt.";
+        public const string SkillUnder80i7 = "Bạn thể hiện sự ổn định và nhất quán khi áp dụng kỹ năng này. Thêm luyện tập sẽ giúp bạn hoàn thiện hơn.";
+        public const string SkillUnder80i8 = "Bạn đang làm khá tốt và tiến bộ rõ ràng theo thời gian. Tiếp tục duy trì nhịp học hiện tại nhé.";
+        public const string SkillUnder80i9 = "Bạn đã đạt được mức sử dụng khá vững trong các tình huống quen thuộc. Luyện tập thêm sẽ giúp bạn tự tin hơn.";
+        public const string SkillUnder80i10 = "Kỹ năng này của bạn đang phát triển đúng hướng. Đây là nền tảng tốt để bạn nâng cấp lên mức cao hơn.";
+
+        public const string SkillUnder100i1 = "Rất tốt! Bạn làm chủ kỹ năng này và áp dụng khá linh hoạt. Đây là một điểm mạnh rõ rệt của bạn.";
+        public const string SkillUnder100i2 = "Bạn thể hiện sự tự tin và nhất quán khi sử dụng kỹ năng này. Kết quả này cho thấy sự nỗ lực rất đáng ghi nhận.";
+        public const string SkillUnder100i3 = "Kỹ năng này của bạn đang ở mức rất vững. Bạn áp dụng hiệu quả trong nhiều tình huống khác nhau.";
+        public const string SkillUnder100i4 = "Bạn làm chủ tốt kỹ năng này và sử dụng một cách tự nhiên. Đây là kết quả của quá trình luyện tập nghiêm túc.";
+        public const string SkillUnder100i5 = "Bạn duy trì hiệu suất cao và ổn định với kỹ năng này. Đây là một thành tựu rất đáng tự hào.";
+        public const string SkillUnder100i6 = "Kỹ năng này đang trở thành thế mạnh rõ rệt của bạn. Bạn áp dụng linh hoạt và chính xác.";
+        public const string SkillUnder100i7 = "Bạn cho thấy khả năng làm chủ và kiểm soát kỹ năng này rất tốt. Kết quả phản ánh sự tiến bộ rõ ràng.";
+        public const string SkillUnder100i8 = "Bạn đang sử dụng kỹ năng này một cách rất hiệu quả. Sự nhất quán của bạn là điểm nổi bật.";
+        public const string SkillUnder100i9 = "Kỹ năng này của bạn đạt mức rất cao và ổn định. Bạn hoàn toàn có thể tiếp tục thử thách bản thân ở mức cao hơn.";
+        public const string SkillUnder100i10 = "Kết quả rất ấn tượng! Kỹ năng này đang đóng vai trò là một điểm mạnh quan trọng của bạn.";
     }
 }

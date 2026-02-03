@@ -13,6 +13,7 @@ namespace Fsel.System.Infrastructure.ValueSettings
         public SharePointConfig? SharePointConfig { get; set; }
         public DailyQuizConfig? DailyQuizConfig { get; set; }
         public new Services? Services { get; set; }
+        public SemanticDictionaryConfig? SemanticDictionaryConfig { get; set; }
 
         public OpenAiConfig? OpenAiConfig { get; set; }
         public ConnectionStrings? ConnectionStrings { get; set; }
@@ -21,6 +22,7 @@ namespace Fsel.System.Infrastructure.ValueSettings
     public class ConnectionStrings
     {
         public string? CrmConnection { get; set; }
+        public string? PostgreConnection { get; set; }
     }
 
     public class OpenAiConfig
@@ -100,5 +102,18 @@ namespace Fsel.System.Infrastructure.ValueSettings
         public int NumberCorrect { get; set; }
         public int NumberWinner { get; set; }
         public int EndHour { get; set; }
+    }
+
+    public class SemanticDictionaryConfig
+    {
+        public double SimilarityThreshold { get; set; } = 0.40;
+        public int MaxInputLength { get; set; } = 240;
+        public string EmbeddingModel { get; set; } = "text-embedding-3-small";
+        public string DefaultCompletionModel { get; set; } = "gpt-4.1-nano";
+        public double DefaultTemperature { get; set; } = 0.7;
+        public int DefaultMaxTokens { get; set; } = 1000;
+        public double DefaultTopP { get; set; } = 1.0;
+        public double DefaultFrequencyPenalty { get; set; } = 0.0;
+        public double DefaultPresencePenalty { get; set; } = 0.0;
     }
 }

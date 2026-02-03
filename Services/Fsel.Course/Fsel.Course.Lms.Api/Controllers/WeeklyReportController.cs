@@ -6,6 +6,7 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Common.ActionResults;
     using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
+    using Fsel.Course.Lms.Application.Commands.OtherCmd;
     using Fsel.Course.Lms.Application.Commands.WeeklyReportCommand;
     using Fsel.Course.Lms.Application.Queries.WeeklyReportQuery;
     using Fsel.Shared.Attributes;
@@ -17,7 +18,6 @@ namespace Fsel.Course.Lms.Api.Controllers
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/weekly-report")]
     [ApiController]
-    [Permission(role: nameof(EnumRole.Admin))]
     public class WeeklyReportController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -76,12 +76,12 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
-        /// send students complete course
+        /// send student complete course
         /// </summary>
-        [HttpPost("send-students-complete-course")]
+        [HttpPost("send-student-complete-course")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> CompleteCourse([FromBody] SendMailStudentFinishCourseCommand command)
+        public async Task<IActionResult> SendMailFinishCourse([FromBody] SendMailFinishCourseCommand command)
         {
             var queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
@@ -94,6 +94,18 @@ namespace Fsel.Course.Lms.Api.Controllers
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> SendMailReminderToDoPT([FromForm] SendMailReminderPTAndKickOffEventCommand command)
+        {
+            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// send students complete course
+        /// </summary>
+        [HttpPost("send-student-complete-pt")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SendMailFinishPT([FromBody] SendMailFinishPTCommand command)
         {
             var queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
