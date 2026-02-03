@@ -14,5 +14,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public DateTime? LastVisited { get; set; }
         public int Visit { get; set; }
         public int? DisplayOrder { get; set; }
+        public Guid VideoId { get; set; }
     }
 }
