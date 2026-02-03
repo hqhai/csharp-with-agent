@@ -101,6 +101,7 @@ namespace Fsel.Course.Infrastructure.Common.QuestionHelper.QuestionTypes.Handler
                     VideoResultId = result.VideoResultId,
                     VideoTimeCodeResultId = result.VideoTimeCodeId, // hoặc _request.TResultId nếu đúng
                     Answer = answer,
+                    IsFirstSubmit = true,
                     Status = EnumAnswerStatus.Process
                 });
             }
