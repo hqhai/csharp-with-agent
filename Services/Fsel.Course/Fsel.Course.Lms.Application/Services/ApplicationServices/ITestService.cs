@@ -810,8 +810,24 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
 
             var availableCourses = await _courseCachingService.GetAllAvailableCoursesAsync();
             suggestLevels.ForEach(x => x.IsAvailableCourse = availableCourses.Any(c => c.LevelId == x.Id));
-
+            ActiveForLowerLevel(suggestLevels);
             return suggestLevels;
+        }
+
+        private static void ActiveForLowerLevel(List<SelectionLevelModel> selectionLevelModels)
+        {
+            var levelGroupByProgram = selectionLevelModels.GroupBy(x => x.ProgramId);
+            foreach (var group in levelGroupByProgram)
+            {
+                var levels = group.ToList();
+                levels.ForEach(l =>
+                {
+                    if (!l.CanSelect && levels.Any(x => x.LevelOrder > l.LevelOrder && x.CanSelect))
+                    {
+                        l.CanSelect = true;
+                    }
+                });
+            }
         }
 
         public static ConditionValue? GetMatchConditionValue(IList<ConditionValue>? conditionValues, Guid levelId)
