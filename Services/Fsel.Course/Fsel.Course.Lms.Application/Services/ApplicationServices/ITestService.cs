@@ -42,7 +42,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
 
         Task CreateTestAnswers(SubmitAnswerCommandModel request);
 
-        Task<List<SelectionLevelModel>> GetSuggestLevels(Guid ptResultId, int age, bool useHighestLevelIdOfPt = false, CancellationToken cancellationToken = default);
+        Task<List<SelectionLevelModel>> GetSuggestLevels(Guid ptResultId, int age, bool isOpenOldLevel = false, CancellationToken cancellationToken = default);
     }
 
     public class TestService : ITestService
@@ -709,7 +709,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             }
         }
 
-        public async Task<List<SelectionLevelModel>> GetSuggestLevels(Guid ptResultId, int age, bool useHighestLevelIdOfPt = false, CancellationToken cancellationToken = default)
+        public async Task<List<SelectionLevelModel>> GetSuggestLevels(Guid ptResultId, int age, bool isOpenOldLevel = false, CancellationToken cancellationToken = default)
         {
             var ptTestResult = await _testGroupResultRepository.ReadQueryable
                 .FirstOrDefaultAsync(x => x.Id == ptResultId, cancellationToken);
@@ -727,18 +727,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                 .Select(x => x.CurrentLevel)
                 .ToListAsync(cancellationToken);
 
-            var highestLevelId = ptTestResult.CurrentLevelId;
-            if (useHighestLevelIdOfPt)
-            {
-                var highestLevelFromPt = levelsFromPtOnSameProgram.Where(x => x != null)
-               .OrderByDescending(x => x.LevelOrder)
-               .FirstOrDefault();
-
-                if (highestLevelFromPt != null)
-                {
-                    highestLevelId = highestLevelFromPt.Id;
-                }
-            }
+            var currentLevelId = ptTestResult.CurrentLevelId;
 
             var program = await _categoryRepository.ReadQueryable
                 .Include(x => x.Levels)
@@ -754,7 +743,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                 .Include(x => x.SubjectConditionRules)
                 .FirstOrDefaultAsync(cancellationToken);
 
-            var matchestRule = suggestCondition?.SubjectConditionRules.Where(x => IsMatchRule(x, age, highestLevelId))
+            var matchestRule = suggestCondition?.SubjectConditionRules.Where(x => IsMatchRule(x, age, currentLevelId))
                 .OrderBy(x =>
                 {
                     var ageCondition = x?.ConditionRules?.FirstOrDefault(x => x.Type == EnumSubjectConditionRuleType.Age);
@@ -799,35 +788,44 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                     }
                     else
                     {
-                        selectionLevel.CanSelect = highestLevelId == x.Id;
+                        selectionLevel.CanSelect = currentLevelId == x.Id;
                     }
                 }
 
-                selectionLevel.IsCurrentLevel = highestLevelId == x.Id;
+                selectionLevel.IsCurrentLevel = currentLevelId == x.Id;
 
                 return selectionLevel;
             }).ToList();
 
             var availableCourses = await _courseCachingService.GetAllAvailableCoursesAsync();
             suggestLevels.ForEach(x => x.IsAvailableCourse = availableCourses.Any(c => c.LevelId == x.Id));
-            ActiveForLowerLevel(suggestLevels);
-            return suggestLevels;
-        }
 
-        private static void ActiveForLowerLevel(List<SelectionLevelModel> selectionLevelModels)
-        {
-            var levelGroupByProgram = selectionLevelModels.GroupBy(x => x.ProgramId);
-            foreach (var group in levelGroupByProgram)
+            if (isOpenOldLevel && levelsFromPtOnSameProgram != null)
             {
-                var levels = group.ToList();
-                levels.ForEach(l =>
+                var canSelectLevelIds = levelsFromPtOnSameProgram.OfType<Level>().Select(x => x.Id).ToList();
+                if (suggestCondition != null)
                 {
-                    if (!l.CanSelect && levels.Any(x => x.LevelOrder > l.LevelOrder && x.CanSelect))
+                    foreach (var level in levelsFromPtOnSameProgram.OfType<Level>())
                     {
-                        l.CanSelect = true;
+                        var matchestRuleOfLevel = suggestCondition.SubjectConditionRules.Where(x => IsMatchRule(x, age, level.Id)).ToList();
+                        var levelIds = matchestRuleOfLevel.SelectMany(x => x.ConditionValues?.SelectMany(x => x.LevelIds ?? new List<Guid>()).Distinct().ToList() ?? new List<Guid>());
+                        if (levelIds != null)
+                        {
+                            canSelectLevelIds = canSelectLevelIds.Concat(levelIds).Distinct().ToList();
+                        }
+                    }
+                }
+
+                suggestLevels.ForEach(l =>
+                {
+                    if (!l.CanSelect)
+                    {
+                        l.CanSelect = canSelectLevelIds.Any(x => x == l.Id);
                     }
                 });
             }
+
+            return suggestLevels;
         }
 
         public static ConditionValue? GetMatchConditionValue(IList<ConditionValue>? conditionValues, Guid levelId)
