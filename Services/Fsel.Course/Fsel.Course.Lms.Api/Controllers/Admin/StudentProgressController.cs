@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Queries.ClassForumResultQuery;
     using Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1;
     using Fsel.Course.Lms.Application.Queries.StudentProgressQuery;
     using Fsel.Course.Lms.Application.Queries.StudentQuery;
@@ -181,6 +182,18 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [ProducesResponseType(typeof(MethodResult<StudentCourseProgressModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromQuery] GetStudentLearningReportQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get class forum result
+        /// </summary>
+        [HttpGet("get-class-forum-result")]
+        [ProducesResponseType(typeof(MethodResult<ClassForumByStudentModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetClassForumResultByAdmin([FromQuery] GetClassForumResultByAdminQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
