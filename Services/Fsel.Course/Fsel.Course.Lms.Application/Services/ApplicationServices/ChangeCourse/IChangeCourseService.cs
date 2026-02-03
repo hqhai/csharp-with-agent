@@ -565,7 +565,6 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.ChangeCourse
         public async Task<ChangeCourseAggregate> GetChangeCourseAggreate(StudentModel student, Guid? levelId, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(student?.Id);
-            ArgumentNullException.ThrowIfNull(levelId);
 
             var subjects = await _categoryCachingService.GetAll(cancellationToken);
 

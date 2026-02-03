@@ -55,7 +55,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 return methodResult;
             }
 
-            var subjectAggregate = await _changeCourseService.GetChangeSubjectAggreate(student, cancellationToken);
+            var subjectAggregate = await _changeCourseService.GetChangeCourseAggreate(student, null, cancellationToken);
 
             var subjectChangeCourse = subjectAggregate.RootSubjects.FirstOrDefault(x => x.GetComponentsByType<LevelChangeCourse>().Any(x => x.IsCurrentLearningLevel));
             var subjectModel = subjectChangeCourse?.GetSubjectTree(isIncludeLevel: true);
