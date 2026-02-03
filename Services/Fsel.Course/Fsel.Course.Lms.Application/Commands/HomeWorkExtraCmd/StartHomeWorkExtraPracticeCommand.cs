@@ -115,7 +115,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
             {
                 await _homeWorkExtraPracticeResultRepository.BulkMergeAsync(new List<HomeWorkExtraPracticeResult> { homeWorkExtraPracticeResult }, bulk =>
                 {
-                    bulk.ColumnPrimaryKeyExpression = c => new { c.StudentId, c.HomeWorkId, c.HomeWorkRetryId, c.WorkingStatus };
+                    bulk.ColumnPrimaryKeyExpression = c => new { c.StudentId, c.HomeWorkId, c.HomeWorkRetryId, c.WorkingStatus, c.IsDeleted };
                 });
             }
             catch
