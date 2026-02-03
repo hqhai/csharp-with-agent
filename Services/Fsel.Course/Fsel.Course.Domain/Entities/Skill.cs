@@ -14,7 +14,6 @@ namespace Fsel.Course.Domain.Entities
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(200, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
-        [RegexValid(Regex = @"^[\x21-\x7E]+$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
         public string? Name { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]

@@ -381,14 +381,14 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                 {
                     await _videoTimeCodeAnswerRepository.BulkMergeAsync(createVideoTimeCodeAnswers, bulk =>
                     {
-                        bulk.ColumnPrimaryKeyExpression = entity => new { entity.VideoResultId, entity.VideoTimeCodeResultId, entity.QuestionId, entity.IsDeleted };
+                        bulk.ColumnPrimaryKeyExpression = entity => new { entity.VideoTimeCodeResultId, entity.QuestionId, entity.IsDeleted };
                     });
                 }
                 else if (updateVideoTimeCodeAnswers.Any())
                 {
                     await _videoTimeCodeAnswerRepository.BulkUpdateList(updateVideoTimeCodeAnswers, bulk =>
                     {
-                        bulk.IgnoreOnUpdateExpression = entity => new { entity.VideoResultId, entity.VideoTimeCodeResultId, entity.QuestionId };
+                        bulk.IgnoreOnUpdateExpression = entity => new { entity.VideoTimeCodeResultId, entity.QuestionId, entity.IsDeleted };
                     });
                 }
             }

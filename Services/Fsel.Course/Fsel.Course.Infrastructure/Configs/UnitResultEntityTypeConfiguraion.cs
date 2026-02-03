@@ -39,6 +39,8 @@ namespace Fsel.Course.Infrastructure.Configs
                    .OnDelete(DeleteBehavior.NoAction);
             builder.HasIndex(c => new { c.StudentId, c.Status });
             //builder.HasIndexIncludeAllProperties(c => new { c.CreatedUserId });
+
+            builder.HasIndex(c => new { c.CourseResultId, c.CourseModuleId, c.IsDeleted });
         }
     }
 }
