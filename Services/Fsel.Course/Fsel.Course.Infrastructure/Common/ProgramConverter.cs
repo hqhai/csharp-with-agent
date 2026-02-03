@@ -4,6 +4,7 @@ namespace Fsel.Course.Infrastructure.Common
 {
     using System.Collections.Concurrent;
     using System.Text.RegularExpressions;
+    using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
@@ -187,15 +188,19 @@ namespace Fsel.Course.Infrastructure.Common
             await AddChildentCategory(competitionEvents.ToArray(), cancellationToken);
         }
 
-        public async Task AddChildentCategoryToActive(IList<CategoryTreeModel> parentCategories, CancellationToken cancellationToken)
+        public async Task AddChildrenCategoryToActive(IList<CategoryTreeModel> parentCategories, CancellationToken cancellationToken, bool isActive = true)
         {
             var parentCategoryIds = parentCategories.Select(x => x.Data).ToList();
-            var childentCategories = await _categoryRepository.Queryable
-                                                              .WhereBulkContains(parentCategoryIds, x => x.ParentId)
-                                                              .Where(x => x.Status == EnumStatus.Active)
-                                                              .ToListAsync(cancellationToken);
 
-            if (childentCategories == null || !childentCategories.Any())
+            var query = _categoryRepository.Queryable.WhereBulkContains(parentCategoryIds, x => x.ParentId);
+            if (isActive)
+            {
+                query = query.Where(x => x.Status == EnumStatus.Active);
+            }
+
+            var childrenCategories = await query.ToListAsync(cancellationToken);
+
+            if (childrenCategories == null || !childrenCategories.Any())
             {
                 return;
             }
@@ -204,13 +209,13 @@ namespace Fsel.Course.Infrastructure.Common
 
             Parallel.ForEach(parentCategories, parentCategory =>
             {
-                var childentWithEventParents = childentCategories.Where(x => x.ParentId == parentCategory.Data).ToList();
-                var parentCategoryChildents = _mapper.Map<IList<CategoryTreeModel>>(childentWithEventParents);
-                parentCategory.Children = parentCategoryChildents.OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate).ToList();
-                competitionEvents.PushRange(parentCategoryChildents.ToArray());
+                var childrenWithEventParents = childrenCategories.Where(x => x.ParentId == parentCategory.Data).ToList();
+                var parentCategoryChildren = _mapper.Map<IList<CategoryTreeModel>>(childrenWithEventParents);
+                parentCategory.Children = parentCategoryChildren.OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate).ToList();
+                competitionEvents.PushRange(parentCategoryChildren.ToArray());
             });
 
-            await AddChildentCategoryToActive(competitionEvents.ToArray(), cancellationToken);
+            await AddChildrenCategoryToActive(competitionEvents.ToArray(), cancellationToken, isActive);
         }
 
         public async Task<MethodResult<List<Flow>>> SaveFlowsAsync(IList<SaveFlowCommandModel>? requestFlows)
