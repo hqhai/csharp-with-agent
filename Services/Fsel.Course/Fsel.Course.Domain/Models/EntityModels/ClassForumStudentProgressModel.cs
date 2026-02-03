@@ -13,6 +13,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public int Visit { get; set; }
         public int? DisplayOrder { get; set; }
         public Guid ClassForumId { get; set; }
+        public Guid? ClassForumResultId { get; set; }
         public SkillScores? SkillScores { get; set; }
     }
 }

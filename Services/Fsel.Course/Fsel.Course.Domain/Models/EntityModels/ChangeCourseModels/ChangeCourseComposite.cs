@@ -85,9 +85,9 @@ namespace Fsel.Course.Domain.Models.EntityModels.ChangeCourseModels
                     .ToList()
             };
 
-            if (Children.Any(c => c is ProgramChangeCourse || c is LevelChangeCourse))
+            subjectModel.HadLearnedBefore = subjectModel.ChildSubjects.Any(c => c.HadLearnedBefore) || subjectModel.Levels.Any(l => l.LearnedBefore);
+            if (Children.Any(c => c is ProgramChangeCourse or LevelChangeCourse))
             {
-                subjectModel.HadLearnedBefore = subjectModel.ChildSubjects.Any(c => c.HadLearnedBefore) || subjectModel.Levels.Any(l => l.LearnedBefore);
                 if (!isIncludeLevel)
                 {
                     subjectModel.Levels = new List<LevelModel>();

@@ -88,7 +88,10 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd.V1i2
                 };
                 try
                 {
-                    await _courseResultRepository.BulkMergeAsync(new List<CourseResult> { courseResult });
+                    await _courseResultRepository.BulkMergeAsync(new List<CourseResult> { courseResult }, bulk =>
+                    {
+                        bulk.ColumnPrimaryKeyExpression = c => new { c.CourseId, c.StudentId, c.IsDeleted, c.WorkingStatus };
+                    });
                 }
                 catch
                 {

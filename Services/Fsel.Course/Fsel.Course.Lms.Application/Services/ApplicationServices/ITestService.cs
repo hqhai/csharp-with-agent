@@ -687,7 +687,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                 {
                     await _testAnswerRepository.BulkMergeAsync(addAnswers, bulk =>
                     {
-                        bulk.ColumnPrimaryKeyExpression = c => new { c.TestResultId, c.TestSectionResultId, c.TestSectionId, c.QuestionId, c.IsDeleted };
+                        bulk.ColumnPrimaryKeyExpression = c => new { c.TestSectionResultId, c.TestSectionId, c.QuestionId, c.IsDeleted };
                     });
                 }
                 catch
@@ -700,7 +700,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                 {
                     await _testAnswerRepository.BulkUpdateList(updateAnswers, bulk =>
                     {
-                        bulk.IgnoreOnUpdateExpression = c => new { c.TestResultId, c.TestSectionResultId, c.TestSectionId, c.QuestionId, c.IsDeleted };
+                        bulk.IgnoreOnUpdateExpression = c => new { c.TestSectionResultId, c.TestSectionId, c.QuestionId, c.IsDeleted };
                     });
                 }
                 catch
@@ -782,6 +782,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                 var selectionLevel = _mapper.Map<SelectionLevelModel>(x);
                 selectionLevel.ProgramId = x.ProgramId;
                 selectionLevel.ProgramLevelName = x.Category?.Name;
+                selectionLevel.ProgramDescription = x.Category?.Description;
 
                 var matchCondition = GetMatchConditionValue(matchestRule?.ConditionValues, x.Id);
                 if (matchCondition != null)

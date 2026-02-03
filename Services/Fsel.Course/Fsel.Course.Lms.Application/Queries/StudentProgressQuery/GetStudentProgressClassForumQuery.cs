@@ -3,7 +3,9 @@
 namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
@@ -35,8 +37,9 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
         private readonly IClassForumResultRepository _classForumResultRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly ISkillRepository _skillRepository;
+        private readonly ILessonRepository _lessonRepository;
 
-        public GetStudentProgressClassForumQueryHandler(IUserService userService, IVideoResultRepository videoResultRepository, IClassForumRepository classForumRepository, ISystemService systemService, IClassForumResultRepository classForumResultRepository, ILessonResultRepository lessonResultRepository, ISkillRepository skillRepository)
+        public GetStudentProgressClassForumQueryHandler(IUserService userService, IVideoResultRepository videoResultRepository, IClassForumRepository classForumRepository, ISystemService systemService, IClassForumResultRepository classForumResultRepository, ILessonResultRepository lessonResultRepository, ISkillRepository skillRepository, ILessonRepository lessonRepository)
         {
             _userService = userService;
             _videoResultRepository = videoResultRepository;
@@ -45,6 +48,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             _classForumResultRepository = classForumResultRepository;
             _lessonResultRepository = lessonResultRepository;
             _skillRepository = skillRepository;
+            _lessonRepository = lessonRepository;
         }
 
         public async Task<MethodResult<IList<ClassForumStudentProgressModel>>> Handle(GetStudentProgressClassForumQuery request, CancellationToken cancellationToken)
@@ -68,6 +72,22 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
 
             var userId = student.UserId;
 
+            var lesson = await _lessonRepository.Queryable.Include(p => p.LessonModules).FirstOrDefaultAsync(p => p.Id == request.LessonId, cancellationToken);
+            if (lesson == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                return methodResult;
+            }
+
+            var modules = lesson.LessonModules.Where(p => p.LessonConfigType == EnumLessonConfigType.ClassForum).OrderBy(p => p.DisplayOrder).ToList();
+            if (modules == null || modules.Count == 0)
+            {
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
+
+            var originalIds = modules.Select(p => p.OriginalId).ToList();
+
             var lessonResult = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.LessonResultId && x.StudentId == request.StudentId, cancellationToken);
 
             if (lessonResult == null || lessonResult.Status == EnumResultStatus.Unfinished)
@@ -76,71 +96,82 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 return methodResult;
             }
 
-            var videoResults = await _videoResultRepository.Queryable.Where(x => x.StudentId == request.StudentId && x.LessonResultId == lessonResult.Id).ToListAsync(cancellationToken);
-            if (videoResults == null)
-            {
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                return methodResult;
-            }
+            var classForumResults = await _classForumResultRepository.Queryable.Include(p => p.ClassForum).ThenInclude(p => p.Skill).Where(x => x.LessonResultId == request.LessonResultId && x.StudentId == request.StudentId).ToListAsync(cancellationToken);
 
-            var classForumResults = await _classForumResultRepository.Queryable.Include(p => p.ClassForum).Include(p => p.LessonModule).Where(x => x.LessonResultId == lessonResult.Id && x.StudentId == request.StudentId).ToListAsync(cancellationToken);
+            var classForums = await _classForumRepository.Queryable.Include(p => p.Skill).Where(p => originalIds.Contains(p.OriginalId) && p.VersionStatus == EnumVersionStatus.LastVersion).ToListAsync(cancellationToken);
 
             var classForumStudentProgressModels = new List<ClassForumStudentProgressModel>();
 
-            var skillIds = classForumResults.Select(p => p.ClassForum?.SkillId).Distinct().ToList();
-
-            var skills = await _skillRepository.Queryable.WhereBulkContains(skillIds, p => p.Id).ToListAsync(cancellationToken);
-
-            foreach (var classForumResult in classForumResults)
+            foreach (var module in modules)
             {
-                var featureAccessTimeResult = await _systemService.GetFeatureAccessTimeAsync(new FeatureAccessTimeQueryModel
-                {
-                    UserId = userId,
-                    UnitId = request.UnitId,
-                    LessonId = request.LessonId,
-                    CourseId = request.CourseId,
-                    EnumFeature = EnumFeature.ClassForum,
-                    ObjectId = classForumResult.ClassForumId
-                });
-
-                if (!featureAccessTimeResult.IsSuccessStatusCode)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallSystemServiceError), nameof(featureAccessTimeResult));
-                    return methodResult;
-                }
-                var featureAccessTime = featureAccessTimeResult.Content?.Result;
-
                 var classForumStudentProgress = new ClassForumStudentProgressModel();
 
-                classForumStudentProgress.DisplayOrder = classForumResult.LessonModule?.DisplayOrder;
+                var classForumResult = classForumResults.FirstOrDefault(p => p.LessonModuleId == module.Id);
 
-                if (featureAccessTime != null)
+                if (classForumResult != null)
                 {
-                    classForumStudentProgress.LastVisited = featureAccessTime.LastVisited ?? null;
-                    classForumStudentProgress.Visit = featureAccessTime.Visit;
-                    classForumStudentProgress.TimeSpent = featureAccessTime.AccessTime;
-                }
+                    var featureAccessTimeResult = await _systemService.GetFeatureAccessTimeAsync(new FeatureAccessTimeQueryModel
+                    {
+                        UserId = userId,
+                        UnitId = request.UnitId,
+                        LessonId = request.LessonId,
+                        CourseId = request.CourseId,
+                        EnumFeature = EnumFeature.ClassForum,
+                        ObjectId = classForumResult.ClassForumId
+                    });
 
-                classForumStudentProgress.SkillScores = new SkillScores
-                {
-                    SkillId = classForumResult.ClassForum?.SkillId,
-                    SkillName = skills.FirstOrDefault(p => p.Id == classForumResult.ClassForum?.SkillId)?.Name,
-                    SkillFilePath = skills.FirstOrDefault(p => p.Id == classForumResult.ClassForum?.SkillId)?.FilePath,
-                    TotalCount = classForumResult.CorrectTotal,
-                    CorrectCount = classForumResult.CorrectCount,
-                };
+                    if (!featureAccessTimeResult.IsSuccessStatusCode)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallSystemServiceError), nameof(featureAccessTimeResult));
+                        return methodResult;
+                    }
+                    var featureAccessTime = featureAccessTimeResult.Content?.Result;
 
-                classForumStudentProgress.ClassForumId = classForumResult.ClassForumId;
+                    classForumStudentProgress.DisplayOrder = module.DisplayOrder;
 
-                if (videoResults.All(p => p.Status == EnumResultStatus.Done))
-                {
-                    classForumStudentProgress.Status = classForumResult != null ? classForumResult.Status.HasValue ? EnumResultStatus.Done : EnumResultStatus.Process : EnumResultStatus.New;
+                    if (featureAccessTime != null)
+                    {
+                        classForumStudentProgress.LastVisited = featureAccessTime.LastVisited ?? null;
+                        classForumStudentProgress.Visit = featureAccessTime.Visit;
+                        classForumStudentProgress.TimeSpent = featureAccessTime.AccessTime;
+                    }
+
+                    classForumStudentProgress.SkillScores = new SkillScores
+                    {
+                        SkillId = classForumResult.ClassForum?.SkillId,
+                        SkillName = classForumResult.ClassForum?.Skill?.Name,
+                        SkillFilePath = classForumResult.ClassForum?.Skill?.FilePath,
+                        TotalCount = classForumResult.CorrectTotal,
+                        CorrectCount = classForumResult.CorrectCount,
+                    };
+
+                    classForumStudentProgress.ClassForumId = classForumResult.ClassForumId;
+                    classForumStudentProgress.ClassForumResultId = classForumResult.Id;
+
+                    classForumStudentProgress.Status = classForumResult.ResultStatus;
+
+                    classForumStudentProgressModels.Add(classForumStudentProgress);
                 }
                 else
                 {
-                    classForumStudentProgress.Status = EnumResultStatus.Unfinished;
+                    var classForum = classForums.FirstOrDefault(p => p.OriginalId == module.OriginalId);
+                    if (classForum != null)
+                    {
+                        classForumStudentProgress.DisplayOrder = module.DisplayOrder;
+                        classForumStudentProgress.SkillScores = new SkillScores
+                        {
+                            SkillId = classForum.SkillId,
+                            SkillName = classForum.Skill?.Name,
+                            SkillFilePath = classForum.Skill?.FilePath
+                        };
+
+                        classForumStudentProgress.ClassForumId = classForum.Id;
+
+                        classForumStudentProgress.Status = EnumResultStatus.Unfinished;
+
+                        classForumStudentProgressModels.Add(classForumStudentProgress);
+                    }
                 }
-                classForumStudentProgressModels.Add(classForumStudentProgress);
             }
 
             methodResult.Result = classForumStudentProgressModels;

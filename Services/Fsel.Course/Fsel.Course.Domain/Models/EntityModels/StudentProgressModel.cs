@@ -18,5 +18,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? ContentProgress { get; set; }
         public int? DisplayOrderUnit { get; set; }
         public int? DisplayOrderLesson { get; set; }
+        public string? Program { get; set; }
     }
 }
