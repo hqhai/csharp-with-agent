@@ -9,7 +9,6 @@ namespace Fsel.Course.Lms.Application.Commands.OtherCmd
     using Fsel.Common.Enums;
     using Fsel.Common.Models;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Infrastructure.ValueSettings;
@@ -24,7 +23,6 @@ namespace Fsel.Course.Lms.Application.Commands.OtherCmd
     using Fsel.Shared.Models.SenderTemplates;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
-    using OfficeOpenXml.Export.HtmlExport.StyleCollectors.StyleContracts;
     using DateTimeHelper = Shared.Helpers.DateTimeHelper;
 
     public class SendMailFinishCourseModel
@@ -51,6 +49,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherCmd
 
         private const string NoneProgress = "none-progress";
         private const string ColorDefault = "#566CD6";
+        private const string BorderRadius = " border-radius: 10px;";
 
         public SendMailFinishCourseCommandHandler(IUserService userService, ILearningService learningService, ISystemService systemService, IClassForumResultRepository classForumResultRepository, ILessonResultRepository lessonResultRepository, IMediator mediator, AppSetting appSetting, ICourseResultRepository courseResultRepository, ISkillRepository skillRepository)
         {
@@ -120,7 +119,9 @@ namespace Fsel.Course.Lms.Application.Commands.OtherCmd
             string unitsNumber = string.Empty;
             string unitsChart = string.Empty;
 
-            var skills = await _skillRepository.ReadQueryable.ToListAsync(cancellationToken);
+            var skillIds = courseResult.SkillScores?.Select(p => p.SkillId).ToList();
+
+            var skills = await _skillRepository.ReadQueryable.WhereBulkContains(skillIds, p => p.Id).ToListAsync(cancellationToken);
 
             if (courseResult.SkillScores != null)
             {
@@ -131,7 +132,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherCmd
                     {
                         var message = SkillMessagePool.Get(item.Percent);
 
-                        var html = string.Format(CultureInfo.InvariantCulture, skillHtml, skill.FilePath, skill.Name, GetColorPercent(item.Percent), item.Percent, item.Percent == 0 ? NoneProgress : null, item.Percent, !string.IsNullOrEmpty(skill.ColorCode) ? skill.ColorCode : ColorDefault, 100 - item.Percent, message);
+                        var html = string.Format(CultureInfo.InvariantCulture, skillHtml, skill.FilePath, skill.Name, GetColorPercent(item.Percent), item.Percent, item.Percent == 0 ? NoneProgress : null, item.Percent, !string.IsNullOrEmpty(skill.ColorCode) ? skill.ColorCode : ColorDefault, item.Percent == 100 ? BorderRadius : null, 100 - item.Percent, item.Percent == 0 ? BorderRadius : null, message);
 
                         skillScore += html;
                     }
@@ -254,14 +255,17 @@ namespace Fsel.Course.Lms.Application.Commands.OtherCmd
                 CountUnit = $"{unitsAccessTime.Count + 1}"
             };
 
-            var sendResult = await _mediator.Send(new SenderCommand
+            if (!string.IsNullOrEmpty(student.User.Email))
             {
-                Email = student.User.Email,
-                Subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendStudentCompleteCourse, learningService.ComponentName, student.User.FullName),
-                Params = sendStudentCompleteCourseModel,
-                CcEmail = student.ParentEmail,
-                Template = EnumSenderTemplate.SendStudentCompleteCourseAcademic
-            }, cancellationToken).ConfigureAwait(false);
+                var sendResult = await _mediator.Send(new SenderCommand
+                {
+                    Email = student.User.Email,
+                    Subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendStudentCompleteCourse, learningService.ComponentName, student.User.FullName),
+                    Params = sendStudentCompleteCourseModel,
+                    CcEmail = student.ParentEmail,
+                    Template = EnumSenderTemplate.SendStudentCompleteCourseAcademic
+                }, cancellationToken).ConfigureAwait(false);
+            }
 
             return methodResult;
         }

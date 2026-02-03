@@ -9,6 +9,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
     using Fsel.Course.Domain.Entities.TestConfigs;
     using Fsel.Course.Domain.Models.EntityModels.PlacementTestModels;
     using Fsel.Course.Lms.Application.Queries.CourseChangeQuery;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
@@ -23,12 +24,14 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
         private IRepository<TestGroupResult> _testGroupResult;
         private readonly IServiceProvider _serviceProvider;
         private readonly MediatR.IMediator _mediator;
+        private readonly SendMailFinishPTPublisher _sendMailFinishPTPublisher;
 
-        public ContinuePTCommandHandler(IRepository<TestGroupResult> testGroupResult, IServiceProvider serviceProvider, MediatR.IMediator mediator)
+        public ContinuePTCommandHandler(IRepository<TestGroupResult> testGroupResult, IServiceProvider serviceProvider, MediatR.IMediator mediator, SendMailFinishPTPublisher sendMailFinishPTPublisher)
         {
             _testGroupResult = testGroupResult;
             _serviceProvider = serviceProvider;
             _mediator = mediator;
+            _sendMailFinishPTPublisher = sendMailFinishPTPublisher;
         }
 
         public async Task<MethodResult<PtStateModel>> Handle(ContinuePTCommand request, CancellationToken cancellationToken)
@@ -62,7 +65,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 return result;
             }
 
-            var aggregate = new FlowTestResultAggregate(flowTestResult, _serviceProvider);
+            var aggregate = new FlowTestResultAggregate(flowTestResult, _serviceProvider, _sendMailFinishPTPublisher);
             await aggregate.InitAggregate();
 
             if (flowTestResult.Status != Domain.Enums.EnumResultStatus.Done && flowTestResult.Status != Domain.Enums.EnumResultStatus.ByPass)
