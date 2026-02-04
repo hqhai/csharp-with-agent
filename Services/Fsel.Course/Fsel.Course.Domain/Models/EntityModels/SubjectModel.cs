@@ -23,6 +23,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public bool IsCurrentLearning { get; set; }
 
+        public bool IsLastestLearned { get; set; }
+
         public bool HasLevel()
         {
             if (Levels != null && Levels.Any())
