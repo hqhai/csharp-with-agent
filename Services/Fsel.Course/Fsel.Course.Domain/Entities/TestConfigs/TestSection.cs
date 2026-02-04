@@ -78,6 +78,8 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
 
         public TestSection? Parent { get; set; }
         public Guid? ParentId { get; set; }
+        public Guid? AiPromptManagerId { get; set; }
+
         public ICollection<TestSection> TestSections { get; set; } = new List<TestSection>();
         public ICollection<TestAISetting> TestAISettings { get; set; } = new List<TestAISetting>();
         public ICollection<TestSectionQuestion> TestSectionQuestions { get; set; } = new List<TestSectionQuestion>();

@@ -2,6 +2,7 @@
 
 namespace Fsel.System.Application.Commands.Chatbots
 {
+    using Fsel.Shared.Constants;
     using Fsel.System.Application.Services.AIServices;
     using Fsel.System.Application.Services.AIServices.Models;
     using Fsel.System.Domain.Models.CommandModels.ChatBot;
@@ -10,7 +11,10 @@ namespace Fsel.System.Application.Commands.Chatbots
     public class SubmitAICommand : IRequest<string?>
     {
         public double MaxToken { get; set; }
-
+        public double Temperature { get; set; }
+        public double PresencePenalty { get; set; }
+        public double TopP { get; set; }
+        public string? Model { get; set; }
         public IList<ChatBotMessageModel>? ChatBotMessages { get; set; }
     }
 
@@ -29,12 +33,12 @@ namespace Fsel.System.Application.Commands.Chatbots
 
             var response = await _openAIService.SubmitAICompletionsAsync(new RequestAIModel
             {
-                Model = "gpt-4o",
+                Model = request.Model ?? ValueSettings.ChatBotSetup.Model,
                 Messages = request.ChatBotMessages,
-                Temperature = 0,
+                Temperature = request.Temperature,
                 MaxTokens = request.MaxToken,
-                PresencePenalty = 0,
-                TopP = 0
+                PresencePenalty = request.PresencePenalty,
+                TopP = request.TopP
             });
 
             var result = response.Content?.Choices?.Select(x => x.Message?.Content).FirstOrDefault();
