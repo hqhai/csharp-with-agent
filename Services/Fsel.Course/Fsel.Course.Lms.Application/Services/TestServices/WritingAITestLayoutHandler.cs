@@ -214,6 +214,8 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
                 currentSectionResult.SkillScores = sectionSkillScores;
                 currentSectionResult.CorrectCount = (int)sectionSkillScore.CorrectCount;
                 currentSectionResult.CorrectTotal = (int)sectionSkillScore.TotalCount;
+                currentSectionResult.Percent = NumberHelper.GetPercent(currentSectionResult.CorrectCount, currentSectionResult.CorrectTotal);
+
                 if (scoringFormulaType == EnumScoringFormulaType.Percent)
                 {
                     var percent = testSectionResult.TestSection?.Percent ?? default;
@@ -229,6 +231,7 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
                 testSectionResult.SkillScores = new List<SkillScores> { testSkillScore };
                 testSectionResult.CorrectCount = (int)testSkillScore.CorrectCount;
                 testSectionResult.CorrectTotal = (int)testSkillScore.TotalCount;
+                testSectionResult.Percent = NumberHelper.GetPercent(testSectionResult.CorrectCount, testSectionResult.CorrectTotal);
             }
             if (scoringFormulaType == EnumScoringFormulaType.Percent)
             {

@@ -199,7 +199,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
 
         private static EnumTokenMission GetTokenMission(ClassForum classForum, ClassForumResult classForumResult)
         {
-            return classForum.CourseSkill == EnumCourseSkill.Writing ? EnumTokenMission.ClassForumWriting
+            return classForum.Layout == EnumClassForumLayout.Writing ? EnumTokenMission.ClassForumWriting
                : classForumResult.MediaType == EnumMediaType.Video ? EnumTokenMission.ClassForumSpeakingVideo
                : EnumTokenMission.ClassForumSpeakingAudio;
         }

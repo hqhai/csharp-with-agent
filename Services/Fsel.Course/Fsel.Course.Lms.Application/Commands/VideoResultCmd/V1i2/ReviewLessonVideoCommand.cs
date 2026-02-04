@@ -16,6 +16,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd.V1i2
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -154,6 +155,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd.V1i2
             {
                 videoResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
                 videoResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
+                videoResult.Percent = NumberHelper.GetPercent(videoResult.CorrectCount, videoResult.CorrectTotal);
                 videoResult.TokenFirstTime = method.Item2;
                 videoResult.TokenLastTime = method.Item3;
             }

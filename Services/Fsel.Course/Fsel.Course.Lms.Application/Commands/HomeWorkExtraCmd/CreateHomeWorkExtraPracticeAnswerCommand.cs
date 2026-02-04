@@ -497,7 +497,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
         {
             homeWorkResult.CorrectCount = statistics.CorrectCount;
             homeWorkResult.CorrectTotal = statistics.CorrectTotal;
-
+            homeWorkResult.Percent = NumberHelper.GetPercent(statistics.CorrectCount, statistics.CorrectTotal);
             if (isHomeWorkDone)
             {
                 homeWorkResult.Status = EnumResultStatus.Done;

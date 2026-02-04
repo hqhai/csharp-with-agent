@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Models.EntityModels.PlacementTestModels;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using Microsoft.Extensions.DependencyInjection;
 
     public class TestResultComposite : ResultComposite
@@ -43,6 +44,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 var test = await ServiceProvider.GetRequiredService<ITestService>().GetHierachicalTestById(TestResult.TestId.Value);
                 TestResult.Status = EnumResultStatus.Done;
                 TestResult.CorrectCount = Children.Cast<TestSectionResultComposite>().Sum(x => x.TestSectionResult.CorrectCount);
+                TestResult.Percent = NumberHelper.GetPercent(TestResult.CorrectCount, TestResult.CorrectTotal);
                 TestResult.SkillScores = Children.Cast<TestSectionResultComposite>().SelectMany(x =>
                 {
                     var correspondSection = test.TestSections.FirstOrDefault(y => y.Id == x.TestSectionResult.TestSectionId);
