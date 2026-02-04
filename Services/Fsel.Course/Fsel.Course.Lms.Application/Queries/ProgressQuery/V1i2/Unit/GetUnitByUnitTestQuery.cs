@@ -74,12 +74,11 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery.V1i2.Unit
             var workingTime = videoTimeCodeResults.Sum(x => GetSecond(x));
             var skillScores = videoTimeCodeResults.Where(x => x.SkillScores != null && x.SkillScores.Any())
             .SelectMany(x => x.SkillScores!)
-            .GroupBy(x => new { x.Skill, x.SkillId })
+            .GroupBy(x => new { x.SkillId })
             .Select(x =>
             {
                 return new SkillScores
                 {
-                    Skill = x.Key.Skill,
                     SkillId = x.Key.SkillId,
                     SkillName = x.Where(x => x.SkillName != null)?.FirstOrDefault()?.SkillName,
                     SkillFilePath = x.Where(x => x.SkillFilePath != null)?.FirstOrDefault()?.SkillFilePath,

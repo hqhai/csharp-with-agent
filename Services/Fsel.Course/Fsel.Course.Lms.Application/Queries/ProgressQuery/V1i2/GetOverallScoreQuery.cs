@@ -96,10 +96,9 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery.V1i2
                 {
                     overallScoreModel.SkillScores = unitResults.Where(x => x.SkillScores != null && x.SkillScores.Any())
                         .SelectMany(x => x.SkillScores!)
-                        .GroupBy(x => new { x.Skill, x.SkillId })
+                        .GroupBy(x => new { x.SkillId })
                         .Select(x => new SkillScores
                         {
-                            Skill = x.Key.Skill,
                             SkillFilePath = x.Where(x => x.SkillFilePath != null).FirstOrDefault()?.SkillFilePath,
                             SkillName = x.Where(x => x.SkillName != null).FirstOrDefault()?.SkillName,
                             SkillId = x.Key.SkillId,

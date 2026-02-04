@@ -12,7 +12,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseLessonModule
     using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServices.LessonItemServices;
     using Fsel.Shared.Constants;
-    using Microsoft.AspNetCore.Cors.Infrastructure;
     using Microsoft.EntityFrameworkCore;
 
     public class BaseLessonResultEventHandler
@@ -102,7 +101,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseLessonModule
                 .Concat(homeWorkResults.SelectMany(x => x.SkillScores ?? Enumerable.Empty<SkillScores>()));
 
             var aggregatedSkillScores = allSkillScores
-                .GroupBy(s => new { s.SkillId, s.Skill })
+                .GroupBy(s => new { s.SkillId })
                 .Select(g =>
                 {
                     var first = g.First();

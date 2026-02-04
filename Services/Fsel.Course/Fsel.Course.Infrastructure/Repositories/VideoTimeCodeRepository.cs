@@ -65,7 +65,6 @@ namespace Fsel.Course.Infrastructure.Repositories
                               select new
                               {
                                   vtc.VideoId,
-                                  ex.CourseSkill,
                                   ex.SkillId,
                                   SkillFilePath = ex.Skill != null ? ex.Skill.FilePath : string.Empty,
                                   SkillName = ex.Skill != null ? ex.Skill.Name : string.Empty, // nếu Skill là navigation, nên Join skill table thay vì Include
@@ -80,7 +79,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 
             // 3) Gom theo (VideoId, Skill) => totals cho 1 lần xuất hiện của video đó
             var perVideoSkill = rows
-                .GroupBy(x => new { x.VideoId, x.SkillId, x.CourseSkill })
+                .GroupBy(x => new { x.VideoId, x.SkillId })
                 .Select(g =>
                 {
                     // TotalQuestion là số câu hỏi (distinct theo QuestionId)
@@ -96,7 +95,6 @@ namespace Fsel.Course.Infrastructure.Repositories
                         SkillName = g.Where(x => x.SkillName != null).FirstOrDefault()?.SkillName,
 
                         SkillId = g.Key.SkillId,
-                        Skill = g.Key.CourseSkill,
                         TotalQuestion = totalQuestion * multiplier,
                         TotalCount = totalCount * multiplier
                     };
@@ -105,14 +103,13 @@ namespace Fsel.Course.Infrastructure.Repositories
 
             // 4) Gom cuối theo Skill
             return perVideoSkill
-                .GroupBy(x => new { x.SkillId, x.Skill })
+                .GroupBy(x => new { x.SkillId })
                 .Select(g => new SkillScores
                 {
                     SkillFilePath = g.Where(x => x.SkillFilePath != null).FirstOrDefault()?.SkillFilePath,
                     SkillName = g.Where(x => x.SkillName != null).FirstOrDefault()?.SkillName,
 
                     SkillId = g.Key.SkillId,
-                    Skill = g.Key.Skill,
                     TotalQuestion = g.Sum(x => x.TotalQuestion),
                     TotalCount = g.Sum(x => x.TotalCount)
                 })

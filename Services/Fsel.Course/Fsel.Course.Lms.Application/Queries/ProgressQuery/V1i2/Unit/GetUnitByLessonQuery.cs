@@ -121,7 +121,6 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery.V1i2.Unit
                 .SelectMany(r => r.SkillScores!.Select(s => new
                 {
                     Type = r.TimeCodeType,
-                    s.Skill,
                     s.SkillId,
                     s.SkillName,
                     s.SkillFilePath,
@@ -136,7 +135,6 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery.V1i2.Unit
                 {
                     g.Key.Type,
                     SkillId = g.Key.SkillId!,
-                    Skill = g.Select(x => x.Skill).FirstOrDefault(),
                     SkillName = g.Select(x => x.SkillName).FirstOrDefault(),
                     SkillFilePath = g.Select(x => x.SkillFilePath).FirstOrDefault(),
                     CorrectCount = g.Sum(z => z.CorrectCount),
@@ -166,7 +164,6 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery.V1i2.Unit
                 group new { tc, ex, q } by new
                 {
                     tc.TimeCodeType,
-                    ex!.CourseSkill,
                     SkillId = ex.SkillId!,
                     SkillName = ex.Skill != null ? ex.Skill.Name : null,
                     SkillFilePath = ex.Skill != null ? ex.Skill.FilePath : null,
@@ -175,7 +172,6 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery.V1i2.Unit
                 select new
                 {
                     Type = g.Key.TimeCodeType,
-                    Skill = g.Key.CourseSkill,
                     g.Key.SkillId,
                     g.Key.SkillName,
                     g.Key.SkillFilePath,
@@ -230,7 +226,6 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery.V1i2.Unit
 
                     skillScoreList.Add(new SkillScores
                     {
-                        Skill = q.Skill,
                         SkillId = q.SkillId,
                         SkillFilePath = q.SkillFilePath,
                         SkillName = q.SkillName,

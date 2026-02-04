@@ -73,7 +73,6 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
                 {
                     new SkillScores
                     {
-                        Skill = homeWork.CourseSkill,
                         SkillId = homeWork.SkillId,
                         SkillFilePath = homeWork.Skill?.FilePath,
                         SkillName = homeWork.Skill?.Name,
