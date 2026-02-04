@@ -7,7 +7,6 @@ namespace Fsel.Course.Infrastructure.Configs
     using Fsel.Course.Domain.Enums;
     using Fsel.Shared.Enums;
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.EntityFrameworkCore.Metadata;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
     public class VideoResultEntityTypeConfiguration : IEntityTypeConfiguration<VideoResult>
@@ -39,11 +38,6 @@ namespace Fsel.Course.Infrastructure.Configs
             builder.HasIndex(c => new { c.Status, c.StudentId });
             builder.HasIndex(c => new { c.StudentId });
             builder.HasIndex(c => new { c.LessonModuleId, c.LessonResultId, c.IsDeleted });
-
-            builder.Property(x => x.Percent)
-                   .HasComputedColumnSql(@"CASE WHEN [CorrectTotal] > 0 THEN ROUND(([CorrectCount] * 100.0) / [CorrectTotal], 0) ELSE 0 END", stored: true)
-                   .ValueGeneratedOnAddOrUpdate()
-                   .Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
         }
     }
 }

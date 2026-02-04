@@ -4,7 +4,6 @@ using Fsel.Common.Helpers;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Fsel.Course.Infrastructure.Configs
@@ -33,11 +32,6 @@ namespace Fsel.Course.Infrastructure.Configs
             builder.HasIndex(c => new { c.Status, c.StudentId }).IncludeValueProperties(x => new { x.VideoResultId, x.VideoTimeCodeId, x.CorrectCount, x.CorrectTotal, x.WorkingTime });
             builder.HasIndex(c => new { c.VideoResultId, c.Status });
             builder.HasIndex(c => new { c.VideoResultId, c.VideoTimeCodeId, c.IsDeleted });
-
-            builder.Property(x => x.Percent)
-                   .HasComputedColumnSql(@"CASE WHEN ([CorrectTotal] + [CorrectTotalUngraded]) > 0 THEN ROUND(([CorrectCount] + [CorrectCountUngraded] * 100.0) / ([CorrectTotal] + [CorrectTotalUngraded]), 0) ELSE 0 END", stored: true)
-                   .ValueGeneratedOnAddOrUpdate()
-                   .Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
         }
     }
 }

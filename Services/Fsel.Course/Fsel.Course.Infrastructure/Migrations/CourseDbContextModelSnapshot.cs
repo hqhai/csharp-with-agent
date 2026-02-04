@@ -907,9 +907,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<double>("Percent")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("float")
-                        .HasComputedColumnSql("CASE WHEN [CorrectTotal] > 0 THEN ROUND(([CorrectCount] * 100.0) / [CorrectTotal], 0) ELSE 0 END", true);
+                        .HasColumnType("float");
 
                     b.Property<double>("PercentModule")
                         .HasColumnType("float");
@@ -3561,9 +3559,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnOrder(110);
 
                     b.Property<double>("Percent")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("float")
-                        .HasComputedColumnSql("CASE WHEN [CorrectTotal] > 0 THEN ROUND(([CorrectCount] * 100.0) / [CorrectTotal], 0) ELSE 0 END", true);
+                        .HasColumnType("float");
 
                     b.Property<double>("PercentModule")
                         .HasColumnType("float");
@@ -3728,9 +3724,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<double>("Percent")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("float")
-                        .HasComputedColumnSql("CASE WHEN [CorrectTotal] > 0 THEN ROUND(([CorrectCount] * 100.0) / [CorrectTotal], 0) ELSE 0 END", true);
+                        .HasColumnType("float");
 
                     b.Property<double>("PercentModule")
                         .HasColumnType("float");
@@ -8029,9 +8023,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<double>("Percent")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("float")
-                        .HasComputedColumnSql("CASE WHEN [CorrectTotal] > 0 THEN ROUND(([CorrectCount] * 100.0) / [CorrectTotal], 0) ELSE 0 END", true);
+                        .HasColumnType("float");
 
                     b.Property<double>("PercentModule")
                         .HasColumnType("float");
@@ -8384,9 +8376,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<double>("Percent")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("float")
-                        .HasComputedColumnSql("CASE WHEN [CorrectTotal] > 0 THEN ROUND(([CorrectCount] * 100.0) / [CorrectTotal], 0) ELSE 0 END", true);
+                        .HasColumnType("float");
 
                     b.Property<double>("PercentModule")
                         .HasColumnType("float");
@@ -9358,9 +9348,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("float");
 
                     b.Property<double>("Percent")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("float")
-                        .HasComputedColumnSql("CASE WHEN [CorrectTotal] > 0 THEN ROUND(([CorrectCount] * 100.0) / [CorrectTotal], 0) ELSE 0 END", true);
+                        .HasColumnType("float");
 
                     b.Property<double>("PercentModule")
                         .HasColumnType("float");
@@ -9707,9 +9695,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("bit");
 
                     b.Property<double>("Percent")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("float")
-                        .HasComputedColumnSql("CASE WHEN ([CorrectTotal] + [CorrectTotalUngraded]) > 0 THEN ROUND(([CorrectCount] + [CorrectCountUngraded] * 100.0) / ([CorrectTotal] + [CorrectTotalUngraded]), 0) ELSE 0 END", true);
+                        .HasColumnType("float");
 
                     b.Property<double>("RetryWorkingTime")
                         .HasColumnType("float");
