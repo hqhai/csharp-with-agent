@@ -97,7 +97,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
             }
             var courseResult = methodCourse.Result!;
 
-            overallHome.ProgressPercent = await GetCurrentProgressPercentAsync(courseResult.CourseId, student.Id, cancellationToken);
+            overallHome.ProgressPercent = await GetCurrentProgressPercentAsync(courseResult, cancellationToken);
 
             var unitResult = await _unitResultRepository.ReadQueryable.Include(x => x.Unit)
                 .Where(x => x.StudentId == student.Id && x.CourseResultId == courseResult.Id)
@@ -161,13 +161,18 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
             return methodResult;
         }
 
-        private async Task<double> GetCurrentProgressPercentAsync(Guid courseId, Guid studentId, CancellationToken cancellationToken)
+        private async Task<double> GetCurrentProgressPercentAsync(CourseResult courseResult, CancellationToken cancellationToken)
         {
             var course = await _courseRepository.ReadQueryable
                 .Include(x => x.CourseModules)
-                .Where(x => x.Id == courseId)
+                .Where(x => x.Id == courseResult.CourseId)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken);
+
+            if (course == null)
+            {
+                return default;
+            }
 
             var originalUnitIds = course.CourseModules
                 .Where(x => x.CourseConfigType == EnumCourseConfigType.Unit)
@@ -196,11 +201,13 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
                  + lessons.SelectMany(x => x.LessonModules).Count();
 
             var numberOfTestDone = await _testGroupResultRepository.ReadQueryable
-                .Where(x => x.CourseId == courseId && x.StudentId == studentId && x.Status == EnumResultStatus.Done)
+                .Where(x => x.CourseResultId == courseResult.Id && x.Status == EnumResultStatus.Done)
                 .CountAsync(cancellationToken);
 
+            var studentId = courseResult.StudentId;
+
             var learnedLessionResultIds = await _lessonResultRepository.ReadQueryable
-                .Where(x => x.CourseId == courseId && x.StudentId == studentId && (x.Status == EnumResultStatus.Done || x.Status == EnumResultStatus.Process))
+                .Where(x => x.CourseResultId == courseResult.Id && (x.Status == EnumResultStatus.Done || x.Status == EnumResultStatus.Process))
                 .Select(x => x.Id)
                 .ToListAsync(cancellationToken);
 
