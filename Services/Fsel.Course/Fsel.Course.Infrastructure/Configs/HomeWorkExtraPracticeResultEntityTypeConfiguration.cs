@@ -8,6 +8,7 @@ namespace Fsel.Course.Infrastructure.Configs
     using Fsel.Course.Domain.Enums;
     using Fsel.Shared.Enums;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.Metadata;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
     public class HomeWorkExtraPracticeResultEntityTypeConfiguration : IEntityTypeConfiguration<HomeWorkExtraPracticeResult>
@@ -44,6 +45,11 @@ namespace Fsel.Course.Infrastructure.Configs
                    .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasIndex(c => new { c.StudentId, c.HomeWorkId, c.HomeWorkRetryId, c.WorkingStatus, c.IsDeleted });
+
+            builder.Property(x => x.Percent)
+              .HasComputedColumnSql(@"CASE WHEN [CorrectTotal] > 0 THEN ROUND(([CorrectCount] * 100.0) / [CorrectTotal], 0) ELSE 0 END", stored: true)
+              .ValueGeneratedOnAddOrUpdate()
+              .Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
         }
     }
 }

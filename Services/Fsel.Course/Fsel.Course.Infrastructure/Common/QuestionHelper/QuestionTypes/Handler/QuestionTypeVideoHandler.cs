@@ -9,6 +9,7 @@ namespace Fsel.Course.Infrastructure.Common.QuestionHelper.QuestionTypes.Handler
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Infrastructure.Common.QuestionHelper.QuestionTypes.Interface;
     using Fsel.Shared.Enums;
@@ -101,6 +102,7 @@ namespace Fsel.Course.Infrastructure.Common.QuestionHelper.QuestionTypes.Handler
                     VideoResultId = result.VideoResultId,
                     VideoTimeCodeResultId = result.VideoTimeCodeId, // hoặc _request.TResultId nếu đúng
                     Answer = answer,
+                    IsFirstSubmit = result.Status == EnumResultStatus.New,
                     Status = EnumAnswerStatus.Process
                 });
             }
