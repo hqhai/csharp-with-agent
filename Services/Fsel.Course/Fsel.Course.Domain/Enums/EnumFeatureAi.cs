@@ -9,8 +9,10 @@ namespace Fsel.Course.Domain.Enums
     {
         [Description("Unit"), Display(Name = "Unit")]
         Unit,
+
         [Description("Lesson"), Display(Name = "Lesson")]
         Lesson,
+
         [Description("Test"), Display(Name = "Test")]
         Test,
     }
