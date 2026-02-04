@@ -7,6 +7,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseCourseModule
     using Fsel.Course.Domain.Entities.V1i1;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Lms.Application.Commands.OtherCmd;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServices.CourseItemServices;
     using Fsel.Shared.Constants;
@@ -25,13 +27,15 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseCourseModule
         private readonly ICourseItemInitializerFactory _courseItemInitializerFactory;
         private readonly ITestGroupResultRepository _testGroupResultRepository;
         private readonly IUnitResultRepository _unitResultRepository;
+        private readonly SendMailFinishCoursePublisher _sendMailFinishCoursePublisher;
 
         public BaseCourseResultEventHandler(ICourseModuleCachingService courseModuleCachingService,
             ICourseModuleRepository courseModuleRepository,
             ICourseResultRepository courseResultRepository,
             ICourseItemInitializerFactory courseItemInitializerFactory,
             ITestGroupResultRepository testGroupResultRepository,
-            IUnitResultRepository unitResultRepository)
+            IUnitResultRepository unitResultRepository,
+            SendMailFinishCoursePublisher sendMailFinishCoursePublisher)
         {
             _courseModuleCachingService = courseModuleCachingService;
             _courseModuleRepository = courseModuleRepository;
@@ -39,6 +43,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseCourseModule
             _courseItemInitializerFactory = courseItemInitializerFactory;
             _testGroupResultRepository = testGroupResultRepository;
             _unitResultRepository = unitResultRepository;
+            _sendMailFinishCoursePublisher = sendMailFinishCoursePublisher;
         }
 
         public async Task UpdateCourseResultAsync(CourseResult courseResult, IList<CourseModule> courseModules, CancellationToken cancellationToken)
@@ -120,6 +125,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseCourseModule
                     entity.CompletionDate
                 };
             });
+
+            await _sendMailFinishCoursePublisher.Publish(new SendMailFinishCourseModel() { StudentId = courseResult.StudentId, CourseId = courseResult.CourseId }, cancellationToken);
         }
 
         public async Task UpdateCourseResultAsync(CourseResult courseResult, Guid courseModuleId, CancellationToken cancellationToken)
