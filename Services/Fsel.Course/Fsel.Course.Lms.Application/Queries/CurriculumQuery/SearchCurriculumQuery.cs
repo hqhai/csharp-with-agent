@@ -123,7 +123,7 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
 
             if (request.LevelIds != null && request.LevelIds.Any())
             {
-                curriculums = curriculums.Where(p => request.LevelIds.Contains(p.LevelId)).ToList();
+                curriculums = curriculums.Where(p => p.LevelId.HasValue && request.LevelIds.Contains(p.LevelId.Value)).ToList();
             }
 
             if (request.CourseIds != null && request.CourseIds.Any())

@@ -10,6 +10,9 @@ namespace Fsel.Shared.Models.ShareModels.CampusModel
     {
         public Guid CourseId { get; set; }
         public Guid ClassId { get; set; }
+        public Guid? ProgramId { get; set; }
+        public Guid? SubjectId { get; set; }
+        public Guid? LevelId { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
         public IList<Guid>? StudentIds { get; set; }
     }

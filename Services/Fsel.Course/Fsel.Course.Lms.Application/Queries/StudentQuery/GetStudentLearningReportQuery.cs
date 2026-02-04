@@ -153,6 +153,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                 SubjectName = course?.Program?.CategoryParent?.Name,
                 LevelName = course?.Level?.Name,
                 CategoryModels = subjects,
+                CourseName = course?.Name
             };
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

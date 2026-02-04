@@ -141,6 +141,9 @@ namespace Fsel.Training.Application.Commands.Campus
                 ClassId = @class.Id,
                 CourseId = request.CourseId,
                 CourseLevel = course.CourseLevel,
+                ProgramId = request.ProgramId,
+                SubjectId = request.SubjectId,
+                LevelId = request.LevelId,
                 StudentIds = classStudents.Select(p => p.StudentId).ToList()
             });
             if (!updateStudentResult.IsSuccessStatusCode)

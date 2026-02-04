@@ -23,7 +23,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? Program { get; set; }
         public Guid? SubjectId { get; set; }
         public string? Subject { get; set; }
-        public Guid LevelId { get; set; }
+        public Guid? LevelId { get; set; }
         public string? Level { get; set; }
 
         public EnumCurriculumStatus CurriculumStatus

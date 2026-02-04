@@ -66,7 +66,10 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
                 {
                     CourseId = curriculum.CourseCloneId,
                     StudentIds = curriculumStudents.Select(p => p.StudentId).ToList(),
-                    ExpiredDate = curriculum.EndDate
+                    ExpiredDate = curriculum.EndDate,
+                    ProgramId = curriculum.ProgramId,
+                    SubjectId = curriculum.SubjectId,
+                    LevelId = curriculum.LevelId,
                 });
 
                 await _curriculumStudentRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

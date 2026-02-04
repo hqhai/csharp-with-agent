@@ -16,6 +16,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? SubjectName { get; set; }
         public string? ProgramName { get; set; }
         public string? LevelName { get; set; }
+        public string? CourseName { get; set; }
         public IList<CategoryModel>? CategoryModels { get; set; }
     }
 }
