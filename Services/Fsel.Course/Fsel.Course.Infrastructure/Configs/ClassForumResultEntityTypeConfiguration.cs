@@ -8,6 +8,7 @@ namespace Fsel.Course.Infrastructure.Configs
     using Fsel.Course.Domain.Enums;
     using Fsel.Shared.Enums;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.Metadata;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
     public class ClassForumResultEntityTypeConfiguration : IEntityTypeConfiguration<ClassForumResult>
@@ -51,6 +52,11 @@ namespace Fsel.Course.Infrastructure.Configs
             builder.HasIndex(c => new { c.IsDeleted, c.StudentId });
             builder.HasIndex(x => new { x.IsDeleted, x.Status, x.ClassForumId, x.Id }).IncludeValueProperties(x => new { x.StudentId });
             builder.HasIndex(c => new { c.LessonResultId, c.LessonModuleId, c.IsDeleted });
+
+            builder.Property(x => x.Percent)
+                   .HasComputedColumnSql(@"CASE WHEN [CorrectTotal] > 0 THEN ROUND(([CorrectCount] * 100.0) / [CorrectTotal], 0) ELSE 0 END", stored: true)
+                   .ValueGeneratedOnAddOrUpdate()
+                   .Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
         }
     }
 }

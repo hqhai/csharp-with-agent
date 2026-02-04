@@ -35,17 +35,9 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Phần trăm câu trả lời đúng
         /// </summary>
-        private double _percent;
 
         [Range(0, 100, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public virtual double Percent
-        {
-            get
-            {
-                return CorrectTotal > 0 ? NumberHelper.GetPercent(CorrectCount, CorrectTotal) : _percent;
-            }
-            set { _percent = CorrectTotal > 0 ? NumberHelper.GetPercent(CorrectCount, CorrectTotal) : value; }
-        }
+        public virtual double Percent { get; set; }
 
         public virtual double PercentModule { get; set; }
 
