@@ -109,7 +109,6 @@ namespace Fsel.Course.Infrastructure.Common.QuestionHelper.QuestionTypes.Handler
                     HomeWorkQuestionId = homeWorkQuestion.Id,
                     HomeWorkResultId = result.Id,
                     Answer = ans,
-                    IsFirstSubmit = result.SubmissionCount == EnumSubmissionCount.FirstSubmit,
                     Status = EnumAnswerStatus.Process
                 });
             }
