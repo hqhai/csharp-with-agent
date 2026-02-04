@@ -14,6 +14,7 @@ namespace Fsel.Course.Application.Queries.CategoryQuery
 
     public class GetSubjectTreeQuery : IRequest<MethodResult<IList<CategoryTreeModel>>>
     {
+        public bool IsActive { get; set; } = true;
     }
 
     public class GetSubjectTreeQueryHandler : IRequestHandler<GetSubjectTreeQuery, MethodResult<IList<CategoryTreeModel>>>
@@ -35,11 +36,17 @@ namespace Fsel.Course.Application.Queries.CategoryQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<CategoryTreeModel>>();
-            var subjects = await _categoryRepository.Queryable.Where(x => !x.ParentId.HasValue && x.Status == EnumStatus.Active)
-                                                    .ToListAsync(cancellationToken);
+
+            var query = _categoryRepository.Queryable.Where(x => !x.ParentId.HasValue);
+            if (request.IsActive)
+            {
+                query = query.Where(p => p.Status == EnumStatus.Active);
+            }
+
+            var subjects = await query.ToListAsync(cancellationToken);
 
             var categoryTrees = _mapper.Map<IList<CategoryTreeModel>>(subjects);
-            await _programConverter.AddChildentCategoryToActive(categoryTrees, cancellationToken);
+            await _programConverter.AddChildrenCategoryToActive(categoryTrees, cancellationToken, request.IsActive);
 
             methodResult.Result = categoryTrees.Where(x => x.Children != null && x.Children.Any()).OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate).ToList();
             methodResult.StatusCode = StatusCodes.Status200OK;

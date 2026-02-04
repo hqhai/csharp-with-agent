@@ -206,9 +206,9 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [ProducesResponseType(typeof(MethodResult<IList<CategoryTreeModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Common.Attributes.Permission(role: nameof(EnumRole.MasterAdmin))]
-        public async Task<IActionResult> GetSubjectTree()
+        public async Task<IActionResult> GetSubjectTree([FromQuery] GetSubjectTreeQuery query)
         {
-            var methodResult = await _mediator.Send(new GetSubjectTreeQuery()).ConfigureAwait(false);
+            var methodResult = await _mediator.Send(query).ConfigureAwait(false);
             return methodResult.GetActionResult();
         }
 
