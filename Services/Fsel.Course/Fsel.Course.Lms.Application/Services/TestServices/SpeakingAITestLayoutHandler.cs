@@ -358,6 +358,7 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
             var total = scores.Sum(x => x.Score);
             child.CorrectCount = (int)total;
             child.CorrectTotal = MaxCorrect;
+            child.Percent = NumberHelper.GetPercent(child.CorrectCount, child.CorrectTotal);
             child.SkillScores = BuildSkillScores(child.TestSection, (int)total, MaxCorrect);
             if (scoringFormulaType == EnumScoringFormulaType.Percent)
             {

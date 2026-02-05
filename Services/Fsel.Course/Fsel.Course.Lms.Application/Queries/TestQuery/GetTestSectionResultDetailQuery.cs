@@ -190,7 +190,7 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
                 var parents = frontier;
                 frontier = new List<Guid>();
 
-                var children = await _testSectionRepository.ReadQueryable
+                var children = await _testSectionRepository.ReadQueryable.Include(x => x.Skill)
                     .Include(x => x.TestSectionQuestions)
                     .ThenInclude(x => x.Question)
                     .AsNoTracking()
@@ -238,7 +238,7 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
                 SectionResultId = nodeResult?.Id,
                 Status = nodeResult?.Status ?? EnumResultStatus.New,
                 UpdatedDate = nodeResult?.UpdatedDate,
-                Name = node.Name,
+                Name = node.Name ?? node.Skill?.Name,
                 CorrectCount = nodeResult?.CorrectCount ?? 0,
                 PercentResult = nodeResult?.Percent ?? 0,
                 Config = node.Config,

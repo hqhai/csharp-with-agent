@@ -157,7 +157,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseUnitModule
             unitResult.CorrectCount = totalCorrectCount;
             unitResult.CorrectTotal = totalCorrectTotal;
             unitResult.Percent = totalPercentModule;
-            if (unitResult.Status == EnumResultStatus.Done)
+            if (unitResult.Status != EnumResultStatus.Done)
             {
                 unitResult.CompletionDate = DateTime.UtcNow;
             }

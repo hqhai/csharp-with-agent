@@ -578,6 +578,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
         {
             homeWorkResult.CorrectCount = statistics.CorrectCount;
             homeWorkResult.CorrectTotal = statistics.CorrectTotal;
+            homeWorkResult.Percent = NumberHelper.GetPercent(statistics.CorrectCount, statistics.CorrectTotal);
 
             if (homeWorkResult.SubmissionCount == EnumSubmissionCount.FirstSubmit)
             {

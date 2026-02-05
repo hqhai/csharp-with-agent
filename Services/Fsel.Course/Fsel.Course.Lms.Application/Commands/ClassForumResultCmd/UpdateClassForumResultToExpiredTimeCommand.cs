@@ -14,6 +14,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
     using Fsel.Course.Lms.Application.Commands.AiCmd;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
@@ -176,6 +177,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             {
                 classForumResult.CorrectCount += classForumAIs.Sum(x => x.Score);
                 classForumResult.CorrectTotal += classForumAIs.Count * MaxScoreClassForum;
+                classForumResult.Percent = NumberHelper.GetPercent(classForumResult.CorrectCount, classForumResult.CorrectTotal);
             }
 
             if (classForumResult.SkillScores != null && classForumResult.SkillScores.Any())

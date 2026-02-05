@@ -1208,8 +1208,17 @@ namespace Fsel.Course.Infrastructure.Common
                 dataAnswer.Answers = new List<ColorMatchingTypeAnswers>();
                 dataAnswer.CountFail = ValueDefault;
             }
+
+            var countCorrect = dataAnswer.Answers.Count(x => x.IsExact == true);
+            var oldCorrect = dataOldAnswer?.Answers.Count(x => x.IsChecked == true && x.IsExact == true);
+
+            if (isTryAgain && dataAnswer != null && !(oldCorrect == countCorrect && dataOldAnswer != null && dataOldAnswer.IsFirstSubmit))
+            {
+                dataAnswer.IsFirstSubmit = false;
+            }
+
             configAnswer = dataAnswer;
-            return (number > 0 ? number : default, isAnswerMissing, _linQAnswerHelper.IsAnswerHaveData(dataAnswer.Answers, nameof(ColorMatchingTypeAnswers.IsChecked)));
+            return (number > 0 ? number : default, isAnswerMissing, _linQAnswerHelper.IsAnswerHaveData(dataAnswer?.Answers, nameof(ColorMatchingTypeAnswers.IsChecked)));
         }
 
         private static (short, bool, bool) HandleAnswerTracing(ref object? configAnswer, TracingAnswer? dataOldAnswer, TracingQuestion? question, bool isTryAgain, bool isSubmit)
@@ -1229,6 +1238,10 @@ namespace Fsel.Course.Infrastructure.Common
             }
 
             short number = (dataAnswer != null && dataAnswer.IsExact) ? (short)1 : (short)valueDefaut;
+            if (isTryAgain && dataOldAnswer != null && dataAnswer != null && !(dataOldAnswer.IsExact == true && dataOldAnswer.IsFirstSubmit))
+            {
+                dataAnswer.IsFirstSubmit = false;
+            }
             bool isAnswerMissing = dataAnswer == null;
             configAnswer = dataAnswer;
             return (number, isAnswerMissing, true);
