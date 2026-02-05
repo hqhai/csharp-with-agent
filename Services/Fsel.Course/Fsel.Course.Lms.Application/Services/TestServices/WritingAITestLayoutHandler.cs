@@ -47,6 +47,7 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
         private readonly IMapper _mapper;
         private readonly AppSetting _appSetting;
         private readonly IAiPromptManagerRepository _aiPromptManagerRepository;
+        private readonly ICategoryRepository _categoryRepository;
         private const int CorrectTotal_Writing = 36;
         private const int First_Run_Order = 1;
         private const int Max_Times_Retry = 3;
@@ -63,7 +64,8 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
             IMediator mediator,
             IMapper mapper,
             AppSetting appSetting,
-            IAiPromptManagerRepository aiPromptManagerRepository)
+            IAiPromptManagerRepository aiPromptManagerRepository,
+            ICategoryRepository categoryRepository)
         {
             _testAnswerRepository = testAnswerRepository;
             _aiGradeSettingRepository = aiGradeSettingRepository;
@@ -77,6 +79,7 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
             _mapper = mapper;
             _appSetting = appSetting;
             _aiPromptManagerRepository = aiPromptManagerRepository;
+            _categoryRepository = categoryRepository;
         }
 
         /// <summary>
@@ -253,8 +256,13 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
 
         private async Task<AiPromptManager?> LoadAiPromptManagerAsync(Guid? id, Guid programId, CancellationToken ct)
         {
-            return await _aiPromptManagerRepository.Queryable
-                .Where(x => x.ProjectId == programId)
+            var subjectId = await _categoryRepository.ReadQueryable.Include(x => x.CategoryParent)
+                                                     .Where(x => x.Id == programId)
+                                                     .Select(x => x.Id)
+                                                     .FirstOrDefaultAsync(ct);
+
+            return await _aiPromptManagerRepository.ReadQueryable
+                .Where(x => x.ProjectId == subjectId)
                 .Where(x => !id.HasValue || x.Id == id.Value)
                 .Include(x => x.AICriteriaConfigs)
                 .FirstOrDefaultAsync(ct);
@@ -273,7 +281,7 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
                 .Where(x => !x.ParentTestSectionResultId.HasValue)
                 .ToListAsync(cancellationToken);
 
-            if (rootSectionResults.Count == 0)
+            if (rootSectionResults.Count == 0 || !rootSectionResults.All(x => x.Status == EnumResultStatus.Done))
             {
                 return;
             }
@@ -286,7 +294,7 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
             testResult.SkillScores = mergedSkillScores;
             testResult.CorrectCount = (int)mergedSkillScores.Sum(x => x.CorrectCount);
             testResult.CorrectTotal = (int)mergedSkillScores.Sum(x => x.TotalCount);
-
+            testResult.Percent = NumberHelper.GetPercent(testResult.CorrectCount, testResult.CorrectTotal);
             // =========================
             // Percent (nếu có)
             // =========================

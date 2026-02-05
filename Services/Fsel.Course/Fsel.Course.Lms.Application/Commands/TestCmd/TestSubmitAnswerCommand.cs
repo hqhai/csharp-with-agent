@@ -10,7 +10,6 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
     using Domain.Models.EntityModels.TestModels;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Lms.Application.Queues.Publishers.Test;
-    using Fsel.Course.Lms.Application.Services.TestServices.Interface;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
     using Services.ApplicationServices.Aggregates;
