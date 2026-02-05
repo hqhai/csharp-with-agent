@@ -391,7 +391,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
                 ProcessDate = request.IsSubmit && submissionCount == EnumSubmissionCount.FirstSubmit ? DateTime.UtcNow : null,
                 ClassForumResultId = classForumResult.Id,
             };
-
+            classForumResult.ProcessDate = DateTime.UtcNow;
             classForumDetailResult.MediaType = MediaHelper.GetMediaType(classForumDetailResult.ClassForumResultFiles.Select(x => x.FilePath).FirstOrDefault());
 
             try

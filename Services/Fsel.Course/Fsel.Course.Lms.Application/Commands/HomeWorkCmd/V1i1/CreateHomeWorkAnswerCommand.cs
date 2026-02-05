@@ -430,6 +430,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
 
             if (homeWorkResult.Status == EnumResultStatus.New)
             {
+                homeWorkResult.ProcessDate = DateTime.UtcNow;
                 homeWorkResult.Status = EnumResultStatus.Process;
             }
 
