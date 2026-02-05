@@ -36,6 +36,7 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
         private readonly SubmitTestAiSpeakingPublisher _publisher;
         private readonly ITestResultRepository _testResultRepository;
         private readonly IAiPromptManagerRepository _aiPromptManagerRepository;
+        private readonly ICategoryRepository _categoryRepository;
 
         public SpeakingAITestLayoutHandler(
             ITestSectionResultRepository testSectionResultRepository,
@@ -45,7 +46,8 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
             IMediator mediator,
             SubmitTestAiSpeakingPublisher publisher,
             ITestResultRepository testResultRepository,
-            IAiPromptManagerRepository aiPromptManagerRepository)
+            IAiPromptManagerRepository aiPromptManagerRepository,
+            ICategoryRepository categoryRepository)
         {
             _testSectionResultRepository = testSectionResultRepository;
             _prosodyScoreRepository = prosodyScoreRepository;
@@ -55,6 +57,7 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
             _publisher = publisher;
             _testResultRepository = testResultRepository;
             _aiPromptManagerRepository = aiPromptManagerRepository;
+            _categoryRepository = categoryRepository;
         }
 
         #region Entry
@@ -107,8 +110,13 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
 
         private async Task<AiPromptManager?> LoadAiPromptManagerAsync(Guid? id, Guid programId, CancellationToken ct)
         {
-            return await _aiPromptManagerRepository.Queryable
-                .Where(x => x.ProjectId == programId)
+            var subjectId = await _categoryRepository.ReadQueryable.Include(x => x.CategoryParent)
+                                         .Where(x => x.Id == programId)
+                                         .Select(x => x.Id)
+                                         .FirstOrDefaultAsync(ct);
+
+            return await _aiPromptManagerRepository.ReadQueryable
+                .Where(x => x.ProjectId == subjectId)
                 .Where(x => !id.HasValue || x.Id == id.Value)
                 .Include(x => x.AICriteriaConfigs)
                 .FirstOrDefaultAsync(ct);
@@ -136,7 +144,7 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
                 .Where(x => !x.ParentTestSectionResultId.HasValue)
                 .ToListAsync(cancellationToken);
 
-            if (rootSectionResults.Count == 0)
+            if (rootSectionResults.Count == 0 || !rootSectionResults.All(x => x.Status == EnumResultStatus.Done))
             {
                 return;
             }
@@ -149,6 +157,7 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
             testResult.SkillScores = mergedSkillScores;
             testResult.CorrectCount = (int)mergedSkillScores.Sum(x => x.CorrectCount);
             testResult.CorrectTotal = (int)mergedSkillScores.Sum(x => x.TotalCount);
+            testResult.Percent = NumberHelper.GetPercent(testResult.CorrectCount, testResult.CorrectTotal);
 
             // =========================
             // Percent (nếu có)
@@ -380,6 +389,7 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
         {
             parent.CorrectCount = children.Sum(x => x.CorrectCount);
             parent.CorrectTotal = children.Sum(x => x.CorrectTotal);
+            parent.Percent = NumberHelper.GetPercent(parent.CorrectCount, parent.CorrectTotal);
             parent.SkillScores = BuildSkillScores(
                 parent.TestSection,
                 parent.CorrectCount,
@@ -403,6 +413,7 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
         {
             section.CorrectCount = 0;
             section.CorrectTotal = MaxCorrect;
+            section.Percent = NumberHelper.GetPercent(section.CorrectCount, section.CorrectTotal);
             section.SkillScores?.Clear();
         }
 
@@ -451,6 +462,7 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
                 c.SkillScoresStr,
                 c.CorrectCount,
                 c.CorrectTotal,
+                c.Percent,
                 c.PercentModule,
                 c.ScoreModule
             });

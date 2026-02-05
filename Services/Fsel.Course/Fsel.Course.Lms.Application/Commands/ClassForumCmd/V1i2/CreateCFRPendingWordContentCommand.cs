@@ -187,7 +187,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
                     submissionCount,
                     request.Content ?? string.Empty,
                     request.FormFile);
-
+                classForumResult.ProcessDate = DateTime.UtcNow;
                 classForumResult.ResultStatus = EnumResultStatus.Done;
                 classForumResult.IsPendingSpeechToText = true;
                 await _classForumResultRepository.BulkUpdateList(new List<ClassForumResult> { classForumResult },

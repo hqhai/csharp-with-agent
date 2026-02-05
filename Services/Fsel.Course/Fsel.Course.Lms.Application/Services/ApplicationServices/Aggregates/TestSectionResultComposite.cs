@@ -199,6 +199,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             if (Children.Count > 0)
             {
                 var scoringFormulaConfigs = (TestSection?.ScoringFormulaConfigs ?? new List<ScoringFormulaConfig>()).ToList();
+                var max = TestSection?.ScoringFormulaConfigs?.Max(x => x.Equal) ?? 9;
 
                 if (Children.All(c => c is TestAnswerLeaf ta && ta.TestAnswer.Status == EnumAnswerStatus.Done))
                 {
@@ -224,6 +225,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                     if (context.ScoringFormulaType == EnumScoringFormulaType.BandScore && TestSection != null && TestSection.Percent.HasValue)
                     {
                         TestSectionResult.ScoreModule = NumberHelper.ConvertDoublePercent(scores * TestSection.Percent.Value, 2);
+                        TestSectionResult.Percent = NumberHelper.GetPercent(scores, max);
                     }
                 }
                 else if (Children.All(c => c is TestSectionResultComposite))
@@ -255,6 +257,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                     if (context.ScoringFormulaType == EnumScoringFormulaType.BandScore && TestSection != null && TestSection.Percent.HasValue)
                     {
                         TestSectionResult.ScoreModule = NumberHelper.ConvertDoublePercent(scores * TestSection.Percent.Value, 2);
+                        TestSectionResult.Percent = NumberHelper.GetPercent(scores, max);
                     }
                 }
                 else
@@ -285,6 +288,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                     if (context.ScoringFormulaType == EnumScoringFormulaType.BandScore && TestSection != null && TestSection.Percent.HasValue)
                     {
                         TestSectionResult.ScoreModule = NumberHelper.ConvertDoublePercent(scores * TestSection.Percent.Value, 2);
+                        TestSectionResult.Percent = NumberHelper.GetPercent(scores, max);
                     }
                 }
             }
@@ -329,6 +333,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             await base.SubmitTest(context);
 
             var scoringFormulaConfigs = (TestSection?.ScoringFormulaConfigs ?? new List<ScoringFormulaConfig>()).ToList();
+            var max = TestSection?.ScoringFormulaConfigs?.Max(x => x.Equal) ?? 9;
 
             if (Children.All(c => c is TestAnswerLeaf ta && ta.TestAnswer.Status == EnumAnswerStatus.Done))
             {
@@ -357,6 +362,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 if (context.ScoringFormulaType == EnumScoringFormulaType.BandScore && TestSection != null && TestSection.Percent.HasValue)
                 {
                     TestSectionResult.ScoreModule = NumberHelper.ConvertDoublePercent(scores * TestSection.Percent.Value, 2);
+                    TestSectionResult.Percent = NumberHelper.GetPercent(scores, max);
                 }
             }
             else if (Children.All(c => c is TestSectionResultComposite))
@@ -387,6 +393,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 if (context.ScoringFormulaType == EnumScoringFormulaType.BandScore && TestSection != null && TestSection.Percent.HasValue)
                 {
                     TestSectionResult.ScoreModule = NumberHelper.ConvertDoublePercent(scores * TestSection.Percent.Value, 2);
+                    TestSectionResult.Percent = NumberHelper.GetPercent(scores, max);
                 }
             }
             else
@@ -417,6 +424,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 if (context.ScoringFormulaType == EnumScoringFormulaType.BandScore && TestSection != null && TestSection.Percent.HasValue)
                 {
                     TestSectionResult.ScoreModule = NumberHelper.ConvertDoublePercent(scores * TestSection.Percent.Value, 2);
+                    TestSectionResult.Percent = NumberHelper.GetPercent(scores, max);
                 }
             }
 

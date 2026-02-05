@@ -46,7 +46,7 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
                 return;
             }
 
-            var testResult = await _testResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == testSectionResult.TestResultId, cancellationToken);
+            var testResult = await _testResultRepository.Queryable.Include(x => x.Test).FirstOrDefaultAsync(x => x.Id == testSectionResult.TestResultId, cancellationToken);
             if (testResult == null)
             {
                 return;

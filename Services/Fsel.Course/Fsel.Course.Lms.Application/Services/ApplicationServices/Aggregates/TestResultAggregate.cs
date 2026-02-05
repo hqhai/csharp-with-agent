@@ -37,12 +37,19 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 await testResultComposite.SubmitTest(new SubmitContext { Id = id, ScoringFormulaType = testResultComposite.Test?.ScoringFormulaType });
                 if (TestResult.Status == EnumResultStatus.Done)
                 {
+                    TestResult.CompletionDate = DateTime.UtcNow;
+                    SingleTestResult.Percent = TestResult.Percent;
+                    SingleTestResult.CompletionDate = DateTime.UtcNow;
                     SingleTestResult.Status = EnumResultStatus.Done;
                     await CommitTest();
                     await CommitTestGroup();
                 }
                 else
                 {
+                    if (!TestResult.ProcessDate.HasValue)
+                    {
+                        TestResult.ProcessDate = DateTime.UtcNow;
+                    }
                     await Commit();
                 }
             }
@@ -115,6 +122,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             if (TestResult.Status == EnumResultStatus.New)
             {
                 TestResult.Status = EnumResultStatus.Process;
+                TestResult.ProcessDate = DateTime.UtcNow;
                 if (!TestResult.SectionResults.Any())
                 {
                     var testService = ServiceProvider.GetRequiredService<ITestService>();
