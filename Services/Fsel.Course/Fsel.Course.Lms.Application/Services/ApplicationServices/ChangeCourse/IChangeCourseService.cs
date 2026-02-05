@@ -523,6 +523,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.ChangeCourse
                 if (relatedCourseResultIdHistory != null)
                 {
                     waitSelectProgramHistory.PtResultId = relatedCourseResultIdHistory.PtResultId;
+                    waitSelectProgramHistory.ToCourseResultId = courseResultId;
                     ptResult = relatedCourseResultIdHistory.PtTestResult;
                 }
                 else
