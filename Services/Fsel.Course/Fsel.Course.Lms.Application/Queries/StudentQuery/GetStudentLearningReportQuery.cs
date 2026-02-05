@@ -27,7 +27,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
         private readonly ISystemService _systemService;
         private readonly IUserService _userService;
         private readonly ICourseResultRepository _courseResultRepository;
-        private readonly IAggregateResultQueryService _aggregateResultQueryService;
+        private readonly ILearningService _learningService;
         private readonly ICourseRepository _courseRepository;
         private readonly ITestGroupResultRepository _testGroupResultRepository;
         private const string CourseDone = "Đã hoàn thành khóa học";
@@ -36,7 +36,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
             ISystemService systemService,
             IUserService userService,
             ICourseResultRepository courseResultRepository,
-            IAggregateResultQueryService aggregateResultQueryService,
+            ILearningService learningService,
             ICourseRepository courseRepository,
             ITestGroupResultRepository testGroupResultRepository)
         {
@@ -44,7 +44,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
             _systemService = systemService;
             _userService = userService;
             _courseResultRepository = courseResultRepository;
-            _aggregateResultQueryService = aggregateResultQueryService;
+            _learningService = learningService;
             _courseRepository = courseRepository;
             _testGroupResultRepository = testGroupResultRepository;
         }
@@ -81,35 +81,30 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
             int currentLessonIndex = 0;
             string? currentUnit = string.Empty;
 
-            if (courseResult != null)
+            var learningTree = await _learningService.GetLearningTreeFromCourseToTest(
+                                            student.Id,
+                                            courseId.Value,
+                                            null,
+                                            cancellationToken);
+
+            var units = learningTree?.Children.ToList();
+
+            var lessons = units?.SelectMany(p => p.Children).ToList();
+
+            totalLessons = lessons?.Count ?? 0;
+
+            currentLessonIndex = lessons?.Count(n => n.Status == EnumResultStatus.Done) ?? 0;
+
+            var unit = units?.FirstOrDefault(p => p.Status == EnumResultStatus.Process);
+            if (unit == null)
             {
-                var learningTree = await _aggregateResultQueryService.GetLearningTreeFromCourseToLesson(
-                                                student.Id,
-                                                courseResult.Id,
-                                                cancellationToken);
-
-                var lessons = learningTree
-                    .GetAllItemByType<LessonComponent>()
-                    .ToList();
-
-                var units = learningTree
-                    .GetAllItemByType<UnitComponent>()
-                    .ToList();
-
-                totalLessons = lessons.Count;
-                currentLessonIndex = lessons.Count(n => n.Status == EnumResultStatus.Done);
-
-                var unit = units.FirstOrDefault(p => p.Status == EnumResultStatus.Process);
-                if (unit == null)
-                {
-                    unit = units.FirstOrDefault(p => p.Status == EnumResultStatus.New);
-                }
-                if (unit == null)
-                {
-                    unit = units.Where(p => p.Status == EnumResultStatus.Done).OrderByDescending(p => p.UpdatedDate).FirstOrDefault();
-                }
-                currentUnit = unit?.ComponentName;
+                unit = units?.FirstOrDefault(p => p.Status == EnumResultStatus.New);
             }
+            if (unit == null)
+            {
+                unit = units?.Where(p => p.Status == EnumResultStatus.Done).OrderByDescending(p => p.UpdatedDate).FirstOrDefault();
+            }
+            currentUnit = unit?.ComponentName;
 
             var testGroupResults = await _testGroupResultRepository.ReadQueryable.Include(p => p.Category).ThenInclude(p => p.CategoryParent).Where(p => p.StudentId == student.Id && p.TestType == EnumTestType.PlacementTest && (p.Status == EnumResultStatus.Process || p.Status == EnumResultStatus.Done)).ToListAsync(cancellationToken);
 
