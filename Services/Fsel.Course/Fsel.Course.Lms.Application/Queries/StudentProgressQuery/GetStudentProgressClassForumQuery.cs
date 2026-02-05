@@ -105,6 +105,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             foreach (var module in modules)
             {
                 var classForumStudentProgress = new ClassForumStudentProgressModel();
+                classForumStudentProgress.DisplayOrder = module.DisplayOrder;
 
                 var classForumResult = classForumResults.FirstOrDefault(p => p.LessonModuleId == module.Id);
 
@@ -126,8 +127,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                         return methodResult;
                     }
                     var featureAccessTime = featureAccessTimeResult.Content?.Result;
-
-                    classForumStudentProgress.DisplayOrder = module.DisplayOrder;
 
                     if (featureAccessTime != null)
                     {
@@ -157,7 +156,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     var classForum = classForums.FirstOrDefault(p => p.OriginalId == module.OriginalId);
                     if (classForum != null)
                     {
-                        classForumStudentProgress.DisplayOrder = module.DisplayOrder;
                         classForumStudentProgress.SkillScores = new SkillScores
                         {
                             SkillId = classForum.SkillId,

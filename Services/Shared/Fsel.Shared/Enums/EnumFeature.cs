@@ -12,5 +12,6 @@ namespace Fsel.Shared.Enums
         DiscussionBoard,
         ChatBot,
         Other,
+        Document
     }
 }

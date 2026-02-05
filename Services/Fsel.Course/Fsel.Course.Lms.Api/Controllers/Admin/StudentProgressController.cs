@@ -198,5 +198,17 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Get Student Progress documents
+        /// </summary>
+        [HttpGet("documents")]
+        [ProducesResponseType(typeof(MethodResult<IList<DocumentStudentProgressModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetStudentProgressDocument([FromQuery] GetStudentProgressDocumentQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }
