@@ -120,9 +120,7 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
                         var result = results.FirstOrDefault(p => item == p.StudentId && c.Curriculum.CourseCloneId == p.LearningTemplateId);
                         if (result != null)
                         {
-                            var lessons = result
-                               .GetAllItemByType<LessonComponent>()
-                               .ToList();
+                            var lessons = result.Children.SelectMany(p => p.Children).ToList();
 
                             studentCampusLearningModel.TotalLesson = lessons.Count;
                             studentCampusLearningModel.TotalLessonDone = lessons.Count(n => n.Status == EnumResultStatus.Done);
