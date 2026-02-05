@@ -64,6 +64,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
         private readonly ISubjectConditionRepository _subjectConditionRepository;
         private readonly ICourseCachingService _courseCachingService;
         private readonly ILevelRepository _levelRepository;
+        private readonly ICourseResultRepository _courseResultRepository;
         private readonly IMapper _mapper;
 
         public TestService(ITestCachingService testCachingService,
@@ -83,6 +84,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             ISubjectConditionRepository subjectConditionRepository,
             ICourseCachingService courseCachingService,
             ILevelRepository levelRepository,
+            ICourseResultRepository courseResultRepository,
             IMapper mapper)
         {
             _testCachingService = testCachingService;
@@ -102,6 +104,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             _subjectConditionRepository = subjectConditionRepository;
             _courseCachingService = courseCachingService;
             _levelRepository = levelRepository;
+            _courseResultRepository = courseResultRepository;
             _mapper = mapper;
         }
 
@@ -824,6 +827,20 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                     }
                 });
             }
+
+            var courseResults = await _courseResultRepository.ReadQueryable
+                .Where(x => x.StudentId == ptTestResult.StudentId && x.WorkingStatus != EnumWorkingStatus.NotWorking)
+                .Include(x => x.Course)
+                .ToListAsync(cancellationToken);
+
+            var learnedLevelIds = courseResults.Select(x => x.Course?.LevelId).OfType<Guid>().ToList();
+            suggestLevels.ForEach(l =>
+            {
+                if (!l.LearnedBefore)
+                {
+                    l.LearnedBefore = learnedLevelIds.Any(x => x == l.Id);
+                }
+            });
 
             return suggestLevels;
         }
