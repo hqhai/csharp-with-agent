@@ -265,8 +265,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                                 if (lesson != null)
                                 {
                                     weeklyReport.NextLesson = lesson.DisplayOrder;
-                                    var percentLesson = lesson.TotalContent > 0 ? lesson.TotalContentCompleted / lesson.TotalContent : 0;
-                                    weeklyReport.PercentLesson = percentLesson;
+                                    weeklyReport.PercentLesson = lesson.TotalContent > 0 ? (int)NumberHelper.GetPercent(lesson.TotalContentCompleted, lesson.TotalContent) : 0;
                                     weeklyReport.Weekly3Display = null;
                                     weeklyReport.SkillMockTestDisplay = SendMailSetting.Display;
                                 }
