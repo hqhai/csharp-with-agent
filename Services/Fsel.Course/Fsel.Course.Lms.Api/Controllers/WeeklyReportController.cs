@@ -45,7 +45,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpPost("aggregate-data-weekly-report")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> WeeklyReport([FromBody] AggregateDataWeeklyReportsCommand command)
+        public async Task<IActionResult> WeeklyReport([FromBody] AggregateDataWeeklyReportCommand command)
         {
             var queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
