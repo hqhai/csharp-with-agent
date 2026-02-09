@@ -76,7 +76,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 return methodResult;
             }
 
-            var modules = lesson.LessonModules.Where(p => p.LessonConfigType == EnumLessonConfigType.Video).OrderBy(p => p.DisplayOrder).ToList();
+            var modules = lesson.LessonModules.Where(p => p.LessonConfigType == EnumLessonConfigType.Document).OrderBy(p => p.DisplayOrder).ToList();
             if (modules == null || modules.Count == 0)
             {
                 methodResult.StatusCode = StatusCodes.Status200OK;
