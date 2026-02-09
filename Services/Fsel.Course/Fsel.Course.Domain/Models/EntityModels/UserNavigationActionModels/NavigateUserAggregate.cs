@@ -95,7 +95,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.UserNavigationActionModels
                     {
                         PtResultId = ptResult?.Id,
                         LevelOfPt = ptResult?.CurrentLevelId,
-                        CurrentCourseResultId = relatedCourseResultIdHistory?.ToCourseResultId,
+                        CurrentCourseResultId = CurrentStateInfo.CourseResultId,
                         Status = EnumNavigateActionStatus.ContinueLearning
                     };
                 }
