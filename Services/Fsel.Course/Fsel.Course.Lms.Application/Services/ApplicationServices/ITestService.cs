@@ -408,8 +408,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
         private async Task SubmitSections(SubmitAnswerCommandModel request)
         {
             ArgumentNullException.ThrowIfNull(request.Answers);
-            var sectionTimeCodeIds = request.Answers.Where(x => x.TestSectionId.HasValue).Select(x => x.TestSectionId!.Value).ToList();
-            var testSections = await _testSectionRepository.GetByIdsAsync(sectionTimeCodeIds);
+            var testSectionIds = request.Answers.Where(x => x.TestSectionId.HasValue).Select(x => x.TestSectionId!.Value).ToList();
+            var testSections = await _testSectionRepository.GetByIdsAsync(testSectionIds);
             if (testSections.Any())
             {
                 var sectionIds = testSections.Select(x => x.Id).ToList();
@@ -440,15 +440,6 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                     }
 
                     int answerLength = item.Answer?.ToString()?.Length ?? default;
-                    if (testSection.DisplayOrder == AnswerLength.Section0 && answerLength > AnswerLength.MaxLengthDisplayOrder0)
-                    {
-                        return;
-                    }
-                    if (testSection.DisplayOrder == AnswerLength.Section1 && answerLength > AnswerLength.MaxLengthDisplayOrder1)
-                    {
-                        return;
-                    }
-
                     var testAnswer = testAnswers.FirstOrDefault(x => x.TestSectionId == testSection.Id);
                     if (testAnswer == null)
                     {
@@ -513,8 +504,18 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                     {
                         return;
                     }
-
-                    var pronunciation = await _continuousPronunciation.AssessPronunciationFromFileContinuousAsync(item.Answer?.ToString() ?? string.Empty, item.SpeechTextAnswer ?? string.Empty);
+                    PronunciationAssessmentModel? pronunciation = null;
+                    if (string.IsNullOrEmpty(item.SpeechTextAnswer))
+                    {
+                        pronunciation = new PronunciationAssessmentModel
+                        {
+                            PronunciationScore = 0
+                        };
+                    }
+                    else
+                    {
+                        pronunciation = await _continuousPronunciation.AssessPronunciationFromFileContinuousAsync(item.Answer?.ToString() ?? string.Empty, item.SpeechTextAnswer ?? string.Empty);
+                    }
                     var testAnswer = testAnswers.FirstOrDefault(x => x.TestSectionId == testSection.Id);
                     if (testAnswer == null)
                     {

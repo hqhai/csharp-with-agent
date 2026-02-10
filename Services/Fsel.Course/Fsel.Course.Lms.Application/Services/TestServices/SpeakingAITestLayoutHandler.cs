@@ -108,18 +108,25 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
 
         #region Load data
 
-        private async Task<AiPromptManager?> LoadAiPromptManagerAsync(Guid? id, Guid programId, CancellationToken ct)
+        private async Task<AiPromptManager?> LoadAiPromptManagerAsync(Guid? id, Guid programId, Guid sectionId, CancellationToken ct)
         {
-            var subjectId = await _categoryRepository.ReadQueryable.Include(x => x.CategoryParent)
-                                         .Where(x => x.Id == programId)
-                                         .Select(x => x.Id)
-                                         .FirstOrDefaultAsync(ct);
+            var sectionAiPromptManager = await _aiPromptManagerRepository.ReadQueryable.Include(x => x.AICriteriaConfigs)
+                                                                         .Where(x => x.AICriteriaConfigs.Any(y => y.ObjectId == sectionId))
+                                                                         .FirstOrDefaultAsync(ct);
+            if (sectionAiPromptManager == null)
+            {
+                var subjectId = await _categoryRepository.ReadQueryable.Include(x => x.CategoryParent)
+                                                    .Where(x => x.Id == programId)
+                                                    .Select(x => x.Id)
+                                                    .FirstOrDefaultAsync(ct);
 
-            return await _aiPromptManagerRepository.ReadQueryable
-                .Where(x => x.ProjectId == subjectId)
-                .Where(x => !id.HasValue || x.Id == id.Value)
-                .Include(x => x.AICriteriaConfigs)
-                .FirstOrDefaultAsync(ct);
+                return await _aiPromptManagerRepository.ReadQueryable
+                    .Where(x => x.ProjectId == subjectId)
+                    .Where(x => !id.HasValue || x.Id == id.Value)
+                    .Include(x => x.AICriteriaConfigs)
+                    .FirstOrDefaultAsync(ct);
+            }
+            return sectionAiPromptManager;
         }
 
         private async Task<List<TestSectionResult>> LoadChildrenAsync(Guid parentId, CancellationToken ct)
@@ -299,7 +306,7 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
             var scores = new List<TestScore>();
 
             var ranges = await _prosodyScoreRepository.ReadQueryable.ToListAsync(ct);
-            var aiPromptManager = await LoadAiPromptManagerAsync(child.TestSection?.AiPromptManagerId, testResult.Test?.ProgramId ?? default, ct);
+            var aiPromptManager = await LoadAiPromptManagerAsync(child.TestSection?.AiPromptManagerId, testResult.Test?.ProgramId ?? default, child.TestSectionId.Value, ct);
 
             var (band, comment) = GetBandScore(input.AveragePronunciationScore, ranges);
 
