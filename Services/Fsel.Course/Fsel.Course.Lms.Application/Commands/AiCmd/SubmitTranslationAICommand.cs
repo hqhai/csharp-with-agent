@@ -16,6 +16,10 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
     public class SubmitTranslationAICommand : AITranslationRequestModel, IRequest<AITranslationResultModel>
     {
+        /// <summary>
+        /// GradingAlFeedback đã được truyền trực tiếp (không cần query lại từ DB)
+        /// </summary>
+        public string? GradingAlFeedback { get; set; }
     }
 
     public class SubmitTranslationAICommandHandler : IRequestHandler<SubmitTranslationAICommand, AITranslationResultModel>
@@ -45,20 +49,42 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 ClassForumDetailResultId = request.ClassForumDetailResultId
             };
 
-            // Get GradingAlFeedback from database
-            var classForumDetailResult = await _classForumDetailResultRepository.Queryable
-                .FirstOrDefaultAsync(x => x.Id == request.ClassForumDetailResultId, cancellationToken);
+            // Lấy GradingAlFeedback từ request trước, nếu không có thì query từ DB
+            string? gradingAlFeedback = request.GradingAlFeedback;
+            ClassForumDetailResult? classForumDetailResult = null;
 
-            if (classForumDetailResult == null || string.IsNullOrEmpty(classForumDetailResult.GradingAlFeedback))
+            if (string.IsNullOrEmpty(gradingAlFeedback))
+            {
+                classForumDetailResult = await _classForumDetailResultRepository.Queryable
+                    .FirstOrDefaultAsync(x => x.Id == request.ClassForumDetailResultId, cancellationToken);
+
+                gradingAlFeedback = classForumDetailResult?.GradingAlFeedback;
+            }
+
+            if (string.IsNullOrEmpty(gradingAlFeedback))
             {
                 return new AITranslationResultModel { ClassForumDetailResultId = request.ClassForumDetailResultId };
             }
 
-            var translatedContent = await ExecuteTranslationAsync(classForumDetailResult.GradingAlFeedback, cancellationToken);
+            var translatedContent = await ExecuteTranslationAsync(gradingAlFeedback, cancellationToken);
             result.TranslatedContent = translatedContent;
 
-            // Save translated content to database
-            await UpdateClassForumDetailResultAsync(classForumDetailResult, translatedContent, cancellationToken);
+            // Save translated content to database (chỉ khi cần query từ DB)
+            if (classForumDetailResult != null)
+            {
+                await UpdateClassForumDetailResultAsync(classForumDetailResult, translatedContent, cancellationToken);
+            }
+            else if (!string.IsNullOrEmpty(translatedContent))
+            {
+                // Nếu GradingAlFeedback được truyền trực tiếp, cần query entity để update
+                classForumDetailResult = await _classForumDetailResultRepository.Queryable
+                    .FirstOrDefaultAsync(x => x.Id == request.ClassForumDetailResultId, cancellationToken);
+
+                if (classForumDetailResult != null)
+                {
+                    await UpdateClassForumDetailResultAsync(classForumDetailResult, translatedContent, cancellationToken);
+                }
+            }
 
             await PublishTranslationResultAsync(result, cancellationToken);
 
@@ -66,14 +92,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
         }
 
         #region Private Methods
-
-        private async Task<string?> GetGradingAlFeedbackAsync(Guid classForumDetailResultId, CancellationToken cancellationToken)
-        {
-            var classForumDetailResult = await _classForumDetailResultRepository.Queryable
-                .FirstOrDefaultAsync(x => x.Id == classForumDetailResultId, cancellationToken);
-
-            return classForumDetailResult?.GradingAlFeedback;
-        }
 
         private async Task<string?> ExecuteTranslationAsync(string gradingAlFeedback, CancellationToken cancellationToken)
         {
