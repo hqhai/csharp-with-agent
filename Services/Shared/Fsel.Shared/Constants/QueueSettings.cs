@@ -127,6 +127,7 @@ namespace Fsel.Shared.Constants
                 public const string DeleteClassForumByFlag = $"{KeyQueue}_DeleteClassForumByFlag";
                 public const string ClassForumAIResponse = $"{KeyQueue}_ClassForumAIResponse";
                 public const string AITranslationResponse = $"{KeyQueue}_AITranslationResponse";
+                public const string ClassForumTranslationRequest = $"{KeyQueue}_ClassForumTranslationRequest";
                 public const string MockTestAnwserResponse = $"{KeyQueue}_MockTestAnwserResponse";
                 public const string SendWeeklyReport = $"{KeyQueue}_SendWeeklyReport";
                 public const string AggregateDataWeeklyReport = $"{KeyQueue}_AggregateDataWeeklyReport";
