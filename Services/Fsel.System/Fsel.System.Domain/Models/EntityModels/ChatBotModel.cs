@@ -18,6 +18,7 @@ namespace Fsel.System.Domain.Models.EntityModels
         public Guid StudentId { get; set; }
         public Guid? SkillId { get; set; }
         public string? SkillName { get; set; }
+        public string? SkillFilePath { get; set; }
         public EnumChatBotStatus Status { get; set; }
 
         public IList<ChatBotMessage>? Conversations { get; set; }
