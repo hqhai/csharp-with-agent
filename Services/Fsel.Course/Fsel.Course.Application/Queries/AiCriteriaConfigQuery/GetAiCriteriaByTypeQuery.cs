@@ -8,6 +8,7 @@ namespace Fsel.Course.Application.Queries.AiCriteriaConfigQuery
     using Domain.Enums;
     using Domain.IRepositories;
     using Domain.Models.EntityModels.AiPromptManagerModels;
+    using Fsel.Common.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -34,8 +35,9 @@ namespace Fsel.Course.Application.Queries.AiCriteriaConfigQuery
             var methodResult = new MethodResult<AICriteriaConfigsModel>();
 
             var aiCriteria = await _aiCriteriaConfigRepository.ReadQueryable
-                .Where(x => x.SubFeatureType == request.SubFeatureType && x.ObjectId == null && x.DefaultType == EnumDefaultType.Default)
-                .ToListAsync(cancellationToken);
+                                                              .Where(x => x.ObjectId == null && x.DefaultType == EnumDefaultType.Default)
+                                                              .Where(x => x.SubFeatureType == request.SubFeatureType && x.VersionStatus == EnumVersionStatus.LastVersion)
+                                                              .ToListAsync(cancellationToken);
 
             if (aiCriteria.Count == 0)
             {
@@ -48,7 +50,6 @@ namespace Fsel.Course.Application.Queries.AiCriteriaConfigQuery
 
             methodResult.Result = result;
             methodResult.StatusCode = StatusCodes.Status200OK;
-
             return methodResult;
         }
     }

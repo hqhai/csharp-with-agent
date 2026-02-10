@@ -35,6 +35,12 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
             return result;
         }
 
+        public static EnumMockTestAIType GetTestAIType(EnumCriteriaAi scoreCriteria)
+        {
+            var result = MockTestCriteriaMap.FirstOrDefault(x => x.Value == scoreCriteria).Key;
+            return result;
+        }
+
         private static readonly IReadOnlyDictionary<EnumTestScoreCriteria, EnumCriteriaAi> CriteriaMap = new Dictionary<EnumTestScoreCriteria, EnumCriteriaAi>
         {
             { EnumTestScoreCriteria.FluencyAndCoherence, EnumCriteriaAi.Fc },

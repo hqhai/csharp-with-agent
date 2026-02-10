@@ -1,5 +1,3 @@
-
-
 namespace Fsel.Course.Application.Commands.AiCriteriaConfigCmd
 {
     using AutoMapper;
@@ -17,7 +15,6 @@ namespace Fsel.Course.Application.Commands.AiCriteriaConfigCmd
 
     public class CreateAiCriteriaConfigCommand : CreateOrUpdateAiCriteriaCommandModel, IRequest<MethodResult<AICriteriaConfigsModel>>
     {
-
     }
 
     public class CreateAiCriteriaConfigHasSubFeatureCommandHandler : IRequestHandler<CreateAiCriteriaConfigCommand, MethodResult<AICriteriaConfigsModel>>
@@ -107,7 +104,7 @@ namespace Fsel.Course.Application.Commands.AiCriteriaConfigCmd
             return (true, null);
         }
 
-        #endregion
+        #endregion Private Methods - Validation
 
         #region Private Methods - Preparation
 
@@ -151,7 +148,7 @@ namespace Fsel.Course.Application.Commands.AiCriteriaConfigCmd
                 .ToListAsync(cancellationToken);
         }
 
-        #endregion
+        #endregion Private Methods - Preparation
 
         #region Private Methods - Processing
 
@@ -337,7 +334,7 @@ namespace Fsel.Course.Application.Commands.AiCriteriaConfigCmd
             };
         }
 
-        #endregion
+        #endregion Private Methods - Processing
 
         #region Private Methods - Transaction
 
@@ -449,7 +446,7 @@ namespace Fsel.Course.Application.Commands.AiCriteriaConfigCmd
             methodResult.Result = result;
         }
 
-        #endregion
+        #endregion Private Methods - Transaction
 
         /// <summary>
         /// Kiểm tra xem AiCriteriaConfig có bản ghi phụ thuộc hay không
@@ -480,6 +477,7 @@ namespace Fsel.Course.Application.Commands.AiCriteriaConfigCmd
 
             return methodResult;
         }
+
         private AICriteriaConfigs BuildCreateEntity(
             CreateAiCriteriaConfigCommandModel item,
             CreateAiCriteriaConfigCommand request)
