@@ -14,6 +14,7 @@ namespace Fsel.Course.Application.Services.SystemServices.CommandModels
         public string? SkillFilePath { get; set; }
         public int Token { get; set; }
         public string? AiConfig { get; set; }
+        public Guid AICriteriaConfigId { get; set; }
         public IList<SkillConfigCommandModel>? Configs { get; set; }
     }
 

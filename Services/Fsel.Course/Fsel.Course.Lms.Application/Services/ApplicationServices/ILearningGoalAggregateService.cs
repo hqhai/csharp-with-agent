@@ -89,12 +89,12 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             var courseIds = keys.Select(x => x.CourseId).Distinct().ToList();
 
             // 1) Lấy danh sách Unit thuộc Course (config type = Unit) + lesson count theo LastVersion
-            var queryModule = _courseModuleRepository.ReadQueryable
+            var queryModule = _courseModuleRepository.Queryable
                                                      .Where(x => x.CourseConfigType == EnumCourseConfigType.Unit)
                                                      .WhereBulkContains(courseIds, x => x.CourseId);
 
             var courseUnits = await (from cm in queryModule
-                                     join u in _unitRepository.ReadQueryable on cm.OriginalId equals u.OriginalId
+                                     join u in _unitRepository.Queryable on cm.OriginalId equals u.OriginalId
                                      where u.VersionStatus == EnumVersionStatus.LastVersion
                                      select new
                                      {
@@ -112,15 +112,14 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                 );
 
             // 2) Lấy CourseResult theo keys
-            var courseResultsQuery = _courseResultRepository.ReadQueryable
+            var courseResultsQuery = _courseResultRepository.Queryable
                 .Where(x => x.WorkingStatus == EnumWorkingStatus.Active)
-                .AsNoTracking()
-                .WhereBulkContains(keys, new[] { "StudentId", "CourseId" })
+                .WhereBulkContains(keys.Select(x => new { x.StudentId, x.CourseId }).ToList(), new[] { "StudentId", "CourseId" })
                 .Select(cr => new { cr.Id, cr.StudentId, cr.CourseId });
 
             // 3) Lấy UnitResult và map theo (StudentId, CourseId, UnitOriginalId) -> LessonCount
             var unitResults = await (from cr in courseResultsQuery
-                                     join ur in _unitResultRepository.ReadQueryable.AsNoTracking()
+                                     join ur in _unitResultRepository.Queryable
                                          on new { cr.CourseId, cr.StudentId, CourseResultId = (Guid?)cr.Id }
                                          equals new { ur.CourseId, ur.StudentId, ur.CourseResultId }
                                      where ur.Unit != null
@@ -167,26 +166,39 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
         }
 
         public async Task<IReadOnlyList<CourseResult>> GetCourseResultsWithoutAggregateAsync(
-        IReadOnlyCollection<Guid> studentIds,
-        CancellationToken ct = default)
+      IReadOnlyCollection<Guid> studentIds,
+      CancellationToken ct = default)
         {
             if (studentIds == null || studentIds.Count == 0)
             {
                 return Array.Empty<CourseResult>();
             }
-            var query = _courseResultRepository.ReadQueryable
-                .AsNoTracking()
-                .WhereBulkContains(studentIds, x => x.StudentId)
-                .Where(cr => cr.WorkingStatus != EnumWorkingStatus.NotWorking)
-                .Where(cr => cr.Status != EnumResultStatus.Done)
-                .Where(cr => !_aggregates.ReadQueryable.Any(ag =>
-                    ag.IsActive
-                    && ag.CourseId == cr.CourseId
-                    && ag.StudentId == cr.StudentId
-                    && ag.CourseResultId == cr.Id))
-                .Include(cr => cr.Course); // giữ nếu caller thật sự cần Course
 
-            return await query.ToListAsync(ct);
+            var query =
+                from cr in _courseResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId)
+                join ag in _aggregates.Queryable
+                    on new
+                    {
+                        cr.CourseId,
+                        cr.StudentId,
+                        CourseResultId = cr.Id
+                    }
+                    equals new
+                    {
+                        ag.CourseId,
+                        ag.StudentId,
+                        ag.CourseResultId
+                    }
+                    into agGroup
+                from ag in agGroup.DefaultIfEmpty()
+                where cr.WorkingStatus != EnumWorkingStatus.NotWorking
+                      && cr.Status != EnumResultStatus.Done
+                      && ag == null
+                select cr;
+
+            return await query
+                .Include(cr => cr.Course) // giữ nếu cần
+                .ToListAsync(ct);
         }
 
         public async Task<HashSet<(Guid StudentId, Guid CourseId)>> GetAggregateKeysAsync(
@@ -220,7 +232,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             // Nếu team bạn thống nhất UTC: nên dùng 1 helper trả UTC range rõ ràng
             var (weekStartUtc, weekEndExclusiveUtc) = weekRangeExclusive;
 
-            var keyModels = keys.Select(x => new { x.Item1, x.Item2 }).ToList();
+            var keyModels = keys.Select(x => new { StudentId = x.Item1, CourseId = x.Item2 }).ToList();
 
             var rows = await _lessonResults.ReadQueryable
                 .AsNoTracking()

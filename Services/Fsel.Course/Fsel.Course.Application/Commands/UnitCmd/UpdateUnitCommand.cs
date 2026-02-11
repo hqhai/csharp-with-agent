@@ -13,6 +13,7 @@ using Unit = Fsel.Course.Domain.Entities.Unit;
 namespace Fsel.Course.Application.Commands.UnitCmd
 {
     using System.Threading;
+    using AutoMapper;
     using Fsel.Common.Enums;
     using Fsel.Core.Base.Interfaces;
     using Fsel.Course.Application.Services.SystemServices;
@@ -30,16 +31,19 @@ namespace Fsel.Course.Application.Commands.UnitCmd
         private readonly IVersionEntityUpdater<Unit> _versionEntityUpdater;
         private readonly IServiceProvider _serviceProvider;
         private readonly ISystemService _systemService;
+        private readonly IMapper _mapper;
 
         public UpdateUnitCommandHandler(IUnitRepository unitTestRepository,
             IVersionEntityUpdater<Unit> versionEntityUpdater,
             IServiceProvider serviceProvider,
-            ISystemService systemService)
+            ISystemService systemService,
+            IMapper mapper)
         {
             _unitRepository = unitTestRepository;
             _versionEntityUpdater = versionEntityUpdater;
             _serviceProvider = serviceProvider;
             _systemService = systemService;
+            _mapper = mapper;
         }
 
         public async Task<MethodResult<UnitModel>> Handle(UpdateUnitCommand request, CancellationToken cancellationToken)
@@ -110,6 +114,7 @@ namespace Fsel.Course.Application.Commands.UnitCmd
                     await Task.Yield();
                 }
             );
+            methodResult.Result = _mapper.Map<UnitModel>(unit);
             await UpdateChatbotConfigAsync(request, methodResult, isUsingByClient);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
