@@ -11,8 +11,8 @@ namespace Fsel.System.Domain.Models.EntityModels
     {
         public Guid? UnitId { get; set; }
 
-        public EnumCourseSkill Skill { get; set; }
-
+        public EnumCourseSkill? Skill { get; set; }
+        public EnumChatbotLayout ChatbotLayout { get; set; }
         public long RemainToken { get; set; }
 
         public Guid StudentId { get; set; }
