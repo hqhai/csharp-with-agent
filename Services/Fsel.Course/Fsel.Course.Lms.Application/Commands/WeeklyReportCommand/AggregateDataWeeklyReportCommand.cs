@@ -47,12 +47,12 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
         private readonly ISkillRepository _skillRepository;
         private readonly ITestGroupResultRepository _testGroupResultRepository;
         private readonly ICourseResultRepository _courseResultRepository;
-        private readonly IAggregateResultQueryService _aggregateResultQueryService;
+        private readonly ILearningService _learningService;
         private readonly ITestResultRepository _testResultRepository;
         private readonly ITestRepository _testRepository;
         private const int ChunkSize = 10000;
 
-        public AggregateDataWeeklyReportCommandHandler(IUserService userService, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, ISystemService systemService, ILessonResultRepository lessonResultRepository, IUnitResultRepository unitResultRepository, IMediator mediator, AppSetting appSetting, IWeeklyReportRepository weeklyReportRepository, ISkillRepository skillRepository, ITestGroupResultRepository testGroupResultRepository, ICourseResultRepository courseResultRepository, IAggregateResultQueryService aggregateResultQueryService, ITestResultRepository testResultRepository, ITestRepository testRepository)
+        public AggregateDataWeeklyReportCommandHandler(IUserService userService, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, ISystemService systemService, ILessonResultRepository lessonResultRepository, IUnitResultRepository unitResultRepository, IMediator mediator, AppSetting appSetting, IWeeklyReportRepository weeklyReportRepository, ISkillRepository skillRepository, ITestGroupResultRepository testGroupResultRepository, ICourseResultRepository courseResultRepository, ITestResultRepository testResultRepository, ITestRepository testRepository, ILearningService learningService)
         {
             _userService = userService;
             _finalTestResultRepository = finalTestResultRepository;
@@ -66,9 +66,9 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
             _skillRepository = skillRepository;
             _testGroupResultRepository = testGroupResultRepository;
             _courseResultRepository = courseResultRepository;
-            _aggregateResultQueryService = aggregateResultQueryService;
             _testResultRepository = testResultRepository;
             _testRepository = testRepository;
+            _learningService = learningService;
         }
 
         public async Task<MethodResult<bool>> Handle(AggregateDataWeeklyReportCommand request, CancellationToken cancellationToken)
@@ -149,7 +149,17 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                             .WhereBulkContains(studentIds, p => p.StudentId)
                             .Where(x => x.Status == EnumResultStatus.New || x.Status == EnumResultStatus.Process).OrderBy(x => x.UpdatedDate).ToListAsync(cancellationToken);
 
+                var testResults = await _testGroupResultRepository.Queryable.Include(mt => mt.TestResults).ThenInclude(p => p.Test).ThenInclude(p => p.TestSections).ThenInclude(p => p.Skill).Where(x => x.StudentId.HasValue && studentIds.Contains(x.StudentId.Value) && x.Status != EnumResultStatus.Done).ToListAsync(cancellationToken);
+
                 var courseResults = await _courseResultRepository.Queryable.WhereBulkContains(studentIds, p => p.StudentId).ToListAsync(cancellationToken);
+
+                var learningComponentModels = students.Where(p => p.CourseId.HasValue).Select(p => new GetLearningTreeFromCourseToTestModel()
+                {
+                    StudentId = p.Id,
+                    CourseId = p.CourseId ?? default,
+                }).ToList();
+
+                var results = await _learningService.GetLearningTreeFromCourseToTest(learningComponentModels, cancellationToken);
 
                 foreach (var item in students)
                 {
@@ -232,6 +242,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                         if (unitResultNext != null)
                         {
                             weeklyReport.NextUnit = unitResultNext.Unit?.Name;
+
                             if (unitResultNext.Status == EnumResultStatus.New)
                             {
                                 weeklyReport.NextLesson = 1;
@@ -241,34 +252,26 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                             }
                             else
                             {
-                                var learningTree = await _aggregateResultQueryService.GetLearningTreeFromCourseToLesson(
-                                                    item.Id,
-                                                    courseResult.Id,
-                                                    cancellationToken);
+                                var learningTree = results.FirstOrDefault(p => p.StudentId == item.Id && p.LearningTemplateId == item.CourseId);
 
-                                var lessons = learningTree
-                                    .GetAllItemByType<LessonComponent>()
-                                    .ToList();
+                                var lessons = learningTree?.Children.SelectMany(p => p.Children);
 
-                                var lesson = lessons.FirstOrDefault(p => p.Status == EnumResultStatus.New);
+                                var lesson = lessons?.FirstOrDefault(p => p.Status == EnumResultStatus.New);
                                 if (lesson == null)
                                 {
-                                    lesson = lessons.FirstOrDefault(p => p.Status == EnumResultStatus.Process);
+                                    lesson = lessons?.FirstOrDefault(p => p.Status == EnumResultStatus.Process);
                                 }
 
                                 if (lesson != null)
                                 {
-                                    var lessonResult = await _lessonResultRepository.Queryable.Include(p => p.UnitModule).FirstOrDefaultAsync(p => p.Id == lesson.LearningResultId, cancellationToken);
-
-                                    weeklyReport.NextLesson = lessonResult?.UnitModule?.DisplayOrder;
-                                    var percentLesson = await GetLesson(lessonResult?.CourseId, lessonResult?.UnitId, lessonResult?.LessonId, item.Id);
-                                    weeklyReport.PercentLesson = percentLesson;
+                                    weeklyReport.NextLesson = lesson.DisplayOrder;
+                                    weeklyReport.PercentLesson = lesson.TotalContent > 0 ? (int)NumberHelper.GetPercent(lesson.TotalContentCompleted, lesson.TotalContent) : 0;
                                     weeklyReport.Weekly3Display = null;
                                     weeklyReport.SkillMockTestDisplay = SendMailSetting.Display;
                                 }
                                 else
                                 {
-                                    var testResult = await _testGroupResultRepository.Queryable.Include(mt => mt.TestResults).ThenInclude(p => p.Test).ThenInclude(p => p.TestSections).ThenInclude(p => p.Skill).Where(x => x.StudentId == item.Id && x.Status != EnumResultStatus.Done && x.TestType == EnumTestType.SkillTest).OrderBy(x => x.UpdatedDate).FirstOrDefaultAsync(cancellationToken);
+                                    var testResult = testResults.Where(p => p.StudentId == item.Id && p.TestType == EnumTestType.SkillTest).OrderBy(x => x.UpdatedDate).FirstOrDefault();
 
                                     var skill = testResult?.TestResults?.FirstOrDefault()?.Test?.TestSections.Select(p => p.Skill).FirstOrDefault();
                                     if (skill != null)
@@ -283,11 +286,13 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                         }
                         else
                         {
-                            var testGroupResult = await _testGroupResultRepository.Queryable.Include(mt => mt.TestResults).ThenInclude(p => p.Test).Where(x => x.StudentId == item.Id && x.Status != EnumResultStatus.Done && x.TestType == EnumTestType.FullTest).OrderBy(x => x.UpdatedDate).FirstOrDefaultAsync(cancellationToken);
+                            var testGroupResult = testResults.Where(p => p.StudentId == item.Id && p.TestType == EnumTestType.FullTest).OrderBy(x => x.UpdatedDate).FirstOrDefault();
+
                             if (testGroupResult == null)
                             {
                                 continue;
                             }
+
                             weeklyReport.NextUnit = testGroupResult.TestResults.FirstOrDefault()?.Test?.Name;
                             weeklyReport.Weekly3Display = SendMailSetting.Display;
                             weeklyReport.SkillMockTestDisplay = SendMailSetting.Display;
@@ -384,25 +389,6 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
             {
                 return featureAccessTimes?.Where(p => p.EnumFeature == EnumFeature.Other).Sum(p => p.AccessTime) ?? 0;
             }
-        }
-
-        private async Task<int> GetLesson(Guid? courseId, Guid? unitId, Guid? lessonId, Guid? studentId)
-        {
-            var counts = new List<int>();
-            var lessonResult = await _lessonResultRepository.GetAsync(courseId, unitId, lessonId, studentId);
-            if (lessonResult != null)
-            {
-                var videoResults = lessonResult.VideoResults.Where(p => p.Status == EnumResultStatus.Done);
-
-                counts.Add(videoResults.Count());
-                counts.Add(lessonResult.ClassForumResults.Where(x => x != null && x.ResultStatus == EnumResultStatus.Done && x.StudentId == studentId).Count());
-                counts.Add(lessonResult.HomeWorkResults.Where(x => x != null && x.Status == EnumResultStatus.Done && x.StudentId == studentId).GroupBy(x => x.LessonResultId).Count());
-            }
-            if (counts.Count == 0)
-            {
-                return 0;
-            }
-            return (int)NumberHelper.ConvertPercentDouble(counts.Average());
         }
 
         private static void CheckAndAssignStatusDate(WeeklyReportModel model, List<DateTime>? userLoginDates, List<DateTime> weekDays)

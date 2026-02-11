@@ -59,6 +59,9 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
             curriculumModel.Subject = curriculum.CourseClone.Program?.CategoryParent?.Name;
             curriculumModel.Level = curriculum.CourseClone.Level?.Name;
             curriculumModel.Program = curriculum.CourseClone.Program?.Name;
+            curriculumModel.ProgramId = curriculum.CourseClone.ProgramId;
+            curriculumModel.SubjectId = curriculum.CourseClone.Program?.CategoryParent?.Id;
+            curriculumModel.LevelId = curriculum.CourseClone.LevelId;
 
             methodResult.Result = curriculumModel;
             return methodResult;

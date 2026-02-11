@@ -28,7 +28,6 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
     public sealed class SpeakingAITestLayoutHandler : ISpeakingAITestLayoutHandler
     {
         private const int MaxCorrect = 36;
-
         private readonly ITestSectionResultRepository _testSectionResultRepository;
         private readonly IProsodyScoreRepository _prosodyScoreRepository;
         private readonly IRepository<TestAnswer> _testAnswerRepository;
@@ -36,6 +35,8 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
         private readonly IMediator _mediator;
         private readonly SubmitTestAiSpeakingPublisher _publisher;
         private readonly ITestResultRepository _testResultRepository;
+        private readonly IAiPromptManagerRepository _aiPromptManagerRepository;
+        private readonly ICategoryRepository _categoryRepository;
 
         public SpeakingAITestLayoutHandler(
             ITestSectionResultRepository testSectionResultRepository,
@@ -44,7 +45,9 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
             IRepository<TestScore> testScoreRepository,
             IMediator mediator,
             SubmitTestAiSpeakingPublisher publisher,
-            ITestResultRepository testResultRepository)
+            ITestResultRepository testResultRepository,
+            IAiPromptManagerRepository aiPromptManagerRepository,
+            ICategoryRepository categoryRepository)
         {
             _testSectionResultRepository = testSectionResultRepository;
             _prosodyScoreRepository = prosodyScoreRepository;
@@ -53,6 +56,8 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
             _mediator = mediator;
             _publisher = publisher;
             _testResultRepository = testResultRepository;
+            _aiPromptManagerRepository = aiPromptManagerRepository;
+            _categoryRepository = categoryRepository;
         }
 
         #region Entry
@@ -103,6 +108,27 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
 
         #region Load data
 
+        private async Task<AiPromptManager?> LoadAiPromptManagerAsync(Guid? id, Guid programId, Guid sectionId, CancellationToken ct)
+        {
+            var sectionAiPromptManager = await _aiPromptManagerRepository.ReadQueryable.Include(x => x.AICriteriaConfigs)
+                                                                         .Where(x => x.AICriteriaConfigs.Any(y => y.ObjectId == sectionId))
+                                                                         .FirstOrDefaultAsync(ct);
+            if (sectionAiPromptManager == null)
+            {
+                var subjectId = await _categoryRepository.ReadQueryable.Include(x => x.CategoryParent)
+                                                    .Where(x => x.Id == programId)
+                                                    .Select(x => x.Id)
+                                                    .FirstOrDefaultAsync(ct);
+
+                return await _aiPromptManagerRepository.ReadQueryable
+                    .Where(x => x.ProjectId == subjectId)
+                    .Where(x => !id.HasValue || x.Id == id.Value)
+                    .Include(x => x.AICriteriaConfigs)
+                    .FirstOrDefaultAsync(ct);
+            }
+            return sectionAiPromptManager;
+        }
+
         private async Task<List<TestSectionResult>> LoadChildrenAsync(Guid parentId, CancellationToken ct)
         {
             return await _testSectionResultRepository.Queryable
@@ -125,7 +151,7 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
                 .Where(x => !x.ParentTestSectionResultId.HasValue)
                 .ToListAsync(cancellationToken);
 
-            if (rootSectionResults.Count == 0)
+            if (rootSectionResults.Count == 0 || !rootSectionResults.All(x => x.Status == EnumResultStatus.Done))
             {
                 return;
             }
@@ -138,6 +164,7 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
             testResult.SkillScores = mergedSkillScores;
             testResult.CorrectCount = (int)mergedSkillScores.Sum(x => x.CorrectCount);
             testResult.CorrectTotal = (int)mergedSkillScores.Sum(x => x.TotalCount);
+            testResult.Percent = NumberHelper.GetPercent(testResult.CorrectCount, testResult.CorrectTotal);
 
             // =========================
             // Percent (nếu có)
@@ -279,6 +306,8 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
             var scores = new List<TestScore>();
 
             var ranges = await _prosodyScoreRepository.ReadQueryable.ToListAsync(ct);
+            var aiPromptManager = await LoadAiPromptManagerAsync(child.TestSection?.AiPromptManagerId, testResult.Test?.ProgramId ?? default, child.TestSectionId.Value, ct);
+
             var (band, comment) = GetBandScore(input.AveragePronunciationScore, ranges);
 
             scores.Add(CreateScore(child, testResult, EnumTestScoreCriteria.Pronunciation, band, comment));
@@ -290,7 +319,14 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
                 EnumTestScoreCriteria.FluencyAndCoherence
             })
             {
-                var ai = await GetAIResponseAsync(criteria, input, ct);
+                var criteriaAi = TestLayoutDispatchHelper.GetCriteriaAi(criteria);
+
+                var aiConfig = aiPromptManager?.AICriteriaConfigs?.Where(x => x.SubFeatureType == EnumSubFeatureType.TestConfigSpeakingLayout)
+                                               .Where(x => x.TypeCriteriaAi == criteriaAi)
+                                               .OrderBy(x => x.DefaultType)
+                                               .FirstOrDefault();
+
+                var ai = await GetAIResponseAsync(criteria, input, aiPromptManager, aiConfig, ct);
                 var model = ConvertHelper.Deserialize<AIEvaluationOutputModel>(ai);
 
                 if (long.TryParse(model?.BandScore, out var score))
@@ -338,6 +374,7 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
             var total = scores.Sum(x => x.Score);
             child.CorrectCount = (int)total;
             child.CorrectTotal = MaxCorrect;
+            child.Percent = NumberHelper.GetPercent(child.CorrectCount, child.CorrectTotal);
             child.SkillScores = BuildSkillScores(child.TestSection, (int)total, MaxCorrect);
             if (scoringFormulaType == EnumScoringFormulaType.Percent)
             {
@@ -359,6 +396,7 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
         {
             parent.CorrectCount = children.Sum(x => x.CorrectCount);
             parent.CorrectTotal = children.Sum(x => x.CorrectTotal);
+            parent.Percent = NumberHelper.GetPercent(parent.CorrectCount, parent.CorrectTotal);
             parent.SkillScores = BuildSkillScores(
                 parent.TestSection,
                 parent.CorrectCount,
@@ -382,6 +420,7 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
         {
             section.CorrectCount = 0;
             section.CorrectTotal = MaxCorrect;
+            section.Percent = NumberHelper.GetPercent(section.CorrectCount, section.CorrectTotal);
             section.SkillScores?.Clear();
         }
 
@@ -430,6 +469,7 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
                 c.SkillScoresStr,
                 c.CorrectCount,
                 c.CorrectTotal,
+                c.Percent,
                 c.PercentModule,
                 c.ScoreModule
             });
@@ -460,21 +500,22 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
         private async Task<string> GetAIResponseAsync(
             EnumTestScoreCriteria criteria,
             SpeakingEvaluationInput input,
+            AiPromptManager? aiPromptManager,
+            AICriteriaConfigs? aICriteria,
             CancellationToken ct)
         {
-            var userConfig = BuildSpeakingPromptHelper
-                .CustomAnswerConfigToSendGPT(input.Questions, input.Answers, criteria);
-
+            var userConfig = BuildSpeakingPromptHelper.CustomAnswerConfigToSendGPT(input.Questions, input.Answers, criteria, aICriteria?.UserRole);
+            var systemConfig = !string.IsNullOrEmpty(aICriteria?.SettingAiConfig) ? aICriteria.SettingAiConfig : BuildSpeakingPromptHelper.GetConfigByType(criteria, true);
             var response = await _mediator.Send(new SubmitAICommand
             {
-                SystemRoleAlConfig = BuildSpeakingPromptHelper.GetConfigByType(criteria, true),
+                SystemRoleAlConfig = systemConfig,
                 UserAIConfig = userConfig,
-                SettingModel = "gpt-4o",
-                SettingTemperature = 1,
-                SettingTopP = 1,
-                SettingPresence = 0,
-                SettingFrequecy = 0,
-                SettingWordMaxLength = 1000
+                SettingModel = aiPromptManager?.AiModel ?? "gpt-4o",
+                SettingTemperature = aICriteria?.SettingTemperature ?? 1,
+                SettingTopP = aICriteria?.SettingTopP ?? 1,
+                SettingPresence = aICriteria?.SettingPresence ?? 0,
+                SettingFrequecy = aICriteria?.SettingFrequency ?? 0,
+                SettingWordMaxLength = aICriteria?.SettingWordMaxLength ?? 1000
             }, ct);
 
             return Shared.Helpers.StringHelper.RemoveMarkdownFromJson(response ?? string.Empty);

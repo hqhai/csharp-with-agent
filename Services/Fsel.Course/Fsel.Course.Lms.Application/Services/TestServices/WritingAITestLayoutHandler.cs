@@ -11,6 +11,7 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
     using Fsel.Core.Base.Interfaces;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Entities.TestConfigs;
     using Fsel.Course.Domain.Enums;
@@ -44,7 +45,8 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
         private readonly IMediator _mediator;
         private readonly IMapper _mapper;
         private readonly AppSetting _appSetting;
-
+        private readonly IAiPromptManagerRepository _aiPromptManagerRepository;
+        private readonly ICategoryRepository _categoryRepository;
         private const int CorrectTotal_Writing = 36;
         private const int First_Run_Order = 1;
         private const int Max_Times_Retry = 3;
@@ -60,7 +62,9 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
             ISenderService senderService,
             IMediator mediator,
             IMapper mapper,
-            AppSetting appSetting)
+            AppSetting appSetting,
+            IAiPromptManagerRepository aiPromptManagerRepository,
+            ICategoryRepository categoryRepository)
         {
             _testAnswerRepository = testAnswerRepository;
             _aiGradeSettingRepository = aiGradeSettingRepository;
@@ -73,6 +77,8 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
             _mediator = mediator;
             _mapper = mapper;
             _appSetting = appSetting;
+            _aiPromptManagerRepository = aiPromptManagerRepository;
+            _categoryRepository = categoryRepository;
         }
 
         /// <summary>
@@ -160,6 +166,9 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
                 {
                     continue;
                 }
+                var aiPromptManager = await LoadAiPromptManagerAsync(currentSectionResult.TestSection?.AiPromptManagerId,
+                    testResult.Test?.ProgramId ?? default,
+                    currentSectionResult.TestSectionId.Value, cancellationToken);
 
                 // load AI config theo sectionId
                 var aiConfig = await LoadAiConfigAsync(currentSectionResult.TestSectionId.Value, cancellationToken);
@@ -191,6 +200,7 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
 
                     await EvaluateSingleAnswerAndBlendAsync(
                         answer: answer,
+                        aiPromptManager: aiPromptManager,
                         aiConfig: aiConfig!,
                         wordContent: BuildWritingContent(answer),
                         sectionDisplayOrder: sectionDisplayOrder,
@@ -208,6 +218,8 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
                 currentSectionResult.SkillScores = sectionSkillScores;
                 currentSectionResult.CorrectCount = (int)sectionSkillScore.CorrectCount;
                 currentSectionResult.CorrectTotal = (int)sectionSkillScore.TotalCount;
+                currentSectionResult.Percent = NumberHelper.GetPercent(currentSectionResult.CorrectCount, currentSectionResult.CorrectTotal);
+
                 if (scoringFormulaType == EnumScoringFormulaType.Percent)
                 {
                     var percent = testSectionResult.TestSection?.Percent ?? default;
@@ -223,6 +235,7 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
                 testSectionResult.SkillScores = new List<SkillScores> { testSkillScore };
                 testSectionResult.CorrectCount = (int)testSkillScore.CorrectCount;
                 testSectionResult.CorrectTotal = (int)testSkillScore.TotalCount;
+                testSectionResult.Percent = NumberHelper.GetPercent(testSectionResult.CorrectCount, testSectionResult.CorrectTotal);
             }
             if (scoringFormulaType == EnumScoringFormulaType.Percent)
             {
@@ -242,6 +255,27 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
             await UpdateTestResultIfDoneAsync(testResult, cancellationToken);
         }
 
+        private async Task<AiPromptManager?> LoadAiPromptManagerAsync(Guid? id, Guid programId, Guid sectionId, CancellationToken ct)
+        {
+            var sectionAiPromptManager = await _aiPromptManagerRepository.ReadQueryable.Include(x => x.AICriteriaConfigs)
+                                                                         .Where(x => x.AICriteriaConfigs.Any(y => y.ObjectId == sectionId))
+                                                                         .FirstOrDefaultAsync(ct);
+            if (sectionAiPromptManager == null)
+            {
+                var subjectId = await _categoryRepository.ReadQueryable.Include(x => x.CategoryParent)
+                                                    .Where(x => x.Id == programId)
+                                                    .Select(x => x.Id)
+                                                    .FirstOrDefaultAsync(ct);
+
+                return await _aiPromptManagerRepository.ReadQueryable
+                    .Where(x => x.ProjectId == subjectId)
+                    .Where(x => !id.HasValue || x.Id == id.Value)
+                    .Include(x => x.AICriteriaConfigs)
+                    .FirstOrDefaultAsync(ct);
+            }
+            return sectionAiPromptManager;
+        }
+
         private async Task UpdateTestResultIfDoneAsync(TestResult testResult, CancellationToken cancellationToken)
         {
             if (testResult.Status != EnumResultStatus.Done)
@@ -255,7 +289,7 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
                 .Where(x => !x.ParentTestSectionResultId.HasValue)
                 .ToListAsync(cancellationToken);
 
-            if (rootSectionResults.Count == 0)
+            if (rootSectionResults.Count == 0 || !rootSectionResults.All(x => x.Status == EnumResultStatus.Done))
             {
                 return;
             }
@@ -268,7 +302,7 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
             testResult.SkillScores = mergedSkillScores;
             testResult.CorrectCount = (int)mergedSkillScores.Sum(x => x.CorrectCount);
             testResult.CorrectTotal = (int)mergedSkillScores.Sum(x => x.TotalCount);
-
+            testResult.Percent = NumberHelper.GetPercent(testResult.CorrectCount, testResult.CorrectTotal);
             // =========================
             // Percent (nếu có)
             // =========================
@@ -353,12 +387,12 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
         // Load data
         // =========================
 
-        private async Task<List<TestSectionResult>> LoadAllSectionResultsAsync(Guid testResultId, CancellationToken cancellationToken)
+        private async Task<List<TestSectionResult>> LoadAllSectionResultsAsync(Guid testSectionResultId, CancellationToken cancellationToken)
         {
             // TODO: đổi đúng field FK của bạn nếu không phải TestResultId
             return await _testSectionResultRepository.ReadQueryable
                 .Include(x => x.TestSection)
-                .Where(x => x.ParentTestSectionResultId == testResultId)
+                .Where(x => x.ParentTestSectionResultId == testSectionResultId)
                 .ToListAsync(cancellationToken);
         }
 
@@ -408,6 +442,7 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
 
         private async Task EvaluateSingleAnswerAndBlendAsync(
             TestAnswer answer,
+            AiPromptManager? aiPromptManager,
             TestAISetting aiConfig,
             string wordContent,
             int sectionDisplayOrder,
@@ -422,6 +457,7 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
         {
             // 1) Call AI -> resultDictionary
             var resultDictionary = await CallAiForAnswerAsync(
+                aiPromptManager: aiPromptManager,
                 aiConfig: aiConfig,
                 wordContent: wordContent,
                 sectionDisplayOrder: sectionDisplayOrder,
@@ -468,6 +504,7 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
         }
 
         private async Task<Dictionary<EnumMockTestAIType, string>> CallAiForAnswerAsync(
+            AiPromptManager? aiPromptManager,
             TestAISetting aiConfig,
             string wordContent,
             int sectionDisplayOrder,
@@ -479,35 +516,60 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
             // Case 1: criteria settings
             if (string.IsNullOrEmpty(aiConfig.SystemRoleAlConfig) || (aiConfig.Prompts != null && aiConfig.Prompts.Count == 0))
             {
-                foreach (var item in aiConfig.TestAICriteriaSettings)
+                if (aiConfig.TestAICriteriaSettings.Any())
                 {
-                    var prompt = string.Concat(new[] { aiConfig.Task!, Environment.NewLine, item.AIConfigs!.Single().PromptContent! });
-                    var userAiConfig = prompt.Replace("{0}", wordContent, StringComparison.CurrentCulture);
+                    foreach (var item in aiConfig.TestAICriteriaSettings)
+                    {
+                        var criteriaAi = TestLayoutDispatchHelper.GetCriteriaAi(item.CriteriaName);
+                        var aiCriteriaConfig = aiPromptManager?.AICriteriaConfigs?.Where(x => x.SubFeatureType == EnumSubFeatureType.TestConfigWritingLayout)
+                                                       .Where(x => x.TypeCriteriaAi == criteriaAi)
+                                                       .OrderBy(x => x.DefaultType)
+                                                       .FirstOrDefault();
 
-                    var aiResponse = await SendChatGPT(aiConfig, item.UserRoleStr!, userAiConfig, cancellationToken);
-                    aiResponse = SharedStringHelper.RemoveMarkdownFromJson(aiResponse);
+                        var promptContent = aiCriteriaConfig?.SettingAiConfig ?? item.AIConfigs!.Single().PromptContent;
+                        var userRoleStr = aiCriteriaConfig?.UserRole ?? item.UserRoleStr;
 
-                    var type = item.AIConfigs![0].Type;
-                    resultDictionary[type] = aiResponse;
+                        var prompt = string.Concat(new[] { aiConfig.Task!, Environment.NewLine, promptContent });
+                        var userAiConfig = prompt.Replace("{0}", wordContent, StringComparison.CurrentCulture);
 
-                    await SendWebSocket(aiResponse, type.ToString(), sectionDisplayOrder, testResultId, cancellationToken);
+                        var aiResponse = await SendChatGPT(aiConfig, aiCriteriaConfig, aiPromptManager, userRoleStr!, userAiConfig, cancellationToken);
+                        aiResponse = SharedStringHelper.RemoveMarkdownFromJson(aiResponse);
+
+                        var type = item.AIConfigs![0].Type;
+                        resultDictionary[type] = aiResponse;
+
+                        await SendWebSocket(aiResponse, type.ToString(), sectionDisplayOrder, testResultId, cancellationToken);
+                    }
+                }
+                else
+                {
+                    var aICriteriaConfigs = aiPromptManager?.AICriteriaConfigs?.Where(x => x.SubFeatureType == EnumSubFeatureType.TestConfigWritingLayout)
+                                                            .OrderBy(x => x.DefaultType)
+                                                            .ToList() ?? new List<AICriteriaConfigs>();
+
+                    foreach (var aiCriteriaConfig in aICriteriaConfigs)
+                    {
+                        if (aiCriteriaConfig == null)
+                        {
+                            continue;
+                        }
+                        var promptContent = aiCriteriaConfig.SettingAiConfig;
+                        var userRoleStr = aiCriteriaConfig.UserRole;
+
+                        var prompt = string.Concat(new[] { aiConfig.Task!, Environment.NewLine, promptContent });
+                        var userAiConfig = prompt.Replace("{0}", wordContent, StringComparison.CurrentCulture);
+
+                        var aiResponse = await SendChatGPT(aiConfig, aiCriteriaConfig, aiPromptManager, userRoleStr!, userAiConfig, cancellationToken);
+                        aiResponse = SharedStringHelper.RemoveMarkdownFromJson(aiResponse);
+
+                        var type = TestLayoutDispatchHelper.GetTestAIType(aiCriteriaConfig.TypeCriteriaAi ?? default);
+                        resultDictionary[type] = aiResponse;
+
+                        await SendWebSocket(aiResponse, type.ToString(), sectionDisplayOrder, testResultId, cancellationToken);
+                    }
                 }
 
                 return resultDictionary;
-            }
-
-            // Case 2: common prompts
-            foreach (var item in aiConfig.Prompts!)
-            {
-                var prompt = string.Concat(new[] { aiConfig.Task!, Environment.NewLine, item.PromptContent! });
-                var userAiConfig = prompt.Replace("{0}", wordContent, StringComparison.CurrentCulture);
-
-                var aiResponse = await SendChatGPT(aiConfig, aiConfig.SystemRoleAlConfig!, userAiConfig, cancellationToken);
-                aiResponse = SharedStringHelper.RemoveMarkdownFromJson(aiResponse);
-
-                resultDictionary[item.Type] = aiResponse;
-
-                await SendWebSocket(aiResponse, item.Type.ToString(), sectionDisplayOrder, testResultId, cancellationToken);
             }
 
             return resultDictionary;
@@ -532,17 +594,32 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
             List<TestAIGradingModel>? LexicalResource,
             List<TestAIGradingModel>? GrammaticalRange,
             bool IsValid)
-            ParseFeedback(object feedback)
+        ParseFeedback(object feedback)
         {
             var json = ConvertHelper.Serialize(feedback);
             var dict = ConvertHelper.Deserialize<Dictionary<string, string>>(json);
 
-            var taskResponse = ConvertHelper.Deserialize<List<TestAIGradingModel>>(dict?.GetValueOrDefault("taskResponse"));
-            var coherence = ConvertHelper.Deserialize<List<TestAIGradingModel>>(dict?.GetValueOrDefault("coherence"));
-            var lexical = ConvertHelper.Deserialize<List<TestAIGradingModel>>(dict?.GetValueOrDefault("lexicalResource"));
-            var grammar = ConvertHelper.Deserialize<List<TestAIGradingModel>>(dict?.GetValueOrDefault("grammaticalRange"));
+            List<TestAIGradingModel>? GetSingleList(string? value)
+            {
+                var list = ConvertHelper.Deserialize<List<TestAIGradingModel>>(value);
+                if (list == null || list.Count == 0)
+                {
+                    return null;
+                }
 
-            var ok = taskResponse != null && coherence != null && lexical != null && grammar != null;
+                // chỉ lấy 1 bản ghi
+                return new List<TestAIGradingModel> { list[0] };
+            }
+
+            var taskResponse = GetSingleList(dict?.GetValueOrDefault("taskResponse"));
+            var coherence = GetSingleList(dict?.GetValueOrDefault("coherence"));
+            var lexical = GetSingleList(dict?.GetValueOrDefault("lexicalResource"));
+            var grammar = GetSingleList(dict?.GetValueOrDefault("grammaticalRange"));
+
+            var ok = taskResponse != null
+                  && coherence != null
+                  && lexical != null
+                  && grammar != null;
 
             return (taskResponse, coherence, lexical, grammar, ok);
         }
@@ -758,7 +835,12 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
         // AI send + websocket
         // =========================
 
-        private async Task<string> SendChatGPT(TestAISetting aiConfig, string systemRole, string userAiConfig, CancellationToken cancellationToken)
+        private async Task<string> SendChatGPT(TestAISetting aiConfig,
+            AICriteriaConfigs? aiCriteriaConfig,
+            AiPromptManager? aiPromptManager,
+            string systemRole,
+            string userAiConfig,
+            CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(userAiConfig))
             {
@@ -767,12 +849,12 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
 
             var result = await _mediator.Send(new SubmitAICommand
             {
-                SettingModel = aiConfig.SettingModel,
-                SettingTemperature = aiConfig.SettingTemperature,
-                SettingFrequecy = aiConfig.SettingFrequecy,
-                SettingWordMaxLength = aiConfig.SettingWordMaxLength,
-                SettingPresence = aiConfig.SettingPresence,
-                SettingTopP = aiConfig.SettingTopP,
+                SettingModel = aiPromptManager?.AiModel ?? aiConfig.SettingModel,
+                SettingTemperature = aiCriteriaConfig?.SettingTemperature ?? aiConfig.SettingTemperature,
+                SettingFrequecy = aiCriteriaConfig?.SettingFrequency ?? aiConfig.SettingFrequecy,
+                SettingWordMaxLength = aiCriteriaConfig?.SettingWordMaxLength ?? aiConfig.SettingWordMaxLength,
+                SettingPresence = aiCriteriaConfig?.SettingPresence ?? aiConfig.SettingPresence,
+                SettingTopP = aiCriteriaConfig?.SettingTopP ?? aiConfig.SettingTopP,
                 SystemRoleAlConfig = systemRole,
                 UserAIConfig = userAiConfig,
             }, cancellationToken).ConfigureAwait(false);

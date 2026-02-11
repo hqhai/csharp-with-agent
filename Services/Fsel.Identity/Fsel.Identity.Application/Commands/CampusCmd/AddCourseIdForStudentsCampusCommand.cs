@@ -37,6 +37,9 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
                 p.CourseId = request.CourseId;
                 p.CourseLevel = request.CourseLevel;
                 p.ClassId = request.ClassId;
+                p.ProgramId = request.ProgramId;
+                p.LevelId = request.LevelId;
+                p.SubjectId = request.SubjectId;
             });
 
             await _studentRepository.ExecuteTransactionAsync(async () =>

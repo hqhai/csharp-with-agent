@@ -89,7 +89,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
             {
                 var levels = await _testService.GetSuggestLevels(ptResult.Id,
                     DateTimeHelper.GetYearOld(student.User.Birthday),
-                    useHighestLevelIdOfPt: false,
+                    isOpenOldLevel: false,
                     cancellationToken: cancellationToken);
 
                 ptResult.SuggestLevel = levels.FirstOrDefault(x => x.CourseType == EnumSubjectConditionValueType.Recommended.ToString())?.Name ?? string.Empty;

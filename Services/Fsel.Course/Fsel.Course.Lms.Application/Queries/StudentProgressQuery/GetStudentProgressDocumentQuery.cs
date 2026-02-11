@@ -2,6 +2,9 @@
 
 namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
 {
+    using System.Collections.Generic;
+    using System.Threading;
+    using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums;
     using Fsel.Common.Enums.ErrorCodes;
@@ -18,7 +21,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetStudentProgressVideoQuery : IRequest<MethodResult<IList<VideoStudentProgressModel>>>
+    public class GetStudentProgressDocumentQuery : IRequest<MethodResult<IList<DocumentStudentProgressModel>>>
     {
         public Guid StudentId { get; set; }
         public Guid CourseId { get; set; }
@@ -27,35 +30,29 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
         public Guid LessonResultId { get; set; }
     }
 
-    public class GetStudentProgressVideoQueryHandler : IRequestHandler<GetStudentProgressVideoQuery, MethodResult<IList<VideoStudentProgressModel>>>
+    public class GetStudentProgressDocumentQueryHandler : IRequestHandler<GetStudentProgressDocumentQuery, MethodResult<IList<DocumentStudentProgressModel>>>
     {
         private readonly IUserService _userService;
-        private readonly ISystemService _systemService;
-        private readonly IVideoResultRepository _videoResultRepository;
-        private readonly ILessonResultRepository _lessonResultRepository;
-        private readonly ICourseResultRepository _courseResultRepository;
         private readonly ILessonRepository _lessonRepository;
-        private readonly IVideoRepository _videoRepository;
-        private readonly VideoConverter _videoConverter;
+        private readonly ILessonResultRepository _lessonResultRepository;
+        private readonly IDocumentRepository _documentRepository;
+        private readonly IDocumentResultRepository _documentResultRepository;
+        private readonly ISystemService _systemService;
 
-        public GetStudentProgressVideoQueryHandler(IUserService userService, ISystemService systemService, IVideoResultRepository videoResultRepository, ILessonResultRepository lessonResultRepository, VideoConverter videoConverter, ICourseResultRepository courseResultRepository, IVideoRepository videoRepository, ILessonRepository lessonRepository)
+        public GetStudentProgressDocumentQueryHandler(IUserService userService, ILessonRepository lessonRepository, ILessonResultRepository lessonResultRepository, IDocumentRepository documentRepository, IDocumentResultRepository documentResultRepository, ISystemService systemService)
         {
             _userService = userService;
-            _systemService = systemService;
-            _videoResultRepository = videoResultRepository;
-            _lessonResultRepository = lessonResultRepository;
-            _videoConverter = videoConverter;
-            _courseResultRepository = courseResultRepository;
-            _videoRepository = videoRepository;
             _lessonRepository = lessonRepository;
+            _lessonResultRepository = lessonResultRepository;
+            _documentRepository = documentRepository;
+            _documentResultRepository = documentResultRepository;
+            _systemService = systemService;
         }
 
-        public async Task<MethodResult<IList<VideoStudentProgressModel>>> Handle(GetStudentProgressVideoQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<DocumentStudentProgressModel>>> Handle(GetStudentProgressDocumentQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<IList<VideoStudentProgressModel>>();
-
-            var videoProgressModels = new List<VideoStudentProgressModel>();
+            var methodResult = new MethodResult<IList<DocumentStudentProgressModel>>();
 
             var studentResults = await _userService.GetUserByStudentIdWithCache(request.StudentId);
             if (!studentResults.IsSuccessStatusCode)
@@ -79,7 +76,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 return methodResult;
             }
 
-            var modules = lesson.LessonModules.Where(p => p.LessonConfigType == EnumLessonConfigType.Video).OrderBy(p => p.DisplayOrder).ToList();
+            var modules = lesson.LessonModules.Where(p => p.LessonConfigType == EnumLessonConfigType.Document).OrderBy(p => p.DisplayOrder).ToList();
             if (modules == null || modules.Count == 0)
             {
                 methodResult.StatusCode = StatusCodes.Status200OK;
@@ -96,18 +93,20 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 return methodResult;
             }
 
-            var videoResults = await _videoResultRepository.Queryable.Include(x => x.Video).Where(x => x.LessonResultId == lessonResult.Id && x.StudentId == request.StudentId).ToListAsync(cancellationToken);
+            var documentResults = await _documentResultRepository.Queryable.Include(x => x.Document).Where(x => x.LessonResultId == lessonResult.Id && x.StudentId == request.StudentId).ToListAsync(cancellationToken);
 
-            var videos = await _videoRepository.Queryable.Where(p => originalIds.Contains(p.OriginalId) && p.VersionStatus == EnumVersionStatus.LastVersion).ToListAsync(cancellationToken);
+            var documents = await _documentRepository.Queryable.Where(p => originalIds.Contains(p.OriginalId) && p.VersionStatus == EnumVersionStatus.LastVersion).ToListAsync(cancellationToken);
+
+            var documentStudentProgressModels = new List<DocumentStudentProgressModel>();
 
             foreach (var module in modules)
             {
-                var videoProgressModel = new VideoStudentProgressModel();
-                videoProgressModel.DisplayOrder = module.DisplayOrder;
+                var documentStudentProgressModel = new DocumentStudentProgressModel();
+                documentStudentProgressModel.DisplayOrder = module.DisplayOrder;
 
-                var videoResult = videoResults.FirstOrDefault(p => p.LessonModuleId == module.Id);
+                var documentResult = documentResults.FirstOrDefault(p => p.LessonModuleId == module.Id);
 
-                if (videoResult != null)
+                if (documentResult != null)
                 {
                     var featureAccessTimeResult = await _systemService.GetFeatureAccessTimeAsync(new FeatureAccessTimeQueryModel
                     {
@@ -115,8 +114,8 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                         UnitId = request.UnitId,
                         LessonId = request.LessonId,
                         CourseId = request.CourseId,
-                        EnumFeature = EnumFeature.VideoLesson,
-                        ObjectId = request.LessonResultId
+                        EnumFeature = EnumFeature.Document,
+                        ObjectId = documentResult.Id
                     });
 
                     if (!featureAccessTimeResult.IsSuccessStatusCode)
@@ -127,36 +126,32 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
 
                     var featureAccessTime = featureAccessTimeResult.Content?.Result;
 
-                    videoProgressModel.Name = videoResult.Video?.Name;
-                    videoProgressModel.VideoId = videoResult.VideoId;
-                    videoProgressModel.Status = videoResult.Status;
-
-                    var method = await _videoConverter.GetVideoSkillScoresV2(videoResult, cancellationToken);
-                    videoProgressModel.VideoSkillScores = method.Item1;
-
                     if (featureAccessTime != null)
                     {
-                        videoProgressModel.Visit = featureAccessTime.Visit;
-                        videoProgressModel.LastVisited = featureAccessTime.LastVisited;
-                        videoProgressModel.TimeSpent = featureAccessTime.AccessTime;
+                        documentStudentProgressModel.Visit = featureAccessTime.Visit;
+                        documentStudentProgressModel.LastVisited = featureAccessTime.LastVisited;
+                        documentStudentProgressModel.TimeSpent = featureAccessTime.AccessTime;
                     }
 
-                    videoProgressModels.Add(videoProgressModel);
+                    documentStudentProgressModel.Status = documentResult.Status;
+
+                    documentStudentProgressModel.Files = documentResult.Document?.Files;
+
+                    documentStudentProgressModels.Add(documentStudentProgressModel);
                 }
                 else
                 {
-                    var video = videos.FirstOrDefault(p => p.OriginalId == module.OriginalId);
-                    if (video != null)
+                    var document = documents.FirstOrDefault(p => p.OriginalId == module.OriginalId);
+                    if (document != null)
                     {
-                        videoProgressModel.Name = video.Name;
-                        videoProgressModel.VideoId = video.Id;
-                        videoProgressModel.Status = EnumResultStatus.Unfinished;
-                        videoProgressModels.Add(videoProgressModel);
+                        documentStudentProgressModel.Files = document.Files;
+                        documentStudentProgressModel.Status = EnumResultStatus.Unfinished;
+                        documentStudentProgressModels.Add(documentStudentProgressModel);
                     }
                 }
             }
 
-            methodResult.Result = videoProgressModels;
+            methodResult.Result = documentStudentProgressModels;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

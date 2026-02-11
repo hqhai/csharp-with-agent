@@ -281,7 +281,7 @@ namespace Fsel.Course.Infrastructure.Common
                     break;
 
                 default:
-                    throw new ArgumentException("Invalid question type");
+                    break;
             }
             return (result, totalCorrect);
         }

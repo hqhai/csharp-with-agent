@@ -40,7 +40,7 @@ namespace Fsel.Course.Application.Queries.AiCriteriaConfigQuery
                 .Where(x => x.Id == request.Id)
                 .ToListAsync(cancellationToken);
 
-            if (aiCriteria == null && aiCriteria.Count == 0)
+            if (aiCriteria == null || aiCriteria.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(aiCriteria));
                 return methodResult;

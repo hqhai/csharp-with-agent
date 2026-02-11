@@ -101,6 +101,10 @@ namespace Fsel.System.Application.Commands.Chatbots
             // 6️⃣ Call AI
             var aiResponse = await _mediator.Send(new SubmitAICommand
             {
+                Model = aiConfig?.AiModel,
+                Temperature = aiConfig?.SettingTemperature ?? default,
+                PresencePenalty = aiConfig?.SettingPresence ?? default,
+                TopP = aiConfig?.SettingTopP ?? default,
                 MaxToken = maxToken,
                 ChatBotMessages = initConversation
             }, ct);

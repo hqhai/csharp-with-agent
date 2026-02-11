@@ -42,7 +42,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
 
         Task CreateTestAnswers(SubmitAnswerCommandModel request);
 
-        Task<List<SelectionLevelModel>> GetSuggestLevels(Guid ptResultId, int age, bool useHighestLevelIdOfPt = false, CancellationToken cancellationToken = default);
+        Task<List<SelectionLevelModel>> GetSuggestLevels(Guid ptResultId, int age, bool isOpenOldLevel = false, CancellationToken cancellationToken = default);
     }
 
     public class TestService : ITestService
@@ -64,6 +64,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
         private readonly ISubjectConditionRepository _subjectConditionRepository;
         private readonly ICourseCachingService _courseCachingService;
         private readonly ILevelRepository _levelRepository;
+        private readonly ICourseResultRepository _courseResultRepository;
         private readonly IMapper _mapper;
 
         public TestService(ITestCachingService testCachingService,
@@ -83,6 +84,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             ISubjectConditionRepository subjectConditionRepository,
             ICourseCachingService courseCachingService,
             ILevelRepository levelRepository,
+            ICourseResultRepository courseResultRepository,
             IMapper mapper)
         {
             _testCachingService = testCachingService;
@@ -102,6 +104,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             _subjectConditionRepository = subjectConditionRepository;
             _courseCachingService = courseCachingService;
             _levelRepository = levelRepository;
+            _courseResultRepository = courseResultRepository;
             _mapper = mapper;
         }
 
@@ -405,8 +408,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
         private async Task SubmitSections(SubmitAnswerCommandModel request)
         {
             ArgumentNullException.ThrowIfNull(request.Answers);
-            var sectionTimeCodeIds = request.Answers.Where(x => x.TestSectionId.HasValue).Select(x => x.TestSectionId!.Value).ToList();
-            var testSections = await _testSectionRepository.GetByIdsAsync(sectionTimeCodeIds);
+            var testSectionIds = request.Answers.Where(x => x.TestSectionId.HasValue).Select(x => x.TestSectionId!.Value).ToList();
+            var testSections = await _testSectionRepository.GetByIdsAsync(testSectionIds);
             if (testSections.Any())
             {
                 var sectionIds = testSections.Select(x => x.Id).ToList();
@@ -437,15 +440,6 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                     }
 
                     int answerLength = item.Answer?.ToString()?.Length ?? default;
-                    if (testSection.DisplayOrder == AnswerLength.Section0 && answerLength > AnswerLength.MaxLengthDisplayOrder0)
-                    {
-                        return;
-                    }
-                    if (testSection.DisplayOrder == AnswerLength.Section1 && answerLength > AnswerLength.MaxLengthDisplayOrder1)
-                    {
-                        return;
-                    }
-
                     var testAnswer = testAnswers.FirstOrDefault(x => x.TestSectionId == testSection.Id);
                     if (testAnswer == null)
                     {
@@ -510,8 +504,18 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                     {
                         return;
                     }
-
-                    var pronunciation = await _continuousPronunciation.AssessPronunciationFromFileContinuousAsync(item.Answer?.ToString() ?? string.Empty, item.SpeechTextAnswer ?? string.Empty);
+                    PronunciationAssessmentModel? pronunciation = null;
+                    if (string.IsNullOrEmpty(item.SpeechTextAnswer))
+                    {
+                        pronunciation = new PronunciationAssessmentModel
+                        {
+                            PronunciationScore = 0
+                        };
+                    }
+                    else
+                    {
+                        pronunciation = await _continuousPronunciation.AssessPronunciationFromFileContinuousAsync(item.Answer?.ToString() ?? string.Empty, item.SpeechTextAnswer ?? string.Empty);
+                    }
                     var testAnswer = testAnswers.FirstOrDefault(x => x.TestSectionId == testSection.Id);
                     if (testAnswer == null)
                     {
@@ -709,7 +713,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             }
         }
 
-        public async Task<List<SelectionLevelModel>> GetSuggestLevels(Guid ptResultId, int age, bool useHighestLevelIdOfPt = false, CancellationToken cancellationToken = default)
+        public async Task<List<SelectionLevelModel>> GetSuggestLevels(Guid ptResultId, int age, bool isOpenOldLevel = false, CancellationToken cancellationToken = default)
         {
             var ptTestResult = await _testGroupResultRepository.ReadQueryable
                 .FirstOrDefaultAsync(x => x.Id == ptResultId, cancellationToken);
@@ -727,18 +731,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                 .Select(x => x.CurrentLevel)
                 .ToListAsync(cancellationToken);
 
-            var highestLevelId = ptTestResult.CurrentLevelId;
-            if (useHighestLevelIdOfPt)
-            {
-                var highestLevelFromPt = levelsFromPtOnSameProgram.Where(x => x != null)
-               .OrderByDescending(x => x.LevelOrder)
-               .FirstOrDefault();
-
-                if (highestLevelFromPt != null)
-                {
-                    highestLevelId = highestLevelFromPt.Id;
-                }
-            }
+            var currentLevelId = ptTestResult.CurrentLevelId;
 
             var program = await _categoryRepository.ReadQueryable
                 .Include(x => x.Levels)
@@ -754,7 +747,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                 .Include(x => x.SubjectConditionRules)
                 .FirstOrDefaultAsync(cancellationToken);
 
-            var matchestRule = suggestCondition?.SubjectConditionRules.Where(x => IsMatchRule(x, age, highestLevelId))
+            var matchestRule = suggestCondition?.SubjectConditionRules.Where(x => IsMatchRule(x, age, currentLevelId))
                 .OrderBy(x =>
                 {
                     var ageCondition = x?.ConditionRules?.FirstOrDefault(x => x.Type == EnumSubjectConditionRuleType.Age);
@@ -799,17 +792,56 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                     }
                     else
                     {
-                        selectionLevel.CanSelect = highestLevelId == x.Id;
+                        selectionLevel.CanSelect = currentLevelId == x.Id;
                     }
                 }
 
-                selectionLevel.IsCurrentLevel = highestLevelId == x.Id;
+                selectionLevel.IsCurrentLevel = currentLevelId == x.Id;
 
                 return selectionLevel;
             }).ToList();
 
             var availableCourses = await _courseCachingService.GetAllAvailableCoursesAsync();
             suggestLevels.ForEach(x => x.IsAvailableCourse = availableCourses.Any(c => c.LevelId == x.Id));
+
+            if (isOpenOldLevel && levelsFromPtOnSameProgram != null)
+            {
+                var canSelectLevelIds = levelsFromPtOnSameProgram.OfType<Level>().Select(x => x.Id).ToList();
+                if (suggestCondition != null)
+                {
+                    foreach (var level in levelsFromPtOnSameProgram.OfType<Level>())
+                    {
+                        var matchestRuleOfLevel = suggestCondition.SubjectConditionRules.Where(x => IsMatchRule(x, age, level.Id)).ToList();
+                        var levelIds = matchestRuleOfLevel.SelectMany(x => x.ConditionValues?.SelectMany(x => x.LevelIds ?? new List<Guid>()).Distinct().ToList() ?? new List<Guid>());
+                        if (levelIds != null)
+                        {
+                            canSelectLevelIds = canSelectLevelIds.Concat(levelIds).Distinct().ToList();
+                        }
+                    }
+                }
+
+                suggestLevels.ForEach(l =>
+                {
+                    if (!l.CanSelect)
+                    {
+                        l.CanSelect = canSelectLevelIds.Any(x => x == l.Id);
+                    }
+                });
+            }
+
+            var courseResults = await _courseResultRepository.ReadQueryable
+                .Where(x => x.StudentId == ptTestResult.StudentId && x.WorkingStatus != EnumWorkingStatus.NotWorking)
+                .Include(x => x.Course)
+                .ToListAsync(cancellationToken);
+
+            var learnedLevelIds = courseResults.Select(x => x.Course?.LevelId).OfType<Guid>().ToList();
+            suggestLevels.ForEach(l =>
+            {
+                if (!l.LearnedBefore)
+                {
+                    l.LearnedBefore = learnedLevelIds.Any(x => x == l.Id);
+                }
+            });
 
             return suggestLevels;
         }

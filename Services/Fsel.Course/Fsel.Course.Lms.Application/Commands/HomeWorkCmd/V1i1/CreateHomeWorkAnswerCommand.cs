@@ -430,6 +430,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
 
             if (homeWorkResult.Status == EnumResultStatus.New)
             {
+                homeWorkResult.ProcessDate = DateTime.UtcNow;
                 homeWorkResult.Status = EnumResultStatus.Process;
             }
 
@@ -578,6 +579,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
         {
             homeWorkResult.CorrectCount = statistics.CorrectCount;
             homeWorkResult.CorrectTotal = statistics.CorrectTotal;
+            homeWorkResult.Percent = NumberHelper.GetPercent(statistics.CorrectCount, statistics.CorrectTotal);
 
             if (homeWorkResult.SubmissionCount == EnumSubmissionCount.FirstSubmit)
             {
@@ -610,7 +612,6 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
 
             var skillScores = new SkillScores
             {
-                Skill = statistics.CourseSkill,
                 CorrectCount = statistics.CorrectCount,
                 TotalCount = statistics.CorrectTotal,
                 CountQuestion = statistics.TotalAnswer,

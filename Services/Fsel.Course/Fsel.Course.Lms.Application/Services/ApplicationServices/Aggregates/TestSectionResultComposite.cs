@@ -199,10 +199,12 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             if (Children.Count > 0)
             {
                 var scoringFormulaConfigs = (TestSection?.ScoringFormulaConfigs ?? new List<ScoringFormulaConfig>()).ToList();
+                var max = TestSection?.ScoringFormulaConfigs?.Max(x => x.Equal) ?? 9;
 
                 if (Children.All(c => c is TestAnswerLeaf ta && ta.TestAnswer.Status == EnumAnswerStatus.Done))
                 {
                     TestSectionResult.CorrectCount = TestSectionResult.TestAnswers.Sum(t => t.CorrectCount);
+                    TestSectionResult.Percent = NumberHelper.GetPercent(TestSectionResult.CorrectCount, TestSectionResult.CorrectTotal);
                     var scores = GetBandScore(TestSectionResult.CorrectCount, scoringFormulaConfigs);
                     if (TestSectionResult.SkillScores != null && TestSectionResult.SkillScores.Any())
                     {
@@ -223,11 +225,14 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                     if (context.ScoringFormulaType == EnumScoringFormulaType.BandScore && TestSection != null && TestSection.Percent.HasValue)
                     {
                         TestSectionResult.ScoreModule = NumberHelper.ConvertDoublePercent(scores * TestSection.Percent.Value, 2);
+                        TestSectionResult.Percent = NumberHelper.GetPercent(scores, max);
                     }
                 }
                 else if (Children.All(c => c is TestSectionResultComposite))
                 {
                     TestSectionResult.CorrectCount = TestSectionResult.SectionResults.Sum(t => t.CorrectCount);
+                    TestSectionResult.Percent = NumberHelper.GetPercent(TestSectionResult.CorrectCount, TestSectionResult.CorrectTotal);
+
                     var scores = GetBandScore(TestSectionResult.CorrectCount, scoringFormulaConfigs);
 
                     if (TestSectionResult.SkillScores != null && TestSectionResult.SkillScores.Any())
@@ -252,11 +257,13 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                     if (context.ScoringFormulaType == EnumScoringFormulaType.BandScore && TestSection != null && TestSection.Percent.HasValue)
                     {
                         TestSectionResult.ScoreModule = NumberHelper.ConvertDoublePercent(scores * TestSection.Percent.Value, 2);
+                        TestSectionResult.Percent = NumberHelper.GetPercent(scores, max);
                     }
                 }
                 else
                 {
                     TestSectionResult.CorrectCount = TestSectionResult.SectionResults.Sum(t => t.CorrectCount);
+                    TestSectionResult.Percent = NumberHelper.GetPercent(TestSectionResult.CorrectCount, TestSectionResult.CorrectTotal);
                     var scores = GetBandScore(TestSectionResult.CorrectCount, scoringFormulaConfigs);
 
                     // get layout and process
@@ -281,6 +288,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                     if (context.ScoringFormulaType == EnumScoringFormulaType.BandScore && TestSection != null && TestSection.Percent.HasValue)
                     {
                         TestSectionResult.ScoreModule = NumberHelper.ConvertDoublePercent(scores * TestSection.Percent.Value, 2);
+                        TestSectionResult.Percent = NumberHelper.GetPercent(scores, max);
                     }
                 }
             }
@@ -325,10 +333,12 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             await base.SubmitTest(context);
 
             var scoringFormulaConfigs = (TestSection?.ScoringFormulaConfigs ?? new List<ScoringFormulaConfig>()).ToList();
+            var max = TestSection?.ScoringFormulaConfigs?.Max(x => x.Equal) ?? 9;
 
             if (Children.All(c => c is TestAnswerLeaf ta && ta.TestAnswer.Status == EnumAnswerStatus.Done))
             {
                 TestSectionResult.CorrectCount = TestSectionResult.TestAnswers.Sum(t => t.CorrectCount);
+                TestSectionResult.Percent = NumberHelper.GetPercent(TestSectionResult.CorrectCount, TestSectionResult.CorrectTotal);
                 var scores = GetBandScore(TestSectionResult.CorrectCount, scoringFormulaConfigs);
 
                 if (TestSectionResult.SkillScores != null && TestSectionResult.SkillScores.Any())
@@ -352,11 +362,13 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 if (context.ScoringFormulaType == EnumScoringFormulaType.BandScore && TestSection != null && TestSection.Percent.HasValue)
                 {
                     TestSectionResult.ScoreModule = NumberHelper.ConvertDoublePercent(scores * TestSection.Percent.Value, 2);
+                    TestSectionResult.Percent = NumberHelper.GetPercent(scores, max);
                 }
             }
             else if (Children.All(c => c is TestSectionResultComposite))
             {
                 TestSectionResult.CorrectCount = TestSectionResult.SectionResults.Sum(t => t.CorrectCount);
+                TestSectionResult.Percent = NumberHelper.GetPercent(TestSectionResult.CorrectCount, TestSectionResult.CorrectTotal);
                 var scores = GetBandScore(TestSectionResult.CorrectCount, scoringFormulaConfigs);
 
                 if (TestSectionResult.SkillScores != null && TestSectionResult.SkillScores.Any())
@@ -381,11 +393,13 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 if (context.ScoringFormulaType == EnumScoringFormulaType.BandScore && TestSection != null && TestSection.Percent.HasValue)
                 {
                     TestSectionResult.ScoreModule = NumberHelper.ConvertDoublePercent(scores * TestSection.Percent.Value, 2);
+                    TestSectionResult.Percent = NumberHelper.GetPercent(scores, max);
                 }
             }
             else
             {
                 TestSectionResult.CorrectCount = TestSectionResult.SectionResults.Sum(t => t.CorrectCount);
+                TestSectionResult.Percent = NumberHelper.GetPercent(TestSectionResult.CorrectCount, TestSectionResult.CorrectTotal);
                 var scores = GetBandScore(TestSectionResult.CorrectCount, scoringFormulaConfigs);
 
                 // get layout and process
@@ -410,6 +424,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 if (context.ScoringFormulaType == EnumScoringFormulaType.BandScore && TestSection != null && TestSection.Percent.HasValue)
                 {
                     TestSectionResult.ScoreModule = NumberHelper.ConvertDoublePercent(scores * TestSection.Percent.Value, 2);
+                    TestSectionResult.Percent = NumberHelper.GetPercent(scores, max);
                 }
             }
 

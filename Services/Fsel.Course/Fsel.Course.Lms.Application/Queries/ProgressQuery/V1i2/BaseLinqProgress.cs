@@ -23,7 +23,6 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery.V1i2
             {
                 SkillFilePath = list.First().SkillFilePath,
                 SkillId = list.First().SkillId,
-                Skill = list.First().Skill,
                 SkillName = list.First().SkillName,
                 CorrectCount = list.Sum(x => x.CorrectCount),
                 CorrectQuestion = list.Sum(x => x.CorrectQuestion ?? 0),

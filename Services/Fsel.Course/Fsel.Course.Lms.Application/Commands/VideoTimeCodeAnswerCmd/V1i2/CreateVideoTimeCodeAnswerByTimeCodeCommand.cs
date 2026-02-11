@@ -285,6 +285,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i2
             videoTimeCodeResult.Status = isDone ? EnumResultStatus.Done : EnumResultStatus.Process;
             videoTimeCodeResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
             videoTimeCodeResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
+            videoTimeCodeResult.Percent = NumberHelper.GetPercent(videoTimeCodeResult.CorrectCount, videoTimeCodeResult.CorrectTotal);
             videoTimeCodeResult.SkillScores = skillScores;
             videoTimeCodeResult.SkillScoreUngraded = skillScoreUngradeds;
             videoTimeCodeResult.IsWorking = false;

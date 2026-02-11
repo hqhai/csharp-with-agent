@@ -81,6 +81,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.UserNavigationActionModels
                 {
                     return new NavigateAction
                     {
+                        FromInfo = latestHistory.FromInfo,
                         RelatedHistoryId = latestHistory.Id,
                         Status = EnumNavigateActionStatus.ChooseProgram
                     };
@@ -94,7 +95,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.UserNavigationActionModels
                     {
                         PtResultId = ptResult?.Id,
                         LevelOfPt = ptResult?.CurrentLevelId,
-                        CurrentCourseResultId = relatedCourseResultIdHistory?.ToCourseResultId,
+                        CurrentCourseResultId = CurrentStateInfo.CourseResultId,
                         Status = EnumNavigateActionStatus.ContinueLearning
                     };
                 }
@@ -121,6 +122,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.UserNavigationActionModels
 
     public record NavigateAction
     {
+        public FromInfo? FromInfo { get; set; }
         public Guid? PtResultId { get; set; }
         public Guid? LevelOfPt { get; set; }
         public Guid? RelatedHistoryId { get; set; }

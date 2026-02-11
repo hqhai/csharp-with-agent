@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseCourseModule
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServices.CourseItemServices;
     using Fsel.Shared.Helpers;
@@ -25,7 +26,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseCourseModule
             ICourseResultRepository courseResultRepository,
             ICourseItemInitializerFactory courseItemInitializerFactory,
             ITestGroupResultRepository testGroupResultRepository,
-            IUnitResultRepository unitResultRepository) : base(courseModuleCachingService, courseModuleRepository, courseResultRepository, courseItemInitializerFactory, testGroupResultRepository, unitResultRepository)
+            IUnitResultRepository unitResultRepository, SendMailFinishCoursePublisher sendMailFinishCoursePublisher) : base(courseModuleCachingService, courseModuleRepository, courseResultRepository, courseItemInitializerFactory, testGroupResultRepository, unitResultRepository, sendMailFinishCoursePublisher)
         {
             _courseModuleRepository = courseModuleRepository;
             _courseResultRepository = courseResultRepository;

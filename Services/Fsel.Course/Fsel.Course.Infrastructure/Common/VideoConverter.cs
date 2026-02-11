@@ -635,7 +635,6 @@ namespace Fsel.Course.Infrastructure.Common
                     g.SelectMany(v => v.SkillScores!)
                      .GroupBy(s => new
                      {
-                         s.Skill,      // EnumCourseSkill (cũ)
                          s.SkillId,    // Guid? / int? (mới)
                          s.SkillName,  // string? (mới)
                          s.SkillFilePath,
@@ -644,7 +643,6 @@ namespace Fsel.Course.Infrastructure.Common
                      .Select(x => new
                      {
                          Type = x.Key.TimeCodeType,
-                         Skill = x.Key.Skill,
                          SkillId = x.Key.SkillId,
                          SkillFilePath = x.Key.SkillFilePath,
                          SkillName = x.Key.SkillName,
@@ -667,7 +665,6 @@ namespace Fsel.Course.Infrastructure.Common
                         .Where(x => x.TotalQuestion != 0)
                         .Select(x => new SkillScores
                         {
-                            Skill = x.Skill,        // EnumCourseSkill (dùng hiện tại)
                             SkillId = x.SkillId,      // dùng dần về sau
                             SkillName = x.SkillName,    // dùng dần về sau
                             SkillFilePath = x.SkillFilePath,
@@ -678,7 +675,7 @@ namespace Fsel.Course.Infrastructure.Common
                             CountQuestion = x.CountQuestion,
                             TokenReceived = x.TokenReceived,
                         })
-                        .OrderBy(s => s.Skill)   // có thể thêm ThenBy(s => s.SkillName) nếu muốn
+                        .OrderBy(s => s.SkillName)   // có thể thêm ThenBy(s => s.SkillName) nếu muốn
                         .ToList()
                 })
                 .ToList();

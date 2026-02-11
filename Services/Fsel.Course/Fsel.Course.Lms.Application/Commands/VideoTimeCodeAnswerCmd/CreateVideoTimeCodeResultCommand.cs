@@ -97,6 +97,10 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
         private async Task UpdateVideoResult(VideoResult videoResult, Guid videoTimeCodeId)
         {
             videoResult.CurrentVideoTimeCodeId = videoTimeCodeId;
+            if (!videoResult.ProcessDate.HasValue)
+            {
+                videoResult.ProcessDate = DateTime.UtcNow;
+            }
             await _videoResultRepository.BulkUpdateList(new List<VideoResult> { videoResult }, bulk =>
             {
                 bulk.ColumnInputExpression = entity => new { entity.CurrentVideoTimeCodeId };

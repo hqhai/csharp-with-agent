@@ -4,11 +4,13 @@ namespace Fsel.System.Application.Queries.DictionarySearchHistoryQuery
 {
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Core.Base;
     using Fsel.System.Infrastructure;
     using Fsel.System.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Fsel.Core.Extensions;
 
     public class SearchDictionaryHistoryQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<DictionarySearchHistoryModel>>>
     {
@@ -17,10 +19,12 @@ namespace Fsel.System.Application.Queries.DictionarySearchHistoryQuery
     public class SearchDictionaryHistoryQueryHandler : IRequestHandler<SearchDictionaryHistoryQuery, MethodResult<PagingItemsModel<DictionarySearchHistoryModel>>>
     {
         private readonly PostgreDbContext _context;
+        private readonly AuthContext _authContext;
 
-        public SearchDictionaryHistoryQueryHandler(PostgreDbContext context)
+        public SearchDictionaryHistoryQueryHandler(PostgreDbContext context, AuthContext authContext)
         {
             _context = context;
+            _authContext = authContext;
         }
 
         public async Task<MethodResult<PagingItemsModel<DictionarySearchHistoryModel>>> Handle(
@@ -39,7 +43,7 @@ namespace Fsel.System.Application.Queries.DictionarySearchHistoryQuery
             }
 
             var query = _context.DictionarySearchHistories
-                .Where(h => !h.IsDeleted)
+                .Where(h => !h.IsDeleted && h.UserId == _authContext.CurrentUserId)
                 .OrderByDescending(h => h.CreatedDate)
                 .Select(h => new DictionarySearchHistoryModel
                 {
@@ -65,11 +69,10 @@ namespace Fsel.System.Application.Queries.DictionarySearchHistoryQuery
             var totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
 
             var lists = await query
-                .Skip((request.Page - 1) * request.PageSize)
-                .Take(request.PageSize)
-                .AsNoTracking()
-                .ToListAsync(cancellationToken: cancellationToken)
-                .ConfigureAwait(false);
+                        .ApplySortAndPaging(request)
+                        .AsNoTracking()
+                        .ToListAsync(cancellationToken: cancellationToken)
+                        .ConfigureAwait(false);
 
             methodResult.Result = new PagingItemsModel<DictionarySearchHistoryModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;

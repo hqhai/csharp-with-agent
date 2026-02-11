@@ -36,11 +36,10 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
         private readonly ISystemService _systemService;
         private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
         private readonly ICourseResultRepository _courseResultRepository;
-        private readonly IAggregateResultQueryService _aggregateResultQueryService;
         private readonly ILearningService _learningService;
         private readonly IServiceProvider _serviceProvider;
 
-        public GetStudentProgressUnitsQueryHandler(ICourseRepository courseRepository, IUnitRepository unitRepository, ManagerProgressHelper managerProgressHelper, IUserService userService, ISystemService systemService, ICourseUnitMockTestRepository courseUnitMockTestRepository, ICourseResultRepository courseResultRepository, IAggregateResultQueryService aggregateResultQueryService, ILearningService learningService, IServiceProvider serviceProvider)
+        public GetStudentProgressUnitsQueryHandler(ICourseRepository courseRepository, IUnitRepository unitRepository, ManagerProgressHelper managerProgressHelper, IUserService userService, ISystemService systemService, ICourseUnitMockTestRepository courseUnitMockTestRepository, ICourseResultRepository courseResultRepository, ILearningService learningService, IServiceProvider serviceProvider)
         {
             _courseRepository = courseRepository;
             _unitRepository = unitRepository;
@@ -49,7 +48,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             _systemService = systemService;
             _courseUnitMockTestRepository = courseUnitMockTestRepository;
             _courseResultRepository = courseResultRepository;
-            _aggregateResultQueryService = aggregateResultQueryService;
             _learningService = learningService;
             _serviceProvider = serviceProvider;
         }

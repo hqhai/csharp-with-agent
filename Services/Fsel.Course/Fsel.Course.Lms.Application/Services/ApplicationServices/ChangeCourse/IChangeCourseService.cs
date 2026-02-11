@@ -523,6 +523,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.ChangeCourse
                 if (relatedCourseResultIdHistory != null)
                 {
                     waitSelectProgramHistory.PtResultId = relatedCourseResultIdHistory.PtResultId;
+                    waitSelectProgramHistory.ToCourseResultId = courseResultId;
                     ptResult = relatedCourseResultIdHistory.PtTestResult;
                 }
                 else
@@ -533,6 +534,21 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.ChangeCourse
                                 && (x.Status == EnumResultStatus.Done || x.Status == EnumResultStatus.ByPass)
                                 && x.TestType == EnumTestType.PlacementTest)
                         .FirstOrDefaultAsync();
+                    if (ptResult == null)
+                    {
+                        ptResult = new TestGroupResult
+                        {
+                            Id = Guid.NewGuid(),
+                            ProgramId = targetCourseResult.Course.ProgramId,
+                            ProgramIdOfPt = targetCourseResult.Course.ProgramId,
+                            CurrentLevelId = targetCourseResult.Course.LevelId,
+                            StudentId = targetCourseResult.StudentId,
+                            TestType = EnumTestType.PlacementTest,
+                            Status = EnumResultStatus.Done
+                        };
+                        _testGroupResultRepository.Add(ptResult);
+                    }
+
                     waitSelectProgramHistory.PtResultId = ptResult.Id;
                 }
 

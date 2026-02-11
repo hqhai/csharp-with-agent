@@ -2,20 +2,17 @@
 
 namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
 {
-    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
-    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Lms.Application.Services.ApplicationServices;
     using Fsel.Shared.Models.ShareModels.CampusModel;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.DependencyInjection;
 
     public class GetStudentsLearningProgressQuery : GetStudentsLearningProgressQueryModel, IRequest<MethodResult<IList<StudentCampusLearningProgressModel>>>
     {
@@ -28,17 +25,17 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly ICourseResultRepository _courseResultRepository;
         private readonly ICourseRepository _courseRepository;
-        private readonly IAggregateResultQueryService _aggregateResultQueryService;
+        private readonly ILearningService _learningService;
         private readonly IServiceProvider _serviceProvider;
 
-        public GetStudentsLearningProgressQueryHandler(ICurriculumStudentRepository curriculumStudentRepository, ICurriculumRepository curriculumRepository, ILessonResultRepository lessonResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IAggregateResultQueryService aggregateResultQueryService, IServiceProvider serviceProvider)
+        public GetStudentsLearningProgressQueryHandler(ICurriculumStudentRepository curriculumStudentRepository, ICurriculumRepository curriculumRepository, ILessonResultRepository lessonResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, ILearningService learningService, IServiceProvider serviceProvider)
         {
             _curriculumStudentRepository = curriculumStudentRepository;
             _curriculumRepository = curriculumRepository;
             _lessonResultRepository = lessonResultRepository;
             _courseResultRepository = courseResultRepository;
             _courseRepository = courseRepository;
-            _aggregateResultQueryService = aggregateResultQueryService;
+            _learningService = learningService;
             _serviceProvider = serviceProvider;
         }
 
@@ -64,89 +61,76 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
                                    CourseClone = cc
                                }).ToListAsync(cancellationToken);
 
-            var courseIds = query.Select(p => p.Curriculum.CourseCloneId).ToList();
-
-            var lessonResultEntities = await _lessonResultRepository.Queryable.WhereBulkContains(request.StudentIds, p => p.StudentId).ToListAsync(cancellationToken);
-
-            var courses = await _courseRepository.Queryable.Include(p => p.CourseUnitMockTests).ThenInclude(p => p.Unit).ThenInclude(p => p.UnitLessons).ToListAsync(cancellationToken);
-
             var courseResultEntities = await _courseResultRepository.Queryable.WhereBulkContains(request.StudentIds, p => p.StudentId).ToListAsync(cancellationToken);
 
             var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
 
-            var studentCampusLearningModelsBag = new ConcurrentBag<StudentCampusLearningProgressModel>();
+            var studentCampusLearningModels = new List<StudentCampusLearningProgressModel>();
 
-            await Parallel.ForEachAsync(
-                request.StudentIds,
-                cancellationToken,
-                async (p, cancellationToken) =>
+            var learningComponentModels = query.Select(p => new GetLearningTreeFromCourseToTestModel()
+            {
+                StudentId = p.CurriculumStudent.StudentId,
+                CourseId = p.Curriculum.CourseCloneId
+            }).ToList();
+
+            var results = await _learningService.GetLearningTreeFromCourseToTest(learningComponentModels, cancellationToken);
+
+            foreach (var item in request.StudentIds)
+            {
+                var curriculums = query.Where(x => x.CurriculumStudent.StudentId == item).ToList();
+                if (curriculums.Any())
                 {
-                    var curriculums = query.Where(x => x.CurriculumStudent.StudentId == p).ToList();
-                    if (curriculums.Any())
+                    foreach (var c in curriculums)
                     {
-                        foreach (var c in curriculums)
+                        var studentCampusLearningModel = new StudentCampusLearningProgressModel()
                         {
-                            var studentCampusLearningModel = new StudentCampusLearningProgressModel()
+                            CurriculumName = c.Curriculum.CurriculumName,
+                            CourseLevel = c.CourseClone.CourseLevel,
+                            CourseType = c.CourseClone.CourseType,
+                            CourseName = c.CourseClone.Name,
+                            ProgramName = c.CourseClone.Program?.Name,
+                            LevelName = c.CourseClone.Level?.Name,
+                            SubjectName = c.CourseClone.Program?.CategoryParent?.Name,
+                            StudentId = item,
+                            CurriculumId = c.Curriculum.Id,
+                            StartDate = c.Curriculum.StartDate,
+                            EndDate = c.Curriculum.EndDate,
+                            CourseCloneId = c.Curriculum.CourseCloneId
+                        };
+
+                        var courseResult = courseResultEntities
+                           .FirstOrDefault(x => x.StudentId == item && x.CourseId == c.Curriculum.CourseCloneId);
+
+                        if (c.Curriculum.StartDate > currentDate)
+                        {
+                            studentCampusLearningModel.Status = EnumStudentCampusLearningStatus.NotStarted;
+                        }
+                        else
+                        {
+                            if (courseResult != null && courseResult.Status == EnumResultStatus.Done)
                             {
-                                CurriculumName = c.Curriculum.CurriculumName,
-                                CourseLevel = c.CourseClone.CourseLevel,
-                                CourseType = c.CourseClone.CourseType,
-                                CourseName = c.CourseClone.Name,
-                                ProgramName = c.CourseClone.Program?.Name,
-                                LevelName = c.CourseClone.Level?.Name,
-                                SubjectName = c.CourseClone.Program?.CategoryParent?.Name,
-                                StudentId = p,
-                                CurriculumId = c.Curriculum.Id,
-                                StartDate = c.Curriculum.StartDate,
-                                EndDate = c.Curriculum.EndDate,
-                                CourseCloneId = c.Curriculum.CourseCloneId
-                            };
-
-                            var courseResult = courseResultEntities
-                               .FirstOrDefault(x => x.StudentId == p && x.CourseId == c.Curriculum.CourseCloneId);
-
-                            if (courseResult != null)
-                            {
-                                using (var scope = _serviceProvider.CreateScope())
-                                {
-                                    var aggregateResultQueryService = scope.ServiceProvider.GetRequiredService<IAggregateResultQueryService>();
-
-                                    var learningTree = await aggregateResultQueryService.GetLearningTreeFromCourseToLesson(
-                                                p,
-                                                courseResult.Id,
-                                                cancellationToken);
-
-                                    var lessons = learningTree
-                                        .GetAllItemByType<LessonComponent>()
-                                        .ToList();
-
-                                    studentCampusLearningModel.TotalLesson = lessons.Count;
-                                    studentCampusLearningModel.TotalLessonDone = lessons.Count(n => n.Status == EnumResultStatus.Done);
-                                }
-                            }
-
-                            if (c.Curriculum.StartDate > currentDate)
-                            {
-                                studentCampusLearningModel.Status = EnumStudentCampusLearningStatus.NotStarted;
+                                studentCampusLearningModel.Status = EnumStudentCampusLearningStatus.Completed;
                             }
                             else
                             {
-                                if (courseResult != null && courseResult.Status == EnumResultStatus.Done)
-                                {
-                                    studentCampusLearningModel.Status = EnumStudentCampusLearningStatus.Completed;
-                                }
-                                else
-                                {
-                                    studentCampusLearningModel.Status = EnumStudentCampusLearningStatus.InProgress;
-                                }
+                                studentCampusLearningModel.Status = EnumStudentCampusLearningStatus.InProgress;
                             }
-
-                            studentCampusLearningModelsBag.Add(studentCampusLearningModel);
                         }
-                    }
-                });
 
-            var studentCampusLearningModels = studentCampusLearningModelsBag.ToList();
+                        var result = results.FirstOrDefault(p => item == p.StudentId && c.Curriculum.CourseCloneId == p.LearningTemplateId);
+                        if (result != null)
+                        {
+                            var lessons = result.Children.SelectMany(p => p.Children).ToList();
+
+                            studentCampusLearningModel.TotalLesson = lessons.Count;
+                            studentCampusLearningModel.TotalLessonDone = lessons.Count(n => n.Status == EnumResultStatus.Done);
+                        }
+
+                        studentCampusLearningModels.Add(studentCampusLearningModel);
+                    }
+                }
+            }
+
 
             methodResult.Result = studentCampusLearningModels;
             return methodResult;

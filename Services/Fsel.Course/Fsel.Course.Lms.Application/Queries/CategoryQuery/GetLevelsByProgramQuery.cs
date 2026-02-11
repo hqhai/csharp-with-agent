@@ -82,7 +82,7 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
             var suggestLevels = await _testService.GetSuggestLevels(
                 navigateAction.PtResultId.Value,
                 DateTimeHelper.GetYearOld(student.User.Birthday),
-                useHighestLevelIdOfPt: false,
+                isOpenOldLevel: true,
                 cancellationToken: cancellationToken);
 
             return new MethodResult<List<SelectionLevelModel>> { Result = suggestLevels, StatusCode = 200 };

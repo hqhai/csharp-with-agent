@@ -13,7 +13,6 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.EntityModels.DashboardModels;
-    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Enums;
@@ -34,7 +33,6 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
         private readonly ICourseResultRepository _courseResultRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly ILessonNoteRepository _lessonNoteRepository;
-        private readonly IUnitLessonRepository _unitLessonRepository;
         private readonly IMapper _mapper;
         private readonly AuthContext _authContext;
 
@@ -45,7 +43,6 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
             , ICourseResultRepository courseResultRepository
             , ILessonResultRepository lessonResultRepository
             , ILessonNoteRepository lessonNoteRepository
-            , IUnitLessonRepository unitLessonRepository
             , IMapper mapper
             , AuthContext authContext)
         {
@@ -56,7 +53,6 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
             _courseResultRepository = courseResultRepository;
             _lessonResultRepository = lessonResultRepository;
             _lessonNoteRepository = lessonNoteRepository;
-            _unitLessonRepository = unitLessonRepository;
             _mapper = mapper;
             _authContext = authContext;
         }

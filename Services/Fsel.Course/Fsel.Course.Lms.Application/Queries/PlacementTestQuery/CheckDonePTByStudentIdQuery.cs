@@ -10,6 +10,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
     using Fsel.Core.Base.Interfaces;
     using Fsel.Course.Domain.Entities.TestConfigs;
     using Fsel.Course.Domain.Enums;
+    using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels.UserNavigationActionModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -23,11 +24,13 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
     public class CheckDonePtByStudentIdHandler : IRequestHandler<CheckDonePtByStudentIdQuery, MethodResult<PtStateModel>>
     {
         private readonly IRepository<TestGroupResult> _testGroupResult;
+        private readonly ICourseResultRepository _courseResultRepository;
         private readonly IMediator _mediator;
 
-        public CheckDonePtByStudentIdHandler(IRepository<TestGroupResult> testGroupResult, IMediator mediator)
+        public CheckDonePtByStudentIdHandler(IRepository<TestGroupResult> testGroupResult, ICourseResultRepository courseResultRepository, IMediator mediator)
         {
             _testGroupResult = testGroupResult;
+            _courseResultRepository = courseResultRepository;
             _mediator = mediator;
         }
 
@@ -63,17 +66,38 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
                  .OrderByDescending(x => x.CreatedDate)
                  .FirstOrDefaultAsync(x => x.Id == userNavigation.PtResultId, cancellationToken);
 
-                var ptState = new PtStateModel
+                PtStateModel ptState = null;
+                if (testGroupResult == null
+                    && userNavigation.Status == EnumNavigateActionStatus.ContinueLearning
+                    && userNavigation.CurrentCourseResultId.HasValue)
                 {
-                    FlowId = testGroupResult?.FlowId,
-                    TestGroupResultId = testGroupResult?.Id,
-                    StudentId = request.StudentId,
-                    Level = testGroupResult?.CurrentLevel?.Name,
-                    LevelId = testGroupResult?.CurrentLevel?.Id,
-                    SelectedProgramId = testGroupResult?.ProgramId,
-                    SelectedPtProgramId = testGroupResult?.ProgramIdOfPt,
-                    Status = testGroupResult?.Status ?? EnumResultStatus.NotStarted
-                };
+                    var coureResult = await _courseResultRepository.ReadQueryable
+                        .Where(x => x.Id == userNavigation.CurrentCourseResultId.Value)
+                        .Include(x => x.Course)
+                        .FirstOrDefaultAsync(cancellationToken);
+                    ptState = new PtStateModel
+                    {
+                        StudentId = request.StudentId,
+                        LevelId = coureResult?.Course.LevelId,
+                        SelectedProgramId = coureResult?.Course.ProgramId,
+                        SelectedPtProgramId = coureResult?.Course.ProgramId,
+                        Status = EnumResultStatus.Done
+                    };
+                }
+                else
+                {
+                    ptState = new PtStateModel
+                    {
+                        FlowId = testGroupResult?.FlowId,
+                        TestGroupResultId = testGroupResult?.Id,
+                        StudentId = request.StudentId,
+                        Level = testGroupResult?.CurrentLevel?.Name,
+                        LevelId = testGroupResult?.CurrentLevel?.Id,
+                        SelectedProgramId = testGroupResult?.ProgramId,
+                        SelectedPtProgramId = testGroupResult?.ProgramIdOfPt,
+                        Status = testGroupResult?.Status ?? EnumResultStatus.NotStarted
+                    };
+                }
 
                 return new MethodResult<PtStateModel> { StatusCode = StatusCodes.Status200OK, Result = ptState };
             }
