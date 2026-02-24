@@ -7,7 +7,7 @@ namespace Fsel.Shared.Enums
         Vocabulary,
         Grammar,
         Listening,
-        Spearking,
+        Speaking,
         Other,
     }
 }
