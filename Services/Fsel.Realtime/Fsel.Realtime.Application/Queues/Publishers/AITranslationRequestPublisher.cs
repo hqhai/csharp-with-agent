@@ -29,8 +29,6 @@ namespace Fsel.Realtime.Application.Queues.Publishers
                 return;
             }
             await _queueProvider.Publish(QueueName, request, cancellationToken);
-
         }
-
     }
 }

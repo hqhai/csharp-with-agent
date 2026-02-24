@@ -69,7 +69,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
             try
             {
-
                 // Kiểm tra định dạng file và chuyển đổi nếu cần
                 string extension = Path.GetExtension(filePath).ToLower(CultureInfo.InvariantCulture);
                 try
@@ -97,13 +96,13 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                                 c.CompletionDate,
                                 c.Status,
                                 c.ClassForumResultId,
-                                c.GradingAlFeedback
+                                c.GradingAlFeedback,
+                                c.AITranslationContent
                             };
                         });
                         methodResult.Result = true;
                         return methodResult;
                     });
-
 
                     await _submitAIResponsePublisher.Publish(new SubmitAIResponseModel
                     {
