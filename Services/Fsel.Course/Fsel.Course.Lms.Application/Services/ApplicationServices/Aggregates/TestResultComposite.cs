@@ -108,7 +108,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                     }
                     else if (context.ScoringFormulaType == EnumScoringFormulaType.BandScore)
                     {
-                        TestResult.Score = Children.Cast<TestSectionResultComposite>().Sum(x => x.TestSectionResult.ScoreModule ?? default);
+                        TestResult.Score = NumberHelper.RoundNumberDouble(Children.Cast<TestSectionResultComposite>().Sum(x => x.TestSectionResult.ScoreModule ?? default));
                     }
                 }
             }
