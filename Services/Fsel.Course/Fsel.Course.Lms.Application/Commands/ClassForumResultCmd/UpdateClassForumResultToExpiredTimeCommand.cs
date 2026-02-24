@@ -152,7 +152,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             }
             await _classforumDetailResultRepository.BulkUpdateList(classForumDetailResults, bulk =>
             {
-                bulk.IgnoreOnUpdateExpression = c => new { c.ClassForumResultId, c.SubmissionCount };
+                bulk.IgnoreOnUpdateExpression = c => new { c.ClassForumResultId, c.SubmissionCount, c.AITranslationContent };
             });
         }
 
@@ -169,7 +169,11 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             classForumResult.Content = classForumDetailResult.Content;
             classForumResult.SubmissionCount = classForumDetailResult.SubmissionCount;
             classForumResult.GradingAlFeedback = classForumDetailResult.GradingAlFeedback;
-            classForumResult.GradingAlFeedback = ConvertHelper.Serialize(classForumAIs);
+            classForumResult.AITranslationContent = classForumDetailResult.AITranslationContent;
+            if (string.IsNullOrEmpty(classForumResult.GradingAlFeedback))
+            {
+                classForumResult.GradingAlFeedback = ConvertHelper.Serialize(classForumAIs);
+            }
 
             classForumResult.CorrectCount = GetTargetCount(classForumDetailResult, classForumResult);
             classForumResult.CorrectTotal = MaxTagetScore;

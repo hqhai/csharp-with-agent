@@ -88,7 +88,18 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                     classForumDetailResult.GradingAlFeedback = classForumAIs != null ? ConvertHelper.Serialize(GetClassForumAIs(classForumAIs)) : default;
                     await _classForumDetailResultRepository.BulkUpdateList(new List<ClassForumDetailResult> { classForumDetailResult }, bulk =>
                     {
-                        bulk.IgnoreOnUpdateExpression = c => new { c.WordContent, c.Content, c.WordCount, c.SubmissionCount, c.ProcessDate, c.CompletionDate, c.Status, c.ClassForumResultId };
+                        bulk.IgnoreOnUpdateExpression = c => new
+                        {
+                            c.WordContent,
+                            c.Content,
+                            c.WordCount,
+                            c.SubmissionCount,
+                            c.ProcessDate,
+                            c.CompletionDate,
+                            c.Status,
+                            c.ClassForumResultId,
+                            c.AITranslationContent
+                        };
                     });
                 }
                 return result;

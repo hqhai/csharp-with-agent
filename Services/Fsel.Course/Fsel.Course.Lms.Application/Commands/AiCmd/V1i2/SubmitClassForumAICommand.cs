@@ -14,8 +14,10 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd.V1i2
     using Fsel.Course.Domain.Models.EntityModels.V1i2;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
     using Fsel.Course.Infrastructure.ValueSettings;
+    using Fsel.Course.Lms.Application.Commands.AiCmd;
     using Fsel.Course.Lms.Application.Commands.ClassForumResultCmd;
     using Fsel.Course.Lms.Application.Queries.OtherFeatureQuery;
+    using Fsel.Course.Lms.Application.Queues.Models;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.AIConfigService;
     using Fsel.Course.Lms.Application.Services.SenderService;
@@ -49,8 +51,9 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd.V1i2
         private readonly ILogger<SubmitAIResponseCommandHandler> _logger;
         private readonly IClassForumRepository _classForumRepository;
         private readonly IAIConfigSubmitService _aiConfigSubmitService;
+        private readonly ClassForumTranslationPublisher _translationPublisher;
 
-        public SubmitAIResponseCommandHandler(ILessonResultRepository lessonResultRepository,
+        public SubmitAIResponseCommandHandler(
             SubmitAIResponsePublisher submitAIResponsePublisher,
             NotificationMessagePublisher notificationMessagePublisher,
             IMediator mediator,
@@ -60,7 +63,8 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd.V1i2
             IUserService userService,
             ILogger<SubmitAIResponseCommandHandler> logger,
             IClassForumRepository classForumRepository,
-            IAIConfigSubmitService aiConfigSubmitService
+            IAIConfigSubmitService aiConfigSubmitService,
+            ClassForumTranslationPublisher translationPublisher
         )
         {
             _submitAIResponsePublisher = submitAIResponsePublisher;
@@ -73,6 +77,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd.V1i2
             _logger = logger;
             _classForumRepository = classForumRepository;
             _aiConfigSubmitService = aiConfigSubmitService;
+            _translationPublisher = translationPublisher;
         }
 
         public async Task<bool> Handle(SubmitClassForumAICommand request, CancellationToken cancellationToken)
@@ -191,7 +196,8 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd.V1i2
                         c.CompletionDate,
                         c.Status,
                         c.ClassForumResultId,
-                        c.PronunciationAlFeedback
+                        c.PronunciationAlFeedback,
+                        c.AITranslationContent
                     };
                 });
 
@@ -233,6 +239,12 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd.V1i2
                         await _notificationMessagePublisher.Publish(notificationQueue, cancellationToken);
                     }
                 }
+
+                // Publish translation request lên queue để xử lý bất đồng bộ
+                await PublishTranslationRequestAsync(
+                    request.ClassForumDetailResultId,
+                    ConvertHelper.Serialize(retryResult.ClassForumAIs),
+                    cancellationToken);
             }
             catch (Exception ex)
             {
@@ -240,6 +252,26 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd.V1i2
             }
 
             return true;
+        }
+
+        private async Task PublishTranslationRequestAsync(Guid classForumDetailResultId, string? gradingAlFeedback, CancellationToken cancellationToken)
+        {
+            try
+            {
+                // Publish request lên queue để xử lý bất đồng bộ
+                // Consumer sẽ gọi SubmitTranslationAICommand
+                await _translationPublisher.Publish(new ClassForumTranslationQueueModel
+                {
+                    ClassForumDetailResultId = classForumDetailResultId,
+                    GradingAlFeedback = gradingAlFeedback
+                }, cancellationToken);
+
+                _logger.LogInformation($"Translation request published for ClassForumDetailResultId: {classForumDetailResultId}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error publishing translation request for ClassForumDetailResultId: {classForumDetailResultId}, Error: {ex.Message}");
+            }
         }
 
         private static JsonElement GetFeedbackElement(string? aiResponse)

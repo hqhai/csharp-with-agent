@@ -9,6 +9,7 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums;
     using Fsel.Common.Helpers;
     using Fsel.Core.Base.Interfaces;
     using Fsel.Course.Domain.Entities;
@@ -17,7 +18,6 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
-    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Infrastructure.ValueSettings;
     using Fsel.Course.Lms.Application.Commands.AiCmd;
     using Fsel.Course.Lms.Application.Queues.Publishers.Test;
@@ -167,7 +167,9 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
                 {
                     continue;
                 }
-                var aiPromptManager = await LoadAiPromptManagerAsync(currentSectionResult.TestSection?.AiPromptManagerId, testResult.Test?.ProgramId ?? default, cancellationToken);
+                var aiPromptManager = await LoadAiPromptManagerAsync(currentSectionResult.TestSection?.AiPromptManagerId,
+                    testResult.Test?.ProgramId ?? default,
+                    currentSectionResult.TestSectionId.Value, cancellationToken);
 
                 // load AI config theo sectionId
                 var aiConfig = await LoadAiConfigAsync(currentSectionResult.TestSectionId.Value, cancellationToken);
@@ -254,18 +256,26 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
             await UpdateTestResultIfDoneAsync(testResult, cancellationToken);
         }
 
-        private async Task<AiPromptManager?> LoadAiPromptManagerAsync(Guid? id, Guid programId, CancellationToken ct)
+        private async Task<AiPromptManager?> LoadAiPromptManagerAsync(Guid? id, Guid programId, Guid sectionId, CancellationToken ct)
         {
-            var subjectId = await _categoryRepository.ReadQueryable.Include(x => x.CategoryParent)
-                                                     .Where(x => x.Id == programId)
-                                                     .Select(x => x.Id)
-                                                     .FirstOrDefaultAsync(ct);
+            var sectionAiPromptManager = await _aiPromptManagerRepository.ReadQueryable.Include(x => x.AICriteriaConfigs)
+                                                                         .Where(x => x.AICriteriaConfigs.Any(y => y.ObjectId == sectionId))
+                                                                         .FirstOrDefaultAsync(ct);
+            if (sectionAiPromptManager == null)
+            {
+                var subjectId = await _categoryRepository.ReadQueryable.Include(x => x.CategoryParent)
+                                                    .Where(x => x.Id == programId)
+                                                    .Select(x => x.Id)
+                                                    .FirstOrDefaultAsync(ct);
 
-            return await _aiPromptManagerRepository.ReadQueryable
-                .Where(x => x.ProjectId == subjectId)
-                .Where(x => !id.HasValue || x.Id == id.Value)
-                .Include(x => x.AICriteriaConfigs)
-                .FirstOrDefaultAsync(ct);
+                return await _aiPromptManagerRepository.ReadQueryable
+                    .Where(x => x.ProjectId == subjectId)
+                    .Where(x => !id.HasValue || x.Id == id.Value)
+                    .Where(x => x.VersionStatus == EnumVersionStatus.LastVersion)
+                    .Include(x => x.AICriteriaConfigs)
+                    .FirstOrDefaultAsync(ct);
+            }
+            return sectionAiPromptManager;
         }
 
         private async Task UpdateTestResultIfDoneAsync(TestResult testResult, CancellationToken cancellationToken)
@@ -304,7 +314,7 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
             }
             else if (testResult.Test?.ScoringFormulaType == EnumScoringFormulaType.BandScore)
             {
-                testResult.Score = rootSectionResults.Sum(x => x.ScoreModule);
+                testResult.Score = NumberHelper.RoundNumberDouble(rootSectionResults.Sum(x => x.ScoreModule) ?? default);
             }
 
             // Persist TestResult
@@ -357,9 +367,7 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
 
                     if (totalAfter > 0)
                     {
-                        existed.Scores =
-                            ((existed.Scores * totalBefore) + (s.Scores * s.TotalCount))
-                            / totalAfter;
+                        existed.Scores = NumberHelper.RoundReduceNumber(((existed.Scores * totalBefore) + (s.Scores * s.TotalCount)) / totalAfter);
                     }
 
                     existed.CorrectCount += s.CorrectCount;
@@ -379,12 +387,12 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
         // Load data
         // =========================
 
-        private async Task<List<TestSectionResult>> LoadAllSectionResultsAsync(Guid testResultId, CancellationToken cancellationToken)
+        private async Task<List<TestSectionResult>> LoadAllSectionResultsAsync(Guid testSectionResultId, CancellationToken cancellationToken)
         {
             // TODO: đổi đúng field FK của bạn nếu không phải TestResultId
             return await _testSectionResultRepository.ReadQueryable
                 .Include(x => x.TestSection)
-                .Where(x => x.ParentTestSectionResultId == testResultId)
+                .Where(x => x.ParentTestSectionResultId == testSectionResultId)
                 .ToListAsync(cancellationToken);
         }
 
@@ -508,44 +516,61 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
             // Case 1: criteria settings
             if (string.IsNullOrEmpty(aiConfig.SystemRoleAlConfig) || (aiConfig.Prompts != null && aiConfig.Prompts.Count == 0))
             {
-                foreach (var item in aiConfig.TestAICriteriaSettings)
+                if (aiConfig.TestAICriteriaSettings.Any())
                 {
-                    var criteriaAi = TestLayoutDispatchHelper.GetCriteriaAi(item.CriteriaName);
-                    var aiCriteriaConfig = aiPromptManager?.AICriteriaConfigs?.Where(x => x.SubFeatureType == EnumSubFeatureType.TestConfigWritingLayout)
-                                                   .Where(x => x.TypeCriteriaAi == criteriaAi)
-                                                   .OrderBy(x => x.DefaultType)
-                                                   .FirstOrDefault();
+                    foreach (var item in aiConfig.TestAICriteriaSettings)
+                    {
+                        var criteriaAi = TestLayoutDispatchHelper.GetCriteriaAi(item.CriteriaName);
+                        var aiCriteriaConfig = aiPromptManager?.AICriteriaConfigs?.Where(x => x.SubFeatureType == EnumSubFeatureType.TestConfigWritingLayout)
+                                                       .Where(x => x.VersionStatus == EnumVersionStatus.LastVersion)
+                                                       .Where(x => x.TypeCriteriaAi == criteriaAi)
+                                                       .OrderBy(x => x.DefaultType)
+                                                       .FirstOrDefault();
 
-                    var promptContent = aiCriteriaConfig?.SettingAiConfig ?? item.AIConfigs!.Single().PromptContent;
-                    var userRoleStr = aiCriteriaConfig?.UserRole ?? item.UserRoleStr;
+                        var promptContent = aiCriteriaConfig?.SettingAiConfig ?? item.AIConfigs!.Single().PromptContent;
+                        var userRoleStr = aiCriteriaConfig?.UserRole ?? item.UserRoleStr;
 
-                    var prompt = string.Concat(new[] { aiConfig.Task!, Environment.NewLine, promptContent });
-                    var userAiConfig = prompt.Replace("{0}", wordContent, StringComparison.CurrentCulture);
+                        var prompt = string.Concat(new[] { aiConfig.Task!, Environment.NewLine, promptContent });
+                        var userAiConfig = prompt.Replace("{0}", wordContent, StringComparison.CurrentCulture);
 
-                    var aiResponse = await SendChatGPT(aiConfig, aiCriteriaConfig, aiPromptManager, userRoleStr!, userAiConfig, cancellationToken);
-                    aiResponse = SharedStringHelper.RemoveMarkdownFromJson(aiResponse);
+                        var aiResponse = await SendChatGPT(aiConfig, aiCriteriaConfig, aiPromptManager, userRoleStr!, userAiConfig, cancellationToken);
+                        aiResponse = SharedStringHelper.RemoveMarkdownFromJson(aiResponse);
 
-                    var type = item.AIConfigs![0].Type;
-                    resultDictionary[type] = aiResponse;
+                        var type = item.AIConfigs![0].Type;
+                        resultDictionary[type] = aiResponse;
 
-                    await SendWebSocket(aiResponse, type.ToString(), sectionDisplayOrder, testResultId, cancellationToken);
+                        await SendWebSocket(aiResponse, type.ToString(), sectionDisplayOrder, testResultId, cancellationToken);
+                    }
+                }
+                else
+                {
+                    var aICriteriaConfigs = aiPromptManager?.AICriteriaConfigs?.Where(x => x.SubFeatureType == EnumSubFeatureType.TestConfigWritingLayout)
+                                                            .OrderBy(x => x.DefaultType)
+                                                            .ToList() ?? new List<AICriteriaConfigs>();
+
+                    foreach (var aiCriteriaConfig in aICriteriaConfigs)
+                    {
+                        if (aiCriteriaConfig == null)
+                        {
+                            continue;
+                        }
+                        var promptContent = aiCriteriaConfig.SettingAiConfig;
+                        var userRoleStr = aiCriteriaConfig.UserRole;
+
+                        var prompt = string.Concat(new[] { aiConfig.Task!, Environment.NewLine, promptContent });
+                        var userAiConfig = prompt.Replace("{0}", wordContent, StringComparison.CurrentCulture);
+
+                        var aiResponse = await SendChatGPT(aiConfig, aiCriteriaConfig, aiPromptManager, userRoleStr!, userAiConfig, cancellationToken);
+                        aiResponse = SharedStringHelper.RemoveMarkdownFromJson(aiResponse);
+
+                        var type = TestLayoutDispatchHelper.GetTestAIType(aiCriteriaConfig.TypeCriteriaAi ?? default);
+                        resultDictionary[type] = aiResponse;
+
+                        await SendWebSocket(aiResponse, type.ToString(), sectionDisplayOrder, testResultId, cancellationToken);
+                    }
                 }
 
                 return resultDictionary;
-            }
-
-            // Case 2: common prompts
-            foreach (var item in aiConfig.Prompts!)
-            {
-                var prompt = string.Concat(new[] { aiConfig.Task!, Environment.NewLine, item.PromptContent! });
-                var userAiConfig = prompt.Replace("{0}", wordContent, StringComparison.CurrentCulture);
-
-                var aiResponse = await SendChatGPT(aiConfig, null, null, aiConfig.SystemRoleAlConfig!, userAiConfig, cancellationToken);
-                aiResponse = SharedStringHelper.RemoveMarkdownFromJson(aiResponse);
-
-                resultDictionary[item.Type] = aiResponse;
-
-                await SendWebSocket(aiResponse, item.Type.ToString(), sectionDisplayOrder, testResultId, cancellationToken);
             }
 
             return resultDictionary;
@@ -570,17 +595,32 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
             List<TestAIGradingModel>? LexicalResource,
             List<TestAIGradingModel>? GrammaticalRange,
             bool IsValid)
-            ParseFeedback(object feedback)
+        ParseFeedback(object feedback)
         {
             var json = ConvertHelper.Serialize(feedback);
             var dict = ConvertHelper.Deserialize<Dictionary<string, string>>(json);
 
-            var taskResponse = ConvertHelper.Deserialize<List<TestAIGradingModel>>(dict?.GetValueOrDefault("taskResponse"));
-            var coherence = ConvertHelper.Deserialize<List<TestAIGradingModel>>(dict?.GetValueOrDefault("coherence"));
-            var lexical = ConvertHelper.Deserialize<List<TestAIGradingModel>>(dict?.GetValueOrDefault("lexicalResource"));
-            var grammar = ConvertHelper.Deserialize<List<TestAIGradingModel>>(dict?.GetValueOrDefault("grammaticalRange"));
+            List<TestAIGradingModel>? GetSingleList(string? value)
+            {
+                var list = ConvertHelper.Deserialize<List<TestAIGradingModel>>(value);
+                if (list == null || list.Count == 0)
+                {
+                    return null;
+                }
 
-            var ok = taskResponse != null && coherence != null && lexical != null && grammar != null;
+                // chỉ lấy 1 bản ghi
+                return new List<TestAIGradingModel> { list[0] };
+            }
+
+            var taskResponse = GetSingleList(dict?.GetValueOrDefault("taskResponse"));
+            var coherence = GetSingleList(dict?.GetValueOrDefault("coherence"));
+            var lexical = GetSingleList(dict?.GetValueOrDefault("lexicalResource"));
+            var grammar = GetSingleList(dict?.GetValueOrDefault("grammaticalRange"));
+
+            var ok = taskResponse != null
+                  && coherence != null
+                  && lexical != null
+                  && grammar != null;
 
             return (taskResponse, coherence, lexical, grammar, ok);
         }
@@ -593,7 +633,7 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
             }
             skillScore.TotalQuestion = 1;
             skillScore.CorrectCount = totalScore;
-            skillScore.Scores = NumberHelper.ConvertRound(totalScore / 4, 2);
+            skillScore.Scores = NumberHelper.RoundReduceNumber(totalScore / 4);
         }
 
         private static void BlendWritingScore(SkillScores skillScore, double averageScore, double totalScore, int runOrder)
@@ -786,10 +826,10 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
         {
             if (displayOrder == First_Run_Order)
             {
-                return NumberHelper.RoundNumberDouble((firstScore + average * 2) / 3);
+                return NumberHelper.RoundReduceNumber((firstScore + average * 2) / 3);
             }
 
-            return NumberHelper.RoundNumberDouble((average + firstScore * 2) / 3);
+            return NumberHelper.RoundReduceNumber((average + firstScore * 2) / 3);
         }
 
         // =========================

@@ -80,13 +80,11 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             var lessonResult = classForumResult?.LessonResult;
             if (classForumResult == null || lessonResult == null)
             {
-                methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
 
             if (classForumResult.ClassForumDetailResults.Any(x => x.SubmissionCount == EnumSubmissionCount.FirstSubmit && x.Status == EnumClassForumResultStatus.Draft))
             {
-                methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
 

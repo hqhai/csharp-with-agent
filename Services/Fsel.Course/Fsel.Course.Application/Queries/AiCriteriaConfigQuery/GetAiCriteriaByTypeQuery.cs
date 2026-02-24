@@ -8,6 +8,7 @@ namespace Fsel.Course.Application.Queries.AiCriteriaConfigQuery
     using Domain.Enums;
     using Domain.IRepositories;
     using Domain.Models.EntityModels.AiPromptManagerModels;
+    using Fsel.Common.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -44,7 +45,7 @@ namespace Fsel.Course.Application.Queries.AiCriteriaConfigQuery
                         : (request.ProgramId != null
                             ? x.ProjectId == request.ProgramId
                             : true))
-                    && x.DefaultType == EnumDefaultType.Default)
+                    && x.DefaultType == EnumDefaultType.Default && x.VersionStatus == EnumVersionStatus.LastVersion)
                 .ToListAsync(cancellationToken);
 
             if (aiCriteria.Count == 0)
@@ -58,7 +59,6 @@ namespace Fsel.Course.Application.Queries.AiCriteriaConfigQuery
 
             methodResult.Result = result;
             methodResult.StatusCode = StatusCodes.Status200OK;
-
             return methodResult;
         }
     }

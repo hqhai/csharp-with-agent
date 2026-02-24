@@ -147,7 +147,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherCmd
             {
                 unitsAccessTime.Add(new UnitAccessTime()
                 {
-                    Time = featureAccessTimes?.Where(p => p.UnitId == units[i].LearningTemplateId).Sum(p => p.AccessTime) ?? 0,
+                    Time = featureAccessTimes?.Where(p => p.UnitId == units[i].LearningResultId).Sum(p => p.AccessTime) ?? 0,
                     DisplayOrder = i + 1,
                 });
             }
@@ -229,7 +229,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherCmd
             var sendStudentCompleteCourseModel = new SendStudentCompleteCourseModel
             {
                 CourseName = learningService.ComponentName,
-                Percent = courseResult.Percent.ToString(cultureInfo),
+                Percent = NumberHelper.ConvertRound(courseResult.Percent).ToString(cultureInfo),
                 StartDate = courseResult.CreatedDate.ToString("dd-MM-yyyy", cultureInfo),
                 EndDate = DateTime.UtcNow.ToString("dd-MM-yyyy", cultureInfo),
                 SkillScore = skillScore,
