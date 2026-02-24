@@ -308,7 +308,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
 
             await _classForumDetailResultRepository.BulkUpdateList(new List<ClassForumDetailResult> { classForumDetailResult }, bulk =>
             {
-                bulk.IgnoreOnUpdateExpression = c => new { c.ClassForumResultId, c.SubmissionCount };
+                bulk.IgnoreOnUpdateExpression = c => new { c.ClassForumResultId, c.SubmissionCount, c.AITranslationContent };
             });
             var classForumResultFileNews = classForumDetailResult.ClassForumResultFiles;
 

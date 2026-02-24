@@ -54,6 +54,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public int? TimeCount { get; set; }
 
         public string? GradingAlFeedback { get; set; }
+        public string? AITranslationContent { get; set; }
 
         private string? _avatarPath;
 

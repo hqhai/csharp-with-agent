@@ -37,10 +37,9 @@ namespace Fsel.Realtime.Application.Queues.Consumers
 
         private async Task SendResultToClientAsync(AITranslationResultModel message)
         {
-            await _translationHubContext.Clients.Group(message.ClassForumDetailResultId.ToString())
-                .SendAsync(HubMethodName, message);
+            await _translationHubContext.Clients.Group(message.ClassForumDetailResultId.ToString()).SendAsync(HubMethodName, message);
         }
 
-        #endregion
+        #endregion Private Methods
     }
 }
