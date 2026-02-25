@@ -1,12 +1,13 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using Amazon.Runtime.Internal.Transform;
+using System.Reflection;
 using Fsel.Common.Constants;
 using Fsel.Core.Base.Interfaces;
 using Fsel.Core.Extensions;
 using Fsel.Shared.Constants;
-using Fsel.System.Application.Queues.Consumers;
+using Fsel.System.Application.Commands.DictionaryAICmd;
 using Fsel.System.Application.Queues.Consumer;
+using Fsel.System.Application.Queues.Consumers;
 using Fsel.System.Application.Queues.Publisher;
 using Fsel.System.Application.Services.AIServices;
 using Fsel.System.Application.Services.CourseServices;
@@ -22,18 +23,15 @@ using Fsel.System.Domain.IRepositories.BlindBoxes;
 using Fsel.System.Domain.IRepositories.CourseGoals;
 using Fsel.System.Domain.IRepositories.DailyQuizs;
 using Fsel.System.Infrastructure;
-using Fsel.System.Infrastructure.Repositories;
 using Fsel.System.Infrastructure.Common;
+using Fsel.System.Infrastructure.Repositories;
 using Fsel.System.Infrastructure.Repositories.BlindBoxes;
 using Fsel.System.Infrastructure.Repositories.CourseGoals;
 using Fsel.System.Infrastructure.Repositories.DailyQuizs;
 using Fsel.System.Infrastructure.ValueSettings;
-using Fsel.System.Application.Commands.DictionaryAICmd;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Npgsql;
 using Refit;
-using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -84,7 +82,6 @@ builder.Services.AddMediatR(typeof(SearchDictionaryAICommand).GetTypeInfo().Asse
 
 // Configure Npgsql to properly handle vector type as string
 //NpgsqlConnection.GlobalTypeMapper.EnableDynamicJson();
-
 
 builder.Services.AddScoped<ILiveTimeFrameRepository, LiveTimeFrameRepository>();
 builder.Services.AddScoped<ICourseTimeConfigRepository, CourseTimeConfigRepository>();
@@ -160,6 +157,7 @@ builder.Services.AddScoped<BuyBlindBoxPublisher>();
 builder.Services.AddScoped<SendNotifyBuyBlindBoxPublisher>();
 builder.Services.AddScoped<DictionaryPublisher>();
 builder.Services.AddScoped<CrawDictionaryDataPublisher>();
+builder.Services.AddScoped<SendBotChatPublisher>();
 
 //Add GoogleSheetService
 builder.Services.AddSingleton<IGoogleSheetService>(provider =>
@@ -210,7 +208,8 @@ queues: new Dictionary<string, Type>
     { QueueSettings.RealtimeQueue.NameQueue.DictionaryRealTime, typeof(DictionaryConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.SemanticDictionary, typeof(SemanticDictionaryConsumer) },
     { QueueSettings.SystemQueue.NameQueue.CrawDictionaryData, typeof(CrawDictionaryDataConsumer) },
-    { QueueSettings.OrderingQueue.NameQueue.AddCoinWhenCoursePurchased, typeof(AddCoinWhenCoursePurchasedConsumer) }
+    { QueueSettings.OrderingQueue.NameQueue.AddCoinWhenCoursePurchased, typeof(AddCoinWhenCoursePurchasedConsumer) },
+    { QueueSettings.SystemQueue.NameQueue.SendBotChat, typeof(SendBotChatConsumer) },
 });
 
 var app = builder.Build();
