@@ -46,6 +46,11 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                     Feedback = x.Feedback,
                     Criteria = x.Criteria,
                 }).ToList(),
+                Answer = TestSectionResult.TestAnswers.Where(x => !x.QuestionId.HasValue).Select(x => new AnswerModel
+                {
+                    GradingAlFeedback = x.GradingAlFeedback,
+                    SpeechTextAnswer = x.SpeechTextAnswer,
+                }).FirstOrDefault(),
                 FilePath = TestSection?.Skill?.FilePath,
                 UpdatedDate = TestSectionResult?.UpdatedDate ?? TestSectionResult?.CreatedDate
             };
@@ -78,6 +83,11 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                     Feedback = x.Feedback,
                     Criteria = x.Criteria,
                 }).ToList(),
+                Answer = TestSectionResult.TestAnswers.Where(x => !x.QuestionId.HasValue).Select(x => new AnswerModel
+                {
+                    GradingAlFeedback = x.GradingAlFeedback,
+                    SpeechTextAnswer = x.SpeechTextAnswer,
+                }).FirstOrDefault(),
                 CorrectTotal = TestSectionResult.CorrectTotal,
                 CurrentSectionTimeCodeId = TestSectionResult.CurrentSectionTimeCodeId,
                 HighestStreak = TestSectionResult.HighestStreak,
