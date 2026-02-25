@@ -197,6 +197,7 @@ namespace Fsel.Shared.Constants
                 public const string ChooseDailyQuizWinners = $"{KeyQueue}_ChooseDailyQuizWinners";
                 public const string SendDictionary = $"{KeyQueue}_SendDictionary";
                 public const string CrawDictionaryData = $"{KeyQueue}_CrawDictionaryData";
+                public const string SendBotChat = $"{KeyQueue}_SendBotChat";
             }
         }
 
