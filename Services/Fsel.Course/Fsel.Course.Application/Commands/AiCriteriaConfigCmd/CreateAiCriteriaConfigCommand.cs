@@ -5,6 +5,7 @@ namespace Fsel.Course.Application.Commands.AiCriteriaConfigCmd
     using Common.Enums;
     using Common.Enums.ErrorCodes;
     using Domain.Entities;
+    using Domain.Enums;
     using Domain.Enums.ErrorCodes;
     using Domain.IRepositories;
     using Domain.Models.CommandModels.AiCriteriaConfig;
@@ -327,7 +328,7 @@ namespace Fsel.Course.Application.Commands.AiCriteriaConfigCmd
                 TypeCriteriaAi = item.TypeCriteriaAi,
                 SubFeatureType = item.SubFeatureType,
                 FeatureMultiple = item.FeatureMultiple,
-                DefaultType = item.DefaultType,
+                DefaultType = EnumDefaultType.Feature,
                 UserRole = item.UserRole,
                 SettingAiConfig = item.SettingAiConfig,
                 JsonConfig = item.JsonConfig
