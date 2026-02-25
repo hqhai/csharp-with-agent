@@ -38,6 +38,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
     {
         public EnumResultStatus Status { get; set; }
         public DateTime? UpdatedDate { get; set; }
+        public AnswerModel? Answer { get; set; }
         public IList<TestScoreModel>? TestScores { get; set; }
     }
 
@@ -130,14 +131,12 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
             Config = section.Config;
             ScoringFormulaConfigs = section.ScoringFormulaConfigs;
             TestLayoutType = section.LayoutType;
-
             foreach (var sectionResult in Children)
             {
                 if (sectionResult is not SectionStateModel sectionStateModel)
                 {
                     continue;
                 }
-
                 var sectionMatch = section.TestSections.FirstOrDefault(s => s.Id == sectionStateModel.SectionId);
                 if (sectionMatch == null)
                 {

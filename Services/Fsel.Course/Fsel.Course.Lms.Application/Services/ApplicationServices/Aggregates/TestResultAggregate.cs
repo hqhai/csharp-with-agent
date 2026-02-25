@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
     using Domain.Enums;
     using Domain.Models.CommandModels.Tests;
     using Domain.Models.EntityModels.TestModels;
+    using Fsel.Course.Domain.Models.EntityModels;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
     using BaseTestStateModel = Domain.Models.EntityModels.PlacementTestModels.BaseTestStateModel;
@@ -275,6 +276,11 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                         TestLayoutType = skill.TestSection?.LayoutType,
                         FilePath = skill.TestSection?.Skill?.FilePath,
                         HighestStreak = skill.HighestStreak,
+                        Answer = skill.TestAnswers.Select(x => new AnswerModel
+                        {
+                            GradingAlFeedback = x.GradingAlFeedback,
+                            SpeechTextAnswer = x.SpeechTextAnswer,
+                        }).FirstOrDefault(),
                         PercentResult = skill.Percent,
                         CurrentSectionTimeCodeId = skill.CurrentSectionTimeCodeId,
                         ScoringFormulaConfigs = skill.TestSection?.ScoringFormulaConfigs,

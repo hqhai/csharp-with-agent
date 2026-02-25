@@ -320,8 +320,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             return await queryable
                 .Where(predicate)
                 .Include(x => x.SectionResults)
-                .ThenInclude(x => x.TestSection)
-                .ThenInclude(x => x.TestSectionQuestions)
+                    .ThenInclude(x => x.TestSection)
+                        .ThenInclude(x => x.TestSectionQuestions)
                 .Include(x => x.TestAnswers)
                 .FirstOrDefaultAsync() ?? new TestResult();
         }
