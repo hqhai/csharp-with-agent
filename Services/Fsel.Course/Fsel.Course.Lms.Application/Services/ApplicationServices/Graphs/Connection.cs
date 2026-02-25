@@ -33,7 +33,14 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Graphs
                 return null;
             }
 
-            return Source.TestResult.Percent >= From && Source.TestResult.Percent <= To ? Target : null;
+            if (Source.TestResult.PercentModule != 0)
+            {
+                return Source.TestResult.PercentModule >= From && Source.TestResult.PercentModule <= To ? Target : null;
+            }
+            else
+            {
+                return Source.TestResult.Percent >= From && Source.TestResult.Percent <= To ? Target : null;
+            }
         }
     }
 }

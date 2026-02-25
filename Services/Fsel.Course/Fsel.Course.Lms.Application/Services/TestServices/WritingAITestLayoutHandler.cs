@@ -9,6 +9,7 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums;
     using Fsel.Common.Helpers;
     using Fsel.Core.Base.Interfaces;
     using Fsel.Course.Domain.Entities;
@@ -270,6 +271,7 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
                 return await _aiPromptManagerRepository.ReadQueryable
                     .Where(x => x.ProjectId == subjectId)
                     .Where(x => !id.HasValue || x.Id == id.Value)
+                    .Where(x => x.VersionStatus == EnumVersionStatus.LastVersion)
                     .Include(x => x.AICriteriaConfigs)
                     .FirstOrDefaultAsync(ct);
             }
@@ -312,7 +314,7 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
             }
             else if (testResult.Test?.ScoringFormulaType == EnumScoringFormulaType.BandScore)
             {
-                testResult.Score = rootSectionResults.Sum(x => x.ScoreModule);
+                testResult.Score = NumberHelper.RoundNumberDouble(rootSectionResults.Sum(x => x.ScoreModule) ?? default);
             }
 
             // Persist TestResult
@@ -365,9 +367,7 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
 
                     if (totalAfter > 0)
                     {
-                        existed.Scores =
-                            ((existed.Scores * totalBefore) + (s.Scores * s.TotalCount))
-                            / totalAfter;
+                        existed.Scores = NumberHelper.RoundReduceNumber(((existed.Scores * totalBefore) + (s.Scores * s.TotalCount)) / totalAfter);
                     }
 
                     existed.CorrectCount += s.CorrectCount;
@@ -522,6 +522,7 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
                     {
                         var criteriaAi = TestLayoutDispatchHelper.GetCriteriaAi(item.CriteriaName);
                         var aiCriteriaConfig = aiPromptManager?.AICriteriaConfigs?.Where(x => x.SubFeatureType == EnumSubFeatureType.TestConfigWritingLayout)
+                                                       .Where(x => x.VersionStatus == EnumVersionStatus.LastVersion)
                                                        .Where(x => x.TypeCriteriaAi == criteriaAi)
                                                        .OrderBy(x => x.DefaultType)
                                                        .FirstOrDefault();
@@ -632,7 +633,7 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
             }
             skillScore.TotalQuestion = 1;
             skillScore.CorrectCount = totalScore;
-            skillScore.Scores = NumberHelper.ConvertRound(totalScore / 4, 2);
+            skillScore.Scores = NumberHelper.RoundReduceNumber(totalScore / 4);
         }
 
         private static void BlendWritingScore(SkillScores skillScore, double averageScore, double totalScore, int runOrder)
@@ -825,10 +826,10 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
         {
             if (displayOrder == First_Run_Order)
             {
-                return NumberHelper.RoundNumberDouble((firstScore + average * 2) / 3);
+                return NumberHelper.RoundReduceNumber((firstScore + average * 2) / 3);
             }
 
-            return NumberHelper.RoundNumberDouble((average + firstScore * 2) / 3);
+            return NumberHelper.RoundReduceNumber((average + firstScore * 2) / 3);
         }
 
         // =========================

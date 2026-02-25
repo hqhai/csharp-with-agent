@@ -140,7 +140,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
 
                 await _classForumDetailResultRepository.BulkUpdateList(new List<ClassForumDetailResult> { classForumDetailResult }, bulk =>
                 {
-                    bulk.IgnoreOnUpdateExpression = c => new { c.ClassForumResultId, c.SubmissionCount };
+                    bulk.IgnoreOnUpdateExpression = c => new { c.ClassForumResultId, c.SubmissionCount, c.AITranslationContent };
                 });
 
                 var token = isFirst ? await GetTokenAsync(classForum, classForumResult, course.CourseType) : null;

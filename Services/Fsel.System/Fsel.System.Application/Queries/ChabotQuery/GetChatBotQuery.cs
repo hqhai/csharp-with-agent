@@ -54,6 +54,7 @@ namespace Fsel.System.Application.Queries.ChabotQuery
 
             foreach (var item in result)
             {
+                item.ChatbotLayout = chatbotSkillConfigs.FirstOrDefault(x => x.SkillId == item.SkillId)?.ChatbotLayout ?? Shared.Enums.EnumChatbotLayout.Other;
                 item.ProgressRatio = Math.Round((float)item.RemainToken / GetChatBotToken(item.SkillId, chatbotSkillConfigs), ValueSettings.ChatBotSetup.RatioRound);
                 item.Conversations = item.Conversations != null ? ArrayHelper.RemoveFirstTwoElements(item.Conversations, ValueSettings.ChatBotSetup.NumberDeletedElement) : null;
             }

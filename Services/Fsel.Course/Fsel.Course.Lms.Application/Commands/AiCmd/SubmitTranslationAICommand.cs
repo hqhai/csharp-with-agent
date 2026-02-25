@@ -2,7 +2,6 @@
 
 namespace Fsel.Course.Lms.Application.Commands.AiCmd
 {
-    using System;
     using System.Threading;
     using System.Threading.Tasks;
     using Domain.Entities;
@@ -41,7 +40,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
         {
             if (request == null)
             {
-                throw new ArgumentNullException(nameof(request));
+                return new AITranslationResultModel();
             }
 
             var result = new AITranslationResultModel
@@ -63,18 +62,20 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
             if (string.IsNullOrEmpty(gradingAlFeedback))
             {
-                return new AITranslationResultModel { ClassForumDetailResultId = request.ClassForumDetailResultId };
+                return result;
             }
 
             var translatedContent = await ExecuteTranslationAsync(gradingAlFeedback, cancellationToken);
+            if (string.IsNullOrEmpty(translatedContent))
+            {
+                return result;
+            }
+
             result.TranslatedContent = translatedContent;
 
             // Save translated content to database (chỉ khi cần query từ DB)
-            if (classForumDetailResult != null)
-            {
-                await UpdateClassForumDetailResultAsync(classForumDetailResult, translatedContent, cancellationToken);
-            }
-            else if (!string.IsNullOrEmpty(translatedContent))
+
+            if (classForumDetailResult == null)
             {
                 // Nếu GradingAlFeedback được truyền trực tiếp, cần query entity để update
                 classForumDetailResult = await _classForumDetailResultRepository.Queryable
@@ -84,6 +85,10 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 {
                     await UpdateClassForumDetailResultAsync(classForumDetailResult, translatedContent, cancellationToken);
                 }
+            }
+            else
+            {
+                await UpdateClassForumDetailResultAsync(classForumDetailResult, translatedContent, cancellationToken);
             }
 
             await PublishTranslationResultAsync(result, cancellationToken);
@@ -111,17 +116,9 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
             await _classForumDetailResultRepository.BulkUpdateList(new List<ClassForumDetailResult> { classForumDetailResult }, bulk =>
             {
-                bulk.IgnoreOnUpdateExpression = c => new
+                bulk.ColumnInputExpression = c => new
                 {
-                    c.WordContent,
-                    c.Content,
-                    c.WordCount,
-                    c.SubmissionCount,
-                    c.ProcessDate,
-                    c.CompletionDate,
-                    c.Status,
-                    c.ClassForumResultId,
-                    c.PronunciationAlFeedback
+                    c.AITranslationContent
                 };
             });
         }

@@ -16,6 +16,10 @@ namespace Fsel.Course.Application.Queries.AiCriteriaConfigQuery
     public class GetAiCriteriaByTypeQuery : IRequest<MethodResult<AICriteriaConfigsModel>>
     {
         public EnumSubFeatureType SubFeatureType { get; set; }
+
+        public Guid? ObjectId { get; set; }
+
+        public Guid? ProgramId { get; set; }
     }
 
     public class GetAiCriteriaByTypeQueryHandler : IRequestHandler<GetAiCriteriaByTypeQuery, MethodResult<AICriteriaConfigsModel>>
@@ -35,9 +39,14 @@ namespace Fsel.Course.Application.Queries.AiCriteriaConfigQuery
             var methodResult = new MethodResult<AICriteriaConfigsModel>();
 
             var aiCriteria = await _aiCriteriaConfigRepository.ReadQueryable
-                                                              .Where(x => x.ObjectId == null && x.DefaultType == EnumDefaultType.Default)
-                                                              .Where(x => x.SubFeatureType == request.SubFeatureType && x.VersionStatus == EnumVersionStatus.LastVersion)
-                                                              .ToListAsync(cancellationToken);
+                .Where(x => x.SubFeatureType == request.SubFeatureType
+                    && (request.ObjectId != null
+                        ? x.ObjectId == request.ObjectId
+                        : (request.ProgramId != null
+                            ? x.ProjectId == request.ProgramId
+                            : true))
+                    && x.DefaultType == EnumDefaultType.Default && x.VersionStatus == EnumVersionStatus.LastVersion)
+                .ToListAsync(cancellationToken);
 
             if (aiCriteria.Count == 0)
             {
