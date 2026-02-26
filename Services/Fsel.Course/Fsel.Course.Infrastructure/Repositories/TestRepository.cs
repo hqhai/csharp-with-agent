@@ -187,7 +187,7 @@ namespace Fsel.Course.Infrastructure.Repositories
             }
 
             var testResults = await (from baseQ in _testGroupResultRepository.ReadQueryable
-                                     where baseQ.CourseResultId == courseResult.Id
+                                     where baseQ.CourseResultId == courseResult.Id && baseQ.UnitResultId == null
                                      join result in _testResultRepository.ReadQueryable
                                          on baseQ.Id equals result.TestGroupResultId
                                      select new
