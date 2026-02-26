@@ -60,5 +60,8 @@ namespace Fsel.Course.Domain.Enums
 
         [Description("Ai Practice Gym Grammar")]
         AiPracticeGymGrammar,
+
+        [Description("Vstep")]
+        Vstep,
     }
 }

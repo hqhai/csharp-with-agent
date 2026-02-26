@@ -47,6 +47,7 @@ namespace Fsel.ExamPractice.Domain.Entities
 
         public EnumSectionExamPracticeType? Type { get; set; }
         public int DisplayOrder { get; set; }
+        public Guid? AiPromptManagerId { get; set; }
         public Guid? ExamPracticeId { get; set; }
         public ExamPractice? ExamPractice { get; set; }
         public Guid? ParentExamPracticeSectionId { get; set; }
