@@ -195,7 +195,7 @@ namespace Fsel.System.Application.Commands.Chatbots
                 return instruction ?? string.Empty;
             }
 
-            var baseConfig = instruction == null ? criteria.UserRole : criteria.SettingAiJson;
+            var baseConfig = instruction == null ? criteria.UserRole : criteria.SettingAiConfig;
 
             baseConfig ??= string.Empty;
             return string.IsNullOrEmpty(instruction)
