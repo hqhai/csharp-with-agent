@@ -89,7 +89,7 @@ namespace Fsel.System.Application.Commands.Chatbots
                                                           .FirstOrDefaultAsync(x => x.SkillId == request.SkillId, ct);
             if (existingChatbot != null)
             {
-                result.Result = MapChatbot(existingChatbot);
+                result.Result = MapChatbot(existingChatbot, chatBotSkill);
                 result.StatusCode = StatusCodes.Status200OK;
                 return result;
             }
@@ -171,16 +171,17 @@ namespace Fsel.System.Application.Commands.Chatbots
                 await _chatBotRepository.UnitOfWork.SaveChangesAsync(ct);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = MapChatbot(chatBot);
+                methodResult.Result = MapChatbot(chatBot, chatBotSkill);
                 return methodResult;
             });
 
             return methodResult;
         }
 
-        private ChatBotModel MapChatbot(ChatBot chatBot)
+        private ChatBotModel MapChatbot(ChatBot chatBot, ChatbotSkillConfig chatbotSkillConfig)
         {
             var model = _mapper.Map<ChatBotModel>(chatBot);
+            model.ChatbotLayout = chatbotSkillConfig.ChatbotLayout;
             model.Conversations = TrimInitMessages(model.Conversations);
             return model;
         }
