@@ -29,19 +29,22 @@ namespace Fsel.Course.Application.Queries.TestQuery
         private readonly IMapper _mapper;
         private readonly ITestSectionQuestionRepository _testSectionQuestionRepository;
         private readonly ITestAISettingRepository _testAISettingRepository;
+        private readonly ICategoryRepository _categoryRepository;
 
         public GetTestQueryHandler(
             ITestRepository testRepository,
             ITestSectionRepository testSectionRepository,
             IMapper mapper,
             ITestSectionQuestionRepository testSectionQuestionRepository,
-            ITestAISettingRepository testAISettingRepository)
+            ITestAISettingRepository testAISettingRepository,
+            ICategoryRepository categoryRepository)
         {
             _testRepository = testRepository;
             _testSectionRepository = testSectionRepository;
             _mapper = mapper;
             _testSectionQuestionRepository = testSectionQuestionRepository;
             _testAISettingRepository = testAISettingRepository;
+            _categoryRepository = categoryRepository;
         }
 
         public async Task<MethodResult<TestModel>> Handle(GetTestQuery request, CancellationToken cancellationToken)
@@ -92,6 +95,8 @@ namespace Fsel.Course.Application.Queries.TestQuery
             var testModel = _mapper.Map<TestModel>(test);
             testModel.IsActive = await _testRepository.IsUsingByClient(test.OriginalId);
             testModel.TestSections = BuildSectionTree(allSections, questionDict, testAISettingDict);
+            var project = await _categoryRepository.GetSecondLevelFromRootAsync(testModel.ProgramId, cancellationToken);
+            testModel.ProjectId = project?.Id;
 
             methodResult.Result = testModel;
             methodResult.StatusCode = StatusCodes.Status200OK;

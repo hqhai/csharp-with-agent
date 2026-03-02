@@ -15,6 +15,31 @@ namespace Fsel.Course.Infrastructure.Repositories
         {
         }
 
+        public async Task<Category?> GetSecondLevelFromRootAsync(Guid? programId, CancellationToken cancellationToken)
+        {
+            if (!programId.HasValue)
+            {
+                return null;
+            }
+            var current = await ReadQueryable.FirstOrDefaultAsync(x => x.Id == programId, cancellationToken);
+
+            while (current != null)
+            {
+                var parent = await ReadQueryable
+                     .FirstOrDefaultAsync(x => x.Id == current.ParentId, cancellationToken);
+                if (parent != null && parent.ParentId == null)
+                {
+                    break;
+                }
+                else
+                {
+                    current = await ReadQueryable.FirstOrDefaultAsync(x => x.Id == current.ParentId, cancellationToken);
+                }
+            }
+
+            return current;
+        }
+
         public async Task<Category?> GetProgramLevelsAsync(Guid? programId, CancellationToken cancellationToken)
         {
             if (!programId.HasValue)

@@ -23,12 +23,14 @@ namespace Fsel.Course.Application.Queries.UnitQuery
     {
         private readonly IUnitRepository _unitRepository;
         private readonly ILessonRepository _lessonRepository;
+        private readonly ICategoryRepository _categoryRepository;
         private readonly IMapper _mapper;
 
-        public GetUnitQueryHandler(IMapper mapper, IUnitRepository unitRepository, ILessonRepository lessonRepository)
+        public GetUnitQueryHandler(IMapper mapper, IUnitRepository unitRepository, ILessonRepository lessonRepository, ICategoryRepository categoryRepository)
         {
             _unitRepository = unitRepository;
             _lessonRepository = lessonRepository;
+            _categoryRepository = categoryRepository;
             _mapper = mapper;
         }
 
@@ -77,6 +79,9 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                     x.Lesson = lessons.FirstOrDefault(l => l.OriginalId == x.OriginalId);
                 });
             }
+
+            var project = await _categoryRepository.GetSecondLevelFromRootAsync(unitModel.ProgramId, cancellationToken);
+            unitModel.ProjectId = project?.Id;
 
             methodResult.Result = unitModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
