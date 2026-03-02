@@ -17,6 +17,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.TestModels
         public CategoryModel? Program { get; set; }
         public LevelModel? Level { get; set; }
         public Guid OriginalId { get; set; }
+        public Guid? ProjectId { get; set; }
         public bool IsArchive { get; set; }
         public int Version { get; set; }
         public EnumVersionStatus VersionStatus { get; set; }

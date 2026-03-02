@@ -26,6 +26,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.V1i1
         public string? NameLevel { get; set; }
 
         public Guid? ProgramId { get; set; }
+        public Guid? ProjectId { get; set; }
 
         public string? NameProgram { get; set; }
 

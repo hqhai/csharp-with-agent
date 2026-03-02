@@ -23,6 +23,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public int Version { get; set; }
         public Guid OriginalId { get; set; }
         public Guid? ProgramId { get; set; }
+        public Guid? ProjectId { get; set; }
         public Guid? LevelId { get; set; }
         public IList<HighlightRange>? HighlightRanges { get; set; }
         public IList<HighlightRange>? ProgressSpeedometerRanges { get; set; }

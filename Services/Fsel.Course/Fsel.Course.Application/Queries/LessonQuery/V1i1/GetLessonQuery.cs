@@ -127,6 +127,8 @@ namespace Fsel.Course.Application.Queries.LessonQuery.V1i1
             var level = await _levelRepository.Queryable.AsNoTracking().FirstOrDefaultAsync(x => x.Id == lesson.LevelId, cancellationToken);
             lesson.NameLevel = level?.Name;
             var category = await _categoryRepository.Queryable.AsNoTracking().FirstOrDefaultAsync(x => x.Id == lesson.ProgramId, cancellationToken);
+            var project = await _categoryRepository.GetSecondLevelFromRootAsync(lesson.ProgramId, cancellationToken);
+            lesson.ProjectId = project?.Id;
             lesson.NameProgram = category?.Name;
 
             if (lesson.LessonInstructions != null && lesson.LessonInstructions.Any())

@@ -8,5 +8,7 @@ namespace Fsel.Course.Domain.IRepositories
     public interface ICategoryRepository : IRepository<Category>
     {
         Task<Category?> GetProgramLevelsAsync(Guid? programId, CancellationToken cancellationToken);
+
+        Task<Category?> GetSecondLevelFromRootAsync(Guid? programId, CancellationToken cancellationToken);
     }
 }
