@@ -2,7 +2,6 @@
 
 namespace Fsel.Course.Application.Commands.CategoryCmd
 {
-    using System.Text.RegularExpressions;
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
