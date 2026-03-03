@@ -36,6 +36,7 @@ namespace Fsel.Course.Domain.Entities
 
         public Guid? ParentId { get; set; }
 
+        public bool? VstepSetting { get; set; }
         public bool IsTestDefault { get; set; }
         public EnumTestMode? TestMode { get; set; }
         public Category? CategoryParent { get; set; }

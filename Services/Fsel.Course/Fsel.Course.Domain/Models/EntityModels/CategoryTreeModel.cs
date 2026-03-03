@@ -13,6 +13,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public EnumTypeCategory ExpandedIcon { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime? UpdatedDate { get; set; }
+        public bool? VstepSetting { get; set; }
         public IList<CategoryTreeModel>? Children { get; set; }
 
         public void RemoveChildByCodition(Predicate<CategoryTreeModel> condtion)
