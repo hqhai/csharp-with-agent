@@ -1288,7 +1288,7 @@ namespace Fsel.Course.Infrastructure.Common
 
                 await _videoTimeCodeAnswerRepository.BulkMergeAsync(videoTimeCodeAnswers, bulk =>
                 {
-                    bulk.ColumnPrimaryKeyExpression = c => new { c.VideoResultId, c.VideoTimeCodeResultId, c.VideoTimeCodeId, c.QuestionId, c.IsDeleted };
+                    bulk.ColumnPrimaryKeyExpression = c => new { c.VideoTimeCodeResultId, c.QuestionId, c.IsDeleted };
                 });
             }
             if (updateVideoTimeCodeAnswers != null && updateVideoTimeCodeAnswers.Any())
@@ -1302,7 +1302,7 @@ namespace Fsel.Course.Infrastructure.Common
                 });
                 await _videoTimeCodeAnswerRepository.BulkUpdateList(updateVideoTimeCodeAnswers, bulk =>
                 {
-                    bulk.IgnoreOnUpdateExpression = entity => new { entity.VideoResultId, entity.VideoTimeCodeResultId, entity.QuestionId };
+                    bulk.IgnoreOnUpdateExpression = entity => new { entity.VideoTimeCodeResultId, entity.QuestionId };
                 });
             }
             return updateVideoTimeCodeAnswers?.Where(x => x.Question != null && !x.Question.Ungraded && x.Question.QuestionType != EnumQuestionType.ExercisePreparation)?.Where(x => x.Status == EnumAnswerStatus.Done).Sum(x => x.CorrectCount) ?? default;
