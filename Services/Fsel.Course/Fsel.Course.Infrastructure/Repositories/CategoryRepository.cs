@@ -40,6 +40,23 @@ namespace Fsel.Course.Infrastructure.Repositories
             return current;
         }
 
+        public async Task<Category?> GetRootSubjectAsync(Guid? programId, CancellationToken cancellationToken)
+        {
+            if (!programId.HasValue)
+            {
+                return null;
+            }
+
+            var current = await ReadQueryable.FirstOrDefaultAsync(x => x.Id == programId, cancellationToken);
+
+            while (current != null && current.ParentId != null)
+            {
+                current = await ReadQueryable.FirstOrDefaultAsync(x => x.Id == current.ParentId, cancellationToken);
+            }
+
+            return current; // đây chính là node có ParentId == null
+        }
+
         public async Task<Category?> GetProgramLevelsAsync(Guid? programId, CancellationToken cancellationToken)
         {
             if (!programId.HasValue)

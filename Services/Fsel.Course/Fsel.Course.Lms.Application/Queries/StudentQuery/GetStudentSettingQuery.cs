@@ -12,6 +12,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
     using Fsel.Course.Domain.Models.EntityModels.UserNavigationActionModels;
     using Fsel.Course.Infrastructure.ValueSettings;
     using Fsel.Course.Lms.Application.Queries.CourseChangeQuery;
+    using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
     using Fsel.Course.Lms.Application.Services.InteractionService;
     using Fsel.Course.Lms.Application.Services.InteractionService.CommandModels;
     using Fsel.Course.Lms.Application.Services.OrderServices;
@@ -38,7 +39,8 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
         private readonly AuthContext _authContext;
         private readonly IInteractionService _interactionService;
         private readonly AppSetting _appSetting;
-        private readonly MediatR.IMediator _mediator;
+        private readonly IMediator _mediator;
+        private readonly ICategoryCachingService _categoryCachingService;
 
         public SettingStudentCheckQueryHandler(IUserService userService,
             IOrderService orderService,
@@ -47,7 +49,8 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
             AuthContext authContext,
             IInteractionService interactionService,
             AppSetting appSetting,
-            MediatR.IMediator mediator)
+            IMediator mediator,
+            ICategoryCachingService categoryCachingService)
         {
             _userService = userService;
             _orderService = orderService;
@@ -57,6 +60,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
             _interactionService = interactionService;
             _appSetting = appSetting;
             _mediator = mediator;
+            _categoryCachingService = categoryCachingService;
         }
 
         public async Task<MethodResult<StudentSettingModel>> Handle(GetStudentSettingQuery request, CancellationToken cancellationToken)
@@ -136,7 +140,12 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
             settingStudentModel.Status = status?.Content?.Result;
             if (student.CourseId.HasValue && (navigateAction == null || navigateAction.Status == EnumNavigateActionStatus.ContinueLearning))
             {
-                var course = await _courseRepository.Queryable.Include(p => p.Program).ThenInclude(p => p.CategoryParent).FirstOrDefaultAsync(p => p.Id == student.CourseId.Value, cancellationToken);
+                var course = await _courseRepository.Queryable.Include(p => p.Program)
+                                                    .ThenInclude(p => p.CategoryParent)
+                                                    .FirstOrDefaultAsync(p => p.Id == student.CourseId.Value, cancellationToken);
+
+                var category = await _categoryCachingService.GetSubjectRootAsync(course?.ProgramId, cancellationToken);
+
                 settingStudentModel.Course = _mapper.Map<CourseModel>(course);
 
                 settingStudentModel.Course.ProgramId = course?.Program?.Id;
@@ -144,6 +153,10 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
 
                 settingStudentModel.Course.SubjectId = course?.Program?.CategoryParent?.Id;
                 settingStudentModel.Course.SubjectName = course?.Program?.CategoryParent?.Name;
+
+                settingStudentModel.RootSubjectId = category?.Id;
+                settingStudentModel.RootSubjectName = category?.Name;
+                settingStudentModel.VstepSetting = category?.VstepSetting ?? default;
 
                 if (course != null)
                 {

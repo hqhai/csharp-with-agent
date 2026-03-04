@@ -21,13 +21,16 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public bool IsLockPT { get; set; }
         public EnumTrialRegistrationStatus? Status { get; set; }
         public DateTime? ExpiredDate { get; set; }
-        public StudentBeginnerGuideModel? BeginnerGuide { get; set; }
         public double NumberOfToken { get; set; }
-        public CourseModel? Course { get; set; }
         public bool IsSurveyEvent { get; set; }
         public bool EmailConfirmed { get; set; }
         public bool IsActivedAccount { get; set; } = true;
         public bool TurnOnTouchpoint { get; set; }
         public EnumUserStatus? UserStatus { get; set; }
+        public Guid? RootSubjectId { get; set; }
+        public string? RootSubjectName { get; set; }
+        public bool VstepSetting { get; set; }
+        public StudentBeginnerGuideModel? BeginnerGuide { get; set; }
+        public CourseModel? Course { get; set; }
     }
 }
