@@ -36,7 +36,6 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i2
         private readonly ITestRepository _testRepository;
         private readonly ICourseResultRepository _courseResultRepository;
         private readonly ICourseModuleCachingService _courseModuleCachingService;
-        private readonly ITestResultRepository _testResultRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly ITestGroupResultRepository _testGroupResultRepository;
 
@@ -49,7 +48,6 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i2
             ITestRepository testRepository,
             ICourseResultRepository courseResultRepository,
             ICourseModuleCachingService courseModuleCachingService,
-            ITestResultRepository testResultRepository,
             ILessonResultRepository lessonResultRepository,
             ITestGroupResultRepository testGroupResultRepository)
         {
@@ -61,7 +59,6 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i2
             _testRepository = testRepository;
             _courseResultRepository = courseResultRepository;
             _courseModuleCachingService = courseModuleCachingService;
-            _testResultRepository = testResultRepository;
             _lessonResultRepository = lessonResultRepository;
             _testGroupResultRepository = testGroupResultRepository;
         }
@@ -169,6 +166,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i2
                 }
                 dto.Name = unit.Unit.Name;
                 dto.Code = unit.Unit.Code;
+                dto.Description = unit.Unit.Description;
                 dto.ObjectId = unit.Unit.Id;
                 dto.Result = _mapper.Map<ResultModel>(unit.UnitResult);
             }
@@ -180,6 +178,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i2
             var dto = _mapper.Map<ModuleCourseModel>(module);
             dto.Name = unit.Name;
             dto.Code = unit.Code;
+            dto.Description = unit.Description;
             dto.ObjectId = unit.Id;
             return dto;
         }
@@ -190,6 +189,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i2
             dto.ObjectId = test.Test.Id;
             dto.Name = test.Test.Name;
             dto.Code = test.Test.Code;
+            dto.Description = test.Test.Description;
             dto.Result = _mapper.Map<ResultModel>(test.TestResult);
             dto.ProgressPrecent = test.TestGroupResult.Status == EnumResultStatus.Done ? ValueSettings.PercentMaxValue : ValueSettings.PercentMinValue;
             return dto;
@@ -201,6 +201,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i2
             dto.ObjectId = test.Id;
             dto.Name = test.Name;
             dto.Code = test.Code;
+            dto.Description = test.Description;
             return dto;
         }
 

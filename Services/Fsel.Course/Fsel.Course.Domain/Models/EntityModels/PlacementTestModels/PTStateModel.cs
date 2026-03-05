@@ -45,7 +45,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
     public class TestStateModel : BaseTestStateModel
     {
         public string? Name { get; set; }
-
+        public string? Description { get; set; }
         public EnumScoringFormulaType ScoringFormulaType { get; set; }
         public double? Score { get; set; }
 
@@ -67,6 +67,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
             }
 
             Name = test.Name;
+            Description = test.Description;
             ScoringFormulaType = test.ScoringFormulaType;
             foreach (var sectionResult in Children)
             {

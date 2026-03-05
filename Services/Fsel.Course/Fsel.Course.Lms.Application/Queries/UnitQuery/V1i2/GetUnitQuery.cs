@@ -117,7 +117,9 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery.V1i2
                 if (lessonResult.Item1 != null)
                 {
                     dto.Name = lessonResult.Item1.Name;
+                    dto.Code = lessonResult.Item1.Code;
                     dto.InstructionContent = lessonResult.Item1.InstructionContent;
+                    dto.Description = lessonResult.Item1.Description;
                     dto.Thumbnail = lessonResult.Item1.Thumbnail;
                     dto.ObjectId = lessonResult.Item1.Id;
                     dto.Result = _mapper.Map<ResultModel>(lessonResult.Item2);
@@ -132,7 +134,9 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery.V1i2
                 if (lesson != null)
                 {
                     dto.Name = lesson.Name;
+                    dto.Code = lesson.Code;
                     dto.InstructionContent = lesson.InstructionContent;
+                    dto.Description = lesson.Description;
                     dto.Thumbnail = lesson.Thumbnail;
                     dto.ObjectId = lesson.Id;
                 }
@@ -152,6 +156,7 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery.V1i2
                 dto.ObjectId = testResult.Item1.Id;
                 dto.Name = testResult.Item1.Name;
                 dto.Code = testResult.Item1.Code;
+                dto.Description = testResult.Item1.Description;
                 dto.Result = _mapper.Map<ResultModel>(testResult.Item3);
                 moduleResults.Add(dto);
                 return;
@@ -163,6 +168,7 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery.V1i2
                 dto.ObjectId = test.Id;
                 dto.Name = test.Name;
                 dto.Code = test.Code;
+                dto.Description = test.Description;
                 moduleResults.Add(dto);
             }
         }
