@@ -432,6 +432,13 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             {
                 homeWorkResult.ProcessDate = DateTime.UtcNow;
                 homeWorkResult.Status = EnumResultStatus.Process;
+                if (!isSubmit)
+                {
+                    await _homeWorkResultRepository.BulkUpdateList(new List<HomeWorkResult> { homeWorkResult }, bulk =>
+                    {
+                        bulk.ColumnInputExpression = c => new { c.ProcessDate, c.Status };
+                    });
+                }
             }
 
             if (isSubmit)
@@ -471,14 +478,6 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                     await _homeWorkResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                     await PublishStudentRankingAsync(homeWorkResult.CreatedUserId, cancellationToken).ConfigureAwait(false);
                 }
-            }
-            else if (!homeWorkResult.ProcessDate.HasValue)
-            {
-                homeWorkResult.ProcessDate = DateTime.UtcNow;
-                await _homeWorkResultRepository.BulkUpdateList(new List<HomeWorkResult> { homeWorkResult }, bulk =>
-                {
-                    bulk.ColumnInputExpression = c => new { c.ProcessDate, c.Status };
-                });
             }
 
             methodResult.Result = true;
