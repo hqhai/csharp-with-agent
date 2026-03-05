@@ -522,6 +522,8 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                     MaxDegreeOfParallelism = 50
                 };
 
+                bool isConfirmOTP = competitionEvent.EventContent?.Actions?.Any(p => p == EnumSchoolEventRuleAction.NotConfirmOTP) ?? false;
+
                 await Parallel.ForEachAsync(students, parallelOptions, async (student, cancellationToken) =>
                 {
                     if (!string.IsNullOrEmpty(student.PhoneNumber?.Trim()))
@@ -550,8 +552,8 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                     PhoneNumber = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber.Trim()),
                                     Birthday = student.DateOfBirth,
                                     Code = GeneratorCodeAsync(studentRepository, student.DateOfBirth ?? DateTime.MinValue, null),
-                                    EmailConfirmed = false,
-                                    PhoneNumberConfirmed = false,
+                                    EmailConfirmed = isConfirmOTP,
+                                    PhoneNumberConfirmed = isConfirmOTP,
                                     Status = EnumUserStatus.Active,
                                     DefaultPassword = password,
                                     Student = new Student()
