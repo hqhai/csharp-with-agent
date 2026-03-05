@@ -22,6 +22,7 @@ namespace Fsel.System.Application.Queues.Consumers
                 await _mediator.Send(new SaveFeatureAccessTimeCommand
                 {
                     UserId = message.UserId,
+                    CourseResultId = message.CourseResultId,
                     AccessTime = message.AccessTime,
                     ObjectId = message.ObjectId,
                     CourseId = message.CourseId,

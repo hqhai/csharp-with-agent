@@ -91,7 +91,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 {
                     UserId = userId,
                     ObjectId = x,
-                    EnumFeature = EnumFeature.MockTest,
+                    EnumFeature = EnumFeature.FullTest,
                     CourseId = course.Id
                 }).ToList(),
             });

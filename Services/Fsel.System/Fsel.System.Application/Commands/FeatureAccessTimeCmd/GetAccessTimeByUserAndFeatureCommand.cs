@@ -37,7 +37,7 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
             ArgumentNullException.ThrowIfNull(request.Features);
             MethodResult<IList<FeatureAccessTimeModel>> methodResult = new MethodResult<IList<FeatureAccessTimeModel>>();
 
-            var featureAccessTimes = await _featureAccessTimeRepository.Queryable
+            var featureAccessTimes = await _featureAccessTimeRepository.ReadQueryable
                                                                        .Where(x => request.UserIds.Contains(x.CreatedUserId) && request.Features.Contains(x.EnumFeature))
                                                                        .ToListAsync(cancellationToken);
 

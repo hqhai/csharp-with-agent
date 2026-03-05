@@ -28,27 +28,42 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<FeatureAccessTimeBusinessModel>>();
 
-            var featureAccessTime = await _featureAccessTimeRepository.Queryable.Where(p => p.CreatedUserId == request.UserId)
-                                                                                .Where(x => !request.CourseId.HasValue || x.CourseId == request.CourseId)
-                                                                                .ToListAsync(cancellationToken);
+            var query = _featureAccessTimeRepository.ReadQueryable
+                                                    .Where(p => p.CreatedUserId == request.UserId)
+                                                    .Where(x => !request.CourseId.HasValue || x.CourseId == request.CourseId);
+
             if (request.StartDate.HasValue && request.EndDate.HasValue)
             {
-                featureAccessTime = featureAccessTime.Where(p => (p.UpdatedDate ?? p.CreatedDate) >= request.StartDate && (p.UpdatedDate ?? p.CreatedDate) <= request.EndDate).ToList();
+                query = query.Where(p => (p.UpdatedDate ?? p.CreatedDate) >= request.StartDate && (p.UpdatedDate ?? p.CreatedDate) <= request.EndDate);
             }
             if (request.StartDate.HasValue)
             {
-                featureAccessTime = featureAccessTime.Where(p => (p.UpdatedDate ?? p.CreatedDate) >= request.StartDate).ToList();
+                query = query.Where(p => (p.UpdatedDate ?? p.CreatedDate) >= request.StartDate);
             }
             if (request.EndDate.HasValue)
             {
-                featureAccessTime = featureAccessTime.Where(p => (p.UpdatedDate ?? p.CreatedDate) <= request.EndDate).ToList();
+                query = query.Where(p => (p.UpdatedDate ?? p.CreatedDate) <= request.EndDate);
             }
+            var featureAccessTime = await query.ToListAsync(cancellationToken);
+            var learnFeatures = new[]
+            {
+                EnumFeature.HomeWork,
+                EnumFeature.Document,
+                EnumFeature.VideoLesson,
+                EnumFeature.FullTest,
+                EnumFeature.SkillTest,
+                EnumFeature.ChatBot
+            };
 
-            var learn = featureAccessTime.Where(p => p.EnumFeature == EnumFeature.HomeWork || p.EnumFeature == EnumFeature.VideoLesson || p.EnumFeature == EnumFeature.MockTest || p.EnumFeature == EnumFeature.FinalTest).ToList();
+            var socialFeatures = new[]
+            {
+                EnumFeature.ClassForum,
+                EnumFeature.DiscussionBoard
+            };
 
-            var social = featureAccessTime.Where(p => p.EnumFeature == EnumFeature.ClassForum || p.EnumFeature == EnumFeature.DiscussionBoard).ToList();
-
-            var other = featureAccessTime.Where(p => p.EnumFeature == EnumFeature.Other).ToList();
+            var learn = featureAccessTime.Where(x => learnFeatures.Contains(x.EnumFeature));
+            var social = featureAccessTime.Where(x => socialFeatures.Contains(x.EnumFeature));
+            var other = featureAccessTime.Where(x => x.EnumFeature == EnumFeature.Other);
 
             methodResult.Result = new List<FeatureAccessTimeBusinessModel>()
             {

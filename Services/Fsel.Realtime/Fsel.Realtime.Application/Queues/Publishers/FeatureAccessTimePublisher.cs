@@ -11,7 +11,6 @@ namespace Fsel.Realtime.Application.Queues.Publishers
     {
         private readonly IQueueProvider _queueProvider;
 
-
         public FeatureAccessTimePublisher(IQueueProvider queueProvider)
         {
             _queueProvider = queueProvider;

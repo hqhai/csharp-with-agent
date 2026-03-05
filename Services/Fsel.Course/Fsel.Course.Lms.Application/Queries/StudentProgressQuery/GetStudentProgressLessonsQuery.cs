@@ -162,7 +162,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                         UnitId = request.UnitId,
                         ObjectId = item.LearningResultId,
                         UserId = userId,
-                        EnumFeature = EnumFeature.MockTest
+                        EnumFeature = EnumFeature.SkillTest
                     });
                     var featureAccessTimeTest = featureAccessTimeTestResult?.Content?.Result;
 
