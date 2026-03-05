@@ -34,7 +34,8 @@ namespace Fsel.Course.Infrastructure.Configs
             builder.HasIndex(c => new { c.StudentId, c.WorkingStatus });
             builder.HasIndex(c => new { c.IsDeleted, c.WorkingStatus });
             builder.HasIndex(c => new { c.CreatedUserId }).IncludeValueProperties(x => new { x.Status, x.CourseId });
-            builder.HasIndex(c => new { c.CourseId, c.StudentId, c.IsDeleted, c.WorkingStatus });
+
+            builder.HasIndex(c => new { c.CourseId, c.StudentId }).IsUnique().HasFilter("[IsDeleted] = 0 AND [WorkingStatus] != 'NotWorking'");
         }
     }
 }
