@@ -27,6 +27,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 TestResultId = TestResult.Id,
                 PercentResult = TestResult.Percent,
                 Status = TestResult.Status,
+                Description = Test?.Description,
                 Children = childStates,
                 Score = TestResult.Score,
                 UpdatedDate = TestResult?.UpdatedDate ?? TestResult?.CreatedDate
@@ -178,6 +179,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 TestResultId = TestResult.Id,
                 PercentResult = TestResult.Percent,
                 Status = TestResult.Status,
+                Description = Test?.Description,
                 Children = childStates,
                 StepFlowId = TestResult.StepFlowId,
                 UpdatedDate = TestResult?.UpdatedDate ?? TestResult?.CreatedDate
