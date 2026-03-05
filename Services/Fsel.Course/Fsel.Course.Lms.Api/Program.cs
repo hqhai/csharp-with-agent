@@ -364,10 +364,7 @@ queues: new Dictionary<string, Type>
 });
 
 var app = builder.Build();
-if (app.Environment.IsDevelopment() || app.Environment.IsStaging() || app.Environment.IsEnvironment(Settings.Environments.Testing))
-{
-    app.UseMiddleware<CacheManagerMiddleware>("/cache");
-}
+app.UseMiddleware<CacheManagerMiddleware>("/cache");
 
 app.UseServices();
 app.Run();
