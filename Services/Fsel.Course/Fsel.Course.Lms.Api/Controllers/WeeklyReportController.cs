@@ -110,6 +110,22 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
+        /// Export pt to pdf
+        /// </summary>
+        [HttpPost("export-pt-to-pdf")]
+        [ProducesResponseType(typeof(MethodResult<byte[]>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ExportFromHtmlRaw([FromBody] ExportPlacementTestCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null)
+            {
+                return commandResult.GetActionResult();
+            }
+            return File(commandResult.Result, "application / pdf", "bao_cao_ket_qua_placement_test.pdf");
+        }
+
+        /// <summary>
         /// send students complete course
         /// </summary>
         [HttpPost("send-student-complete-unit")]
