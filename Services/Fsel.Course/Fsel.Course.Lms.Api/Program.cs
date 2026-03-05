@@ -305,6 +305,7 @@ builder.Services.AddScoped<SetTimeRetryTestPublisher>();
 builder.Services.AddScoped<TranslationResultPublisher>();
 builder.Services.AddScoped<SendMailFinishCoursePublisher>();
 builder.Services.AddScoped<SendMailFinishPTPublisher>();
+builder.Services.AddScoped<SendMailCompleteUnitPublisher>();
 
 // Refit
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
@@ -361,6 +362,7 @@ queues: new Dictionary<string, Type>
     { QueueSettings.LmsQueue.NameQueue.AITranslationResponse, typeof(AITranslationResponseConsumer) },
     { QueueSettings.LmsQueue.NameQueue.SendMailFinishCourse, typeof(SendMailFinishCourseConsumer) },
     { QueueSettings.LmsQueue.NameQueue.SendMailFinishPT, typeof(SendMailFinishPTConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.SendMailCompleteUnit, typeof(SendMailCompleteUnitConsumer) },
 });
 
 var app = builder.Build();

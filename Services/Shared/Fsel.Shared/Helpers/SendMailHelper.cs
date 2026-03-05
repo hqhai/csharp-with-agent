@@ -118,6 +118,14 @@ namespace Fsel.Shared.Helpers
             return $"{hours}h{minutes:D2}ph";
         }
 
+        public static string FormatTimeSpanAsClockV1(long totalMinutes)
+        {
+            TimeSpan timeSpan = TimeSpan.FromMinutes(totalMinutes);
+            int hours = (int)timeSpan.TotalHours;
+            int minutes = timeSpan.Minutes;
+            return $"{hours} giờ {minutes:D2} phút";
+        }
+
         public static async Task<string> GetTemplateFromPath(string baseDirectory, string filePath, CancellationToken cancellationToken)
         {
             var path = Path.Combine(baseDirectory, filePath);

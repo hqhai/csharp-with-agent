@@ -4,14 +4,12 @@ namespace Fsel.Course.Lms.Api.Controllers
 {
     using System.Net;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Course.Lms.Application.Commands.OtherCmd;
     using Fsel.Course.Lms.Application.Commands.WeeklyReportCommand;
     using Fsel.Course.Lms.Application.Queries.WeeklyReportQuery;
     using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
-    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
@@ -125,6 +123,18 @@ namespace Fsel.Course.Lms.Api.Controllers
                 return commandResult.GetActionResult();
             }
             return File(commandResult.Result, "application / pdf", "bao_cao_ket_qua_placement_test.pdf");
+        }
+
+        /// <summary>
+        /// send students complete course
+        /// </summary>
+        [HttpPost("send-student-complete-unit")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SendMailCompleteUnit([FromBody] SendMailCompleteUnitCommand command)
+        {
+            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
     }
 }
