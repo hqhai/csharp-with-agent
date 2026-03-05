@@ -10,5 +10,7 @@ namespace Fsel.Course.Domain.IRepositories
         Task<Category?> GetProgramLevelsAsync(Guid? programId, CancellationToken cancellationToken);
 
         Task<Category?> GetSecondLevelFromRootAsync(Guid? programId, CancellationToken cancellationToken);
+
+        Task<Category?> GetRootSubjectAsync(Guid? programId, CancellationToken cancellationToken);
     }
 }

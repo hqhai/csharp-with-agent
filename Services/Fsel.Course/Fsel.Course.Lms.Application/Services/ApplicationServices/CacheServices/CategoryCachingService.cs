@@ -12,6 +12,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices
     public interface ICategoryCachingService : IEntityCachingService<Category>
     {
         Task<IList<Category>> GetAll(CancellationToken cancellationToken = default);
+
+        Task<Category?> GetSubjectRootAsync(Guid? programId, CancellationToken cancellationToken = default);
     }
 
     public class CategoryCachingService : EntityCachingService<Category>, ICategoryCachingService
@@ -44,6 +46,20 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices
                 return categories;
             }, token: cancellationToken);
             return subjects;
+        }
+
+        public async Task<Category?> GetSubjectRootAsync(Guid? programId, CancellationToken cancellationToken = default)
+        {
+            if (!programId.HasValue)
+            {
+                return null;
+            }
+
+            var subject = await GetOrSetAsync($"root_{programId}", async (ctx, _) =>
+            {
+                return await _categoryRepository.GetRootSubjectAsync(programId, cancellationToken);
+            }, token: cancellationToken);
+            return subject;
         }
 
         private async Task LoadChildCategory(Category category)
