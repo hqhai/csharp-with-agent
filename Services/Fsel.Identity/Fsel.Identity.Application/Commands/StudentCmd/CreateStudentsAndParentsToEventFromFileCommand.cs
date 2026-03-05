@@ -438,6 +438,8 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                     return methodResult;
                 }
 
+                bool isConfirmOTP = competitionEvent.EventContent?.Actions?.Any(p => p == EnumSchoolEventRuleAction.NotConfirmOTP) ?? false;
+
                 var studentIds = new ConcurrentBag<Guid>();
                 var studentModels = new ConcurrentBag<CreateOrderForStudentsEventCommandModel>();
 
@@ -477,8 +479,8 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                     PhoneNumber = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber.Trim()),
                                     Birthday = student.DateOfBirth,
                                     Code = GeneratorCodeAsync(studentRepository, student.DateOfBirth ?? DateTime.MinValue, null),
-                                    EmailConfirmed = false,
-                                    PhoneNumberConfirmed = false,
+                                    EmailConfirmed = isConfirmOTP,
+                                    PhoneNumberConfirmed = isConfirmOTP,
                                     Status = EnumUserStatus.Active,
                                     DefaultPassword = password,
                                     Student = new Student()
@@ -572,8 +574,8 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                         PhoneNumber = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.ParentPhoneNumber.Trim()),
                                         Birthday = student.ParentDateOfBirth,
                                         Code = GeneratorCodeAsync(parentRepository, student.ParentDateOfBirth ?? DateTime.MinValue, null),
-                                        EmailConfirmed = false,
-                                        PhoneNumberConfirmed = false,
+                                        EmailConfirmed = isConfirmOTP,
+                                        PhoneNumberConfirmed = isConfirmOTP,
                                         Status = EnumUserStatus.Active,
                                         DefaultPassword = password,
                                         Student = new Student()

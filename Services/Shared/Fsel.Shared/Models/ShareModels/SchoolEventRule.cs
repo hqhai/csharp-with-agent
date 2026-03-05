@@ -87,6 +87,7 @@ namespace Fsel.Shared.Models.ShareModels
         EventRegistrationSuccess,
         EventGiftDisplay,
         DisableChangePasswordToEvent,
+        NotConfirmOTP
     }
 
     public enum EnumByPassPaymentType
