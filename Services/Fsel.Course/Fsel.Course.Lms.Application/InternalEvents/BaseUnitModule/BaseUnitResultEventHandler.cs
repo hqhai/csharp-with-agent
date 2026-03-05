@@ -8,6 +8,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseUnitModule
     using Fsel.Course.Domain.Entities.V1i1;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Lms.Application.Commands.OtherCmd;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServices.UnitItemServices;
     using Fsel.Shared.Constants;
@@ -27,6 +29,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseUnitModule
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly ITestGroupResultRepository _testGroupResultRepository;
         private readonly IUnitItemInitializerFactory _unitItemInitializerFactory;
+        private readonly SendMailCompleteUnitPublisher _sendMailCompleteUnitPublisher;
 
         public BaseUnitResultEventHandler(
             IUnitModuleCachingService unitModuleCachingService,
@@ -34,7 +37,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseUnitModule
             IUnitResultRepository unitResultRepository,
             ILessonResultRepository lessonResultRepository,
             ITestGroupResultRepository testGroupResultRepository,
-            IUnitItemInitializerFactory unitItemInitializerFactory)
+            IUnitItemInitializerFactory unitItemInitializerFactory,
+            SendMailCompleteUnitPublisher sendMailCompleteUnitPublisher)
         {
             _unitModuleCachingService = unitModuleCachingService;
             _unitModuleRepository = unitModuleRepository;
@@ -42,6 +46,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseUnitModule
             _lessonResultRepository = lessonResultRepository;
             _testGroupResultRepository = testGroupResultRepository;
             _unitItemInitializerFactory = unitItemInitializerFactory;
+            _sendMailCompleteUnitPublisher = sendMailCompleteUnitPublisher;
         }
 
         /// <summary>
@@ -76,6 +81,9 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseUnitModule
                 });
 
                 await _unitResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+                await _sendMailCompleteUnitPublisher.Publish(new SendMailCompleteUnitCommandModel() { UnitResultId = unitResult.Id }, cancellationToken);
+
                 return;
             }
 
@@ -177,6 +185,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseUnitModule
             });
 
             await _unitResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+            await _sendMailCompleteUnitPublisher.Publish(new SendMailCompleteUnitCommandModel() { UnitResultId = unitResult.Id }, cancellationToken);
         }
 
         /// <summary>

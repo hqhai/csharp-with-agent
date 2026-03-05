@@ -47,5 +47,12 @@ namespace Fsel.Shared.Models.SenderTemplates
         public string? SkillDisplay { get; set; }
         public string? LinkReport { get; set; }
         public string? AccessLink { get; set; }
+        public string? Program { get; set; }
+        public string? Level { get; set; }
+        public string? Videos { get; set; }
+        public string? HomeWorks { get; set; }
+        public string? ClassForums { get; set; }
+        public string? SkillTests { get; set; }
+        public string? Display { get; set; }
     }
 }
