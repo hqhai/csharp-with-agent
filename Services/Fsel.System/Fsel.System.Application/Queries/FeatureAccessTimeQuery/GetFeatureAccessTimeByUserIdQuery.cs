@@ -32,7 +32,7 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
                 return methodResult;
             }
 
-            var query = _featureAccessTimeRepository.Queryable.WhereBulkContains(request.UserIds, x => x.CreatedUserId);
+            var query = _featureAccessTimeRepository.ReadQueryable.WhereBulkContains(request.UserIds, x => x.CreatedUserId);
             if (request.StartDate.HasValue)
             {
                 query = query.Where(x => x.CreatedDate.Date >= request.StartDate.Value.Date);

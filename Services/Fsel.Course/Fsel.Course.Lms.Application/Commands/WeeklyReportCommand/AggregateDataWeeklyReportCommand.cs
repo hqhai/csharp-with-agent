@@ -3,6 +3,7 @@
 namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
 {
     using System.Globalization;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -375,20 +376,52 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
             weeklyReport.ColorOther = SendMailHelper.GetColorText(totalOther, previousOther);
         }
 
-        private static long GetFeatureAccessTimeByType(List<FeatureAccessTimeModel>? featureAccessTimes, EnumFeatureBussinessType businessType)
+        private static readonly Dictionary<EnumFeatureBussinessType, EnumFeature[]> FeatureMapping =
+            new()
+            {
+                {
+                    EnumFeatureBussinessType.Learn,
+                    new[]
+                    {
+                        EnumFeature.VideoLesson,
+                        EnumFeature.HomeWork,
+                        EnumFeature.FullTest,
+                        EnumFeature.SkillTest,
+                        EnumFeature.ChatBot
+                    }
+                },
+                {
+                    EnumFeatureBussinessType.Social,
+                    new[]
+                    {
+                        EnumFeature.ClassForum,
+                        EnumFeature.DiscussionBoard
+                    }
+                },
+                {
+                    EnumFeatureBussinessType.Other,
+                    new[]
+                    {
+                        EnumFeature.Other
+                    }
+                }
+            };
+
+        private static long GetFeatureAccessTimeByType(
+            List<FeatureAccessTimeModel>? featureAccessTimes,
+            EnumFeatureBussinessType businessType)
         {
-            if (businessType == EnumFeatureBussinessType.Learn)
+            if (featureAccessTimes == null || featureAccessTimes.Count == 0)
             {
-                return featureAccessTimes?.Where(p => p.EnumFeature == EnumFeature.VideoLesson || p.EnumFeature == EnumFeature.HomeWork || p.EnumFeature == EnumFeature.FinalTest || p.EnumFeature == EnumFeature.MockTest || p.EnumFeature == EnumFeature.ChatBot).Sum(p => p.AccessTime) ?? 0;
+                return 0;
             }
-            else if (businessType == EnumFeatureBussinessType.Social)
+            if (!FeatureMapping.TryGetValue(businessType, out var features))
             {
-                return featureAccessTimes?.Where(p => p.EnumFeature == EnumFeature.ClassForum || p.EnumFeature == EnumFeature.DiscussionBoard).Sum(p => p.AccessTime) ?? 0;
+                return 0;
             }
-            else
-            {
-                return featureAccessTimes?.Where(p => p.EnumFeature == EnumFeature.Other).Sum(p => p.AccessTime) ?? 0;
-            }
+            return featureAccessTimes
+                .Where(x => x.EnumFeature.HasValue && features.ToList().Contains(x.EnumFeature.Value))
+                .Sum(x => x.AccessTime);
         }
 
         private static void CheckAndAssignStatusDate(WeeklyReportModel model, List<DateTime>? userLoginDates, List<DateTime> weekDays)

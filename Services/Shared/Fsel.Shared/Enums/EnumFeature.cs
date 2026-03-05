@@ -7,11 +7,11 @@ namespace Fsel.Shared.Enums
         ClassForum,
         HomeWork,
         VideoLesson,
-        MockTest,
-        FinalTest,
         DiscussionBoard,
         ChatBot,
         Other,
-        Document
+        Document,
+        FullTest,
+        SkillTest
     }
 }

@@ -42,7 +42,9 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
             var userIdEnums = featureAccessTimeRequestEnumFeatures.Select(x => x.UserId).Distinct().ToList();
             var featureEnums = featureAccessTimeRequestEnumFeatures.Select(x => x.EnumFeature).Distinct().ToList();
 
-            var featureAccessTimeEnumFeatures = await (from baseQ in _featureAccessTimeRepository.Queryable.WhereBulkContains(userIdEnums, x => x.CreatedUserId).Where(x => featureEnums.Contains(x.EnumFeature))
+            var featureAccessTimeEnumFeatures = await (from baseQ in _featureAccessTimeRepository.ReadQueryable
+                                                                                                 .WhereBulkContains(userIdEnums, x => x.CreatedUserId)
+                                                                                                 .Where(x => featureEnums.Contains(x.EnumFeature))
                                                        group baseQ by new { baseQ.EnumFeature, baseQ.CreatedUserId } into g
                                                        select new FeatureAccessTimeModel
                                                        {
@@ -65,9 +67,10 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
             var featureRequests = featureAccessTimeRequestFeatures.Select(x => x.EnumFeature).Distinct().ToList();
             var courseIdRequests = featureAccessTimeRequestFeatures.Select(x => x.CourseId).Distinct().ToList();
 
-            var featureAccessTimeFeatures = await (from baseQ in _featureAccessTimeRepository.Queryable.WhereBulkContains(courseIdRequests, x => x.CourseId)
-                                                   .Where(x => featureRequests.Contains(x.EnumFeature))
-                                                   .WhereBulkContains(userRequestIds, x => x.CreatedUserId)
+            var featureAccessTimeFeatures = await (from baseQ in _featureAccessTimeRepository.ReadQueryable
+                                                                                             .WhereBulkContains(courseIdRequests, x => x.CourseId)
+                                                                                             .Where(x => featureRequests.Contains(x.EnumFeature))
+                                                                                             .WhereBulkContains(userRequestIds, x => x.CreatedUserId)
                                                    group baseQ by new { baseQ.EnumFeature, baseQ.CourseId, baseQ.CreatedUserId } into g
                                                    select new FeatureAccessTimeModel
                                                    {
@@ -84,7 +87,7 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
             var userRequesteCourseIds = featureAccessTimeCourseRequests.Select(x => x.UserId).ToList();
             var courseIdRequesteCourses = featureAccessTimeCourseRequests.Select(x => x.EnumFeature).ToList();
 
-            var featureAccessTimeCourses = await (from baseQ in _featureAccessTimeRepository.Queryable.WhereBulkContains(courseIdRequesteCourses, x => x.CourseId)
+            var featureAccessTimeCourses = await (from baseQ in _featureAccessTimeRepository.ReadQueryable.WhereBulkContains(courseIdRequesteCourses, x => x.CourseId)
                                                                                                       .WhereBulkContains(userRequesteCourseIds, x => x.CreatedUserId)
                                                   where baseQ.EnumFeature != Shared.Enums.EnumFeature.Other && baseQ.CourseId.HasValue
                                                   group baseQ by new { baseQ.CourseId, baseQ.CreatedUserId } into g
@@ -101,7 +104,8 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
 
             var userIds = featureAccessTimeRequests.Select(x => x.UserId).ToList();
 
-            var featureAccessTimes = await (from baseQ in _featureAccessTimeRepository.Queryable.WhereBulkContains(userIds, x => x.CreatedUserId)
+            var featureAccessTimes = await (from baseQ in _featureAccessTimeRepository.ReadQueryable
+                                                                                      .WhereBulkContains(userIds, x => x.CreatedUserId)
                                             group baseQ by new { baseQ.CreatedUserId } into g
                                             select new FeatureAccessTimeModel
                                             {
