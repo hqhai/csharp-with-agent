@@ -110,7 +110,7 @@ namespace Fsel.Course.Infrastructure.Common.QuestionHelper.QuestionTypes.Handler
                 {
                     await _videoTimeCodeAnswerRepository.BulkMergeAsync(new List<VideoTimeCodeAnswer> { entity }, bulk =>
                     {
-                        bulk.ColumnPrimaryKeyExpression = c => new { c.VideoTimeCodeResultId, c.QuestionId, c.IsDeleted };
+                        bulk.ColumnPrimaryKeyExpression = c => new { c.VideoResultId, c.VideoTimeCodeResultId, c.VideoTimeCodeId, c.QuestionId, c.IsDeleted };
                     });
                 }
                 catch { }
