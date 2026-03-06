@@ -977,7 +977,7 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasIndex("LessonResultId", "LessonModuleId")
                         .IsUnique()
-                        .HasFilter("[IsDeleted] = 0");
+                        .HasFilter("[IsDeleted] = 0 AND [LessonModuleId] IS NOT NULL");
 
                     b.HasIndex("IsDeleted", "Status", "ClassForumId", "Id");
 
@@ -1966,7 +1966,7 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasIndex("LessonResultId", "LessonModuleId")
                         .IsUnique()
-                        .HasFilter("[IsDeleted] = 0");
+                        .HasFilter("[IsDeleted] = 0 AND [LessonModuleId] IS NOT NULL");
 
                     b.ToTable("DocumentResults");
                 });
@@ -3797,7 +3797,7 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasIndex("LessonResultId", "LessonModuleId")
                         .IsUnique()
-                        .HasFilter("[IsDeleted] = 0");
+                        .HasFilter("[IsDeleted] = 0 AND [LessonModuleId] IS NOT NULL");
 
                     b.ToTable("HomeWorkResults");
                 });
@@ -4539,7 +4539,7 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasIndex("UnitModuleId", "UnitResultId")
                         .IsUnique()
-                        .HasFilter("[IsDeleted] = 0");
+                        .HasFilter("[IsDeleted] = 0 AND [UnitModuleId] IS NOT NULL AND [UnitResultId] IS NOT NULL ");
 
                     b.HasIndex("CourseId", "StudentId", "Status");
 
@@ -7993,11 +7993,11 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasIndex("CourseModuleId", "CourseResultId")
                         .IsUnique()
-                        .HasFilter("[IsDeleted] = 0 AND [UnitResultId] IS NULL");
+                        .HasFilter("[IsDeleted] = 0 AND [UnitResultId] IS NULL AND [CourseModuleId] IS NOT NULL AND [CourseResultId] IS NOT NULL");
 
                     b.HasIndex("UnitModuleId", "UnitResultId")
                         .IsUnique()
-                        .HasFilter("[IsDeleted] = 0");
+                        .HasFilter("[IsDeleted] = 0 AND [UnitModuleId] IS NOT NULL AND [UnitResultId] IS NOT NULL");
 
                     b.ToTable("TestGroupResult");
                 });
@@ -8107,9 +8107,9 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasIndex("TestId");
 
-                    b.HasIndex("TestGroupResultId", "TestId")
+                    b.HasIndex("TestGroupResultId", "TestId", "StepFlowId")
                         .IsUnique()
-                        .HasFilter("[IsDeleted] = 0");
+                        .HasFilter("[IsDeleted] = 0 AND [TestGroupResultId] IS NOT NULL AND [TestId] IS NOT NULL");
 
                     b.ToTable("TestResult");
                 });
@@ -8456,7 +8456,7 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasIndex("TestResultId", "TestSectionId")
                         .IsUnique()
-                        .HasFilter("[IsDeleted] = 0");
+                        .HasFilter("[IsDeleted] = 0 AND [TestResultId] IS NOT NULL AND [TestSectionId] IS NOT NULL");
 
                     b.ToTable("TestSectionResult");
                 });
@@ -8876,7 +8876,7 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasIndex("CourseResultId", "CourseModuleId")
                         .IsUnique()
-                        .HasFilter("[IsDeleted] = 0");
+                        .HasFilter("[IsDeleted] = 0 AND [CourseResultId] IS NOT NULL AND [CourseModuleId] IS NOT NULL");
 
                     b.HasIndex("StudentId", "Status");
 
@@ -9440,7 +9440,7 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasIndex("LessonModuleId", "LessonResultId")
                         .IsUnique()
-                        .HasFilter("[IsDeleted] = 0");
+                        .HasFilter("[IsDeleted] = 0 AND [LessonModuleId] IS NOT NULL");
 
                     b.HasIndex("Status", "StudentId");
 
@@ -9683,7 +9683,7 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasIndex("VideoTimeCodeResultId", "QuestionId")
                         .IsUnique()
-                        .HasFilter("[IsDeleted] = 0");
+                        .HasFilter("[IsDeleted] = 0 AND [VideoTimeCodeResultId] IS NOT NULL");
 
                     b.ToTable("VideoTimeCodeAnswers");
                 });
