@@ -552,7 +552,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                     PhoneNumber = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber.Trim()),
                                     Birthday = student.DateOfBirth,
                                     Code = GeneratorCodeAsync(studentRepository, student.DateOfBirth ?? DateTime.MinValue, null),
-                                    EmailConfirmed = isConfirmOTP,
+                                    EmailConfirmed = false,
                                     PhoneNumberConfirmed = isConfirmOTP,
                                     Status = EnumUserStatus.Active,
                                     DefaultPassword = password,
