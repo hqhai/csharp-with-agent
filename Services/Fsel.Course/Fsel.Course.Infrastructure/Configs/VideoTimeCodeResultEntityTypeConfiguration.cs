@@ -31,7 +31,8 @@ namespace Fsel.Course.Infrastructure.Configs
 
             builder.HasIndex(c => new { c.Status, c.StudentId }).IncludeValueProperties(x => new { x.VideoResultId, x.VideoTimeCodeId, x.CorrectCount, x.CorrectTotal, x.WorkingTime });
             builder.HasIndex(c => new { c.VideoResultId, c.Status });
-            builder.HasIndex(c => new { c.VideoResultId, c.VideoTimeCodeId, c.IsDeleted });
+
+            builder.HasIndex(c => new { c.VideoResultId, c.VideoTimeCodeId }).IsUnique().HasFilter("[IsDeleted] = 0");
         }
     }
 }
