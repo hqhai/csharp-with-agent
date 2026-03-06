@@ -12,6 +12,7 @@ namespace Fsel.Course.Infrastructure.Configs
         public void Configure(EntityTypeBuilder<ClassForumDetailResultHistory> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
+
             builder.HasOne(a => a.ClassForumDetailResult)
                    .WithMany(b => b.ClassForumDetailResultHistories)
                    .HasForeignKey(p => p.ClassForumDetailResultId)

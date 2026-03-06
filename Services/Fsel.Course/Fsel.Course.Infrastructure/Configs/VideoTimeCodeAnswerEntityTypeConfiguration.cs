@@ -45,7 +45,10 @@ namespace Fsel.Course.Infrastructure.Configs
                        .OnDelete(DeleteBehavior.SetNull);
 
             builder.HasIndex(c => new { c.QuestionId, c.VideoResultId }).IncludeValueProperties(x => new { x.CorrectCount });
-            builder.HasIndex(c => new { c.VideoTimeCodeResultId, c.QuestionId, c.IsDeleted });
+
+            builder.HasIndex(c => new { c.VideoTimeCodeResultId, c.QuestionId })
+                   .IsUnique()
+                   .HasFilter("[IsDeleted] = 0 AND [VideoTimeCodeResultId] IS NOT NULL");
         }
     }
 }
