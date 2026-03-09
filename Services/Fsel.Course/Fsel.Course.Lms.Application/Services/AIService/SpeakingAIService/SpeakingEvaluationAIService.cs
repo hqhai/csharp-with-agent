@@ -177,6 +177,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                     enableMiscue: false
                 );
                 pronConfig.EnableProsodyAssessment();
+                pronConfig.EnableContentAssessmentWithTopic(topic);
                 pronConfig.ApplyTo(recognizer);
 
                 var stopRecognition = new TaskCompletionSource<int>();
