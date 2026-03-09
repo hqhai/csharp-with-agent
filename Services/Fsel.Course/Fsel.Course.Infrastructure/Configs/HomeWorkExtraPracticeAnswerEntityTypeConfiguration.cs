@@ -30,7 +30,7 @@ namespace Fsel.Course.Infrastructure.Configs
                       v => v.ToString(),
                       v => v.EnumParse<EnumAnswerStatus>());
 
-            builder.HasIndex(c => new { c.QuestionId, c.HomeWorkExtraPracticeResultId }).IsUnique().HasFilter("[IsDeleted] = 0");
+            builder.HasIndex(c => new { c.QuestionId, c.HomeWorkExtraPracticeResultId, c.IsDeleted });
         }
     }
 }
