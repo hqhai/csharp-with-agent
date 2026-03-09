@@ -542,8 +542,8 @@ namespace Fsel.Authentication.Infrastructure.Configs
 
                     RequireClientSecret = false,
                     RequirePkce = false,
-                    RedirectUris = { "fsel-multi-subject-uat://lms-web-multi-subject-testing.fsel.edu.vn" },
-                    PostLogoutRedirectUris = { "fsel-multi-subject-uat://lms-web-multi-subject-testing.fsel.edu.vn" },
+                    RedirectUris = { "fsel-multi-subject-uat://lms-web-multi-subject-testing.fsel.edu.vn", "fsel-multi-subject-uat://lms-web-multi-subject-production.fsel.edu.vn" },
+                    PostLogoutRedirectUris = { "fsel-multi-subject-uat://lms-web-multi-subject-testing.fsel.edu.vn", "fsel-multi-subject-uat://lms-web-multi-subject-production.fsel.edu.vn" },
 
                     AllowOfflineAccess = true,
                     AccessTokenLifetime = 3600,
