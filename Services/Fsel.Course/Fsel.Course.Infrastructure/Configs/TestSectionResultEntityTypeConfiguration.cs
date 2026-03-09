@@ -33,9 +33,7 @@ namespace Fsel.Course.Infrastructure.Configs
                     v => v.ToString(),
                     v => v.EnumParse<EnumResultStatus>());
 
-            builder.HasIndex(c => new { c.TestResultId, c.TestSectionId })
-                .IsUnique()
-                .HasFilter("[IsDeleted] = 0 AND [TestResultId] IS NOT NULL AND [TestSectionId] IS NOT NULL");
+            builder.HasIndex(c => new { c.TestResultId, c.TestSectionId }).IsUnique().HasFilter("[IsDeleted] = 0");
         }
     }
 }
