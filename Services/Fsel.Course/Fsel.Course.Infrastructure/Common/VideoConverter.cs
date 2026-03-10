@@ -18,6 +18,7 @@ namespace Fsel.Course.Infrastructure.Common
     using Fsel.Course.Domain.Models.CommandModels.Videos;
     using Fsel.Course.Domain.Models.CommandModels.VideoTimeCodes;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Shared.ApplicationServices.CacheServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using Microsoft.EntityFrameworkCore;
@@ -40,6 +41,7 @@ namespace Fsel.Course.Infrastructure.Common
         private readonly IQuestionShuffleRepository _questionShuffleRepository;
         private readonly IQuestionExplanationErrorRepository _questionExplanationErrorRepository;
         private readonly ISkillRepository _skillRepository;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
         private const int NumberOfQuestion = 1;
         private List<VideoTimeCode> DeleteVideoTimeCodes = new List<VideoTimeCode>();
         private List<Exercise> DeleteExercises = new List<Exercise>();
@@ -60,7 +62,8 @@ namespace Fsel.Course.Infrastructure.Common
             , IMapper mapper
             , IQuestionShuffleRepository questionShuffleRepository
             , IQuestionExplanationErrorRepository questionExplanationErrorRepository
-            , ISkillRepository skillRepository)
+            , ISkillRepository skillRepository
+            , IRequestSafeCachingService requestSafeCachingService)
         {
             _videoRepository = videoRepository;
             _questionRepository = questionRepository;
@@ -78,6 +81,7 @@ namespace Fsel.Course.Infrastructure.Common
             _questionShuffleRepository = questionShuffleRepository;
             _questionExplanationErrorRepository = questionExplanationErrorRepository;
             _skillRepository = skillRepository;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         #region ADD
@@ -1286,10 +1290,16 @@ namespace Fsel.Course.Infrastructure.Common
                     };
                 }).ToList();
 
-                await _videoTimeCodeAnswerRepository.BulkMergeAsync(videoTimeCodeAnswers, bulk =>
-                {
-                    bulk.ColumnPrimaryKeyExpression = c => new { c.VideoResultId, c.VideoTimeCodeResultId, c.VideoTimeCodeId, c.QuestionId, c.IsDeleted };
-                });
+                await _requestSafeCachingService.SafeRequest(
+                       key: $"Add_VideoTimeCodeAnswer_{string.Join("_", videoTimeCodeAnswers.Select(hwa => $"{hwa.VideoTimeCodeResultId}_{hwa.QuestionId}_{hwa.IsDeleted}"))}",
+                       safeFunction: async () =>
+                       {
+                           await _videoTimeCodeAnswerRepository.BulkMergeAsync(videoTimeCodeAnswers, bulk =>
+                           {
+                               bulk.ColumnPrimaryKeyExpression = c => new { c.VideoTimeCodeResultId, c.QuestionId, c.IsDeleted };
+                           });
+                           return videoTimeCodeAnswers;
+                       });
             }
             if (updateVideoTimeCodeAnswers != null && updateVideoTimeCodeAnswers.Any())
             {

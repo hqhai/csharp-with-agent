@@ -13,6 +13,8 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkConfigCmd
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.HomeWorkConfigs;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
+    using Fsel.Shared.ApplicationServices.CacheServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -27,13 +29,15 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkConfigCmd
         private readonly IMapper _mapper;
         private readonly ICurriculumRepository _curriculumRepository;
         private readonly IHomeWorkRepository _homeWorkRepository;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
 
-        public SaveHomeWorkConfigCommandHandler(IHomeWorkConfigRepository homeWorkConfigRepository, IMapper mapper, ICurriculumRepository curriculumRepository, IHomeWorkRepository homeWorkRepository)
+        public SaveHomeWorkConfigCommandHandler(IHomeWorkConfigRepository homeWorkConfigRepository, IMapper mapper, ICurriculumRepository curriculumRepository, IHomeWorkRepository homeWorkRepository, IRequestSafeCachingService requestSafeCachingService)
         {
             _homeWorkConfigRepository = homeWorkConfigRepository;
             _mapper = mapper;
             _curriculumRepository = curriculumRepository;
             _homeWorkRepository = homeWorkRepository;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         public async Task<MethodResult<HomeWorkConfigModel>> Handle(SaveHomeWorkConfigCommand request, CancellationToken cancellationToken)
@@ -105,7 +109,13 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkConfigCmd
 
             await _homeWorkConfigRepository.ExecuteTransactionAsync(async () =>
             {
-                await _homeWorkConfigRepository.BulkMergeAsync(homeworkConfigs);
+                await _requestSafeCachingService.SafeRequest<HomeWorkConfig>(
+                    key: $"Add_HomeWorkConfig_{homeworkConfig.CurriculumId}_{homeworkConfig.HomeWorkId}",
+                    safeFunction: async () =>
+                    {
+                        await _homeWorkConfigRepository.BulkMergeAsync(homeworkConfigs);
+                        return homeworkConfig;
+                    });
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = _mapper.Map<HomeWorkConfigModel>(homeworkConfig);
                 return methodResult;

@@ -23,6 +23,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
     using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService.Interface;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
+    using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
@@ -32,6 +33,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Logging;
     using static Fsel.Shared.Constants.ValueSettings;
+    using Fsel.Shared.ApplicationServices.CacheServices;
 
     public class CreateMockTestAnswerBySectionGroupCommand : CreateAnswerBySectionGroupCommandModel, IRequest<MethodResult<SectionGroupResultModel>>
     {
@@ -60,6 +62,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
         private readonly DisconnectSocketCalculateTimePublisher _disconnectSocketCalculateTimePublisher;
         private readonly SaveUserSurveyAssignmentPublisher _saveUserSurveyAssignmentPublisher;
         private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
 
         public CreateMockTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository,
             AuthContext authContext,
@@ -81,7 +84,8 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             SubmitSpeakingAIPublisher submitSpeakingAIPublisher,
             DisconnectSocketCalculateTimePublisher disconnectSocketCalculateTimePublisher,
             SaveUserSurveyAssignmentPublisher saveUserSurveyAssignmentPublisher,
-            ICourseUnitMockTestRepository courseUnitMockTestRepository)
+            ICourseUnitMockTestRepository courseUnitMockTestRepository,
+            IRequestSafeCachingService requestSafeCachingService)
         {
             _questionRepository = questionRepository;
             _authContext = authContext;
@@ -104,6 +108,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             _disconnectSocketCalculateTimePublisher = disconnectSocketCalculateTimePublisher;
             _saveUserSurveyAssignmentPublisher = saveUserSurveyAssignmentPublisher;
             _courseUnitMockTestRepository = courseUnitMockTestRepository;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         public async Task<MethodResult<SectionGroupResultModel>> Handle(CreateMockTestAnswerBySectionGroupCommand request, CancellationToken cancellationToken)
@@ -418,10 +423,16 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             {
                 if (createMockTestAnswers != null && createMockTestAnswers.Any())
                 {
-                    await _mockTestAnswerRepository.BulkMergeAsync(createMockTestAnswers, bulk =>
-                    {
-                        bulk.ColumnPrimaryKeyExpression = entity => new { entity.SectionGroupResultId, entity.SectionId, entity.SectionTimeCodeId, entity.SectionQuestionId, entity.MockTestResultId, entity.IsDeleted };
-                    });
+                    await _requestSafeCachingService.SafeRequest<List<MockTestAnswer>>(
+                    key: $"Add_MockTestAnswers_{string.Join("_", createMockTestAnswers.Select(hwa => $"{hwa.SectionGroupResultId}_{hwa.SectionId}_{hwa.SectionTimeCodeId}_{hwa.SectionQuestionId}"))}",
+                        safeFunction: async () =>
+                        {
+                            await _mockTestAnswerRepository.BulkMergeAsync(createMockTestAnswers, bulk =>
+                            {
+                                bulk.ColumnPrimaryKeyExpression = entity => new { entity.SectionGroupResultId, entity.SectionId, entity.SectionTimeCodeId, entity.SectionQuestionId, entity.MockTestResultId, entity.IsDeleted };
+                            });
+                            return createMockTestAnswers.ToList();
+                        });
                 }
                 if (updateMockTestAnswers != null && updateMockTestAnswers.Any())
                 {

@@ -16,9 +16,9 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.ExtraPracticeAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Infrastructure;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.ApplicationServices.CacheServices;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -37,6 +37,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
         private readonly IExtraPracticeAnswerRepository _extraPracticeAnswerRepository;
         private readonly IQuestionRepository _questionRepository;
         private readonly IExtraPracticeResultRepository _extraPracticeResultRepository;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
 
         public CreateExtraPracticeAnswerVideoCommandHandler(AuthContext authContext
             , IUserService userService
@@ -44,7 +45,8 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             , QuestionConverter questionConverter
             , IExtraPracticeAnswerRepository extraPracticeAnswerRepository
             , IQuestionRepository questionRepository
-            , IExtraPracticeResultRepository extraPracticeResultRepository)
+            , IExtraPracticeResultRepository extraPracticeResultRepository
+            , IRequestSafeCachingService requestSafeCachingService)
         {
             _authContext = authContext;
             _userService = userService;
@@ -53,6 +55,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             _extraPracticeAnswerRepository = extraPracticeAnswerRepository;
             _questionRepository = questionRepository;
             _extraPracticeResultRepository = extraPracticeResultRepository;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         public async Task<MethodResult<ExtraPracticeResultModel>> Handle(CreateExtraPracticeAnswerVideoCommand request, CancellationToken cancellationToken)
@@ -157,10 +160,17 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             {
                 if (extraPracticeAnswers.Count > 0)
                 {
-                    await _extraPracticeAnswerRepository.BulkMergeAsync(extraPracticeAnswers, bulk =>
-                    {
-                        bulk.ColumnPrimaryKeyExpression = entity => new { entity.ExtraPracticeResultId, entity.ExtraPracticeExerciseResultId, entity.QuestionId, entity.IsDeleted };
-                    });
+                    var firstAnswer = extraPracticeAnswers.First();
+                    await _requestSafeCachingService.SafeRequest<List<ExtraPracticeAnswer>>(
+                        key: $"Add_ExtraPracticeAnswer_{firstAnswer.ExtraPracticeResultId}_{firstAnswer.ExtraPracticeExerciseResultId}_{firstAnswer.QuestionId}_{firstAnswer.IsDeleted}",
+                        safeFunction: async () =>
+                        {
+                            await _extraPracticeAnswerRepository.BulkMergeAsync(extraPracticeAnswers, bulk =>
+                            {
+                                bulk.ColumnPrimaryKeyExpression = entity => new { entity.ExtraPracticeResultId, entity.ExtraPracticeExerciseResultId, entity.QuestionId, entity.IsDeleted };
+                            });
+                            return extraPracticeAnswers;
+                        });
                 }
                 else if (updateExtraPracticeAnswers.Count > 0)
                 {

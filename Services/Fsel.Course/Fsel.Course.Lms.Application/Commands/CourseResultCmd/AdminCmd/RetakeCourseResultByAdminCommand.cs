@@ -19,6 +19,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd.AdminCmd
     using Fsel.Course.Lms.Application.Services.TrainingServices.CommandModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
+    using Fsel.Shared.ApplicationServices.CacheServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
@@ -47,6 +48,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd.AdminCmd
         private readonly ICourseResultRepository _courseResultRepository;
         private readonly SaveUserCourseSettingPublisher _saveUserCourseSettingPublisher;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
 
         public RetakeCourseResultCommandHandler(IMapper mapper
             , ITrainingService trainingService
@@ -57,7 +59,8 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd.AdminCmd
             , ILogger<RetakeCourseResultByAdminCommand> logger
             , ICourseResultRepository courseResultRepository
             , SaveUserCourseSettingPublisher saveUserCourseSettingPublisher
-            , IHttpContextAccessor httpContextAccessor)
+            , IHttpContextAccessor httpContextAccessor
+            , IRequestSafeCachingService requestSafeCachingService)
         {
             _mapper = mapper;
             _trainingService = trainingService;
@@ -69,6 +72,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd.AdminCmd
             _courseResultRepository = courseResultRepository;
             _saveUserCourseSettingPublisher = saveUserCourseSettingPublisher;
             _httpContextAccessor = httpContextAccessor;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         public async Task<MethodResult<CourseResultModel>> Handle(RetakeCourseResultByAdminCommand request, CancellationToken cancellationToken)
@@ -233,10 +237,16 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd.AdminCmd
             }
             try
             {
-                await _courseResultRepository.BulkMergeAsync(new List<CourseResult> { courseResultNew }, bulk =>
-                {
-                    bulk.ColumnPrimaryKeyExpression = c => new { c.CourseId, c.StudentId, c.IsDeleted };
-                });
+                await _requestSafeCachingService.SafeRequest<CourseResult>(
+                    key: $"Add_CourseResult_{courseResultNew.CourseId}_{courseResultNew.StudentId}_{courseResultNew.WorkingStatus}_{courseResultNew.IsDeleted}",
+                    safeFunction: async () =>
+                    {
+                        await _courseResultRepository.BulkMergeAsync(new List<CourseResult> { courseResultNew }, bulk =>
+                        {
+                            bulk.ColumnPrimaryKeyExpression = c => new { c.CourseId, c.StudentId, c.WorkingStatus, c.IsDeleted };
+                        });
+                        return courseResultNew;
+                    });
             }
             catch (Exception ex)
             {

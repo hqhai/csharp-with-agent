@@ -16,6 +16,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd.V1i1
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Queues.Publishers;
+    using Fsel.Shared.ApplicationServices.CacheServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
@@ -46,6 +47,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd.V1i1
         private readonly IHomeWorkRepository _homeWorkRepository;
         private readonly IVideoResultRepository _videoResultRepository;
         private readonly IHomeWorkResultRepository _homeWorkResultRepository;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
 
         public StartLessonCommandHandler(ICourseRepository courseRepository
             , IUnitRepository unitRepository
@@ -60,7 +62,8 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd.V1i1
             , ICourseResultRepository courseResultRepository
             , IHomeWorkRepository homeWorkRepository
             , IVideoResultRepository videoResultRepository
-            , IHomeWorkResultRepository homeWorkResultRepository)
+            , IHomeWorkResultRepository homeWorkResultRepository
+            , IRequestSafeCachingService requestSafeCachingService)
         {
             _courseRepository = courseRepository;
             _unitRepository = unitRepository;
@@ -76,6 +79,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd.V1i1
             _homeWorkRepository = homeWorkRepository;
             _videoResultRepository = videoResultRepository;
             _homeWorkResultRepository = homeWorkResultRepository;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         public async Task<MethodResult<LessonResultModel>> Handle(StartLessonCommand request, CancellationToken cancellationToken)
@@ -126,9 +130,15 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd.V1i1
                     StudentId = lessonResult.StudentId,
                     LessonResultId = lessonResult.Id
                 };
-                await _videoResultRepository.BulkMergeAsync(new List<VideoResult> { videoResult }, bulk =>
+                await _requestSafeCachingService.SafeRequest<VideoResult>(
+                key: $"Add_VideoResult_{videoResult.LessonResultId}_{videoResult.StudentId}_{videoResult.VideoId}_{videoResult.IsDeleted}",
+                safeFunction: async () =>
                 {
-                    bulk.ColumnPrimaryKeyExpression = c => new { c.LessonResultId, c.StudentId, c.VideoId, c.IsDeleted };
+                    await _videoResultRepository.BulkMergeAsync(new List<VideoResult> { videoResult }, bulk =>
+                    {
+                        bulk.ColumnPrimaryKeyExpression = c => new { c.LessonResultId, c.StudentId, c.VideoId, c.IsDeleted };
+                    });
+                    return videoResult;
                 });
             }
 
@@ -149,9 +159,15 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd.V1i1
                     SubmissionCount = EnumSubmissionCount.FirstSubmit,
                 }).ToList();
 
-                await _homeWorkResultRepository.BulkMergeAsync(homeWorkResults, bulk =>
+                await _requestSafeCachingService.SafeRequest<List<HomeWorkResult>>(
+                key: $"Add_HomeWorkResults_{string.Join("_", homeWorkResults.Select(hwr => $"{hwr.LessonResultId}_{hwr.StudentId}_{hwr.HomeWorkId}_{hwr.IsDeleted}"))}",
+                safeFunction: async () =>
                 {
-                    bulk.ColumnPrimaryKeyExpression = c => new { c.LessonResultId, c.StudentId, c.HomeWorkId, c.IsDeleted };
+                    await _homeWorkResultRepository.BulkMergeAsync(homeWorkResults, bulk =>
+                    {
+                        bulk.ColumnPrimaryKeyExpression = c => new { c.LessonResultId, c.StudentId, c.HomeWorkId, c.IsDeleted };
+                    });
+                    return homeWorkResults;
                 });
             }
 

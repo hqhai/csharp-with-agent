@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Shared.ApplicationServices.CacheServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using MediatR;
@@ -28,18 +29,21 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
         private readonly IMapper _mapper;
         private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
         private readonly ICourseTeacherRepository _courseTeacherRepository;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
 
         public CloneCourseCommandHandler(ICourseRepository courseRepository
             , ILogger<CloneCourseCommand> logger
             , IMapper mapper
             , ICourseUnitMockTestRepository courseUnitMockTestRepository
-            , ICourseTeacherRepository courseTeacherRepository)
+            , ICourseTeacherRepository courseTeacherRepository
+            , IRequestSafeCachingService requestSafeCachingService)
         {
             _courseRepository = courseRepository;
             _logger = logger;
             _mapper = mapper;
             _courseUnitMockTestRepository = courseUnitMockTestRepository;
             _courseTeacherRepository = courseTeacherRepository;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         public async Task<MethodResult<CourseModel>> Handle(CloneCourseCommand request, CancellationToken cancellationToken)
@@ -82,10 +86,16 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
             {
                 try
                 {
-                    await _courseRepository.BulkMergeAsync(new List<EntityCourse> { courseClone }, bulk =>
-                    {
-                        bulk.ColumnPrimaryKeyExpression = entity => new { entity.ParentCourseId, entity.Priority, entity.IsDeleted };
-                    });
+                    await _requestSafeCachingService.SafeRequest<EntityCourse>(
+                        key: $"Add_Course_{courseClone.ParentCourseId}_{courseClone.Priority}_{courseClone.IsDeleted}",
+                        safeFunction: async () =>
+                        {
+                            await _courseRepository.BulkMergeAsync(new List<EntityCourse> { courseClone }, bulk =>
+                            {
+                                bulk.ColumnPrimaryKeyExpression = entity => new { entity.ParentCourseId, entity.Priority, entity.IsDeleted };
+                            });
+                            return courseClone;
+                        });
 
                     var courseTeachers = course.CourseTeachers.Select(x =>
                     {
@@ -101,8 +111,29 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
                         return courseUnitMockTest;
                     }).ToList();
 
-                    await _courseUnitMockTestRepository.BulkMergeAsync(courseUnitMockTests);
-                    await _courseTeacherRepository.BulkMergeAsync(courseTeachers);
+                    if (courseUnitMockTests.Any())
+                    {
+                        var firstMockTest = courseUnitMockTests.First();
+                        await _requestSafeCachingService.SafeRequest<List<CourseUnitMockTest>>(
+                            key: $"Add_CourseUnitMockTest_{firstMockTest.CourseId}_{firstMockTest.MockTestId}",
+                            safeFunction: async () =>
+                            {
+                                await _courseUnitMockTestRepository.BulkMergeAsync(courseUnitMockTests);
+                                return courseUnitMockTests;
+                            });
+                    }
+
+                    if (courseTeachers.Any())
+                    {
+                        var firstTeacher = courseTeachers.First();
+                        await _requestSafeCachingService.SafeRequest<List<CourseTeacher>>(
+                            key: $"Add_CourseTeacher_{firstTeacher.CourseId}_{firstTeacher.TeacherId}",
+                            safeFunction: async () =>
+                            {
+                                await _courseTeacherRepository.BulkMergeAsync(courseTeachers);
+                                return courseTeachers;
+                            });
+                    }
                 }
                 catch (Exception ex)
                 {

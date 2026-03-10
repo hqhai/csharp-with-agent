@@ -9,9 +9,11 @@ namespace Fsel.Course.Infrastructure.Common.QuestionHelper.QuestionTypes.Handler
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers;
+    using Fsel.Course.Domain.Entities.TestConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Infrastructure.Common.QuestionHelper.QuestionTypes.Interface;
+    using Fsel.Shared.ApplicationServices.CacheServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using Fsel.Shared.Models.ShareModels.QuestionResultConfigModels;
@@ -23,16 +25,19 @@ namespace Fsel.Course.Infrastructure.Common.QuestionHelper.QuestionTypes.Handler
         private readonly QuestionResultQueueModel _request;
         private readonly IExerciseQuestionRepository _exerciseQuestionRepository;
         private readonly IVideoTimeCodeAnswerRepository _videoTimeCodeAnswerRepository;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
 
         public QuestionTypeVideoHandler(IVideoTimeCodeResultRepository videoTimeCodeResultRepository,
                                        QuestionResultQueueModel request,
                                        IExerciseQuestionRepository exerciseQuestionRepository,
-                                       IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository)
+                                       IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository,
+                                       IRequestSafeCachingService requestSafeCachingService)
         {
             _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
             _request = request;
             _exerciseQuestionRepository = exerciseQuestionRepository;
             _videoTimeCodeAnswerRepository = videoTimeCodeAnswerRepository;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         public async Task<MethodResult<bool>> ExecuteAsync(CancellationToken cancellationToken)
@@ -108,10 +113,16 @@ namespace Fsel.Course.Infrastructure.Common.QuestionHelper.QuestionTypes.Handler
                 };
                 try
                 {
-                    await _videoTimeCodeAnswerRepository.BulkMergeAsync(new List<VideoTimeCodeAnswer> { entity }, bulk =>
-                    {
-                        bulk.ColumnPrimaryKeyExpression = c => new { c.VideoResultId, c.VideoTimeCodeResultId, c.VideoTimeCodeId, c.QuestionId, c.IsDeleted };
-                    });
+                    await _requestSafeCachingService.SafeRequest(
+                        key: $"Add_VideoTimeCodeAnswer_{entity.VideoTimeCodeResultId}_{entity.QuestionId}_{entity.IsDeleted}",
+                        safeFunction: async () =>
+                        {
+                            await _videoTimeCodeAnswerRepository.BulkMergeAsync(new List<VideoTimeCodeAnswer> { entity }, bulk =>
+                            {
+                                bulk.ColumnPrimaryKeyExpression = c => new { c.VideoTimeCodeResultId, c.QuestionId, c.IsDeleted };
+                            });
+                            return entity;
+                        });
                 }
                 catch { }
             }

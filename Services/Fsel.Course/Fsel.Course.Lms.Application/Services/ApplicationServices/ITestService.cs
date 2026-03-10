@@ -16,11 +16,12 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
     using Fsel.Course.Domain.Models.CommandModels.Tests;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService.Interface;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
+    using Fsel.Shared.ApplicationServices.CacheServices;
     using Fsel.Shared.Enums;
     using Microsoft.EntityFrameworkCore;
-    using static Fsel.Shared.Constants.ValueSettings;
 
     public interface ITestService
     {
@@ -66,6 +67,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
         private readonly ILevelRepository _levelRepository;
         private readonly ICourseResultRepository _courseResultRepository;
         private readonly IMapper _mapper;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
 
         public TestService(ITestCachingService testCachingService,
             ITestRepository testRepository,
@@ -85,7 +87,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             ICourseCachingService courseCachingService,
             ILevelRepository levelRepository,
             ICourseResultRepository courseResultRepository,
-            IMapper mapper)
+            IMapper mapper,
+            IRequestSafeCachingService requestSafeCachingService)
         {
             _testCachingService = testCachingService;
             _testRepository = testRepository;
@@ -106,6 +109,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             _levelRepository = levelRepository;
             _courseResultRepository = courseResultRepository;
             _mapper = mapper;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         public async Task<Test> GetHierachicalTestFirstOrDefault(Expression<Func<Test, bool>> predicate)
@@ -689,9 +693,15 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             {
                 try
                 {
-                    await _testAnswerRepository.BulkMergeAsync(addAnswers, bulk =>
+                    await _requestSafeCachingService.SafeRequest(
+                    key: $"Add_TestAnswers_{string.Join('_', addAnswers.Select(x => $"{x.TestSectionResultId}_{x.TestSectionId}_{x.QuestionId}_{x.IsDeleted}"))}",
+                    safeFunction: async () =>
                     {
-                        bulk.ColumnPrimaryKeyExpression = c => new { c.TestSectionResultId, c.TestSectionId, c.QuestionId, c.IsDeleted };
+                        await _testAnswerRepository.BulkMergeAsync(addAnswers, bulk =>
+                        {
+                            bulk.ColumnPrimaryKeyExpression = c => new { c.TestSectionResultId, c.TestSectionId, c.QuestionId, c.IsDeleted };
+                        });
+                        return addAnswers;
                     });
                 }
                 catch

@@ -16,6 +16,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
     using Fsel.Course.Domain.Models.EntityModels.CachingModels;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
+    using Fsel.Shared.ApplicationServices.CacheServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using Microsoft.EntityFrameworkCore;
@@ -43,6 +44,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
         private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
         private readonly IVideoTimeCodeAnswerRepository _videoTimeCodeAnswerRepository;
         private readonly QuestionConverter _questionConverter;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
 
         public VideoService(
             IVideoRepository videoRepository,
@@ -54,7 +56,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             IExerciseQuestionRepository exerciseQuestionRepository,
             IVideoTimeCodeRepository videoTimeCodeRepository,
             IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository,
-            QuestionConverter questionConverter)
+            QuestionConverter questionConverter,
+            IRequestSafeCachingService requestSafeCachingService)
         {
             _videoRepository = videoRepository;
             _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
@@ -66,6 +69,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             _videoTimeCodeRepository = videoTimeCodeRepository;
             _videoTimeCodeAnswerRepository = videoTimeCodeAnswerRepository;
             _questionConverter = questionConverter;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         #region Build VideoModel
@@ -379,10 +383,16 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             {
                 if (createVideoTimeCodeAnswers.Any())
                 {
-                    await _videoTimeCodeAnswerRepository.BulkMergeAsync(createVideoTimeCodeAnswers, bulk =>
-                    {
-                        bulk.ColumnPrimaryKeyExpression = entity => new { entity.VideoTimeCodeResultId, entity.QuestionId, entity.IsDeleted };
-                    });
+                    await _requestSafeCachingService.SafeRequest(
+                       key: $"Add_VideoTimeCodeAnswers_{string.Join('_', createVideoTimeCodeAnswers.Select(x => $"{x.VideoTimeCodeResultId}_{x.QuestionId}_{x.IsDeleted}"))}",
+                       safeFunction: async () =>
+                       {
+                           await _videoTimeCodeAnswerRepository.BulkMergeAsync(createVideoTimeCodeAnswers, bulk =>
+                           {
+                               bulk.ColumnPrimaryKeyExpression = entity => new { entity.VideoTimeCodeResultId, entity.QuestionId, entity.IsDeleted };
+                           });
+                           return createVideoTimeCodeAnswers;
+                       });
                 }
                 else if (updateVideoTimeCodeAnswers.Any())
                 {

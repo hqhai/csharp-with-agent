@@ -23,6 +23,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
+    using Fsel.Shared.ApplicationServices.CacheServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
@@ -54,6 +55,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
         private readonly QuestBoardPublisher _questBoardPublisher;
         private readonly RankedStudentPublisher _rankedStudentPublisher;
         private readonly IHomeWorkQuestionRepository _homeWorkQuestionRepository;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
 
         public CreateHomeWorkAnswerCommandHandler(
             IHomeWorkResultRepository homeWorkResultRepository,
@@ -72,7 +74,8 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             ILogger<CreateHomeWorkAnswerCommand> logger,
             QuestBoardPublisher questionBoardPublisher,
             RankedStudentPublisher rankedStudentPublisher,
-            IHomeWorkQuestionRepository homeWorkQuestionRepository)
+            IHomeWorkQuestionRepository homeWorkQuestionRepository,
+            IRequestSafeCachingService requestSafeCachingService)
         {
             _homeWorkResultRepository = homeWorkResultRepository;
             _courseResultRepository = courseResultRepository;
@@ -91,6 +94,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             _questBoardPublisher = questionBoardPublisher;
             _rankedStudentPublisher = rankedStudentPublisher;
             _homeWorkQuestionRepository = homeWorkQuestionRepository;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         public async Task<MethodResult<HomeWorkModel>> Handle(CreateHomeWorkAnswerCommand request, CancellationToken cancellationToken)
@@ -348,15 +352,21 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             {
                 if (newAnswers.Any())
                 {
-                    await _homeWorkAnswerRepository.BulkMergeAsync(newAnswers, bulk =>
-                    {
-                        bulk.ColumnPrimaryKeyExpression = entity => new
+                    await _requestSafeCachingService.SafeRequest<List<HomeWorkAnswer>>(
+                        key: $"Add_HomeWorkAnswers_{string.Join("_", newAnswers.Select(na => $"{na.HomeWorkQuestionId}_{na.HomeWorkResultId}_{na.IsDeleted}"))}",
+                        safeFunction: async () =>
                         {
-                            entity.HomeWorkQuestionId,
-                            entity.HomeWorkResultId,
-                            entity.IsDeleted
-                        };
-                    });
+                            await _homeWorkAnswerRepository.BulkMergeAsync(newAnswers, bulk =>
+                            {
+                                bulk.ColumnPrimaryKeyExpression = entity => new
+                                {
+                                    entity.HomeWorkQuestionId,
+                                    entity.HomeWorkResultId,
+                                    entity.IsDeleted
+                                };
+                            });
+                            return newAnswers;
+                        });
                 }
 
                 if (updatedAnswers.Any())

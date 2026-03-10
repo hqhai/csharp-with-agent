@@ -19,6 +19,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Queries.HomeWorkExtraQuery;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.ApplicationServices.CacheServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
@@ -43,6 +44,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
         private readonly ILogger<CreateHomeWorkExtraPracticeAnswerCommand> _logger;
         private readonly IHomeWorkQuestionRepository _homeWorkQuestionRepository;
         private readonly IHomeWorkRetryRepository _homeWorkRetryRepository;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
 
         public CreateHomeWorkExtraPracticeAnswerCommandHandler(
             IHomeWorkExtraPracticeResultRepository homeWorkExtraPracticeResultRepository,
@@ -55,7 +57,8 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
             IQuestionRepository questionRepository,
             ILogger<CreateHomeWorkExtraPracticeAnswerCommand> logger,
             IHomeWorkQuestionRepository homeWorkQuestionRepository,
-            IHomeWorkRetryRepository homeWorkRetryRepository)
+            IHomeWorkRetryRepository homeWorkRetryRepository,
+            IRequestSafeCachingService requestSafeCachingService)
         {
             _homeWorkExtraPracticeResultRepository = homeWorkExtraPracticeResultRepository;
             _homeWorkExtraPracticeAnswerRepository = homeWorkExtraPracticeAnswerRepository;
@@ -68,6 +71,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
             _logger = logger;
             _homeWorkQuestionRepository = homeWorkQuestionRepository;
             _homeWorkRetryRepository = homeWorkRetryRepository;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         public async Task<MethodResult<HomeWorkExtraDtoModel>> Handle(CreateHomeWorkExtraPracticeAnswerCommand request, CancellationToken cancellationToken)
@@ -361,15 +365,21 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
             {
                 if (creates.Any())
                 {
-                    await _homeWorkExtraPracticeAnswerRepository.BulkMergeAsync(creates, bulk =>
-                    {
-                        bulk.ColumnPrimaryKeyExpression = e => new
+                    await _requestSafeCachingService.SafeRequest(
+                    key: $"Add_HomeWorkExtraPracticeAnswers_{string.Join("_", creates.Select(vtca => $"{vtca.HomeWorkExtraPracticeResultId}_{vtca.QuestionId}_{vtca.IsDeleted}"))}",
+                        safeFunction: async () =>
                         {
-                            e.QuestionId,
-                            e.HomeWorkExtraPracticeResultId,
-                            e.IsDeleted
-                        };
-                    });
+                            await _homeWorkExtraPracticeAnswerRepository.BulkMergeAsync(creates, bulk =>
+                            {
+                                bulk.ColumnPrimaryKeyExpression = e => new
+                                {
+                                    e.QuestionId,
+                                    e.HomeWorkExtraPracticeResultId,
+                                    e.IsDeleted
+                                };
+                            });
+                            return creates;
+                        });
                 }
 
                 if (updates.Any())

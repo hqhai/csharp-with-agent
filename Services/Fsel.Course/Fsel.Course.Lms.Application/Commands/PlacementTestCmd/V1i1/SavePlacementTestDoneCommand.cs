@@ -10,6 +10,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
+    using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
@@ -17,6 +18,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
     using MediatR;
     using Microsoft.EntityFrameworkCore;
     using static Fsel.Shared.Helpers.IeltsScoreHelper;
+    using Fsel.Shared.ApplicationServices.CacheServices;
 
     public class SavePlacementTestDoneCommand : IRequest<MethodResult<bool>>
     {
@@ -31,16 +33,19 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
         private readonly IUserService _userService;
         private readonly IPlacementTestRepository _placementTestRepository;
         private readonly IPlacementTestGroupResultRepository _placementTestGroupResultRepository;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
 
         public SavePlacementTestDoneCommandHandler(IPlacementTestResultRepository placementTestResultRepository,
             IUserService userService,
             IPlacementTestRepository placementTestRepository,
-            IPlacementTestGroupResultRepository placementTestGroupResultRepository)
+            IPlacementTestGroupResultRepository placementTestGroupResultRepository,
+            IRequestSafeCachingService requestSafeCachingService)
         {
             _placementTestResultRepository = placementTestResultRepository;
             _userService = userService;
             _placementTestRepository = placementTestRepository;
             _placementTestGroupResultRepository = placementTestGroupResultRepository;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         public async Task<MethodResult<bool>> Handle(SavePlacementTestDoneCommand request, CancellationToken cancellationToken)
@@ -124,10 +129,16 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                 ProcessLevel = placementTest.PlacementTestLevel,
                 Status = EnumResultStatus.Process
             };
-            await _placementTestGroupResultRepository.BulkMergeAsync(new List<PlacementTestGroupResult> { placementTestGroupResult }, bulk =>
-            {
-                bulk.ColumnPrimaryKeyExpression = c => new { c.StudentId, c.IsDeleted };
-            });
+            await _requestSafeCachingService.SafeRequest<PlacementTestGroupResult>(
+                key: $"Add_PlacementTestGroupResult_{placementTestGroupResult.StudentId}_{placementTestGroupResult.IsDeleted}",
+                safeFunction: async () =>
+                {
+                    await _placementTestGroupResultRepository.BulkMergeAsync(new List<PlacementTestGroupResult> { placementTestGroupResult }, bulk =>
+                    {
+                        bulk.ColumnPrimaryKeyExpression = c => new { c.StudentId, c.IsDeleted };
+                    });
+                    return placementTestGroupResult;
+                });
         }
 
         private async Task UpdatePlacementGroupResultDoneAsync(PlacementTestResult placementTestResult, EnumCourseLevel desiredLevel, EnumCourseLevel? level)
@@ -178,10 +189,16 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                 CorrectTotal = correctValue.Item2,
             };
 
-            await _placementTestResultRepository.BulkMergeAsync(new List<PlacementTestResult> { placementTestResult }, bulk =>
-            {
-                bulk.ColumnPrimaryKeyExpression = c => new { c.StudentId, c.PlacementTestId, c.IsDeleted };
-            });
+            await _requestSafeCachingService.SafeRequest<PlacementTestResult>(
+                key: $"Add_PlacementTestResult_{placementTestResult.StudentId}_{placementTestResult.PlacementTestId}_{placementTestResult.IsDeleted}",
+                safeFunction: async () =>
+                {
+                    await _placementTestResultRepository.BulkMergeAsync(new List<PlacementTestResult> { placementTestResult }, bulk =>
+                    {
+                        bulk.ColumnPrimaryKeyExpression = c => new { c.StudentId, c.PlacementTestId, c.IsDeleted };
+                    });
+                    return placementTestResult;
+                });
         }
     }
 }

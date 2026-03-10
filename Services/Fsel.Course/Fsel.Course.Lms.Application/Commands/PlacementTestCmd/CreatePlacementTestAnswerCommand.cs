@@ -15,9 +15,9 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
     using Fsel.Course.Domain.Models.CommandModels.PlacementTestAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
-    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
+    using Fsel.Shared.ApplicationServices.CacheServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
@@ -39,6 +39,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
         private readonly AuthContext _authContext;
         private readonly QuestionConverter _questionConverter;
         private readonly IMediator _mediator;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
 
         public CreatePlacementTestAnswerCommandHandler(IPlacementTestAnswerRepository placementTestAnswerRepository
             , IPlacementTestResultRepository placementTestResultRepository
@@ -47,7 +48,8 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             , IMapper mapper
             , AuthContext authContext
             , QuestionConverter questionConverter
-            , IMediator mediator)
+            , IMediator mediator
+            , IRequestSafeCachingService requestSafeCachingService)
         {
             _placementTestAnswerRepository = placementTestAnswerRepository;
             _placementTestResultRepository = placementTestResultRepository;
@@ -57,6 +59,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             _authContext = authContext;
             _questionConverter = questionConverter;
             _mediator = mediator;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         public async Task<MethodResult<IList<PlacementTestResultModel>>> Handle(CreatePlacementTestAnswerCommand request, CancellationToken cancellationToken)
@@ -227,10 +230,16 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             }
             await _placementTestAnswerRepository.ExecuteTransactionAsync(async () =>
             {
-                await _placementTestResultRepository.BulkMergeAsync(new List<PlacementTestResult> { placementTestResult }, bulk =>
-                {
-                    bulk.ColumnPrimaryKeyExpression = c => new { c.PlacementTestId, c.StudentId, c.IsDeleted };
-                });
+                await _requestSafeCachingService.SafeRequest<PlacementTestResult>(
+                    key: $"Add_PlacementTestResult_{placementTestResult.PlacementTestId}_{placementTestResult.StudentId}_{placementTestResult.IsDeleted}",
+                    safeFunction: async () =>
+                    {
+                        await _placementTestResultRepository.BulkMergeAsync(new List<PlacementTestResult> { placementTestResult }, bulk =>
+                        {
+                            bulk.ColumnPrimaryKeyExpression = c => new { c.PlacementTestId, c.StudentId, c.IsDeleted };
+                        });
+                        return placementTestResult;
+                    });
                 placementTestResults.Add(placementTestResult);
                 placementTestResults = placementTestResults.OrderBy(x => x.CreatedDate).ToList();
 

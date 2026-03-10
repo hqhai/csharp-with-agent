@@ -10,17 +10,22 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
     using Fsel.Course.Domain.Entities.V1i1;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Shared.ApplicationServices.CacheServices;
     using Microsoft.EntityFrameworkCore;
 
     public class DocumentLessonItemInitializer : ILessonItemInitializer
     {
         private readonly IDocumentRepository _documentRepository;
         private readonly IDocumentResultRepository _documentResultRepository;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
 
-        public DocumentLessonItemInitializer(IDocumentRepository documentRepository, IDocumentResultRepository documentResultRepository)
+        public DocumentLessonItemInitializer(IDocumentRepository documentRepository,
+            IDocumentResultRepository documentResultRepository,
+            IRequestSafeCachingService requestSafeCachingService)
         {
             _documentRepository = documentRepository;
             _documentResultRepository = documentResultRepository;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         public async Task<VoidMethodResult> InitializeAsync(LessonModule lessonModule, LessonResult lessonResult, CancellationToken cancellationToken)
@@ -66,11 +71,17 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
                 NewDate = DateTime.UtcNow,
                 DocumentId = document.Id,
             };
+            await _requestSafeCachingService.SafeRequest(
+                key: $"Add_DocumentResult_{documentResult.LessonModuleId}_{documentResult.LessonResultId}_{documentResult.IsDeleted}",
+                safeFunction: async () =>
+                {
+                    await _documentResultRepository.BulkMergeAsync(new List<DocumentResult> { documentResult }, bulk =>
+                    {
+                        bulk.ColumnPrimaryKeyExpression = c => new { c.LessonModuleId, c.LessonResultId, c.IsDeleted };
+                    });
+                    return documentResult;
+                });
 
-            await _documentResultRepository.BulkMergeAsync(new List<DocumentResult> { documentResult }, bulk =>
-            {
-                bulk.ColumnPrimaryKeyExpression = c => new { c.LessonModuleId, c.LessonResultId, c.IsDeleted };
-            });
             return methodResult;
         }
     }
