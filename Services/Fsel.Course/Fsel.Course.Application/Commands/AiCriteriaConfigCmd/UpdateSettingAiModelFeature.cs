@@ -11,6 +11,7 @@ namespace Fsel.Course.Application.Commands.AiCriteriaConfigCmd
     using Domain.IRepositories;
     using Domain.Models.CommandModels.AiCriteriaConfig;
     using Domain.Models.EntityModels.AiPromptManagerModels;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -41,10 +42,38 @@ namespace Fsel.Course.Application.Commands.AiCriteriaConfigCmd
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<AICriteriaConfigsModel>();
 
+            var hasObjectIdOrProjectId = request.ObjectId != null || request.ProjectId != Guid.Empty;
+
+            // Bước 1: Tìm theo ProjectId hoặc ObjectId
             var existing = await _aiCriteriaConfigRepository.ReadQueryable
-                .Where(x => x.ProjectId == request.ProjectId && x.SubFeatureType == request.SubFeatureType && !x.IsDeleted)
+                .Where(x => x.SubFeatureType == request.SubFeatureType
+                    && !x.IsDeleted
+                    && ((request.ObjectId != null && x.ObjectId == request.ObjectId)
+                        || (request.ProjectId != Guid.Empty && x.ProjectId == request.ProjectId)))
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
+
+            // Bước 2: Nếu không ra kết quả với ProjectId/ObjectId → tìm theo DefaultType = Default
+            if (existing.Count == 0 && !hasObjectIdOrProjectId)
+            {
+                existing = await _aiCriteriaConfigRepository.ReadQueryable
+                    .Where(x => x.SubFeatureType == request.SubFeatureType
+                        && !x.IsDeleted
+                        && x.DefaultType == EnumDefaultType.Default)
+                    .AsNoTracking()
+                    .ToListAsync(cancellationToken);
+            }
+
+            // Bước 3: Nếu có ProjectId/ObjectId nhưng không tìm thấy → tìm theo DefaultType = Feature
+            if (existing.Count == 0 && hasObjectIdOrProjectId)
+            {
+                existing = await _aiCriteriaConfigRepository.ReadQueryable
+                    .Where(x => x.SubFeatureType == request.SubFeatureType
+                        && !x.IsDeleted
+                        && x.DefaultType == EnumDefaultType.Feature)
+                    .AsNoTracking()
+                    .ToListAsync(cancellationToken);
+            }
 
             if (existing.Count == 0)
             {
@@ -118,7 +147,7 @@ namespace Fsel.Course.Application.Commands.AiCriteriaConfigCmd
             newVersion.Version = originalEntity.Version + 1;
             newVersion.VersionStatus = EnumVersionStatus.LastVersion;
             newVersion.VersionType = EnumVersion.V2;
-
+            newVersion.DefaultType = EnumDefaultType.Feature;
             // Copy các properties không map được
             newVersion.ProjectId = originalEntity.ProjectId;
             newVersion.SubFeatureType = originalEntity.SubFeatureType;
