@@ -7,8 +7,8 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.PlacementTestAnswers;
-    using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Shared.ApplicationServices.CacheServices;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
@@ -151,7 +151,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                             {
                                 bulk.ColumnPrimaryKeyExpression = entity => new { entity.SectionGroupResultId, entity.SectionQuestionId, entity.PlacementTestResultId, entity.IsDeleted };
                             });
-                            return createPlacementTestAnswers;
+                            return createPlacementTestAnswers.ToList();
                         });
                 }
                 if (updatePlacementTestAnswers != null && updatePlacementTestAnswers.Any())

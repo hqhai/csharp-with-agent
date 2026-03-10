@@ -22,7 +22,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
-    using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
+    using Fsel.Shared.ApplicationServices.CacheServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
@@ -331,7 +331,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
                             {
                                 bulk.ColumnPrimaryKeyExpression = entity => new { entity.SectionQuestionId, entity.FinalTestResultId, entity.SectionGroupResultId, entity.IsDeleted };
                             });
-                            return createFinalTestAnswers;
+                            return createFinalTestAnswers.ToList();
                         });
                 }
                 if (updateFinalTestAnswers != null && updateFinalTestAnswers.Any())

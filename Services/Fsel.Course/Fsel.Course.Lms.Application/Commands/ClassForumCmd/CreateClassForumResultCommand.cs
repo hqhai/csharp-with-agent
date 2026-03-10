@@ -303,7 +303,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                     safeFunction: async () =>
                     {
                         await _classForumResultFileRepository.BulkMergeAsync(classForumResultFileNews);
-                        return classForumResultFileNews;
+                        return classForumResultFileNews.ToList();
                     });
             }
             methodResult.Result = classForumDetailResult;
@@ -392,7 +392,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                         safeFunction: async () =>
                         {
                             await _classForumResultFileRepository.BulkMergeAsync(classForumResultFiles);
-                            return classForumResultFiles;
+                            return classForumResultFiles.ToList();
                         });
                 }
             }
