@@ -23,6 +23,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
+    using Fsel.Shared.ApplicationServices.CacheServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
@@ -54,6 +55,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
         private readonly QuestBoardPublisher _questBoardPublisher;
         private readonly ICourseResultRepository _courseResultRepository;
         private readonly RankedStudentPublisher _rankedStudentPublisher;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
 
         public CreateVideoTimeCodeAnswerByTimeCodeCommandHandler(QuestBoardPublisher questBoardPublisher,
             IMapper mapper,
@@ -73,7 +75,8 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             IQuestionRepository questionRepository,
             QuestionConverter questionConverter,
             CreateTokenHistoryPublisher createTokenHistoryPublisher,
-            RankedStudentPublisher rankedStudentPublisher)
+            RankedStudentPublisher rankedStudentPublisher,
+            IRequestSafeCachingService requestSafeCachingService)
         {
             _videoTimeCodeAnswerRepository = videoTimeCodeAnswerRepository;
             _disconnectSocketCalculateTimePublisher = disconnectSocketCalculateTimePublisher;
@@ -93,6 +96,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             _questBoardPublisher = questBoardPublisher;
             _courseResultRepository = courseResultRepository;
             _rankedStudentPublisher = rankedStudentPublisher;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         public async Task<MethodResult<VideoTimeCodeModel>> Handle(CreateVideoTimeCodeAnswerByTimeCodeCommand request, CancellationToken cancellationToken)
@@ -317,10 +321,16 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             {
                 if (videoTimeCodeAnswers.Any())
                 {
-                    await _videoTimeCodeAnswerRepository.BulkMergeAsync(videoTimeCodeAnswers, bulk =>
-                    {
-                        bulk.ColumnPrimaryKeyExpression = entity => new { entity.VideoResultId, entity.VideoTimeCodeResultId, entity.QuestionId, entity.IsDeleted };
-                    });
+                    await _requestSafeCachingService.SafeRequest<List<VideoTimeCodeAnswer>>(
+                    key: $"Add_VideoTimeCodeAnswers_{string.Join('_', videoTimeCodeAnswers.Select(x => $"{x.VideoTimeCodeResultId}_{x.QuestionId}_{x.IsDeleted}"))}",
+                        safeFunction: async () =>
+                        {
+                            await _videoTimeCodeAnswerRepository.BulkMergeAsync(videoTimeCodeAnswers, bulk =>
+                            {
+                                bulk.ColumnPrimaryKeyExpression = entity => new { entity.VideoTimeCodeResultId, entity.QuestionId, entity.IsDeleted };
+                            });
+                            return videoTimeCodeAnswers;
+                        });
                 }
                 else if (updateVideoTimeCodeAnswers.Any())
                 {

@@ -22,7 +22,6 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
     using Fsel.Course.Domain.Models.CommandModels.PlacementTestAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
-    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Infrastructure.ValueSettings;
     using Fsel.Course.Lms.Application.Commands.SenderCmd;
     using Fsel.Course.Lms.Application.Commands.StudentCmd;
@@ -31,6 +30,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.CommandModels;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
+    using Fsel.Shared.ApplicationServices.CacheServices;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
@@ -67,6 +67,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
         private readonly IPlacementTestGroupResultRepository _placementTestGroupResultRepository;
         private readonly SavePlacementTestAnswersPublisher _savePlacementTestAnswersPublisher;
         private readonly ISystemService _systemService;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
 
         public CreatePlacementTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository,
             AuthContext authContext,
@@ -86,7 +87,8 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             QuestBoardPublisher questBoardPublisher,
             DisconnectSocketCalculateTimePublisher disconnectSocketCalculateTimePublisher,
             IPlacementTestGroupResultRepository placementTestGroupResultRepository,
-            SavePlacementTestAnswersPublisher savePlacementTestAnswersPublisher, ISystemService systemService
+            SavePlacementTestAnswersPublisher savePlacementTestAnswersPublisher, ISystemService systemService,
+            IRequestSafeCachingService requestSafeCachingService
             )
         {
             _questionRepository = questionRepository;
@@ -109,6 +111,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             _placementTestGroupResultRepository = placementTestGroupResultRepository;
             _savePlacementTestAnswersPublisher = savePlacementTestAnswersPublisher;
             _systemService = systemService;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         public async Task<MethodResult<PlacementTestResultModel>> Handle(CreatePlacementTestAnswerBySectionGroupCommand request, CancellationToken cancellationToken)
@@ -238,10 +241,17 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             {
                 if (createPlacementTestAnswers != null && createPlacementTestAnswers.Any())
                 {
-                    await _placementTestAnswerRepository.BulkMergeAsync(createPlacementTestAnswers, bulk =>
-                    {
-                        bulk.ColumnPrimaryKeyExpression = entity => new { entity.SectionGroupResultId, entity.SectionQuestionId, entity.PlacementTestResultId, entity.IsDeleted };
-                    });
+                    var firstAnswer = createPlacementTestAnswers.First();
+                    await _requestSafeCachingService.SafeRequest<List<PlacementTestAnswer>>(
+                    key: $"Add_PlacementTestAnswer_{string.Join("_", createPlacementTestAnswers.Select(hwa => $"{hwa.SectionGroupResultId}_{hwa.SectionQuestionId}_{hwa.PlacementTestResultId}_{hwa.IsDeleted}"))}",
+                        safeFunction: async () =>
+                        {
+                            await _placementTestAnswerRepository.BulkMergeAsync(createPlacementTestAnswers, bulk =>
+                            {
+                                bulk.ColumnPrimaryKeyExpression = entity => new { entity.SectionGroupResultId, entity.SectionQuestionId, entity.PlacementTestResultId, entity.IsDeleted };
+                            });
+                            return createPlacementTestAnswers.ToList();
+                        });
                 }
                 if (updatePlacementTestAnswers != null && updatePlacementTestAnswers.Any())
                 {

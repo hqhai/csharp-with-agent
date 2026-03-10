@@ -9,6 +9,7 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Lms.Application.Queries.CurriculumQuery;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
+    using Fsel.Shared.ApplicationServices.CacheServices;
     using Fsel.Shared.Models.ShareModels.CampusModel;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -22,12 +23,14 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
         private readonly ICurriculumStudentRepository _curriculumStudentRepository;
         private readonly ITrainingService _trainingService;
         private readonly IMediator _mediator;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
 
-        public AddStudentsToCurriculumCommandHandler(ICurriculumStudentRepository curriculumStudentRepository, ITrainingService trainingService, MediatR.IMediator mediator)
+        public AddStudentsToCurriculumCommandHandler(ICurriculumStudentRepository curriculumStudentRepository, ITrainingService trainingService, MediatR.IMediator mediator, IRequestSafeCachingService requestSafeCachingService)
         {
             _curriculumStudentRepository = curriculumStudentRepository;
             _trainingService = trainingService;
             _mediator = mediator;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         public async Task<MethodResult<bool>> Handle(AddStudentsToCurriculumCommand request, CancellationToken cancellationToken)
@@ -57,10 +60,21 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
 
             await _curriculumStudentRepository.ExecuteTransactionAsync(async () =>
             {
-                await _curriculumStudentRepository.BulkMergeAsync(curriculumStudents, x =>
+                var studentList = curriculumStudents.ToList();
+                if (studentList.Any())
                 {
-                    x.ColumnPrimaryKeyExpression = c => new { c.StudentId, c.CurriculumId };
-                });
+                    var firstStudent = studentList.First();
+                    await _requestSafeCachingService.SafeRequest<List<CurriculumStudent>>(
+                        key: $"Add_CurriculumStudent_{firstStudent.StudentId}_{firstStudent.CurriculumId}",
+                        safeFunction: async () =>
+                        {
+                            await _curriculumStudentRepository.BulkMergeAsync(studentList, x =>
+                            {
+                                x.ColumnPrimaryKeyExpression = c => new { c.StudentId, c.CurriculumId };
+                            });
+                            return studentList;
+                        });
+                }
 
                 var result = await _trainingService.AddStudentsCampusIntoClass(new AddStudentsCampusIntoClassCommandModel()
                 {

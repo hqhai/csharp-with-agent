@@ -18,6 +18,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
     using Fsel.Course.Lms.Application.Services.StorageServices;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
@@ -29,6 +30,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
     using Refit;
     using Microsoft.Extensions.Logging;
     using Fsel.Course.Infrastructure.Repositories;
+    using Fsel.Shared.ApplicationServices.CacheServices;
 
     public class CreateCFRPendingWordContentCommand : CreateCFRPendingWordContentCommandModel, IRequest<MethodResult<bool>>
     {
@@ -49,6 +51,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
         private readonly IMediator _mediator;
         private readonly ILogger<CreateCFRPendingWordContentCommand> _logger;
         private readonly IClassForumResultFileRepository _classForumResultFileRepository;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
         private const int MaxClassForumDetailResultRecord = 2;
         private const int MaxPendingSpeechToText = 2;
         private const int TimeStartJobTest = 10;
@@ -66,7 +69,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
                                                          IStorageService storageService,
                                                          IMediator mediator,
                                                         ILogger<CreateCFRPendingWordContentCommand> logger,
-                                                        IClassForumResultFileRepository classForumResultFileRepository)
+                                                        IClassForumResultFileRepository classForumResultFileRepository,
+                                                        IRequestSafeCachingService requestSafeCachingService)
         {
             _userService = userService;
             _classForumResultRepository = classForumResultRepository;
@@ -81,6 +85,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
             _mediator = mediator;
             _logger = logger;
             _classForumResultFileRepository = classForumResultFileRepository;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         public async Task<MethodResult<bool>> Handle(CreateCFRPendingWordContentCommand request, CancellationToken cancellationToken)
@@ -224,10 +229,16 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
                 IsPendingSpeechToText = true
             };
 
-            await _classForumResultRepository.BulkMergeAsync(new List<ClassForumResult> { classForumResult }, bulk =>
-            {
-                bulk.ColumnPrimaryKeyExpression = c => new { c.LessonResultId, c.ClassForumId, c.StudentId, c.IsDeleted };
-            });
+            await _requestSafeCachingService.SafeRequest(
+                key: $"Add_ClassForumResult_{classForumResult.LessonResultId}_{classForumResult.ClassForumId}_{classForumResult.StudentId}_{classForumResult.IsDeleted}",
+                safeFunction: async () =>
+                {
+                    await _classForumResultRepository.BulkMergeAsync(new List<ClassForumResult> { classForumResult }, bulk =>
+                    {
+                        bulk.ColumnPrimaryKeyExpression = c => new { c.LessonResultId, c.ClassForumId, c.StudentId, c.IsDeleted };
+                    });
+                    return classForumResult;
+                });
             await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             return classForumResult;
         }
@@ -260,17 +271,30 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
                 ClassForumResultFiles = new List<ClassForumResultFile> { new ClassForumResultFile { FilePath = filePath } }
             };
 
-            await _classForumDetailResultRepository.BulkMergeAsync(new List<ClassForumDetailResult> { classForumDetailResult }, bulk =>
-            {
-                bulk.ColumnPrimaryKeyExpression = c => new { c.SubmissionCount, c.ClassForumResultId, c.IsDeleted };
-            });
+            await _requestSafeCachingService.SafeRequest<ClassForumDetailResult>(
+                key: $"Add_ClassForumDetailResult_{classForumDetailResult.SubmissionCount}_{classForumDetailResult.ClassForumResultId}_{classForumDetailResult.IsDeleted}",
+                safeFunction: async () =>
+                {
+                    await _classForumDetailResultRepository.BulkMergeAsync(new List<ClassForumDetailResult> { classForumDetailResult }, bulk =>
+                    {
+                        bulk.ColumnPrimaryKeyExpression = c => new { c.SubmissionCount, c.ClassForumResultId, c.IsDeleted };
+                    });
+                    return classForumDetailResult;
+                });
             if (classForumDetailResult.ClassForumResultFiles.Any())
             {
                 foreach (var file in classForumDetailResult.ClassForumResultFiles)
                 {
                     file.ClassForumDetailResultId = classForumDetailResult.Id; // Set foreign key nếu cần
                 }
-                await _classForumResultFileRepository.BulkMergeAsync(classForumDetailResult.ClassForumResultFiles);
+                var classForumResultFiles = classForumDetailResult.ClassForumResultFiles.ToList();
+                await _requestSafeCachingService.SafeRequest(
+                    key: $"Add_ClassForumResultFiles_{string.Join("_", classForumResultFiles.Select(hwa => $"{hwa.ClassForumDetailResultId}_{hwa.FilePath}"))}",
+                    safeFunction: async () =>
+                    {
+                        await _classForumResultFileRepository.BulkMergeAsync(classForumResultFiles);
+                        return classForumResultFiles;
+                    });
             }
             return classForumDetailResult;
         }

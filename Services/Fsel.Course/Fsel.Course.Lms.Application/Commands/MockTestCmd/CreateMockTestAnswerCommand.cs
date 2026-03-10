@@ -17,6 +17,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Queues.Publishers;
+    using Fsel.Shared.ApplicationServices.CacheServices;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
     using MediatR;
@@ -38,6 +39,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
         private readonly ISectionGroupRepository _sectionGroupRepository;
         private readonly SubmitMockTestAnswerPublisher _submitMockTestAnswerPublisher;
         private readonly IMapper _mapper;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
 
         public CreateMockTestAnswerCommandHandler(IQuestionRepository questionRepository
             , IMockTestAnswerRepository mockTestAnswerRepository
@@ -47,7 +49,8 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             , ISectionTimeCodeRepository sectionTimeCodeRepository
             , ISectionGroupRepository sectionGroupRepository
             , IMapper mapper
-            , SubmitMockTestAnswerPublisher submitMockTestAnswerPublisher)
+            , SubmitMockTestAnswerPublisher submitMockTestAnswerPublisher
+            , IRequestSafeCachingService requestSafeCachingService)
         {
             _questionRepository = questionRepository;
             _mockTestAnswerRepository = mockTestAnswerRepository;
@@ -58,6 +61,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             _sectionGroupRepository = sectionGroupRepository;
             _mapper = mapper;
             _submitMockTestAnswerPublisher = submitMockTestAnswerPublisher;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         public async Task<MethodResult<MockTestResultModel>> Handle(CreateMockTestAnswerCommand request, CancellationToken cancellationToken)
@@ -214,10 +218,16 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             {
                 if (mockTestAnswers.Count > 0)
                 {
-                    await _mockTestAnswerRepository.BulkMergeAsync(mockTestAnswers, bulk =>
-                    {
-                        bulk.ColumnPrimaryKeyExpression = entity => new { entity.SectionGroupResultId, entity.SectionId, entity.SectionTimeCodeId, entity.SectionQuestionId, entity.MockTestResultId, entity.IsDeleted };
-                    });
+                    await _requestSafeCachingService.SafeRequest<List<MockTestAnswer>>(
+                        key: $"Add_MockTestAnswers_{string.Join("_", mockTestAnswers.Select(ma => $"{ma.SectionGroupResultId}_{ma.MockTestResultId}_{ma.IsDeleted}"))}",
+                        safeFunction: async () =>
+                        {
+                            await _mockTestAnswerRepository.BulkMergeAsync(mockTestAnswers, bulk =>
+                            {
+                                bulk.ColumnPrimaryKeyExpression = entity => new { entity.SectionGroupResultId, entity.SectionId, entity.SectionTimeCodeId, entity.SectionQuestionId, entity.MockTestResultId, entity.IsDeleted };
+                            });
+                            return mockTestAnswers;
+                        });
                 }
 
                 await _mockTestResultRepository.BulkUpdateList(new List<MockTestResult> { mockTestResult }, bulk =>

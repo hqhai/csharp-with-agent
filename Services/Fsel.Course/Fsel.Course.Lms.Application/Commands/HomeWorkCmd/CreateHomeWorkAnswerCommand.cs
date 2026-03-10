@@ -14,7 +14,9 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Queues.Publishers;
+    using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.ApplicationServices.CacheServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
@@ -37,6 +39,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
         private const int FIFTY_PERCENT_DONE = 50;
         private readonly QuestBoardPublisher _questBoardPublisher;
         private readonly IUserService _userService;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
 
         public CreateHomeWorkAnswerCommandHandler(IHomeWorkResultRepository homeWorkResultRepository,
             IHomeWorkAnswerRepository homeWorkAnswerRepository,
@@ -45,7 +48,8 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
             IQuestionRepository questionRepository,
             AuthContext authContext,
             QuestBoardPublisher questBoardPublisher,
-            IUserService userService)
+            IUserService userService,
+            IRequestSafeCachingService requestSafeCachingService)
         {
             _homeWorkResultRepository = homeWorkResultRepository;
             _homeWorkAnswerRepository = homeWorkAnswerRepository;
@@ -55,6 +59,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
             _authContext = authContext;
             _questBoardPublisher = questBoardPublisher;
             _userService = userService;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         public async Task<MethodResult<bool>> Handle(CreateHomeWorkAnswerCommand request, CancellationToken cancellationToken)
@@ -178,10 +183,16 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
 
             if (homeWorkAnswers.Any())
             {
-                await _homeWorkAnswerRepository.BulkMergeAsync(homeWorkAnswers, bulk =>
-                {
-                    bulk.ColumnPrimaryKeyExpression = entity => new { entity.HomeWorkQuestionId, entity.HomeWorkResultId, entity.IsDeleted };
-                });
+                await _requestSafeCachingService.SafeRequest<List<HomeWorkAnswer>>(
+                    key: $"Add_HomeWorkAnswers_{string.Join("_", homeWorkAnswers.Select(hwa => $"{hwa.HomeWorkQuestionId}_{hwa.HomeWorkResultId}_{hwa.IsDeleted}"))}",
+                    safeFunction: async () =>
+                    {
+                        await _homeWorkAnswerRepository.BulkMergeAsync(homeWorkAnswers, bulk =>
+                        {
+                            bulk.ColumnPrimaryKeyExpression = entity => new { entity.HomeWorkQuestionId, entity.HomeWorkResultId, entity.IsDeleted };
+                        });
+                        return homeWorkAnswers;
+                    });
             }
 
             methodResult.StatusCode = StatusCodes.Status201Created;

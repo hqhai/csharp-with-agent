@@ -13,6 +13,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
+    using Fsel.Shared.ApplicationServices.CacheServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
@@ -35,6 +36,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
         private readonly ICurriculumRepository _curriculumRepository;
         private readonly ICurriculumStudentRepository _curriculumStudentRepository;
         private readonly IHomeWorkConfigRepository _homeWorkConfigRepository;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
         private const int MaxRetry = 1;
 
         public StartHomeWorkExtraPracticeCommandHandler(AuthContext authContext,
@@ -44,7 +46,8 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
             IHomeWorkRetryRepository homeWorkRetryRepository,
             ICurriculumRepository curriculumRepository,
             ICurriculumStudentRepository curriculumStudentRepository,
-            IHomeWorkConfigRepository homeWorkConfigRepository)
+            IHomeWorkConfigRepository homeWorkConfigRepository,
+            IRequestSafeCachingService requestSafeCachingService)
         {
             _authContext = authContext;
             _userService = userService;
@@ -54,6 +57,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
             _curriculumRepository = curriculumRepository;
             _curriculumStudentRepository = curriculumStudentRepository;
             _homeWorkConfigRepository = homeWorkConfigRepository;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         public async Task<MethodResult<bool>> Handle(StartHomeWorkExtraPracticeCommand request, CancellationToken cancellationToken)
@@ -113,10 +117,16 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
             };
             try
             {
-                await _homeWorkExtraPracticeResultRepository.BulkMergeAsync(new List<HomeWorkExtraPracticeResult> { homeWorkExtraPracticeResult }, bulk =>
-                {
-                    bulk.ColumnPrimaryKeyExpression = c => new { c.StudentId, c.HomeWorkId, c.HomeWorkRetryId, c.WorkingStatus, c.IsDeleted };
-                });
+                await _requestSafeCachingService.SafeRequest<HomeWorkExtraPracticeResult>(
+                    key: $"Add_HomeWorkExtraPracticeResult_{homeWorkExtraPracticeResult.StudentId}_{homeWorkExtraPracticeResult.HomeWorkId}_{homeWorkExtraPracticeResult.HomeWorkRetryId}_{homeWorkExtraPracticeResult.WorkingStatus}_{homeWorkExtraPracticeResult.IsDeleted}",
+                    safeFunction: async () =>
+                    {
+                        await _homeWorkExtraPracticeResultRepository.BulkMergeAsync(new List<HomeWorkExtraPracticeResult> { homeWorkExtraPracticeResult }, bulk =>
+                        {
+                            bulk.ColumnPrimaryKeyExpression = c => new { c.StudentId, c.HomeWorkId, c.HomeWorkRetryId, c.WorkingStatus, c.IsDeleted };
+                        });
+                        return homeWorkExtraPracticeResult;
+                    });
             }
             catch
             {
@@ -139,10 +149,16 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
                 };
                 try
                 {
-                    await _homeWorkRetryRepository.BulkMergeAsync(new List<HomeWorkRetry> { homeWorkRetry }, bulk =>
-                    {
-                        bulk.ColumnPrimaryKeyExpression = c => new { c.StudentId, c.HomeWorkId, c.CurriculumId, c.HomeWorkConfigId };
-                    });
+                    await _requestSafeCachingService.SafeRequest<HomeWorkRetry>(
+                        key: $"Add_HomeWorkRetry_{homeWorkRetry.StudentId}_{homeWorkRetry.HomeWorkId}_{homeWorkRetry.CurriculumId}_{homeWorkRetry.HomeWorkConfigId}",
+                        safeFunction: async () =>
+                        {
+                            await _homeWorkRetryRepository.BulkMergeAsync(new List<HomeWorkRetry> { homeWorkRetry }, bulk =>
+                            {
+                                bulk.ColumnPrimaryKeyExpression = c => new { c.StudentId, c.HomeWorkId, c.CurriculumId, c.HomeWorkConfigId };
+                            });
+                            return homeWorkRetry;
+                        });
                 }
                 catch
                 {

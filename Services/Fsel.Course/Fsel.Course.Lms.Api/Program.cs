@@ -42,6 +42,7 @@ using Fsel.Course.Lms.Application.Services.TestServices;
 using Fsel.Course.Lms.Application.Services.TestServices.Interface;
 using Fsel.Course.Lms.Application.Services.TrainingServices;
 using Fsel.Course.Lms.Application.Services.UserServices;
+using Fsel.Shared.ApplicationServices.CacheServices;
 using Fsel.Shared.Constants;
 using Refit;
 
@@ -233,6 +234,7 @@ builder.Services.AddScoped<IVideoTimeCodeService, VideoTimeCodeService>();
 builder.Services.AddScoped<ILearningGoalAggregateService, LearningGoalAggregateService>();
 builder.Services.AddScoped<IStudentGoalProgressService, StudentGoalProgressService>();
 builder.Services.AddScoped<ILearningService, LearningService>();
+builder.Services.AddScoped<IRequestSafeCachingService, RequestSafeCachingService>();
 
 builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();

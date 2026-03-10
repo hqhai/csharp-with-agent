@@ -16,8 +16,8 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
     using Fsel.Course.Domain.Models.CommandModels.ExtraPracticeAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
-    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.ApplicationServices.CacheServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -38,6 +38,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
         private readonly IQuestionRepository _questionRepository;
         private readonly IExtraPracticeResultRepository _extraPracticeResultRepository;
         private readonly IExtraPracticeExerciseResultRepository _extraPracticeExerciseResultRepository;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
 
         public CreateExtraPracticeAnswerBookCommandHandler(AuthContext authContext
             , IUserService userService
@@ -48,7 +49,8 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             , AnswerTypeConverter answerTypeConverter
             , IQuestionRepository questionRepository
             , IExtraPracticeResultRepository extraPracticeResultRepository
-            , IExtraPracticeExerciseResultRepository extraPracticeExerciseResultRepository)
+            , IExtraPracticeExerciseResultRepository extraPracticeExerciseResultRepository
+            , IRequestSafeCachingService requestSafeCachingService)
         {
             _authContext = authContext;
             _userService = userService;
@@ -60,6 +62,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             _questionRepository = questionRepository;
             _extraPracticeResultRepository = extraPracticeResultRepository;
             _extraPracticeExerciseResultRepository = extraPracticeExerciseResultRepository;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         public async Task<MethodResult<ExtraPracticeExerciseResultModel>> Handle(CreateExtraPracticeAnswerBookCommand request, CancellationToken cancellationToken)
@@ -105,10 +108,16 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                     Status = EnumResultStatus.Process,
                     SkillId = extraPracticeExercise.Exercise?.SkillId
                 };
-                await _extraPracticeExerciseResultRepository.BulkMergeAsync(new List<ExtraPracticeExerciseResult> { extraPracticeExerciseResult }, bulk =>
-                {
-                    bulk.ColumnPrimaryKeyExpression = c => new { c.StudentId, c.ExtraPracticeResultId, c.ExtraPracticeExerciseId, c.IsDeleted };
-                });
+                await _requestSafeCachingService.SafeRequest<ExtraPracticeExerciseResult>(
+                    key: $"Add_ExtraPracticeExerciseResult_{extraPracticeExerciseResult.StudentId}_{extraPracticeExerciseResult.ExtraPracticeResultId}_{extraPracticeExerciseResult.ExtraPracticeExerciseId}_{extraPracticeExerciseResult.IsDeleted}",
+                    safeFunction: async () =>
+                    {
+                        await _extraPracticeExerciseResultRepository.BulkMergeAsync(new List<ExtraPracticeExerciseResult> { extraPracticeExerciseResult }, bulk =>
+                        {
+                            bulk.ColumnPrimaryKeyExpression = c => new { c.StudentId, c.ExtraPracticeResultId, c.ExtraPracticeExerciseId, c.IsDeleted };
+                        });
+                        return extraPracticeExerciseResult;
+                    });
             }
 
             #region xoa cau tra loi

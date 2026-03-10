@@ -11,7 +11,7 @@ namespace Fsel.Course.Infrastructure.Common.QuestionHelper.QuestionTypes.Handler
     using Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Infrastructure.Common.QuestionHelper.QuestionTypes.Interface;
-    using Fsel.Course.Infrastructure.Repositories;
+    using Fsel.Shared.ApplicationServices.CacheServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using Fsel.Shared.Models.ShareModels.QuestionResultConfigModels;
@@ -23,16 +23,19 @@ namespace Fsel.Course.Infrastructure.Common.QuestionHelper.QuestionTypes.Handler
         private readonly IHomeWorkResultRepository _homeWorkResultRepository;
         private readonly IHomeWorkQuestionRepository _homeWorkQuestionRepository;
         private readonly IHomeWorkAnswerRepository _homeWorkAnswerRepository;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
 
         public QuestionTypeHomeWorkHandler(QuestionResultQueueModel request,
                                           IHomeWorkResultRepository homeWorkResultRepository,
                                           IHomeWorkQuestionRepository homeWorkQuestionRepository,
-                                          IHomeWorkAnswerRepository homeWorkAnswerRepository)
+                                          IHomeWorkAnswerRepository homeWorkAnswerRepository,
+                                          IRequestSafeCachingService requestSafeCachingService)
         {
             _request = request;
             _homeWorkResultRepository = homeWorkResultRepository;
             _homeWorkQuestionRepository = homeWorkQuestionRepository;
             _homeWorkAnswerRepository = homeWorkAnswerRepository;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         public async Task<MethodResult<bool>> ExecuteAsync(CancellationToken cancellationToken)
@@ -110,10 +113,16 @@ namespace Fsel.Course.Infrastructure.Common.QuestionHelper.QuestionTypes.Handler
                 };
                 try
                 {
-                    await _homeWorkAnswerRepository.BulkMergeAsync(new List<HomeWorkAnswer> { hwAnswer }, bulk =>
-                    {
-                        bulk.ColumnPrimaryKeyExpression = entity => new { entity.HomeWorkQuestionId, entity.HomeWorkResultId, entity.IsDeleted };
-                    });
+                    await _requestSafeCachingService.SafeRequest(
+                        key: $"Add_HomeWorkAnswer_{hwAnswer.HomeWorkQuestionId}_{hwAnswer.HomeWorkResultId}_{hwAnswer.IsDeleted}",
+                        safeFunction: async () =>
+                        {
+                            await _homeWorkAnswerRepository.BulkMergeAsync(new List<HomeWorkAnswer> { hwAnswer }, bulk =>
+                            {
+                                bulk.ColumnPrimaryKeyExpression = entity => new { entity.HomeWorkQuestionId, entity.HomeWorkResultId, entity.IsDeleted };
+                            });
+                            return hwAnswer;
+                        });
                 }
                 catch { }
             }

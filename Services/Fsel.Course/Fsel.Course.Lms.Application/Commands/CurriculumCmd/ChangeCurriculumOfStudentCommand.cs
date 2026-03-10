@@ -16,9 +16,11 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Commands.CourseResultCmd;
     using Fsel.Course.Lms.Application.Queues.Publishers;
+    using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.TrainingServices.CommandModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.ApplicationServices.CacheServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Models.ShareModels.CampusModel;
@@ -48,8 +50,9 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
         private readonly ICurriculumStudentRepository _curriculumStudentRepository;
         private readonly ICurriculumRepository _curriculumRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
 
-        public ChangeCurriculumOfStudentCommandHandler(IMapper mapper, ITrainingService trainingService, AuthContext authContext, ChangeCourseHelper changeCourseHelper, ICourseRepository courseRepository, SaveUserCourseSettingPublisher saveUserCourseSettingPublisher, IUserService userService, ILogger<ChangeCourseLevelCommand> logger, ICourseResultRepository courseResultRepository, NotificationMessagePublisher notificationMessagePublisher, ICurriculumStudentRepository curriculumStudentRepository, ICurriculumRepository curriculumRepository, ILessonResultRepository lessonResultRepository)
+        public ChangeCurriculumOfStudentCommandHandler(IMapper mapper, ITrainingService trainingService, AuthContext authContext, ChangeCourseHelper changeCourseHelper, ICourseRepository courseRepository, SaveUserCourseSettingPublisher saveUserCourseSettingPublisher, IUserService userService, ILogger<ChangeCourseLevelCommand> logger, ICourseResultRepository courseResultRepository, NotificationMessagePublisher notificationMessagePublisher, ICurriculumStudentRepository curriculumStudentRepository, ICurriculumRepository curriculumRepository, ILessonResultRepository lessonResultRepository, IRequestSafeCachingService requestSafeCachingService)
         {
             _mapper = mapper;
             _trainingService = trainingService;
@@ -64,6 +67,7 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
             _curriculumStudentRepository = curriculumStudentRepository;
             _curriculumRepository = curriculumRepository;
             _lessonResultRepository = lessonResultRepository;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         public async Task<MethodResult<bool>> Handle(ChangeCurriculumOfStudentCommand request, CancellationToken cancellationToken)
@@ -147,10 +151,16 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
                     }
                     try
                     {
-                        await _courseResultRepository.BulkMergeAsync(new List<CourseResult> { courseResult }, bulk =>
-                        {
-                            bulk.ColumnPrimaryKeyExpression = c => new { c.CourseId, c.StudentId, c.IsDeleted };
-                        });
+                        await _requestSafeCachingService.SafeRequest<CourseResult>(
+                            key: $"Add_CourseResult_{courseResult.CourseId}_{courseResult.StudentId}_{courseResult.WorkingStatus}_{courseResult.IsDeleted}",
+                            safeFunction: async () =>
+                            {
+                                await _courseResultRepository.BulkMergeAsync(new List<CourseResult> { courseResult }, bulk =>
+                                {
+                                    bulk.ColumnPrimaryKeyExpression = c => new { c.CourseId, c.WorkingStatus, c.StudentId, c.IsDeleted };
+                                });
+                                return courseResult;
+                            });
                     }
                     catch (Exception ex)
                     {

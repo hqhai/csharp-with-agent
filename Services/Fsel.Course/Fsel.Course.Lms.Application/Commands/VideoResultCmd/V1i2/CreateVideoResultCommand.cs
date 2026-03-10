@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd.V1i2
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Shared.ApplicationServices.CacheServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -23,17 +24,20 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd.V1i2
         private readonly ILessonModuleRepository _lessonModuleRepository;
         private readonly IVideoRepository _videoRepository;
         private readonly IVideoResultRepository _videoResultRepository;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
 
         public CreateVideoResultCommandHandler(
             ILessonResultRepository lessonResultRepository,
             ILessonModuleRepository lessonModuleRepository,
             IVideoRepository videoRepository,
-            IVideoResultRepository videoResultRepository)
+            IVideoResultRepository videoResultRepository,
+            IRequestSafeCachingService requestSafeCachingService)
         {
             _lessonResultRepository = lessonResultRepository;
             _lessonModuleRepository = lessonModuleRepository;
             _videoRepository = videoRepository;
             _videoResultRepository = videoResultRepository;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         public async Task<MethodResult<bool>> Handle(CreateVideoResultCommand request, CancellationToken cancellationToken)
@@ -90,10 +94,16 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd.V1i2
 
             try
             {
-                await _videoResultRepository.BulkMergeAsync(new List<VideoResult> { videoResult }, bulk =>
-                {
-                    bulk.ColumnPrimaryKeyExpression = c => new { c.LessonModuleId, c.LessonResultId, c.IsDeleted };
-                });
+                await _requestSafeCachingService.SafeRequest<VideoResult>(
+                    key: $"Add_VideoResult_{videoResult.LessonModuleId}_{videoResult.LessonResultId}_{videoResult.IsDeleted}",
+                    safeFunction: async () =>
+                    {
+                        await _videoResultRepository.BulkMergeAsync(new List<VideoResult> { videoResult }, bulk =>
+                        {
+                            bulk.ColumnPrimaryKeyExpression = c => new { c.LessonModuleId, c.LessonResultId, c.IsDeleted };
+                        });
+                        return videoResult;
+                    });
             }
             catch { }
 
