@@ -22,6 +22,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
+    using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
@@ -55,6 +56,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
         private readonly DisconnectSocketCalculateTimePublisher _disconnectSocketCalculateTimePublisher;
         private readonly ICourseRepository _courseRepository;
         private readonly SaveUserSurveyAssignmentPublisher _saveUserSurveyAssignmentPublisher;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
 
         public CreateFinalTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository,
             ICourseResultRepository courseResultRepository,
@@ -73,7 +75,8 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             ILogger<CreateFinalTestAnswerBySectionGroupCommand> logger,
             DisconnectSocketCalculateTimePublisher disconnectSocketCalculateTimePublisher,
             ICourseRepository courseRepository,
-            SaveUserSurveyAssignmentPublisher saveUserSurveyAssignmentPublisher)
+            SaveUserSurveyAssignmentPublisher saveUserSurveyAssignmentPublisher,
+            IRequestSafeCachingService requestSafeCachingService)
         {
             _questionRepository = questionRepository;
             _courseResultRepository = courseResultRepository;
@@ -93,6 +96,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             _disconnectSocketCalculateTimePublisher = disconnectSocketCalculateTimePublisher;
             _courseRepository = courseRepository;
             _saveUserSurveyAssignmentPublisher = saveUserSurveyAssignmentPublisher;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         public async Task<MethodResult<SectionGroupResultModel>> Handle(CreateFinalTestAnswerBySectionGroupCommand request, CancellationToken cancellationToken)
@@ -318,10 +322,17 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             {
                 if (createFinalTestAnswers != null && createFinalTestAnswers.Any())
                 {
-                    await _finalTestAnswerRepository.BulkMergeAsync(createFinalTestAnswers, bulk =>
-                    {
-                        bulk.ColumnPrimaryKeyExpression = entity => new { entity.SectionQuestionId, entity.FinalTestResultId, entity.SectionGroupResultId, entity.IsDeleted };
-                    });
+                    var firstAnswer = createFinalTestAnswers.First();
+                    await _requestSafeCachingService.SafeRequest<List<FinalTestAnswer>>(
+                        key: $"Add_FinalTestAnswers_{firstAnswer.SectionQuestionId}_{firstAnswer.FinalTestResultId}_{firstAnswer.SectionGroupResultId}_{firstAnswer.IsDeleted}",
+                        safeFunction: async () =>
+                        {
+                            await _finalTestAnswerRepository.BulkMergeAsync(createFinalTestAnswers, bulk =>
+                            {
+                                bulk.ColumnPrimaryKeyExpression = entity => new { entity.SectionQuestionId, entity.FinalTestResultId, entity.SectionGroupResultId, entity.IsDeleted };
+                            });
+                            return createFinalTestAnswers;
+                        });
                 }
                 if (updateFinalTestAnswers != null && updateFinalTestAnswers.Any())
                 {

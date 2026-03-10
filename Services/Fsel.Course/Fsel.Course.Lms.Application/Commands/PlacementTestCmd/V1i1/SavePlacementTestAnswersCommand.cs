@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.PlacementTestAnswers;
+    using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Shared.Enums;
     using MediatR;
@@ -27,6 +28,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
         private readonly AnswerTypeConverter _answerTypeConverter;
         private readonly SectionGroupConverter _sectionGroupConverter;
         private readonly ISectionQuestionRepository _sectionQuestionRepository;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
 
         public SavePlacementTestAnswersCommandHandler(ISectionGroupResultRepository sectionGroupResultRepository,
             IQuestionRepository questionRepository,
@@ -35,7 +37,8 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             ILogger<SavePlacementTestAnswersCommandHandler> logger,
             AnswerTypeConverter answerTypeConverter,
             SectionGroupConverter sectionGroupConverter,
-            ISectionQuestionRepository sectionQuestionRepository)
+            ISectionQuestionRepository sectionQuestionRepository,
+            IRequestSafeCachingService requestSafeCachingService)
         {
             _sectionGroupResultRepository = sectionGroupResultRepository;
             _questionRepository = questionRepository;
@@ -45,6 +48,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             _answerTypeConverter = answerTypeConverter;
             _sectionGroupConverter = sectionGroupConverter;
             _sectionQuestionRepository = sectionQuestionRepository;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         public async Task<bool> Handle(SavePlacementTestAnswersCommand request, CancellationToken cancellationToken)
@@ -94,10 +98,20 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                     IsCorrect = null,
                     Status = EnumAnswerStatus.Done
                 }).ToList();
-                await _placementTestAnswerRepository.BulkMergeAsync(placementTestAnswers, bulk =>
+                if (placementTestAnswers.Any())
                 {
-                    bulk.ColumnPrimaryKeyExpression = entity => new { entity.SectionGroupResultId, entity.SectionQuestionId, entity.PlacementTestResultId, entity.IsDeleted };
-                });
+                    var firstAnswer = placementTestAnswers.First();
+                    await _requestSafeCachingService.SafeRequest<List<PlacementTestAnswer>>(
+                        key: $"Add_PlacementTestAnswers_{firstAnswer.SectionGroupResultId}_{firstAnswer.PlacementTestResultId}_{firstAnswer.IsDeleted}",
+                        safeFunction: async () =>
+                        {
+                            await _placementTestAnswerRepository.BulkMergeAsync(placementTestAnswers, bulk =>
+                            {
+                                bulk.ColumnPrimaryKeyExpression = entity => new { entity.SectionGroupResultId, entity.SectionQuestionId, entity.PlacementTestResultId, entity.IsDeleted };
+                            });
+                            return placementTestAnswers;
+                        });
+                }
             }
             catch (Exception ex)
             {
@@ -128,10 +142,17 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             {
                 if (createPlacementTestAnswers != null && createPlacementTestAnswers.Any())
                 {
-                    await _placementTestAnswerRepository.BulkMergeAsync(createPlacementTestAnswers, bulk =>
-                    {
-                        bulk.ColumnPrimaryKeyExpression = entity => new { entity.SectionGroupResultId, entity.SectionQuestionId, entity.PlacementTestResultId, entity.IsDeleted };
-                    });
+                    var firstAnswer = createPlacementTestAnswers.First();
+                    await _requestSafeCachingService.SafeRequest<List<PlacementTestAnswer>>(
+                        key: $"Add_PlacementTestAnswers_{firstAnswer.SectionGroupResultId}_{firstAnswer.PlacementTestResultId}_{firstAnswer.IsDeleted}",
+                        safeFunction: async () =>
+                        {
+                            await _placementTestAnswerRepository.BulkMergeAsync(createPlacementTestAnswers, bulk =>
+                            {
+                                bulk.ColumnPrimaryKeyExpression = entity => new { entity.SectionGroupResultId, entity.SectionQuestionId, entity.PlacementTestResultId, entity.IsDeleted };
+                            });
+                            return createPlacementTestAnswers;
+                        });
                 }
                 if (updatePlacementTestAnswers != null && updatePlacementTestAnswers.Any())
                 {

@@ -297,7 +297,14 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                 {
                     file.ClassForumDetailResultId = classForumDetailResult.Id; // Set foreign key nếu cần
                 }
-                await _classForumResultFileRepository.BulkMergeAsync(classForumResultFileNews);
+                var firstFile = classForumResultFileNews.First();
+                await _requestSafeCachingService.SafeRequest<List<ClassForumResultFile>>(
+                    key: $"Add_ClassForumResultFiles_{firstFile.ClassForumDetailResultId}",
+                    safeFunction: async () =>
+                    {
+                        await _classForumResultFileRepository.BulkMergeAsync(classForumResultFileNews);
+                        return classForumResultFileNews;
+                    });
             }
             methodResult.Result = classForumDetailResult;
             return methodResult;
@@ -379,7 +386,14 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                     {
                         file.ClassForumDetailResultId = classForumDetailResult.Id; // Set foreign key nếu cần
                     }
-                    await _classForumResultFileRepository.BulkMergeAsync(classForumResultFiles);
+                    var firstFile = classForumResultFiles.First();
+                    await _requestSafeCachingService.SafeRequest<List<ClassForumResultFile>>(
+                        key: $"Add_ClassForumResultFiles_{firstFile.ClassForumDetailResultId}",
+                        safeFunction: async () =>
+                        {
+                            await _classForumResultFileRepository.BulkMergeAsync(classForumResultFiles);
+                            return classForumResultFiles;
+                        });
                 }
             }
             catch (Exception ex)
