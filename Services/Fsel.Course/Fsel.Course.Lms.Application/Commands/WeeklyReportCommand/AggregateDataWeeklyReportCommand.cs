@@ -310,13 +310,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                         weeklyReport.SenderTemplate = EnumSenderTemplate.WeeklyReport2;
                     }
 
-                    var token = await _userService.SenderSettingGenerateToken(new UpdateSenderSettingCommandModel
-                    {
-                        UserId = item.UserId,
-                        Template = weeklyReport.SenderTemplate
-                    });
-
-                    weeklyReport.AccessLink = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl!.UpdateSenderSettingUrl!, token?.Content?.Result ?? string.Empty);
+                    weeklyReport.AccessLink = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl?.UpdateSenderSettingUrl ?? string.Empty, item.UserId, weeklyReport.SenderTemplate);
 
                     if (!string.IsNullOrEmpty(item.User?.Email))
                     {

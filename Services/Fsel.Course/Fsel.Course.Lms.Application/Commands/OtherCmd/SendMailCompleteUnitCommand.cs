@@ -195,13 +195,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherCmd
 
             var currentOther = Shared.Helpers.DateTimeHelper.ConvertSecondsToMinutes(featureAccessTime?.Where(x => x.FeatureBusinessType == EnumFeatureBussinessType.Other).Sum(p => p.AccessTime) ?? 0);
 
-            var token = await _userService.SenderSettingGenerateToken(new UpdateSenderSettingCommandModel
-            {
-                UserId = student.UserId,
-                Template = EnumSenderTemplate.SendStudentCompleteCourseAcademic
-            });
-
-            string accessLink = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl!.UpdateSenderSettingUrl!, token?.Content?.Result ?? string.Empty);
+            string accessLink = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl?.UpdateSenderSettingUrl ?? string.Empty, student.UserId, EnumSenderTemplate.Unit1Report);
 
             var cultureInfo = CultureInfo.InvariantCulture;
 

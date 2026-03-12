@@ -98,13 +98,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherCmd
                 }
             }
 
-            var token = await _userService.SenderSettingGenerateToken(new UpdateSenderSettingCommandModel
-            {
-                UserId = student.UserId,
-                Template = EnumSenderTemplate.SendStudentCompleteCourseAcademic
-            });
-
-            string accessLink = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl!.UpdateSenderSettingUrl!, token?.Content?.Result ?? string.Empty);
+            string accessLink = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl?.UpdateSenderSettingUrl ?? string.Empty, student.UserId, EnumSenderTemplate.StudentCompletePTToPdf);
 
             var display = subject?.Name == SubjectEnglish ? null : Display;
 

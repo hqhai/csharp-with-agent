@@ -215,13 +215,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherCmd
                 return methodResult;
             }
 
-            var token = await _userService.SenderSettingGenerateToken(new UpdateSenderSettingCommandModel
-            {
-                UserId = student.UserId,
-                Template = EnumSenderTemplate.SendStudentCompleteCourseAcademic
-            });
-
-            string accessLink = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl!.UpdateSenderSettingUrl!, token?.Content?.Result ?? string.Empty);
+            string accessLink = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl?.UpdateSenderSettingUrl ?? string.Empty, student.UserId, EnumSenderTemplate.SendStudentCompleteCourseAcademic);
 
             var value = Math.Round((double)unitsAccessTime.Sum(p => p.Time) / totalLesson / 3600, 1);
             var result = value % 1 == 0 ? ((int)value).ToString(CultureInfo.InvariantCulture) : value.ToString("0.0", CultureInfo.InvariantCulture);
