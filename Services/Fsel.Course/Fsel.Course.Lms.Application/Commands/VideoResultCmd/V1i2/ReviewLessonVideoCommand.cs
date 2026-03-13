@@ -88,9 +88,12 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd.V1i2
                 return methodResult;
             }
 
+            var highestStreak = await _videoConverter.GetHighestStreak(videoResult);
+
             videoResult.NumberOfStars = request.NumberOfStars;
             videoResult.Feedback = request.Feedback;
-            videoResult.HighestStreak = await _videoConverter.GetHighestStreak(videoResult);
+            videoResult.HighestStreak = highestStreak.HighestStreakQuestion;
+            videoResult.HighestStreakSubQuestion = highestStreak.HighestStreakSubQuestion;
             videoResult.TimeCodeHighestStreak = GetHighestStreak(videoTimeCodeResults);
             if (!videoResult.IsValid())
             {

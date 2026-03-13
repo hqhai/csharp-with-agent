@@ -472,7 +472,10 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                 var tokensAchieved = totalCorrect * tokenUnitValue;
 
                 // Tính HighestStreak mỗi lần submit
-                homeWorkResult.HighestStreak = await CalculateHighestCorrectStreakAsync(homeWorkResult.Id, cancellationToken);
+                var highestStreak = await CalculateHighestCorrectStreakAsync(homeWorkResult.Id, cancellationToken);
+                homeWorkResult.HighestStreak = highestStreak.HighestStreakQuestion;
+                homeWorkResult.HighestStreakSubQuestion = highestStreak.HighestStreakSubQuestion;
+
                 if (tokensAchieved > 0)
                 {
                     await PublishTokenHistoryAsync(homeWorkResult, student, course, tokensAchieved, cancellationToken);
@@ -673,18 +676,28 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             return answers?.Sum(x => x.CorrectCount) ?? default;
         }
 
-        private async Task<int> CalculateHighestCorrectStreakAsync(Guid homeWorkResultId, CancellationToken cancellationToken)
+        private async Task<HighestStreakModel> CalculateHighestCorrectStreakAsync(Guid homeWorkResultId, CancellationToken cancellationToken)
         {
             var answers = await (from baseQ in _homeWorkAnswerRepository.ReadQueryable
                                  join hq in _homeWorkQuestionRepository.ReadQueryable on baseQ.HomeWorkQuestionId equals hq.Id
                                  where baseQ.HomeWorkResultId == homeWorkResultId && baseQ.Status == EnumAnswerStatus.Done
                                  orderby hq.CreatedDate
-                                 select baseQ.IsCorrect == true && baseQ.IsFirstSubmit).ToListAsync(cancellationToken);
+                                 select new AnswerTimelineModel
+                                 {
+                                     IsCorrect = baseQ.IsCorrect == true && baseQ.IsFirstSubmit,
+                                     Score = baseQ.CorrectCount
+                                 }
+
+                                 ).ToListAsync(cancellationToken);
             if (!answers.Any())
             {
-                return 0;
+                return new HighestStreakModel();
             }
-            return answers.GetHighestStreak();
+            return new HighestStreakModel()
+            {
+                HighestStreakQuestion = answers.Select(p => p.IsCorrect).ToList().GetHighestStreak(),
+                HighestStreakSubQuestion = answers.GetHighestStreakV1()
+            };
         }
 
         #endregion HomeWorkAnswer Finalization & Streak

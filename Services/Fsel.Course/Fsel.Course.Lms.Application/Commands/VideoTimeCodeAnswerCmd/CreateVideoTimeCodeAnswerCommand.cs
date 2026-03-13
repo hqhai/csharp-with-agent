@@ -209,11 +209,17 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 }
                 if (videoTimeCode != null && videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone)
                 {
-                    videoResult.HighestStreak = await _videoConverter.GetHighestStreak(videoResult);
+                    var highestStreak = await _videoConverter.GetHighestStreak(videoResult);
+
+                    videoResult.HighestStreak = highestStreak.HighestStreakQuestion;
+                    videoResult.HighestStreakSubQuestion = highestStreak.HighestStreakSubQuestion;
                 }
                 else if (videoTimeCode != null && videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone)
                 {
-                    videoTimeCodeResult.HighestStreak = await _videoConverter.GetHighestStreak(videoTimeCodeResult);
+                    var highestStreak = await _videoConverter.GetHighestStreak(videoTimeCodeResult);
+
+                    videoTimeCodeResult.HighestStreak = highestStreak.HighestStreakSubQuestion;
+                    videoTimeCodeResult.HighestStreakSubQuestion = highestStreak.HighestStreakSubQuestion;
                 }
                 await _videoResultRepository.BulkUpdateList(new List<VideoResult> { videoResult }, bulk =>
                 {

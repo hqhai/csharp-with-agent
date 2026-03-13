@@ -229,6 +229,7 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
                 SkillScores = nodeResult?.SkillScores,
                 CorrectTotal = nodeResult?.CorrectTotal ?? 0,
                 HighestStreak = nodeResult?.HighestStreak,
+                HighestStreakQuestion = nodeResult?.HighestStreakSubQuestion,
                 TestScores = nodeResult?.TestScores.OrderBy(x => x.CreatedDate).Select(x => new TestScoreModel
                 {
                     Criteria = x.Criteria,

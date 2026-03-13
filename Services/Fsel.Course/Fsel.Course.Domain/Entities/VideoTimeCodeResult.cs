@@ -71,6 +71,12 @@ namespace Fsel.Course.Domain.Entities
 
         public int? TokenFirstTime { get; set; }
         public int? TokenLastTime { get; set; }
+
+        /// <summary>
+        /// Chuỗi liên tiếp của sub question
+        /// </summary>
+        public int? HighestStreakSubQuestion { get; set; }
+
         public ICollection<VideoTimeCodeAnswer> VideoTimeCodeAnswers { get; set; } = new List<VideoTimeCodeAnswer>();
     }
 }

@@ -109,6 +109,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
         public double? WorkingTime { get; set; }
         public double? PercentResult { get; set; }
         public int? HighestStreak { get; set; }
+        public int? HighestStreakQuestion { get; set; }
         public double? ScoreModule { get; set; }
         public Guid? CurrentSectionTimeCodeId { get; set; }
         public IList<BaseTestStateModel> Children { get; set; } = new List<BaseTestStateModel>();

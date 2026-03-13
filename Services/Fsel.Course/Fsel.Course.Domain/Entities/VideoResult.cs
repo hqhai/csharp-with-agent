@@ -43,6 +43,7 @@ namespace Fsel.Course.Domain.Entities
         public bool IsShowToken { get; set; }
         public EnumPlaybackSpeed PlaybackSpeed { get; set; } = EnumPlaybackSpeed.Normal;
         public int? HighestStreak { get; set; }
+        public int? HighestStreakSubQuestion { get; set; }
         public int? TimeCodeHighestStreak { get; set; }
 
         [NotMapped]

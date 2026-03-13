@@ -36,6 +36,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 Children = new List<BaseTestStateModel>(),
                 CurrentSectionTimeCodeId = TestSectionResult.CurrentSectionTimeCodeId,
                 HighestStreak = TestSectionResult.HighestStreak,
+                HighestStreakQuestion = TestSectionResult.HighestStreakSubQuestion,
                 CorrectTotal = TestSectionResult.CorrectTotal,
                 PercentResult = TestSectionResult.Percent,
                 SkillScores = TestSectionResult.SkillScores,
@@ -91,6 +92,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 CorrectTotal = TestSectionResult.CorrectTotal,
                 CurrentSectionTimeCodeId = TestSectionResult.CurrentSectionTimeCodeId,
                 HighestStreak = TestSectionResult.HighestStreak,
+                HighestStreakQuestion = TestSectionResult.HighestStreakSubQuestion,
                 PercentResult = TestSectionResult.Percent,
                 ScoreModule = TestSectionResult.ScoreModule,
                 SkillScores = TestSectionResult.SkillScores,
@@ -302,8 +304,13 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                     }
                 }
             }
-            var answers = GetPlainQuestionStates().Select(x => x.Answer != null && x.Answer.IsCorrect == true).ToList();
-            TestSectionResult.HighestStreak = answers.GetHighestStreak();
+            var answers = GetPlainQuestionStates().Select(x => new AnswerTimelineModel()
+            {
+                IsCorrect = x.Answer != null && x.Answer.IsCorrect == true,
+                Score = x.Answer?.CorrectCount
+            }).ToList();
+            TestSectionResult.HighestStreak = answers.Select(p => p.IsCorrect).ToList().GetHighestStreak();
+            TestSectionResult.HighestStreakSubQuestion = answers.GetHighestStreakV1();
             TestSectionResult.Status = EnumResultStatus.Done;
         }
 

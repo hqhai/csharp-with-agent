@@ -143,7 +143,10 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i2
                 return methodResult;
             }
 
-            ctx.VideoTimeCodeResult.HighestStreak = await _videoConverter.GetHighestStreak(ctx.VideoTimeCodeResult);
+            var highestStreak = await _videoConverter.GetHighestStreak(ctx.VideoTimeCodeResult);
+
+            ctx.VideoTimeCodeResult.HighestStreak = highestStreak.HighestStreakQuestion;
+            ctx.VideoTimeCodeResult.HighestStreakSubQuestion = highestStreak.HighestStreakSubQuestion;
 
             await UpdateVideoTimeCodeResultAsync(ctx, request.IsTimeUp, ct);
             return methodResult;

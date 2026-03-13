@@ -6,6 +6,9 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
     {
         public override double PercentModule { get; set; }
         public double? ScoreModule { get; set; }
+
+        public int? HighestStreakSubQuestion { get; set; }
+
         public Guid? TestResultId { get; set; }
 
         public TestResult? TestResult { get; set; }

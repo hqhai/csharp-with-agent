@@ -276,6 +276,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                         TestLayoutType = skill.TestSection?.LayoutType,
                         FilePath = skill.TestSection?.Skill?.FilePath,
                         HighestStreak = skill.HighestStreak,
+                        HighestStreakQuestion = skill.HighestStreakSubQuestion,
                         Answer = skill.TestAnswers.Select(x => new AnswerModel
                         {
                             GradingAlFeedback = x.GradingAlFeedback,
