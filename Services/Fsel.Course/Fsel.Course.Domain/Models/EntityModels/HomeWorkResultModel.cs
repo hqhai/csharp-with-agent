@@ -13,5 +13,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public EnumSubmissionCount SubmissionCount { get; set; }
         public int? TokenFirstTime { get; set; }
         public int? TokenLastTime { get; set; }
+        public int? HighestStreakQuestion { get; set; }
     }
 }

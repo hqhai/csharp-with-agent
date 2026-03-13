@@ -845,7 +845,7 @@ namespace Fsel.Course.Infrastructure.Common
             return (scoreQuery.ToList(), listGroupQuestion.Sum(x => x.TotalQuestion) != answers.Sum(x => x.TotalAnswer));
         }
 
-        public async Task<int> GetHighestStreak(VideoResult videoResult)
+        public async Task<HighestStreakModel> GetHighestStreak(VideoResult videoResult)
         {
             ArgumentNullException.ThrowIfNull(videoResult);
 
@@ -866,13 +866,21 @@ namespace Fsel.Course.Infrastructure.Common
                                              && q.QuestionType != EnumQuestionType.ExercisePreparation
                                              && a.CreatedDate >= videoResult.CreatedDate
                                              orderby q.CreatedDate
-                                             select a != null && a.IsCorrect == true && a.IsFirstSubmit)
+                                             select new AnswerTimelineModel
+                                             {
+                                                 IsCorrect = a != null && a.IsCorrect == true && a.IsFirstSubmit,
+                                                 Score = a != null ? a.CorrectCount : null
+                                             })
                                              .ToListAsync();
 
-            return correctnessTimeline.GetHighestStreak();
+            return new HighestStreakModel
+            {
+                HighestStreakQuestion = correctnessTimeline.Select(p => p.IsCorrect).ToList().GetHighestStreak(),
+                HighestStreakSubQuestion = correctnessTimeline.GetHighestStreakV1(),
+            };
         }
 
-        public async Task<int> GetHighestStreak(VideoTimeCodeResult videoTimeCodeResult)
+        public async Task<HighestStreakModel> GetHighestStreak(VideoTimeCodeResult videoTimeCodeResult)
         {
             ArgumentNullException.ThrowIfNull(videoTimeCodeResult);
 
@@ -894,10 +902,18 @@ namespace Fsel.Course.Infrastructure.Common
                 && q.QuestionType != EnumQuestionType.ExercisePreparation
                 && a.CreatedDate >= videoTimeCodeResult.CreatedDate
                 orderby q.CreatedDate
-                select a != null && a.IsCorrect == true && a.IsFirstSubmit
+                select new AnswerTimelineModel
+                {
+                    IsCorrect = a != null && a.IsCorrect == true && a.IsFirstSubmit,
+                    Score = a != null ? a.CorrectCount : null
+                }
             ).ToListAsync();
 
-            return correctnessTimeline.GetHighestStreak();
+            return new HighestStreakModel
+            {
+                HighestStreakQuestion = correctnessTimeline.Select(p => p.IsCorrect).ToList().GetHighestStreak(),
+                HighestStreakSubQuestion = correctnessTimeline.GetHighestStreakV1(),
+            };
         }
 
         private static bool GetUngraded(VideoTimeCode? videoTimeCode)

@@ -10,6 +10,7 @@ namespace Fsel.Course.Domain.Entities
     {
         private EnumSubmissionCount? _submissionCount;
         public int? HighestStreak { get; set; }
+        public int? HighestStreakSubQuestion { get; set; }
 
         public int? TokenFirstTime { get; set; }
         public int? TokenLastTime { get; set; }
