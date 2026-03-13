@@ -24,13 +24,22 @@ namespace Fsel.Course.Application.Queries.UnitQuery
         private readonly IUnitRepository _unitRepository;
         private readonly ILessonRepository _lessonRepository;
         private readonly ICategoryRepository _categoryRepository;
+        private readonly ITestRepository _testRepository;
+        private readonly ITestSectionRepository _testSectionRepository;
         private readonly IMapper _mapper;
 
-        public GetUnitQueryHandler(IMapper mapper, IUnitRepository unitRepository, ILessonRepository lessonRepository, ICategoryRepository categoryRepository)
+        public GetUnitQueryHandler(IMapper mapper,
+            IUnitRepository unitRepository,
+            ILessonRepository lessonRepository,
+            ICategoryRepository categoryRepository,
+            ITestRepository testRepository,
+            ITestSectionRepository testSectionRepository)
         {
             _unitRepository = unitRepository;
             _lessonRepository = lessonRepository;
             _categoryRepository = categoryRepository;
+            _testRepository = testRepository;
+            _testSectionRepository = testSectionRepository;
             _mapper = mapper;
         }
 
@@ -56,14 +65,14 @@ namespace Fsel.Course.Application.Queries.UnitQuery
             {
                 var lessons = await _lessonRepository.ReadQueryable
                 .Where(x => originals.Contains(x.OriginalId) && x.VersionStatus == EnumVersionStatus.LastVersion && !x.IsArchive)
-                .Include(x => x.LessonInstructions)
-                .ThenInclude(li => li.Skill)
                 .Select(x => new LessonSearchModel
                 {
                     Id = x.Id,
                     Name = x.Name,
                     LevelId = x.LevelId,
                     ProgramId = x.ProgramId,
+                    NameLevel = x.Level != null ? x.Level.Name : string.Empty,
+                    NameProgram = x.Category != null ? x.Category.Name : string.Empty,
                     Overview = x.InstructionContent,
                     OriginalId = x.OriginalId,
                     Skills = x.LessonInstructions.Select(i => new SkillDTO
@@ -74,9 +83,32 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                 })
                 .ToListAsync(cancellationToken: cancellationToken);
 
+                var tests = await _testRepository.ReadQueryable
+               .Where(x => originals.Contains(x.OriginalId) && x.VersionStatus == EnumVersionStatus.LastVersion && !x.IsArchive)
+               .Select(x => new PlacementTestSearchModel
+               {
+                   Id = x.Id,
+                   Name = x.Name,
+                   LevelId = x.LevelId,
+                   ProgramId = x.ProgramId,
+                   LevelCode = x.Level != null ? x.Level.Code : string.Empty,
+                   LevelName = x.Level != null ? x.Level.Name : string.Empty,
+                   NameProgram = x.Program != null ? x.Program.Name : string.Empty,
+                   OriginalId = x.OriginalId,
+                   Skills = _testSectionRepository.ReadQueryable.Include(x => x.Skill)
+                   .Where(y => y.TestId == x.Id && y.ParentId == null)
+                   .Select(i => new SkillDTO
+                   {
+                       Name = i.Skill.Name ?? string.Empty,
+                       FilePath = i.Skill.FilePath ?? string.Empty
+                   }).ToList()
+               })
+               .ToListAsync(cancellationToken: cancellationToken);
+
                 unitModel.UnitModules?.ForEach(x =>
                 {
                     x.Lesson = lessons.FirstOrDefault(l => l.OriginalId == x.OriginalId);
+                    x.Test = tests.FirstOrDefault(l => l.OriginalId == x.OriginalId);
                 });
             }
 

@@ -8,9 +8,12 @@ namespace Fsel.Course.Domain.Models.EntityModels.V1i1
         public DateTime? CreatedDate { get; set; }
         public DateTime? UpdatedDate { get; set; }
         public string? Name { get; set; }
+        public Guid ProgramId { get; set; }
         public Guid? LevelId { get; set; }
         public Guid OriginalId { get; set; }
         public string? LevelName { get; set; }
         public string? LevelCode { get; set; }
+        public string? NameProgram { get; set; }
+        public IList<SkillDTO>? Skills { get; set; }
     }
 }
