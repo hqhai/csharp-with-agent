@@ -2,11 +2,13 @@
 
 namespace Fsel.Course.Lms.Application.Services.ApplicationServices
 {
+    using AutoMapper;
     using CacheServices;
     using Domain.Entities;
     using Domain.Enums;
     using Domain.IRepositories;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
+    using Fsel.Course.Domain.Models.EntityModels.SkillModels;
     using Microsoft.EntityFrameworkCore;
 
     public interface ICategoryService
@@ -27,19 +29,34 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
         private readonly ICategoryRepository _categoryRepository;
         private readonly ISkillLevelRepository _skillLevelRepository;
         private readonly ILevelRepository _levelRepository;
+        private readonly ICategoryTestBankRepository _categoryTestBankRepository;
+        private readonly ITestRepository _testRepository;
+        private readonly ITestSectionRepository _testSectionRepository;
+        private readonly ISkillRepository _skillRepository;
+        private readonly IMapper _mapper;
 
         public CategoryService(
             ICategoryCachingService categoryCachingService,
             IProgramSkillScoresCachingService programSkillScoresCachingService,
             ICategoryRepository categoryRepository,
             ISkillLevelRepository skillLevelRepository,
-            ILevelRepository levelRepository)
+            ILevelRepository levelRepository,
+            ICategoryTestBankRepository categoryTestBankRepository,
+            ITestRepository testRepository,
+            ITestSectionRepository testSectionRepository,
+            ISkillRepository skillRepository,
+            IMapper mapper)
         {
             _categoryCachingService = categoryCachingService;
             _programSkillScoresCachingService = programSkillScoresCachingService;
             _categoryRepository = categoryRepository;
             _skillLevelRepository = skillLevelRepository;
             _levelRepository = levelRepository;
+            _categoryTestBankRepository = categoryTestBankRepository;
+            _testRepository = testRepository;
+            _testSectionRepository = testSectionRepository;
+            _skillRepository = skillRepository;
+            _mapper = mapper;
         }
 
         public async Task<IList<SkillScores>> GetDefaultSkillScoresAsync(Guid? programId, CancellationToken cancellationToken = default)
