@@ -113,7 +113,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
                 return methodResult;
             }
 
-            var classForum = await _classForumRepository.Queryable.FirstOrDefaultAsync(x => x.LessonId == classForumResult.LessonResult.LessonId, cancellationToken);
+            var classForum = await _classForumRepository.Queryable.FirstOrDefaultAsync(x => x.Id == classForumResult.ClassForumId, cancellationToken);
             if (classForum == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForum));
@@ -140,7 +140,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
 
                 await _classForumDetailResultRepository.BulkUpdateList(new List<ClassForumDetailResult> { classForumDetailResult }, bulk =>
                 {
-                    bulk.IgnoreOnUpdateExpression = c => new { c.ClassForumResultId, c.SubmissionCount };
+                    bulk.IgnoreOnUpdateExpression = c => new { c.ClassForumResultId, c.SubmissionCount, c.AITranslationContent };
                 });
 
                 var token = isFirst ? await GetTokenAsync(classForum, classForumResult, course.CourseType) : null;
@@ -199,7 +199,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
 
         private static EnumTokenMission GetTokenMission(ClassForum classForum, ClassForumResult classForumResult)
         {
-            return classForum.CourseSkill == EnumCourseSkill.Writing ? EnumTokenMission.ClassForumWriting
+            return classForum.Layout == EnumClassForumLayout.Writing ? EnumTokenMission.ClassForumWriting
                : classForumResult.MediaType == EnumMediaType.Video ? EnumTokenMission.ClassForumSpeakingVideo
                : EnumTokenMission.ClassForumSpeakingAudio;
         }

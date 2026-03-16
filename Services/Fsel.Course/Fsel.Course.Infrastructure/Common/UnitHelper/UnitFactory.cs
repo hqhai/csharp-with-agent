@@ -6,7 +6,6 @@ namespace Fsel.Course.Infrastructure.Common.UnitHelper
     using System.Collections.Generic;
     using System.Linq;
     using Fsel.Common.Enums;
-    using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.V1i1;
     using Fsel.Course.Domain.Enums;
@@ -28,22 +27,19 @@ namespace Fsel.Course.Infrastructure.Common.UnitHelper
             {
                 Code = _createRequest.Code,
                 Name = _createRequest.Name,
+                Description = _createRequest.Description,
                 LessonCount = _createRequest.Modules?.Count(m => m.ModuleType == EnumUnitConfigType.Lesson) ?? 0,
                 TestCount = _createRequest.Modules?.Count(m => m.ModuleType == EnumUnitConfigType.Test) ?? 0,
                 VersionStatus = EnumVersionStatus.LastVersion,
                 Version = version,
+                IsAIPracticeGymEnabled = _createRequest.IsAIPracticeGymEnabled,
                 LevelId = _createRequest.LevelId,
-                ProgramId = _createRequest.ProgramId
+                ProgramId = _createRequest.ProgramId,
+                HighlightRanges = _createRequest.HighlightRanges,
+                ProgressSpeedometerRanges = _createRequest.ProgressSpeedometerRanges
             };
             unit.OriginalId = originalId.HasValue ? originalId.Value : unit.Id;
-
             unit.UnitModules = UnitModuleClassification(_createRequest.Modules, unit.Id).ToList();
-
-            if (_createRequest.HighlightRanges != null && _createRequest.HighlightRanges.Any())
-            {
-                unit.HighlightRange = _createRequest.HighlightRanges.Serialize();
-            }
-
             return unit;
         }
 

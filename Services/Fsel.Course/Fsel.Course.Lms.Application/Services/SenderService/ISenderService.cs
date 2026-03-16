@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Application.Services.SenderService
     using Fsel.Common.ActionResults;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.SenderTemplates;
+    using Fsel.Shared.Models.ShareModels;
     using Fsel.Shared.Models.ShareModels.QueryModels;
     using Refit;
 
@@ -20,6 +21,9 @@ namespace Fsel.Course.Lms.Application.Services.SenderService
 
         [Post("/v1/send-email/get-histories-send-mail-learning-progress")]
         Task<IApiResponse<MethodResult<IList<HistorySendMailLearningProgressModel>>>> GetHistoriesSendMailLearningProgress([Body] GetHistoriesSendMailLearningProgressModel model);
+
+        [Post("/v1/pdf/export-from-template")]
+        Task<IApiResponse<MethodResult<byte[]>>> ExportPdfFromTemplate([Body] ExportPdfByTemplateCommandModel model);
     }
 
     public class SendEmailCommandModel

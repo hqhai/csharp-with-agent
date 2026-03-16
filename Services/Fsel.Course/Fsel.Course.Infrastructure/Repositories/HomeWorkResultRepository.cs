@@ -50,11 +50,10 @@ namespace Fsel.Course.Infrastructure.Repositories
             return homeWorkResults
                 .Where(x => x.SkillScores != null && x.SkillScores.Any())
                 .SelectMany(x => x.SkillScores!)
-                .GroupBy(x => new { x.SkillId, x.Skill, x.SkillName })
+                .GroupBy(x => new { x.SkillId, x.SkillName })
                 .Select(g => new SkillScores
                 {
                     SkillId = g.Key.SkillId,
-                    Skill = g.Key.Skill,
                     SkillName = g.Key.SkillName,
 
                     CorrectCount = g.Sum(s => s.CorrectCount),

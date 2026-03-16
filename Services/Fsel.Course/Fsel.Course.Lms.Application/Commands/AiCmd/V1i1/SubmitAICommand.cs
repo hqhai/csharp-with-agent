@@ -51,7 +51,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd.V1i1
                 {
                     Format = new
                     {
-                        Type = "json_schema",
+                        Type = !string.IsNullOrEmpty(request.SchemaType) ? request.SchemaType : "json_schema",
                         Name = request.NameSchema,
                         Schema = request.Text
                     }

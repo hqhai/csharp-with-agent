@@ -26,7 +26,9 @@ namespace Fsel.Course.Infrastructure.Maps
             CreateMap<Category, ProgramModel>().IgnoreAllNonExisting();
             CreateMap<CreateProgramCommandModel, Category>().ForMember(x => x.Levels, x => x.Ignore()).IgnoreAllNonExisting();
             CreateMap<UpdateProgramCommandModel, Category>().ForMember(x => x.Levels, x => x.Ignore()).IgnoreAllNonExisting();
-            CreateMap<Level, LevelModel>().ForMember(x => x.ProgramLevelName, x => x.MapFrom(c => c.Category != null ? $"{c.Category.Name} - {c.Name}" : c.Name));
+            CreateMap<Level, LevelModel>()
+                .ForMember(x => x.ProgramLevelName, x => x.MapFrom(c => c.Category != null ? $"{c.Category.Name} - {c.Name}" : c.Name))
+                .ForMember(x => x.Skils, x => x.MapFrom(c => c.SkillLevels.OrderBy(x => x.CreatedDate).Select(x => x.Skill)));
             CreateMap<Level, SelectionLevelModel>().ForMember(x => x.ProgramLevelName, x => x.MapFrom(c => c.Category != null ? $"{c.Category.Name} - {c.Name}" : c.Name));
             CreateMap<UpdateLevelCommandModel, Level>().IgnoreAllNonExisting();
         }

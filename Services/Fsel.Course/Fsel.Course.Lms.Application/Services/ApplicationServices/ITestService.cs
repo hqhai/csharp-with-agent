@@ -6,17 +6,22 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
     using System.Linq.Dynamic.Core;
     using System.Linq.Expressions;
     using System.Threading.Tasks;
+    using AutoMapper;
     using Fsel.Core.Base.Interfaces;
+    using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Entities.SubjectConditionRuleConfigs;
     using Fsel.Course.Domain.Entities.TestConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.Tests;
+    using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService.Interface;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
+    using Fsel.Shared.ApplicationServices.CacheServices;
     using Fsel.Shared.Enums;
     using Microsoft.EntityFrameworkCore;
-    using static Fsel.Shared.Constants.ValueSettings;
 
     public interface ITestService
     {
@@ -37,6 +42,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
         Task CreateAnswers(SubmitAnswerCommandModel request);
 
         Task CreateTestAnswers(SubmitAnswerCommandModel request);
+
+        Task<List<SelectionLevelModel>> GetSuggestLevels(Guid ptResultId, int age, bool isOpenOldLevel = false, CancellationToken cancellationToken = default);
     }
 
     public class TestService : ITestService
@@ -53,6 +60,14 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
         private readonly IRepository<TestAnswer> _testAnswerRepository;
         private readonly QuestionConverter _questionConverter;
         private readonly ITestSectionResultRepository _testSectionResultRepository;
+        private readonly IContinuousPronunciationAssessmentService _continuousPronunciation;
+        private readonly ICategoryRepository _categoryRepository;
+        private readonly ISubjectConditionRepository _subjectConditionRepository;
+        private readonly ICourseCachingService _courseCachingService;
+        private readonly ILevelRepository _levelRepository;
+        private readonly ICourseResultRepository _courseResultRepository;
+        private readonly IMapper _mapper;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
 
         public TestService(ITestCachingService testCachingService,
             ITestRepository testRepository,
@@ -65,7 +80,15 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             ISpeakingEvaluationAIService evaluationAIService,
             IRepository<TestAnswer> testAnswerRepository,
             QuestionConverter questionConverter,
-            ITestSectionResultRepository testSectionResultRepository)
+            ITestSectionResultRepository testSectionResultRepository,
+            IContinuousPronunciationAssessmentService continuousPronunciation,
+            ICategoryRepository categoryRepository,
+            ISubjectConditionRepository subjectConditionRepository,
+            ICourseCachingService courseCachingService,
+            ILevelRepository levelRepository,
+            ICourseResultRepository courseResultRepository,
+            IMapper mapper,
+            IRequestSafeCachingService requestSafeCachingService)
         {
             _testCachingService = testCachingService;
             _testRepository = testRepository;
@@ -79,6 +102,14 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             _testAnswerRepository = testAnswerRepository;
             _questionConverter = questionConverter;
             _testSectionResultRepository = testSectionResultRepository;
+            _continuousPronunciation = continuousPronunciation;
+            _categoryRepository = categoryRepository;
+            _subjectConditionRepository = subjectConditionRepository;
+            _courseCachingService = courseCachingService;
+            _levelRepository = levelRepository;
+            _courseResultRepository = courseResultRepository;
+            _mapper = mapper;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         public async Task<Test> GetHierachicalTestFirstOrDefault(Expression<Func<Test, bool>> predicate)
@@ -293,8 +324,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             return await queryable
                 .Where(predicate)
                 .Include(x => x.SectionResults)
-                .ThenInclude(x => x.TestSection)
-                .ThenInclude(x => x.TestSectionQuestions)
+                    .ThenInclude(x => x.TestSection)
+                        .ThenInclude(x => x.TestSectionQuestions)
                 .Include(x => x.TestAnswers)
                 .FirstOrDefaultAsync() ?? new TestResult();
         }
@@ -310,7 +341,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             var testSectionResult = await _testSectionResultRepository.Queryable.Include(x => x.TestSection)
                                                                       .Where(x => x.Id == request.SectionResultId)
                                                                       .FirstOrDefaultAsync();
-            if (testSectionResult == null)
+            if (testSectionResult == null || testSectionResult.Status == EnumResultStatus.Done)
             {
                 return;
             }
@@ -325,9 +356,10 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                 return;
             }
 
-            var testSectionResult = await _testSectionResultRepository.Queryable.Include(x => x.TestSection)
-                                                                .Where(x => x.Id == request.SectionResultId)
-                                                                .FirstOrDefaultAsync();
+            var testSectionResult = await _testSectionResultRepository.Queryable.AsNoTracking()
+                                                                      .Include(x => x.TestSection)
+                                                                      .Where(x => x.Id == request.SectionResultId)
+                                                                      .FirstOrDefaultAsync();
             if (testSectionResult == null)
             {
                 return;
@@ -380,11 +412,22 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
         private async Task SubmitSections(SubmitAnswerCommandModel request)
         {
             ArgumentNullException.ThrowIfNull(request.Answers);
-            var sectionTimeCodeIds = request.Answers.Where(x => x.TestSectionId.HasValue).Select(x => x.TestSectionId!.Value).ToList();
-            var testSections = await _testSectionRepository.GetByIdsAsync(sectionTimeCodeIds);
+            var testSectionIds = request.Answers.Where(x => x.TestSectionId.HasValue).Select(x => x.TestSectionId!.Value).ToList();
+            var testSections = await _testSectionRepository.GetByIdsAsync(testSectionIds);
             if (testSections.Any())
             {
-                var testAnswers = await _testAnswerRepository.Queryable.Where(x => x.TestSectionResultId == request.SectionResultId).ToListAsync();
+                var sectionIds = testSections.Select(x => x.Id).ToList();
+
+                var partResults = await _testSectionResultRepository.ReadQueryable.Where(x => x.TestSectionId.HasValue && sectionIds.Contains(x.TestSectionId.Value))
+                                                                    .Where(x => x.TestResultId == request.TestResultId)
+                                                                    .ToListAsync();
+                var testSectionResultIds = partResults.Select(x => x.Id).ToList();
+                var testAnswers = await _testAnswerRepository.Queryable.AsNoTracking()
+                                                             .Where(x => x.TestSectionResultId.HasValue && testSectionResultIds.Contains(x.TestSectionResultId.Value))
+                                                             .ToListAsync();
+
+                var addAnswers = new List<TestAnswer>();
+                var updateAnswers = new List<TestAnswer>();
 
                 foreach (var item in request.Answers)
                 {
@@ -393,28 +436,31 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                     {
                         return;
                     }
-                    int answerLength = item.Answer?.ToString()?.Length ?? default;
-                    if (testSection.DisplayOrder == AnswerLength.Section0 && answerLength > AnswerLength.MaxLengthDisplayOrder0)
-                    {
-                        return;
-                    }
-                    if (testSection.DisplayOrder == AnswerLength.Section1 && answerLength > AnswerLength.MaxLengthDisplayOrder1)
+                    var partId = testSection.Id;
+                    var partResult = partResults.FirstOrDefault(x => x.TestSectionId == partId);
+                    if (partResult == null)
                     {
                         return;
                     }
 
+                    int answerLength = item.Answer?.ToString()?.Length ?? default;
                     var testAnswer = testAnswers.FirstOrDefault(x => x.TestSectionId == testSection.Id);
                     if (testAnswer == null)
                     {
                         testAnswer = new TestAnswer
                         {
-                            TestSectionResultId = request.SectionResultId,
-                            QuestionId = testSection.Id,
-                            StudentId = request.StudentId
+                            TestResultId = request.TestResultId,
+                            TestSectionResultId = partResult.Id,
+                            TestSectionId = item.TestSectionId,
+                            StudentId = request.StudentId ?? partResult.StudentId
                         };
-                        _testAnswerRepository.Add(testAnswer);
+                        addAnswers.Add(testAnswer);
                     }
-                    testAnswer.Answer = request.Answers;
+                    else
+                    {
+                        updateAnswers.Add(testAnswer);
+                    }
+                    testAnswer.Answer = item.Answer;
                     testAnswer.Status = EnumAnswerStatus.Done;
                     if (!testAnswer.IsValid())
                     {
@@ -422,7 +468,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                     }
                 }
 
-                await _testAnswerRepository.DbContext.SaveChangesAsync();
+                await SaveAsync(addAnswers, updateAnswers);
             }
         }
 
@@ -436,7 +482,18 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             if (testSections.Any())
             {
                 await UpdateTestSecionResult(testSectionResult, testSections.ToList());
-                var testAnswers = await _testAnswerRepository.Queryable.Where(x => x.TestSectionResultId == request.SectionResultId).ToListAsync();
+                var sectionIds = testSections.Select(x => x.ParentId).ToList();
+                var partResults = await _testSectionResultRepository.ReadQueryable.Where(x => x.TestSectionId.HasValue && sectionIds.Contains(x.TestSectionId.Value))
+                                                                    .Where(x => x.TestResultId == request.TestResultId)
+                                                                    .ToListAsync();
+
+                var testSectionResultIds = partResults.Select(x => x.Id).ToList();
+                var testAnswers = await _testAnswerRepository.Queryable.AsNoTracking()
+                                                             .Where(x => x.TestSectionResultId.HasValue && testSectionResultIds.Contains(x.TestSectionResultId.Value))
+                                                             .ToListAsync();
+
+                var addAnswers = new List<TestAnswer>();
+                var updateAnswers = new List<TestAnswer>();
 
                 foreach (var item in request.Answers)
                 {
@@ -445,30 +502,50 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                     {
                         return;
                     }
-
-                    double pronScore = await _evaluationAIService.EvaluationSpeakingV1(testSection.Name, item.Answer?.ToString() ?? default);
+                    var partId = testSection.ParentId;
+                    var partResult = partResults.FirstOrDefault(x => x.TestSectionId == partId);
+                    if (partResult == null)
+                    {
+                        return;
+                    }
+                    PronunciationAssessmentModel? pronunciation = null;
+                    if (string.IsNullOrEmpty(item.SpeechTextAnswer))
+                    {
+                        pronunciation = new PronunciationAssessmentModel
+                        {
+                            PronunciationScore = 0
+                        };
+                    }
+                    else
+                    {
+                        pronunciation = await _continuousPronunciation.AssessPronunciationFromFileContinuousAsync(item.Answer?.ToString() ?? string.Empty, item.SpeechTextAnswer ?? string.Empty);
+                    }
                     var testAnswer = testAnswers.FirstOrDefault(x => x.TestSectionId == testSection.Id);
                     if (testAnswer == null)
                     {
                         testAnswer = new TestAnswer
                         {
-                            TestSectionResultId = request.SectionResultId,
-                            QuestionId = testSection.Id,
-                            StudentId = request.StudentId
+                            TestResultId = request.TestResultId,
+                            TestSectionResultId = partResult.Id,
+                            TestSectionId = item.TestSectionId,
+                            StudentId = request.StudentId ?? partResult.StudentId
                         };
-                        _testAnswerRepository.Add(testAnswer);
+                        addAnswers.Add(testAnswer);
+                    }
+                    else
+                    {
+                        updateAnswers.Add(testAnswer);
                     }
                     testAnswer.SpeechTextAnswer = item.SpeechTextAnswer;
-                    testAnswer.PronunciationScore = pronScore;
-                    testAnswer.Answer = request.Answers;
+                    testAnswer.PronunciationScore = pronunciation.PronunciationScore;
+                    testAnswer.Answer = item.Answer;
                     testAnswer.Status = EnumAnswerStatus.Done;
                     if (!testAnswer.IsValid())
                     {
                         return;
                     }
                 }
-
-                await _testAnswerRepository.DbContext.SaveChangesAsync();
+                await SaveAsync(addAnswers, updateAnswers);
             }
         }
 
@@ -486,8 +563,14 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                 var partResults = await _testSectionResultRepository.ReadQueryable.Where(x => x.TestSectionId.HasValue && partIds.Contains(x.TestSectionId.Value))
                                                                            .Where(x => x.TestResultId == request.TestResultId)
                                                                            .ToListAsync();
+                var partResultIds = partResults.Select(x => x.Id).ToList();
+                var testAnswers = await _testAnswerRepository.Queryable.AsNoTracking()
+                                                             .Where(x => x.TestSectionResultId.HasValue && partResultIds.Contains(x.TestSectionResultId.Value))
+                                                             .ToListAsync();
 
-                var testAnswers = await _testAnswerRepository.Queryable.Where(x => x.TestSectionResultId == request.SectionResultId).ToListAsync();
+                var addAnswers = new List<TestAnswer>();
+                var updateAnswers = new List<TestAnswer>();
+
                 foreach (var item in request.Answers)
                 {
                     var question = questions.FirstOrDefault(x => x.Id == item.QuestionId);
@@ -518,9 +601,14 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                             TestSectionResultId = partResult.Id,
                             TestResultId = request.TestResultId,
                             QuestionId = question.Id,
-                            StudentId = request.StudentId
+                            TestSectionId = partResult.TestSectionId,
+                            StudentId = request.StudentId ?? partResult.StudentId
                         };
-                        _testAnswerRepository.Add(testAnswer);
+                        addAnswers.Add(testAnswer);
+                    }
+                    else
+                    {
+                        updateAnswers.Add(testAnswer);
                     }
 
                     testAnswer.Answer = answerConfig;
@@ -533,8 +621,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                         return;
                     }
                 }
-
-                await _testAnswerRepository.DbContext.SaveChangesAsync();
+                await SaveAsync(addAnswers, updateAnswers);
             }
         }
 
@@ -547,7 +634,13 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                                                      .ToListAsync();
             if (questions != null && questions.Any())
             {
-                var testAnswers = await _testAnswerRepository.Queryable.Where(x => x.TestSectionResultId == request.SectionResultId).ToListAsync();
+                var testAnswers = await _testAnswerRepository.Queryable.AsNoTracking()
+                                                             .Where(x => x.TestSectionResultId == request.SectionResultId)
+                                                             .ToListAsync();
+
+                var addAnswers = new List<TestAnswer>();
+                var updateAnswers = new List<TestAnswer>();
+
                 foreach (var item in request.Answers)
                 {
                     var question = questions.FirstOrDefault(x => x.Id == item.QuestionId);
@@ -573,7 +666,11 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                             QuestionId = question.Id,
                             StudentId = request.StudentId
                         };
-                        _testAnswerRepository.Add(testAnswer);
+                        addAnswers.Add(testAnswer);
+                    }
+                    else
+                    {
+                        updateAnswers.Add(testAnswer);
                     }
 
                     testAnswer.Answer = answerConfig;
@@ -586,9 +683,233 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                         return;
                     }
                 }
-
-                await _testAnswerRepository.DbContext.SaveChangesAsync();
+                await SaveAsync(addAnswers, updateAnswers);
             }
+        }
+
+        private async Task SaveAsync(IList<TestAnswer> addAnswers, IList<TestAnswer> updateAnswers)
+        {
+            if (addAnswers.Any())
+            {
+                try
+                {
+                    await _requestSafeCachingService.SafeRequest(
+                    key: $"Add_TestAnswers_{string.Join('_', addAnswers.Select(x => $"{x.TestSectionResultId}_{x.TestSectionId}_{x.QuestionId}_{x.IsDeleted}"))}",
+                    safeFunction: async () =>
+                    {
+                        await _testAnswerRepository.BulkMergeAsync(addAnswers, bulk =>
+                        {
+                            bulk.ColumnPrimaryKeyExpression = c => new { c.TestSectionResultId, c.TestSectionId, c.QuestionId, c.IsDeleted };
+                        });
+                        return addAnswers;
+                    });
+                }
+                catch
+                {
+                }
+            }
+            if (updateAnswers.Any())
+            {
+                try
+                {
+                    await _testAnswerRepository.BulkUpdateList(updateAnswers, bulk =>
+                    {
+                        bulk.IgnoreOnUpdateExpression = c => new { c.TestSectionResultId, c.TestSectionId, c.QuestionId, c.IsDeleted };
+                    });
+                }
+                catch
+                {
+                }
+            }
+        }
+
+        public async Task<List<SelectionLevelModel>> GetSuggestLevels(Guid ptResultId, int age, bool isOpenOldLevel = false, CancellationToken cancellationToken = default)
+        {
+            var ptTestResult = await _testGroupResultRepository.ReadQueryable
+                .FirstOrDefaultAsync(x => x.Id == ptResultId, cancellationToken);
+            if (ptTestResult == null)
+            {
+                return new List<SelectionLevelModel>();
+            }
+
+            var levelsFromPtOnSameProgram = await _testGroupResultRepository.ReadQueryable
+                .Where(x => x.ProgramId == ptTestResult.ProgramId
+                            && x.StudentId == ptTestResult.StudentId
+                            && x.TestType == EnumTestType.PlacementTest
+                            && x.Status == EnumResultStatus.Done)
+                .Include(x => x.CurrentLevel)
+                .Select(x => x.CurrentLevel)
+                .ToListAsync(cancellationToken);
+
+            var currentLevelId = ptTestResult.CurrentLevelId;
+
+            var program = await _categoryRepository.ReadQueryable
+                .Include(x => x.Levels)
+                .FirstOrDefaultAsync(x => x.Id == ptTestResult.ProgramId, cancellationToken);
+
+            var sliblingPrograms = await _categoryRepository.ReadQueryable
+                .Include(x => x.Levels)
+                .Where(x => x.ParentId == program.ParentId)
+                .ToListAsync(cancellationToken);
+
+            var suggestCondition = await _subjectConditionRepository.ReadQueryable
+                .Where(x => x.CategoryId == program.ParentId && x.Status && x.Type == EnumConditionType.CourseSuggest)
+                .Include(x => x.SubjectConditionRules)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            var matchestRule = suggestCondition?.SubjectConditionRules.Where(x => IsMatchRule(x, age, currentLevelId))
+                .OrderBy(x =>
+                {
+                    var ageCondition = x?.ConditionRules?.FirstOrDefault(x => x.Type == EnumSubjectConditionRuleType.Age);
+                    return ageCondition?.FromAge == null ? 999 : Math.Abs(age - ageCondition.FromAge.Value);
+                })
+                .FirstOrDefault();
+
+            var levelIdsOfMatchRule = matchestRule?.ConditionValues?.SelectMany(x => x.LevelIds ?? new List<Guid>()).Distinct().ToList() ?? new List<Guid>();
+            var levelsOfMatchRule = new List<Level>();
+            if (levelIdsOfMatchRule.Any())
+            {
+                levelsOfMatchRule = await _levelRepository.ReadQueryable.Where(x => levelIdsOfMatchRule.Contains(x.Id)).Include(x => x.Category).ToListAsync(cancellationToken);
+            }
+
+            foreach (var level in sliblingPrograms.SelectMany(x => x.Levels).DistinctBy(x => x.Id))
+            {
+                if (!levelsOfMatchRule.Any(x => x.Id == level.Id))
+                {
+                    levelsOfMatchRule.Add(level);
+                }
+            }
+
+            var suggestLevels = levelsOfMatchRule.Select(x =>
+            {
+                var selectionLevel = _mapper.Map<SelectionLevelModel>(x);
+                selectionLevel.ProgramId = x.ProgramId;
+                selectionLevel.ProgramLevelName = x.Category?.Name;
+                selectionLevel.ProgramDescription = x.Category?.Description;
+
+                var matchCondition = GetMatchConditionValue(matchestRule?.ConditionValues, x.Id);
+                if (matchCondition != null)
+                {
+                    selectionLevel.CanSelect = true;
+                    selectionLevel.CourseType = matchCondition.Type.ToString();
+                }
+
+                if (!selectionLevel.CanSelect)
+                {
+                    if (program.TestMode == EnumTestMode.Not && program.Levels.Any(l => l.Id == x.Id))
+                    {
+                        selectionLevel.CanSelect = true;
+                    }
+                    else
+                    {
+                        selectionLevel.CanSelect = currentLevelId == x.Id;
+                    }
+                }
+
+                selectionLevel.IsCurrentLevel = currentLevelId == x.Id;
+
+                return selectionLevel;
+            }).ToList();
+
+            var availableCourses = await _courseCachingService.GetAllAvailableCoursesAsync();
+            suggestLevels.ForEach(x => x.IsAvailableCourse = availableCourses.Any(c => c.LevelId == x.Id));
+
+            if (isOpenOldLevel && levelsFromPtOnSameProgram != null)
+            {
+                var canSelectLevelIds = levelsFromPtOnSameProgram.OfType<Level>().Select(x => x.Id).ToList();
+                if (suggestCondition != null)
+                {
+                    foreach (var level in levelsFromPtOnSameProgram.OfType<Level>())
+                    {
+                        var matchestRuleOfLevel = suggestCondition.SubjectConditionRules.Where(x => IsMatchRule(x, age, level.Id)).ToList();
+                        var levelIds = matchestRuleOfLevel.SelectMany(x => x.ConditionValues?.SelectMany(x => x.LevelIds ?? new List<Guid>()).Distinct().ToList() ?? new List<Guid>());
+                        if (levelIds != null)
+                        {
+                            canSelectLevelIds = canSelectLevelIds.Concat(levelIds).Distinct().ToList();
+                        }
+                    }
+                }
+
+                suggestLevels.ForEach(l =>
+                {
+                    if (!l.CanSelect)
+                    {
+                        l.CanSelect = canSelectLevelIds.Any(x => x == l.Id);
+                    }
+                });
+            }
+
+            var courseResults = await _courseResultRepository.ReadQueryable
+                .Where(x => x.StudentId == ptTestResult.StudentId && x.WorkingStatus != EnumWorkingStatus.NotWorking)
+                .Include(x => x.Course)
+                .ToListAsync(cancellationToken);
+
+            var learnedLevelIds = courseResults.Select(x => x.Course?.LevelId).OfType<Guid>().ToList();
+            suggestLevels.ForEach(l =>
+            {
+                if (!l.LearnedBefore)
+                {
+                    l.LearnedBefore = learnedLevelIds.Any(x => x == l.Id);
+                }
+            });
+
+            return suggestLevels;
+        }
+
+        public static ConditionValue? GetMatchConditionValue(IList<ConditionValue>? conditionValues, Guid levelId)
+        {
+            if (conditionValues == null)
+            {
+                return null;
+            }
+
+            return conditionValues.FirstOrDefault(x => x.LevelIds != null && x.LevelIds.Contains(levelId));
+        }
+
+        public static bool IsMatchRule(SubjectConditionRule rule, int age, Guid? levelId)
+        {
+            var ageCondition = rule?.ConditionRules?.FirstOrDefault(x => x.Type == EnumSubjectConditionRuleType.Age);
+            if (ageCondition != null)
+            {
+                if (!ageCondition.FromAge.HasValue)
+                {
+                    return false;
+                }
+
+                switch (ageCondition.OperatorType)
+                {
+                    case EnumOperatorType.Include:
+                    case EnumOperatorType.Exclude:
+                        break;
+
+                    case EnumOperatorType.Equal when ageCondition.FromAge != age:
+                    case EnumOperatorType.GreaterThan when age <= ageCondition.FromAge.Value:
+                    case EnumOperatorType.LessThan when age >= ageCondition.FromAge.Value:
+                    case EnumOperatorType.GreaterThanEqual when age < ageCondition.FromAge.Value:
+                    case EnumOperatorType.LessThanEqual when age > ageCondition.FromAge.Value:
+                    case EnumOperatorType.Between when !ageCondition.ToAge.HasValue || age > ageCondition.ToAge.Value ||
+                                                       age < ageCondition.FromAge.Value:
+                        return false;
+                }
+            }
+
+            var levelCondition = rule?.ConditionRules?.FirstOrDefault(x => x.Type == EnumSubjectConditionRuleType.CurrentLevel);
+            if (levelCondition == null)
+            {
+                return true;
+            }
+
+            if (!levelId.HasValue)
+            {
+                return false;
+            }
+
+            return levelCondition.OperatorType switch
+            {
+                EnumOperatorType.Include => levelCondition.LevelIds != null && levelCondition.LevelIds.Contains(levelId.Value),
+                EnumOperatorType.Exclude => levelCondition.LevelIds == null || !levelCondition.LevelIds.Contains(levelId.Value),
+                _ => true
+            };
         }
     }
 }

@@ -26,5 +26,6 @@ namespace Fsel.Course.Domain.Entities
         public ICollection<TestGroupResult> TestGroupResults { get; set; } = new List<TestGroupResult>();
         public ICollection<UnitResult> UnitResults { get; set; } = new List<UnitResult>();
         public ICollection<LessonResult> LessonResults { get; set; } = new List<LessonResult>();
+        public ICollection<CourseChangingHistory> CourseChangingHistories { get; set; } = new List<CourseChangingHistory>();
     }
 }

@@ -57,8 +57,10 @@ namespace Fsel.Shared.Enums
         WeeklyProgressReport7,
         WeeklyProgressReport8,
         WeeklyProgressReport9,
-        LearningProgressWarning
+        LearningProgressWarning,
 
         #endregion Weekly progress report
+
+        StudentCompletePTToPdf,
     }
 }

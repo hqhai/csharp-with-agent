@@ -8,5 +8,6 @@ namespace Fsel.Course.Domain.Models.EntityModels.ModuleModels
     {
         public EnumLessonConfigType LessonConfigType { get; set; }
         public Guid LessonId { get; set; }
+        public IList<ModuleLessonModel>? SubModules { get; set; }
     }
 }

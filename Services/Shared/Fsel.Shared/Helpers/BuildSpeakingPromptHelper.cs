@@ -38,10 +38,10 @@ namespace Fsel.Shared.Helpers
             return result;
         }
 
-        public static string CustomAnswerConfigToSendGPT(IList<string> questions, IList<string> answers, EnumTestScoreCriteria criteria)
+        public static string CustomAnswerConfigToSendGPT(IList<string> questions, IList<string> answers, EnumTestScoreCriteria criteria, string? userRole)
         {
             StringBuilder sb = new StringBuilder();
-            string defaultConfigByCriteria = GetConfigByType(criteria, false);
+            string defaultConfigByCriteria = !string.IsNullOrEmpty(userRole) ? userRole : GetConfigByType(criteria, false);
 
             // Generate questions
             sb.AppendLine("Speaking Test Questions:");

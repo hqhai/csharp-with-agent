@@ -1,9 +1,12 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using Amazon.Runtime.Internal.Transform;
+using System.Reflection;
 using Fsel.Common.Constants;
+using Fsel.Core.Base.Interfaces;
 using Fsel.Core.Extensions;
 using Fsel.Shared.Constants;
+using Fsel.System.Application.Commands.DictionaryAICmd;
+using Fsel.System.Application.Queues.Consumer;
 using Fsel.System.Application.Queues.Consumers;
 using Fsel.System.Application.Queues.Publisher;
 using Fsel.System.Application.Services.AIServices;
@@ -26,6 +29,7 @@ using Fsel.System.Infrastructure.Repositories.BlindBoxes;
 using Fsel.System.Infrastructure.Repositories.CourseGoals;
 using Fsel.System.Infrastructure.Repositories.DailyQuizs;
 using Fsel.System.Infrastructure.ValueSettings;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Refit;
 
@@ -41,11 +45,51 @@ builder.AddDbContexts<SystemDbContext, SystemReadDbContext>();
 builder.Services.AddDbContext<CrmDbContext>(
         options => options.UseSqlServer(appSetting?.ConnectionStrings?.CrmConnection));
 
+// Configure PostgreDbContext with pgvector support
+builder.Services.AddDbContext<PostgreDbContext>(options =>
+{
+    options.UseNpgsql(appSetting?.ConnectionStrings?.PostgreConnection, npgsqlOptions =>
+    {
+        // Enable connection pooling for better performance
+        npgsqlOptions.MaxBatchSize(100);
+    });
+});
+
+// Configure SemanticDictionaryConfig
+builder.Services.Configure<SemanticDictionaryConfig>(options =>
+{
+    var config = appSetting?.SemanticDictionaryConfig;
+    if (config != null)
+    {
+        options.SimilarityThreshold = config.SimilarityThreshold;
+        options.MaxInputLength = config.MaxInputLength;
+        options.EmbeddingModel = config.EmbeddingModel;
+        options.DefaultCompletionModel = config.DefaultCompletionModel;
+        options.DefaultTemperature = config.DefaultTemperature;
+        options.DefaultMaxTokens = config.DefaultMaxTokens;
+        options.DefaultTopP = config.DefaultTopP;
+        options.DefaultFrequencyPenalty = config.DefaultFrequencyPenalty;
+        options.DefaultPresencePenalty = config.DefaultPresencePenalty;
+    }
+});
+builder.Services.AddSingleton(resolver => resolver.GetRequiredService<Microsoft.Extensions.Options.IOptions<SemanticDictionaryConfig>>().Value);
+
+// Register IUnitOfWork for PostgreDbContext
+builder.Services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<PostgreDbContext>());
+
+// Register MediatR handlers
+builder.Services.AddMediatR(typeof(SearchDictionaryAICommand).GetTypeInfo().Assembly);
+
+// Configure Npgsql to properly handle vector type as string
+//NpgsqlConnection.GlobalTypeMapper.EnableDynamicJson();
+
 builder.Services.AddScoped<ILiveTimeFrameRepository, LiveTimeFrameRepository>();
 builder.Services.AddScoped<ICourseTimeConfigRepository, CourseTimeConfigRepository>();
 builder.Services.AddScoped<IForbiddenWordRepository, ForbiddenWordRepository>();
 builder.Services.AddScoped<ITeachingCostRepository, TeachingCostRepository>();
 builder.Services.AddScoped<IReferralDiscountConfigRepository, ReferralDiscountConfigRepository>();
+builder.Services.AddScoped<IDictionaryAIRepository, DictionaryAIRepository>();
+builder.Services.AddScoped<ISemanticDictionaryService, SemanticDictionaryService>();
 builder.Services.AddScoped<ILogActionRepository, LogActionRepository>();
 builder.Services.AddScoped<IQuestBoardRepository, QuestBoardRepository>();
 builder.Services.AddScoped<IQuestBoardOverallRepository, QuestBoardOverallRepository>();
@@ -87,6 +131,8 @@ builder.Services.AddScoped<IBlindBoxChestConfigRepository, BlindBoxChestConfigRe
 builder.Services.AddScoped<IBlindBoxHistoryRepository, BlindBoxHistoryRepository>();
 builder.Services.AddScoped<IBlindBoxUserRepository, BlindBoxUserRepository>();
 builder.Services.AddScoped<IDictionaryRepository, DictionaryRepository>();
+builder.Services.AddScoped<IDictionaryAIRepository, DictionaryAIRepository>();
+builder.Services.AddScoped<ISemanticDictionaryService, SemanticDictionaryService>();
 builder.Services.AddScoped<IUnknownWordRepository, UnknownWordRepository>();
 builder.Services.AddScoped<IFselRatingRepository, FselRatingRepository>();
 builder.Services.AddScoped<IDisplayOrderConfigRepository, DisplayOrderConfigRepository>();
@@ -111,6 +157,7 @@ builder.Services.AddScoped<BuyBlindBoxPublisher>();
 builder.Services.AddScoped<SendNotifyBuyBlindBoxPublisher>();
 builder.Services.AddScoped<DictionaryPublisher>();
 builder.Services.AddScoped<CrawDictionaryDataPublisher>();
+builder.Services.AddScoped<SendBotChatPublisher>();
 
 //Add GoogleSheetService
 builder.Services.AddSingleton<IGoogleSheetService>(provider =>
@@ -134,6 +181,12 @@ builder.Services.AddRefitClient<IOpenAIService>().ConfigureHttpClient(delegate (
     }
 });
 
+// Refit client for LMS API (AICriteriaConfig)
+builder.Services.AddRefitClient<ICourseService>().ConfigureHttpClient(x =>
+{
+    x.BaseAddress = new Uri(appSetting?.Services?.LmsCourseApiUrl ?? "");
+});
+
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {
@@ -153,10 +206,13 @@ queues: new Dictionary<string, Type>
     { QueueSettings.SystemQueue.NameQueue.BuyBlindBox, typeof(BuyBlindBoxConsumer) },
     { QueueSettings.SystemQueue.NameQueue.ChooseDailyQuizWinners, typeof(ChooseDailyQuizWinnersConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.DictionaryRealTime, typeof(DictionaryConsumer) },
+    { QueueSettings.RealtimeQueue.NameQueue.SemanticDictionary, typeof(SemanticDictionaryConsumer) },
     { QueueSettings.SystemQueue.NameQueue.CrawDictionaryData, typeof(CrawDictionaryDataConsumer) },
-    { QueueSettings.OrderingQueue.NameQueue.AddCoinWhenCoursePurchased, typeof(AddCoinWhenCoursePurchasedConsumer) }
+    { QueueSettings.OrderingQueue.NameQueue.AddCoinWhenCoursePurchased, typeof(AddCoinWhenCoursePurchasedConsumer) },
+    { QueueSettings.SystemQueue.NameQueue.SendBotChat, typeof(SendBotChatConsumer) },
 });
 
 var app = builder.Build();
 app.UseServices();
+
 app.Run();

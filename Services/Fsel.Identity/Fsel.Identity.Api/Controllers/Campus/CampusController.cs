@@ -9,14 +9,12 @@ namespace Fsel.Identity.Api.Controllers.Campus
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Identity.Application.Commands.CampusCmd;
-    using Fsel.Identity.Application.Commands.CampusCmd.Classes;
     using Fsel.Identity.Application.Queries.CampusQuery;
     using Fsel.Identity.Domain.Models;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Models.ShareModels.CampusModel;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
     [ApiVersion(ApiSettings.APIVersion1)]
     [ApiVersion(ApiSettings.APIVersion1i1)]

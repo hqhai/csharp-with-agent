@@ -48,6 +48,7 @@ namespace Fsel.Shared.Constants
                 public const string LeaderBoard = $"{KeyQueue}_LeaderBoard";
                 public const string ClassForum = $"{KeyQueue}_ClassForum";
                 public const string AIFeedBack = $"{KeyQueue}_AIFeedBack";
+                public const string AITranslationResponse = $"{KeyQueue}_AITranslationResponse";
                 public const string FeatureAccessTime = $"{KeyQueue}_FeatureAccessTime";
                 public const string ChatBot = $"{KeyQueue}_ChatBot";
                 public const string ChatBotRealTime = $"{KeyQueue}_ChatBotRealTime";
@@ -70,6 +71,8 @@ namespace Fsel.Shared.Constants
 
                 public const string TestSpeaking = $"{KeyQueue}_TestSpeaking";
                 public const string TestWriting = $"{KeyQueue}_TestWriting";
+                public const string SemanticDictionary = $"{KeyQueue}_SemanticDictionary";
+                public const string SemanticDictionaryAI = $"{KeyQueue}_SemanticDictionaryAI";
             }
         }
 
@@ -123,6 +126,8 @@ namespace Fsel.Shared.Constants
                 public const string SetTimeClassForumDone = $"{KeyQueue}_SetTimeClassForumDone";
                 public const string DeleteClassForumByFlag = $"{KeyQueue}_DeleteClassForumByFlag";
                 public const string ClassForumAIResponse = $"{KeyQueue}_ClassForumAIResponse";
+                public const string AITranslationResponse = $"{KeyQueue}_AITranslationResponse";
+                public const string ClassForumTranslationRequest = $"{KeyQueue}_ClassForumTranslationRequest";
                 public const string MockTestAnwserResponse = $"{KeyQueue}_MockTestAnwserResponse";
                 public const string SendWeeklyReport = $"{KeyQueue}_SendWeeklyReport";
                 public const string AggregateDataWeeklyReport = $"{KeyQueue}_AggregateDataWeeklyReport";
@@ -150,6 +155,11 @@ namespace Fsel.Shared.Constants
                 public const string ClassForumPronunciationAi = $"{KeyQueue}_ClassForumPronunciationAi";
 
                 public const string SetTimeRetryTest = $"{KeyQueue}_SetTimeRetryTest";
+                public const string SubmitTestAi = $"{KeyQueue}_SubmitTestAi";
+
+                public const string SendMailFinishCourse = $"{KeyQueue}_SendMailFinishCourse";
+                public const string SendMailFinishPT = $"{KeyQueue}_SendMailFinishPT";
+                public const string SendMailCompleteUnit = $"{KeyQueue}_SendMailCompleteUnit";
             }
         }
 
@@ -188,6 +198,7 @@ namespace Fsel.Shared.Constants
                 public const string ChooseDailyQuizWinners = $"{KeyQueue}_ChooseDailyQuizWinners";
                 public const string SendDictionary = $"{KeyQueue}_SendDictionary";
                 public const string CrawDictionaryData = $"{KeyQueue}_CrawDictionaryData";
+                public const string SendBotChat = $"{KeyQueue}_SendBotChat";
             }
         }
 

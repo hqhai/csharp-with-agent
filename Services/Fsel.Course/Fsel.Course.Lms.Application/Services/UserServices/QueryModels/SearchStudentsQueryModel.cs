@@ -10,5 +10,8 @@ namespace Fsel.Course.Lms.Application.Services.UserServices.QueryModels
         public bool IsCourseProcess { get; set; }
         public EnumCourseType? CourseType { get; set; }
         public EnumCourseLevel? CourseLevel { get; set; }
+        public string? ListProgram { get; set; }
+        public string? ListLevel { get; set; }
+        public string? ListSubject { get; set; }
     }
 }

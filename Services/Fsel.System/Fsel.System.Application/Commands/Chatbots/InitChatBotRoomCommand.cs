@@ -8,7 +8,9 @@ namespace Fsel.System.Application.Commands.Chatbots
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
-    using Fsel.System.Domain.Entities.ChatBot;
+    using Fsel.System.Application.Services.CourseServices;
+    using Fsel.System.Application.Services.CourseServices.Models;
+    using Fsel.System.Application.Services.CourseServices.QueryModels;
     using Fsel.System.Domain.Entities.Chatbots;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.CommandModels.ChatBot;
@@ -19,155 +21,196 @@ namespace Fsel.System.Application.Commands.Chatbots
 
     public class InitChatBotRoomCommand : SaveChatBotMessageModel, IRequest<MethodResult<ChatBotModel>>
     {
-
     }
 
     public class InitChatBotRoomCommandHandler : IRequestHandler<InitChatBotRoomCommand, MethodResult<ChatBotModel>>
     {
-
         private readonly IMapper _mapper;
         private readonly IChatBotRepository _chatBotRepository;
         private readonly IChatbotConfigRepository _chatBotConfigRepository;
         private readonly IMediator _mediator;
-        public InitChatBotRoomCommandHandler(IMapper mapper, IChatBotRepository chatBotRepository, IChatbotConfigRepository chatBotConfigRepository, IMediator mediator)
+        private readonly ICourseService _courseService;
+
+        public InitChatBotRoomCommandHandler(
+            IMapper mapper,
+            IChatBotRepository chatBotRepository,
+            IChatbotConfigRepository chatBotConfigRepository,
+            IMediator mediator,
+            ICourseService courseService)
         {
             _mapper = mapper;
             _chatBotRepository = chatBotRepository;
             _chatBotConfigRepository = chatBotConfigRepository;
             _mediator = mediator;
+            _courseService = courseService;
         }
 
-        public async Task<MethodResult<ChatBotModel>> Handle(InitChatBotRoomCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<ChatBotModel>> Handle(
+            InitChatBotRoomCommand request,
+            CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<ChatBotModel>();
+            return await InitBySkillIdAsync(request, cancellationToken);
+        }
 
-            var chatbotConfig = _chatBotConfigRepository.Queryable.Include(x => x.ChatbotSkillConfigs).Include(x => x.ChatbotTokenConfigs).FirstOrDefault(x => x.UnitId == request.UnitId && x.Status == EnumChatbotConfigStatus.Completed);
-            var chatbotMessage = _chatBotRepository.Queryable.FirstOrDefault(x => x.UnitId == request.UnitId && x.StudentId == request.StudentId && x.Skill == request.Skill);
+        private async Task<MethodResult<ChatBotModel>> InitBySkillIdAsync(
+            InitChatBotRoomCommand request,
+            CancellationToken ct)
+        {
+            var result = new MethodResult<ChatBotModel>();
 
-            string initSystemRole = ReadingSystemUserConfig(request.Skill);
-
+            var chatbotConfig = await _chatBotConfigRepository.ReadQueryable
+                                                              .Include(x => x.ChatbotSkillConfigs)
+                                                              .Where(x => x.UnitId == request.UnitId)
+                                                              .Where(x => x.Status == EnumChatbotConfigStatus.Completed)
+                                                              .FirstOrDefaultAsync(ct);
             if (chatbotConfig == null)
             {
-                methodResult.AddError(nameof(EnumSystemErrorCode.DataNotExist));
-                return methodResult;
+                result.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(chatbotConfig));
+                return result;
             }
 
-            var chatBotSkill = chatbotConfig.ChatbotSkillConfigs.FirstOrDefault(x => x.Skill == request.Skill);
-
-            string initUserRole = ReadingSystemUserConfig(request.Skill, chatBotSkill!.AiConfig);
-
-            #region Exists
-            if (chatbotMessage != null)
+            // 2️⃣ Load skill config
+            var chatBotSkill = chatbotConfig.ChatbotSkillConfigs.FirstOrDefault(x => x.SkillId == request.SkillId);
+            if (chatBotSkill == null)
             {
-                methodResult.Result = _mapper.Map<ChatBotModel>(chatbotMessage);
-                methodResult.Result.Conversations = ArrayHelper.RemoveFirstTwoElements(methodResult.Result.Conversations!, ValueSettings.ChatBotSetup.NumberDeletedElement);
-                return methodResult;
+                result.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(chatBotSkill));
+                return result;
             }
-            #endregion
 
-            #region Init
-            List<ChatBotMessageModel> initConversation = new List<ChatBotMessageModel> {
-                    new ChatBotMessageModel {   Role = "system",Content =  initSystemRole},
-                    new ChatBotMessageModel {   Role = "user",Content =  initUserRole},
-                };
+            // 3️⃣ Load AI criteria config
+            var aiConfig = await LoadAiCriteriaConfigAsync(chatBotSkill.AICriteriaConfigId);
 
-            var response = await _mediator.Send(new SubmitAICommand
+            // 4️⃣ Check existing chatbot
+            var existingChatbot = await _chatBotRepository.ReadQueryable
+                                                          .Where(x => x.UnitId == request.UnitId)
+                                                          .Where(x => x.StudentId == request.StudentId)
+                                                          .Where(x => x.UnitResultId == request.UnitResultId)
+                                                          .FirstOrDefaultAsync(x => x.SkillId == request.SkillId, ct);
+            if (existingChatbot != null)
             {
-                MaxToken = GetSkillToken(request.Skill, chatbotConfig),
-                ChatBotMessages = initConversation,
-            }, cancellationToken);
+                result.Result = MapChatbot(existingChatbot, chatBotSkill);
+                result.StatusCode = StatusCodes.Status200OK;
+                return result;
+            }
 
-            ChatBotMessageModel newMessage = new ChatBotMessageModel
+            // 5️⃣ Build initial conversation
+            var initConversation = BuildInitConversation(aiConfig, chatBotSkill);
+            var maxToken = chatBotSkill.Token;
+
+            // 6️⃣ Call AI
+            var aiResponse = await _mediator.Send(new SubmitAICommand
+            {
+                Model = aiConfig?.AiModel,
+                Temperature = aiConfig?.SettingTemperature ?? default,
+                PresencePenalty = aiConfig?.SettingPresence ?? default,
+                TopP = aiConfig?.SettingTopP ?? default,
+                MaxToken = maxToken,
+                ChatBotMessages = initConversation
+            }, ct);
+
+            initConversation.Add(new ChatBotMessageModel
             {
                 Role = "system",
-                Content = response
-            };
-            initConversation.Add(newMessage);
+                Content = aiResponse
+            });
 
-            ChatBot chatBot = new ChatBot();
+            return await CreateChatbotAsync(request, chatBotSkill, initConversation, maxToken, ct);
+        }
+
+        private async Task<AICriteriaConfigsModel?> LoadAiCriteriaConfigAsync(Guid? configId)
+        {
+            if (!configId.HasValue)
+            {
+                return null;
+            }
+
+            var result = await _courseService.GetConfigByIdAsync(new GetAICriteriaConfigsQueryModel
+            {
+                Id = configId.Value
+            });
+
+            return result?.Content?.Result;
+        }
+
+        private static IList<ChatBotMessageModel> BuildInitConversation(AICriteriaConfigsModel? aiConfig, ChatbotSkillConfig? skillConfig)
+        {
+            return new List<ChatBotMessageModel>
+            {
+                new()
+                {
+                    Role = "system",
+                    Content = ReadingSystemUserConfig(aiConfig)
+                },
+                new()
+                {
+                    Role = "user",
+                    Content = ReadingSystemUserConfig(aiConfig, skillConfig?.AiConfig)
+                }
+            };
+        }
+
+        private async Task<MethodResult<ChatBotModel>> CreateChatbotAsync(
+            InitChatBotRoomCommand request,
+            ChatbotSkillConfig chatBotSkill,
+            IList<ChatBotMessageModel> conversation,
+            int maxToken,
+            CancellationToken ct)
+        {
+            MethodResult<ChatBotModel> methodResult = new MethodResult<ChatBotModel>();
             await _chatBotRepository.ExecuteTransactionAsync(async () =>
             {
-                //Mapping
-                chatBot = _mapper.Map<ChatBot>(request);
-                chatBot.Conversations = _mapper.Map<List<ChatBotMessage>>(initConversation);
-                chatBot.LastestAnswer = _mapper.Map<ChatBotMessage>(newMessage);
-                chatBot.RemainToken = GetSkillToken(request.Skill, chatbotConfig);
+                var chatBot = _mapper.Map<ChatBot>(request);
+                chatBot.Conversations = _mapper.Map<List<ChatBotMessage>>(conversation);
+                chatBot.LastestAnswer = _mapper.Map<ChatBotMessage>(conversation.Last());
+                chatBot.RemainToken = maxToken;
+                chatBot.SkillFilePath = chatBotSkill.SkillFilePath;
+                chatBot.SkillName = chatBotSkill.SkillName;
 
-                //Save
                 _chatBotRepository.Add(chatBot);
-                await _chatBotRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _chatBotRepository.UnitOfWork.SaveChangesAsync(ct);
+
                 methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = _mapper.Map<ChatBotModel>(chatBot);
-                methodResult.Result.Conversations = methodResult.Result.Conversations != null ? ArrayHelper.RemoveFirstTwoElements(methodResult.Result.Conversations!, ValueSettings.ChatBotSetup.NumberDeletedElement) : null;
+                methodResult.Result = MapChatbot(chatBot, chatBotSkill);
                 return methodResult;
             });
-            #endregion
 
-            methodResult.StatusCode = StatusCodes.Status201Created;
             return methodResult;
         }
 
-        private static string ReadingSystemUserConfig(EnumCourseSkill skill, string? instruction = null)
+        private ChatBotModel MapChatbot(ChatBot chatBot, ChatbotSkillConfig chatbotSkillConfig)
         {
-            string filePath = string.Empty;
-
-            switch (skill)
-            {
-                case (EnumCourseSkill.Vocabulary):
-                    filePath = instruction == null ? ResourceSettings.VocabularyRole : ResourceSettings.VocabularyInstruction;
-                    break;
-                case (EnumCourseSkill.Grammar):
-                    filePath = instruction == null ? ResourceSettings.GrammarRole : ResourceSettings.GrammarInstruction;
-                    break;
-                case (EnumCourseSkill.Reading):
-                    filePath = instruction == null ? ResourceSettings.ReadingRole : ResourceSettings.ReadingInstruction;
-                    break;
-                case (EnumCourseSkill.Speaking):
-                    filePath = instruction == null ? ResourceSettings.SpeakingRole : ResourceSettings.SpeakingInstruction;
-                    break;
-                case (EnumCourseSkill.Writing):
-                    filePath = instruction == null ? ResourceSettings.WritingRole : ResourceSettings.WritingInstruction;
-                    break;
-                case (EnumCourseSkill.Listening):
-                    filePath = instruction == null ? ResourceSettings.ListeningRole : ResourceSettings.ListeningInstruction;
-                    break;
-            }
-            string result = instruction == null ? File.ReadAllText(filePath) : (instruction + "\n" + File.ReadAllText(filePath));
-            return result;
+            var model = _mapper.Map<ChatBotModel>(chatBot);
+            model.ChatbotLayout = chatbotSkillConfig.ChatbotLayout;
+            model.Conversations = TrimInitMessages(model.Conversations);
+            return model;
         }
 
-        /// <summary>
-        /// Lấy số token được config theo chatbot
-        /// </summary>
-        /// <param name="skill"></param>
-        /// <param name="chatbotConfig"></param>
-        /// <returns></returns>
-        public static int GetSkillToken(EnumCourseSkill skill, ChatbotConfig chatbotConfig)
+        private static string ReadingSystemUserConfig(
+            AICriteriaConfigsModel? aiCriteriaConfig,
+            string? instruction = null)
         {
-            int token = 0;
-            switch (skill)
+            var criteria = aiCriteriaConfig?.AiCriteriaModels?.FirstOrDefault();
+            if (criteria == null)
             {
-                case (EnumCourseSkill.Vocabulary):
-                    token = chatbotConfig?.ChatbotTokenConfigs?.VocabularyToken ?? default;
-                    break;
-                case (EnumCourseSkill.Grammar):
-                    token = chatbotConfig?.ChatbotTokenConfigs?.GrammarToken ?? default;
-                    break;
-                case (EnumCourseSkill.Listening):
-                    token = chatbotConfig?.ChatbotTokenConfigs?.ListeningToken ?? default;
-                    break;
-                case (EnumCourseSkill.Reading):
-                    token = chatbotConfig?.ChatbotTokenConfigs?.ReadingToken ?? default;
-                    break;
-                case (EnumCourseSkill.Writing):
-                    token = chatbotConfig?.ChatbotTokenConfigs?.WritingToken ?? default;
-                    break;
-                case (EnumCourseSkill.Speaking):
-                    token = chatbotConfig?.ChatbotTokenConfigs?.SpeakingToken ?? default;
-                    break;
+                return instruction ?? string.Empty;
             }
-            return token;
+
+            var baseConfig = instruction == null ? criteria.UserRole : criteria.SettingAiConfig;
+
+            baseConfig ??= string.Empty;
+            return string.IsNullOrEmpty(instruction)
+                ? baseConfig
+                : $"{instruction}\n{baseConfig}";
+        }
+
+        private static IList<ChatBotMessage>? TrimInitMessages(
+            IList<ChatBotMessage>? conversations)
+        {
+            return conversations == null
+                ? null : ArrayHelper.RemoveFirstTwoElements(
+                        conversations,
+                        ValueSettings.ChatBotSetup.NumberDeletedElement);
         }
     }
 }

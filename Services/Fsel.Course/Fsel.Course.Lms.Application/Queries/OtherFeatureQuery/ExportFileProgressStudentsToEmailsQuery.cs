@@ -150,9 +150,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             var unitResultGroups = (await (from baseQ in _courseResultRepository.Queryable
                                            .WhereBulkContains(studentIds, x => x.StudentId)
                                            join cum in _courseUnitMockTestRepository.Queryable on baseQ.CourseId equals cum.CourseId
-                                           join ur in _unitResultRepository.Queryable
-                                               on new { cum.CourseId, baseQ.StudentId, UnitId = cum.UnitId }
-                                               equals new { ur.CourseId, ur.StudentId, UnitId = (Guid?)ur.UnitId }
+                                           join ur in _unitResultRepository.Queryable on baseQ.Id equals ur.CourseResultId
                                            where baseQ.WorkingStatus == EnumWorkingStatus.Active
                                            select new { ur.StudentId, ur })
                                           .ToListAsync(cancellationToken))

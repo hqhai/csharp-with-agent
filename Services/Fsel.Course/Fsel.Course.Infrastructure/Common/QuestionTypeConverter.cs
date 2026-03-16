@@ -290,7 +290,7 @@ namespace Fsel.Course.Infrastructure.Common
                     break;
 
                 default:
-                    throw new ArgumentException("Invalid question type");
+                    break;
             }
             return (result, totalCorrect);
         }
@@ -809,7 +809,7 @@ namespace Fsel.Course.Infrastructure.Common
             }
         }
 
-        public (object?, string?) QuestionShuffleConverterObject(object? config, EnumQuestionType type, IList<SubQuestionConfig>? shuffleConfigs = null)
+        public (object?, string?) QuestionShuffleConverterObject(object? config, EnumQuestionType type, bool isResultDone = false, IList<SubQuestionConfig>? shuffleConfigs = null)
         {
             object? result = config;
             string questionShuffleStr = shuffleConfigs != null ? shuffleConfigs.Serialize() : string.Empty;
@@ -832,26 +832,26 @@ namespace Fsel.Course.Infrastructure.Common
                     result = matchingTypeQuestion;
                     break;
 
-                case EnumQuestionType.GapFillWordBankScoreByGap:
-                    var gapFillQuestion = config.Deserialize<GapFillQuestion>();
-                    if (gapFillQuestion != null)
-                    {
-                        gapFillQuestion.Contents = GenerateRandomLoop(gapFillQuestion.Contents, shuffleConfigs);
-                        if (shuffleConfigs == null)
-                        {
-                            questionShuffleStr = gapFillQuestion.Contents?.Select((x, index) => new SubQuestionConfig
-                            {
-                                Id = $"{x.Id}",
-                                Index = index
-                            }).Serialize() ?? string.Empty;
-                        }
-                    }
-                    result = gapFillQuestion;
-                    break;
+                //case EnumQuestionType.GapFillWordBankScoreByGap:
+                //    var gapFillQuestion = config.Deserialize<GapFillQuestion>();
+                //    if (gapFillQuestion != null && !isResultDone)
+                //    {
+                //        gapFillQuestion.Contents = GenerateRandomLoop(gapFillQuestion.Contents, shuffleConfigs);
+                //        if (shuffleConfigs == null)
+                //        {
+                //            questionShuffleStr = gapFillQuestion.Contents?.Select((x, index) => new SubQuestionConfig
+                //            {
+                //                Id = $"{x.Id}",
+                //                Index = index
+                //            }).Serialize() ?? string.Empty;
+                //        }
+                //    }
+                //    result = gapFillQuestion;
+                //    break;
 
                 case EnumQuestionType.DragAndDropListSentenceOrder:
                     var dragAndDropList = config.Deserialize<DragAndDropListSentenceOrderQuestion>();
-                    if (dragAndDropList != null)
+                    if (dragAndDropList != null && !isResultDone)
                     {
                         dragAndDropList.Contents = GenerateRandomLoop(dragAndDropList.Contents, shuffleConfigs);
                         if (shuffleConfigs == null)
@@ -870,6 +870,11 @@ namespace Fsel.Course.Infrastructure.Common
                 {
                     var drag = config.Deserialize<DragAndDropSentenceOrderQuestion>();
                     if (drag?.Contents == null || drag.Contents.Count == 0)
+                    {
+                        result = drag;
+                        break;
+                    }
+                    if (isResultDone)
                     {
                         result = drag;
                         break;

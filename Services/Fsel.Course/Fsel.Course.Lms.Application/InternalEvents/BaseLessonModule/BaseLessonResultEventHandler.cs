@@ -101,7 +101,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseLessonModule
                 .Concat(homeWorkResults.SelectMany(x => x.SkillScores ?? Enumerable.Empty<SkillScores>()));
 
             var aggregatedSkillScores = allSkillScores
-                .GroupBy(s => new { s.SkillId, s.Skill })
+                .GroupBy(s => new { s.SkillId })
                 .Select(g =>
                 {
                     var first = g.First();
@@ -110,6 +110,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseLessonModule
                     {
                         Skill = first.Skill,
                         SkillId = first.SkillId,
+                        SkillFilePath = first.SkillFilePath,
                         SkillName = first.SkillName,
                         Scores = g.Sum(x => x.Scores),
                         TotalCount = g.Sum(x => x.TotalCount),
@@ -137,6 +138,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseLessonModule
             lessonResult.CorrectCount = totalCorrectCount;
             lessonResult.CorrectTotal = totalCorrectTotal;
             lessonResult.Percent = totalPercentModule;
+            if (lessonResult.Status != EnumResultStatus.Done)
+            {
+                lessonResult.CompletionDate = DateTime.UtcNow;
+            }
             lessonResult.Status = EnumResultStatus.Done;
 
             await _lessonResultRepository.BulkUpdateList(
@@ -149,7 +154,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseLessonModule
                         entity.CorrectTotal,
                         entity.Percent,
                         entity.SkillScoresStr,
-                        entity.Status
+                        entity.Status,
+                        entity.CompletionDate
                     };
                 });
 

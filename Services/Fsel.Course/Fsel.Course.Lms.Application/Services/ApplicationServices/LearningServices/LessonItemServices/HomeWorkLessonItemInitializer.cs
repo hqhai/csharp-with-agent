@@ -7,20 +7,26 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
     using Fsel.Common.Enums;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Entities.V1i1;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Shared.ApplicationServices.CacheServices;
     using Microsoft.EntityFrameworkCore;
 
     public class HomeWorkLessonItemInitializer : ILessonItemInitializer
     {
         private readonly IHomeWorkRepository _homeWorkRepository;
         private readonly IHomeWorkResultRepository _homeWorkResultRepository;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
 
-        public HomeWorkLessonItemInitializer(IHomeWorkRepository homeWorkRepository, IHomeWorkResultRepository homeWorkResultRepository)
+        public HomeWorkLessonItemInitializer(IHomeWorkRepository homeWorkRepository,
+            IHomeWorkResultRepository homeWorkResultRepository,
+            IRequestSafeCachingService requestSafeCachingService)
         {
             _homeWorkRepository = homeWorkRepository;
             _homeWorkResultRepository = homeWorkResultRepository;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         public async Task<VoidMethodResult> InitializeAsync(LessonModule lessonModule, LessonResult lessonResult, CancellationToken cancellationToken)
@@ -41,16 +47,19 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
                 if (homeWorkResult.Status == EnumResultStatus.Unfinished)
                 {
                     homeWorkResult.Status = EnumResultStatus.New;
+                    homeWorkResult.NewDate = DateTime.UtcNow;
                     await _homeWorkResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
                 }
 
                 return methodResult;
             }
 
-            var homeWork = await _homeWorkRepository.ReadQueryable.Where(x => x.OriginalId == lessonModule.OriginalId)
-                                             .Where(x => x.VersionStatus == EnumVersionStatus.LastVersion)
-                                             .FirstOrDefaultAsync(cancellationToken);
-
+            var homeWork = await _homeWorkRepository.ReadQueryable
+                                                    .Where(x => x.OriginalId == lessonModule.OriginalId)
+                                                    .Include(x => x.HomeWorkQuestions)
+                                                    .Include(x => x.Skill)
+                                                    .Where(x => x.VersionStatus == EnumVersionStatus.LastVersion)
+                                                    .FirstOrDefaultAsync(cancellationToken);
             if (homeWork == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWork), lessonModule.OriginalId);
@@ -62,13 +71,32 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
                 LessonResultId = lessonResult.Id,
                 StudentId = lessonResult.StudentId,
                 Status = EnumResultStatus.New,
+                NewDate = DateTime.UtcNow,
                 HomeWorkId = homeWork.Id,
                 LessonModuleId = lessonModule.Id,
+                SkillScores = new List<SkillScores>
+                {
+                    new SkillScores
+                    {
+                        SkillId = homeWork.SkillId,
+                        SkillFilePath = homeWork.Skill?.FilePath,
+                        SkillName = homeWork.Skill?.Name,
+                        TotalQuestion = homeWork.HomeWorkQuestions?.Count ?? 0,
+                    },
+                },
             };
-            await _homeWorkResultRepository.BulkMergeAsync(new List<HomeWorkResult> { homeWorkResult }, bulk =>
-            {
-                bulk.ColumnPrimaryKeyExpression = c => new { c.LessonResultId, c.LessonModuleId, c.IsDeleted };
-            });
+
+            await _requestSafeCachingService.SafeRequest(
+                key: $"Add_HomeWorkResult_{homeWorkResult.LessonModuleId}_{homeWorkResult.LessonResultId}_{homeWorkResult.IsDeleted}",
+                safeFunction: async () =>
+                {
+                    await _homeWorkResultRepository.BulkMergeAsync(new List<HomeWorkResult> { homeWorkResult }, bulk =>
+                    {
+                        bulk.ColumnPrimaryKeyExpression = c => new { c.LessonResultId, c.LessonModuleId, c.IsDeleted };
+                    });
+                    return homeWorkResult;
+                });
+
             return methodResult;
         }
     }

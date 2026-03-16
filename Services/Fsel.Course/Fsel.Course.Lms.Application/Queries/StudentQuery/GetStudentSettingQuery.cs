@@ -4,15 +4,15 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
 {
     using System.Threading;
     using AutoMapper;
-    using Core.Base.Interfaces;
-    using Domain.Entities.TestConfigs;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
-    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Domain.Models.EntityModels.UserNavigationActionModels;
     using Fsel.Course.Infrastructure.ValueSettings;
+    using Fsel.Course.Lms.Application.Queries.CourseChangeQuery;
+    using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
     using Fsel.Course.Lms.Application.Services.InteractionService;
     using Fsel.Course.Lms.Application.Services.InteractionService.CommandModels;
     using Fsel.Course.Lms.Application.Services.OrderServices;
@@ -24,7 +24,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
-    using Services.ApplicationServices;
 
     public class GetStudentSettingQuery : IRequest<MethodResult<StudentSettingModel>>
     {
@@ -40,7 +39,8 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
         private readonly AuthContext _authContext;
         private readonly IInteractionService _interactionService;
         private readonly AppSetting _appSetting;
-        private readonly IRepository<TestGroupResult> _testGroupResultRepository;
+        private readonly IMediator _mediator;
+        private readonly ICategoryCachingService _categoryCachingService;
 
         public SettingStudentCheckQueryHandler(IUserService userService,
             IOrderService orderService,
@@ -48,8 +48,9 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
             IMapper mapper,
             AuthContext authContext,
             IInteractionService interactionService,
-            IRepository<TestGroupResult> testGroupResultRepository,
-            AppSetting appSetting)
+            AppSetting appSetting,
+            IMediator mediator,
+            ICategoryCachingService categoryCachingService)
         {
             _userService = userService;
             _orderService = orderService;
@@ -57,15 +58,19 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
             _mapper = mapper;
             _authContext = authContext;
             _interactionService = interactionService;
-            _testGroupResultRepository = testGroupResultRepository;
             _appSetting = appSetting;
+            _mediator = mediator;
+            _categoryCachingService = categoryCachingService;
         }
 
         public async Task<MethodResult<StudentSettingModel>> Handle(GetStudentSettingQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<StudentSettingModel>();
-            var studentResult = await _userService.GetStudentByUserIdAsync(request.UserId ?? _authContext.CurrentUserId);
+
+            var userId = request.UserId ?? _authContext.CurrentUserId;
+
+            var studentResult = await _userService.GetStudentByUserIdAsync(userId);
             if (!studentResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentResult));
@@ -89,10 +94,10 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                 ClassId = student.ClassId,
                 EmailConfirmed = student.User?.EmailConfirmed ?? default,
                 TurnOnTouchpoint = _appSetting.TouchpointConfig?.TurnOnTouchpoint ?? false,
-                UserStatus = student?.User?.Status
+                UserStatus = student.User?.Status
             };
             var role = _authContext.Roles?.FirstOrDefault();
-
+            NavigateAction? navigateAction = null;
             if (!string.IsNullOrEmpty(role) && role == EnumRole.StudentCampus.ToString())
             {
                 settingStudentModel.IsLockPT = true;
@@ -100,10 +105,10 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
             }
             else
             {
-                await GetPlacementTestAsync(settingStudentModel, student, cancellationToken);
+                navigateAction = await GetPlacementTestAsync(settingStudentModel, student, cancellationToken);
             }
 
-            var @eventResults = await _userService.GetEventByUserId(request.UserId ?? _authContext.CurrentUserId);
+            var @eventResults = await _userService.GetEventByUserId(userId);
 
             var requestCheckSurvey = new CheckSurveyBySurveyFormTypeModel()
             {
@@ -125,7 +130,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                 settingStudentModel.CompetitionEventId = events?.FirstOrDefault()?.Id;
             }
 
-            var status = await _orderService.GetCurrentStatusAsync(request.UserId ?? _authContext.CurrentUserId);
+            var status = await _orderService.GetCurrentStatusAsync(userId);
             if (!status.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallOrderServiceError), nameof(status));
@@ -133,10 +138,25 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
             }
 
             settingStudentModel.Status = status?.Content?.Result;
-            if (student.CourseId.HasValue)
+            if (student.CourseId.HasValue && (navigateAction == null || navigateAction.Status == EnumNavigateActionStatus.ContinueLearning))
             {
-                var course = await _courseRepository.GetByIdAsync(student.CourseId.Value);
+                var course = await _courseRepository.Queryable.Include(p => p.Program)
+                                                    .ThenInclude(p => p.CategoryParent)
+                                                    .FirstOrDefaultAsync(p => p.Id == student.CourseId.Value, cancellationToken);
+
+                var category = await _categoryCachingService.GetSubjectRootAsync(course?.ProgramId, cancellationToken);
+
                 settingStudentModel.Course = _mapper.Map<CourseModel>(course);
+
+                settingStudentModel.Course.ProgramId = course?.Program?.Id;
+                settingStudentModel.Course.ProgramName = course?.Program?.Name;
+
+                settingStudentModel.Course.SubjectId = course?.Program?.CategoryParent?.Id;
+                settingStudentModel.Course.SubjectName = course?.Program?.CategoryParent?.Name;
+
+                settingStudentModel.RootSubjectId = category?.Id;
+                settingStudentModel.RootSubjectName = category?.Name;
+                settingStudentModel.VstepSetting = category?.VstepSetting ?? default;
 
                 if (course != null)
                 {
@@ -156,17 +176,36 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
             return methodResult;
         }
 
-        private async Task GetPlacementTestAsync(StudentSettingModel settingStudentModel, StudentModel student, CancellationToken cancellationToken)
+        private async Task<NavigateAction> GetPlacementTestAsync(StudentSettingModel settingStudentModel, StudentModel student, CancellationToken cancellationToken)
         {
-            var testGroupResult = await _testGroupResultRepository.Queryable
-                .Include(x => x.Level)
-                .FirstOrDefaultAsync(x => x.StudentId == student.Id
-                                          && x.TestType == EnumTestType.PlacementTest,
-                    cancellationToken);
+            var getUserNavigationResult = await _mediator.Send(new GetUserNavigationQuery(), cancellationToken);
+            if (!getUserNavigationResult.IsOK || getUserNavigationResult.Result == null)
+            {
+                throw new Exception("Get user navigation failed");
+            }
 
-            settingStudentModel.IsPlacementTest = testGroupResult != null;
-            settingStudentModel.IsLockPT = testGroupResult?.Status is EnumResultStatus.ByPass or EnumResultStatus.Done;
-            settingStudentModel.PTLevel = testGroupResult?.CurrentLevelId;
+            var userNavigation = getUserNavigationResult.Result;
+
+            if (userNavigation.Status is EnumNavigateActionStatus.NotDoingYetAnything or EnumNavigateActionStatus.ContinuePt)
+            {
+                settingStudentModel.IsPlacementTest = userNavigation.PtResultId != null;
+                settingStudentModel.IsLockPT = false;
+                return userNavigation;
+            }
+            else if (userNavigation.Status is EnumNavigateActionStatus.ChooseLevel or EnumNavigateActionStatus.ContinueLearning)
+            {
+                settingStudentModel.IsPlacementTest = true;
+                settingStudentModel.IsLockPT = true;
+                settingStudentModel.PTLevel = userNavigation.LevelOfPt;
+                return userNavigation;
+            }
+
+            if (userNavigation.Status == EnumNavigateActionStatus.ContinueLearning)
+            {
+                settingStudentModel.Course = null;
+            }
+
+            return userNavigation;
         }
     }
 }

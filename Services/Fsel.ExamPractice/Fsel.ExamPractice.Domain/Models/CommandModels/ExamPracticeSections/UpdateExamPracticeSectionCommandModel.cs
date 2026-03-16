@@ -14,6 +14,7 @@ namespace Fsel.ExamPractice.Domain.Models.CommandModels.ExamPracticeSections
         public string? Name { get; set; }
         public EnumCourseSkill? CourseSkill { get; set; }
         public EnumSectionExamPracticeType? Type { get; set; }
+        public Guid? AiPromptManagerId { get; set; }
         public SectionMediaConfig? Config { get; set; }
         public IList<UpdateExamPracticeSectionCommandModel> ChildrenExamPracticeSections { get; set; } = new List<UpdateExamPracticeSectionCommandModel>();
         public IList<UpdateQuestionCommandModel> Questions { get; set; } = new List<UpdateQuestionCommandModel>();

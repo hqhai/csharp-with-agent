@@ -5,7 +5,7 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
     public class TestSectionResult : BaseLearnResult
     {
         public override double PercentModule { get; set; }
-
+        public double? ScoreModule { get; set; }
         public Guid? TestResultId { get; set; }
 
         public TestResult? TestResult { get; set; }

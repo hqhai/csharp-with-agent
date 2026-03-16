@@ -55,6 +55,11 @@ namespace Fsel.Course.Infrastructure.Configs
                    .HasForeignKey(p => p.CurrentLevelId)
                    .OnDelete(DeleteBehavior.NoAction);
 
+            builder.HasOne(a => a.EmailLevel)
+                   .WithMany(b => b.TestGroupResultsForEmailLevel)
+                   .HasForeignKey(p => p.EmailLevelId)
+                   .OnDelete(DeleteBehavior.NoAction);
+
             builder.HasOne(a => a.Flow)
                    .WithMany(b => b.TestGroupResults)
                    .HasForeignKey(p => p.FlowId)
@@ -76,6 +81,9 @@ namespace Fsel.Course.Infrastructure.Configs
                    .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumResultStatus>());
+
+            builder.HasIndex(c => new { c.CourseModuleId, c.CourseResultId, c.IsDeleted });
+            builder.HasIndex(c => new { c.UnitModuleId, c.UnitResultId, c.IsDeleted });
         }
     }
 }

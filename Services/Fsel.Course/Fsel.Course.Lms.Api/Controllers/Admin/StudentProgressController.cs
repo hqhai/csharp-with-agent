@@ -8,8 +8,10 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Queries.ClassForumResultQuery;
     using Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1;
     using Fsel.Course.Lms.Application.Queries.StudentProgressQuery;
+    using Fsel.Course.Lms.Application.Queries.StudentQuery;
     using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
     using MediatR;
@@ -18,7 +20,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/student-progress")]
     [ApiController]
-    [Permission(permissionCodes: new[] { StudentManagement.View, SchoolStudentManagement.ViewProgress })]
+    [Permission]
     public class StudentProgressController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -141,11 +143,11 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         /// Get Student Progress HomeWork
         /// </summary>
         [HttpGet("class-forum")]
-        [ProducesResponseType(typeof(MethodResult<ClassForumStudentProgressModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<IList<ClassForumStudentProgressModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetStudentProgressClassForum([FromQuery] GetStudentProgressClassForumQuery query)
         {
-            MethodResult<ClassForumStudentProgressModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
@@ -153,11 +155,11 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         /// Get Student Progress Video
         /// </summary>
         [HttpGet("video")]
-        [ProducesResponseType(typeof(MethodResult<VideoStudentProgressModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<IList<VideoStudentProgressModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetStudentProgressVideo([FromQuery] GetStudentProgressVideoQuery query)
         {
-            MethodResult<VideoStudentProgressModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
@@ -171,6 +173,42 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Learning Report
+        /// </summary>
+        [HttpGet("learning-report")]
+        [ProducesResponseType(typeof(MethodResult<StudentCourseProgressModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Get([FromQuery] GetStudentLearningReportQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get class forum result
+        /// </summary>
+        [HttpGet("get-class-forum-result")]
+        [ProducesResponseType(typeof(MethodResult<ClassForumByStudentModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetClassForumResultByAdmin([FromQuery] GetClassForumResultByAdminQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Student Progress documents
+        /// </summary>
+        [HttpGet("documents")]
+        [ProducesResponseType(typeof(MethodResult<IList<DocumentStudentProgressModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetStudentProgressDocument([FromQuery] GetStudentProgressDocumentQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
     }
 }

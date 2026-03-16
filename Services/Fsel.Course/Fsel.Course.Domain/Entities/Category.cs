@@ -3,6 +3,7 @@
 namespace Fsel.Course.Domain.Entities
 {
     using System.ComponentModel.DataAnnotations;
+    using Fsel.Common.Attributes;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
     using Fsel.Course.Domain.Entities.FlowConfigs;
@@ -12,13 +13,21 @@ namespace Fsel.Course.Domain.Entities
 
     public class Category : Entity
     {
+        [RegexValid(Regex = @"^(?!.*[\[\]])(?i).*?\.(jpg|jpeg|png|webp|svg|heif|heic)$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
+        [MaxLength(2000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? Thumbnail { get; set; }
+
         [MaxLength(200, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        [RegexValid(Regex = @"^[^<>]*$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
         public string? Name { get; set; }
 
         [MaxLength(200, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [RegexValid(Regex = @"^[a-zA-Z0-9]*$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
         public string? Code { get; set; }
 
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [RegexValid(Regex = @"^[^<>]*$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
         public string? Description { get; set; }
 
         public EnumTypeCategory Type { get; set; }
@@ -27,6 +36,7 @@ namespace Fsel.Course.Domain.Entities
 
         public Guid? ParentId { get; set; }
 
+        public bool? VstepSetting { get; set; }
         public bool IsTestDefault { get; set; }
         public EnumTestMode? TestMode { get; set; }
         public Category? CategoryParent { get; set; }
@@ -43,7 +53,7 @@ namespace Fsel.Course.Domain.Entities
         public ICollection<Test> Tests { get; set; } = new List<Test>();
         public ICollection<Course> Courses { get; set; } = new List<Course>();
         public ICollection<HomeWork> HomeWorks { get; set; } = new List<HomeWork>();
-
         public ICollection<TestGroupResult> TestGroupResults { get; set; } = new List<TestGroupResult>();
+        public ICollection<StudentGoalAggregate> StudentGoalAggregates { get; set; } = new List<StudentGoalAggregate>();
     }
 }

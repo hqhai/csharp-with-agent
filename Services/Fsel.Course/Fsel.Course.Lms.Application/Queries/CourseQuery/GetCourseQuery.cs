@@ -19,6 +19,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
     using Fsel.Course.Lms.Application.Services.TrainingServices.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
+    using Fsel.Shared.ApplicationServices.CacheServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
@@ -50,6 +51,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
         private readonly SaveUserCourseSettingPublisher _saveUserCourseSettingPublisher;
         private readonly IFinalTestResultRepository _finalTestResultRepository;
         private readonly ILogger<object> _logger;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
 
         public GetCourseQueryHandler(
             AuthContext authContext,
@@ -66,7 +68,8 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             IMockTestResultRepository mockTestResultRepository,
             SaveUserCourseSettingPublisher saveUserCourseSettingPublisher,
             IFinalTestResultRepository finalTestResultRepository,
-            ILogger<GetCourseQueryHandler> logger)
+            ILogger<GetCourseQueryHandler> logger,
+            IRequestSafeCachingService requestSafeCachingService)
         {
             _courseRepository = courseRepository;
             _userService = userService;
@@ -83,6 +86,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             _saveUserCourseSettingPublisher = saveUserCourseSettingPublisher;
             _finalTestResultRepository = finalTestResultRepository;
             _logger = logger;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         public async Task<MethodResult<CourseModel>> Handle(GetCourseQuery request, CancellationToken cancellationToken)
@@ -345,10 +349,16 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                     NewDate = DateTime.UtcNow,
                     CourseId = course.Id
                 };
-                await _courseResultRepository.BulkMergeAsync(new List<CourseResult> { courseResult }, bulk =>
-                {
-                    bulk.ColumnPrimaryKeyExpression = c => new { c.CourseId, c.StudentId, c.IsDeleted };
-                });
+                await _requestSafeCachingService.SafeRequest<CourseResult>(
+                    key: $"Add_CourseResult_{courseResult.CourseId}_{courseResult.StudentId}_{courseResult.IsDeleted}",
+                    safeFunction: async () =>
+                    {
+                        await _courseResultRepository.BulkMergeAsync(new List<CourseResult> { courseResult }, bulk =>
+                        {
+                            bulk.ColumnPrimaryKeyExpression = c => new { c.CourseId, c.StudentId, c.IsDeleted };
+                        });
+                        return courseResult;
+                    });
             }
 
             var courseUnitMockTests = course.CourseUnitMockTests.OrderBy(x => x.DisplayOrder).ToList();
@@ -389,26 +399,44 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             if (course.UnitResults.Any())
             {
                 var unitResults = course.UnitResults.ToList();
-                await _unitResultRepository.BulkMergeAsync(unitResults, bulk =>
-                {
-                    bulk.ColumnPrimaryKeyExpression = entity => new { entity.UnitId, entity.CourseId, entity.StudentId, entity.IsDeleted };
-                });
+                await _requestSafeCachingService.SafeRequest<List<UnitResult>>(
+                    key: $"Add_UnitResults_{string.Join("_", unitResults.Select(ur => $"{ur.UnitId}_{ur.CourseId}_{ur.StudentId}_{ur.IsDeleted}"))}",
+                    safeFunction: async () =>
+                    {
+                        await _unitResultRepository.BulkMergeAsync(unitResults, bulk =>
+                        {
+                            bulk.ColumnPrimaryKeyExpression = entity => new { entity.UnitId, entity.CourseId, entity.StudentId, entity.IsDeleted };
+                        });
+                        return unitResults;
+                    });
             }
             if (course.FinalTestResults.Any())
             {
                 var finalTestResults = course.FinalTestResults.ToList();
-                await _finalTestResultRepository.BulkMergeAsync(finalTestResults, bulk =>
-                {
-                    bulk.ColumnPrimaryKeyExpression = entity => new { entity.FinalTestId, entity.CourseId, entity.StudentId, entity.IsDeleted };
-                });
+                await _requestSafeCachingService.SafeRequest<List<FinalTestResult>>(
+                    key: $"Add_FinalTestResults_{string.Join("_", finalTestResults.Select(ftr => $"{ftr.FinalTestId}_{ftr.CourseId}_{ftr.StudentId}_{ftr.IsDeleted}"))}",
+                    safeFunction: async () =>
+                    {
+                        await _finalTestResultRepository.BulkMergeAsync(finalTestResults, bulk =>
+                        {
+                            bulk.ColumnPrimaryKeyExpression = entity => new { entity.FinalTestId, entity.CourseId, entity.StudentId, entity.IsDeleted };
+                        });
+                        return finalTestResults;
+                    });
             }
             if (course.MockTestResults.Any())
             {
                 var mockTestResults = course.MockTestResults.ToList();
-                await _mockTestResultRepository.BulkMergeAsync(mockTestResults, bulk =>
-                {
-                    bulk.ColumnPrimaryKeyExpression = entity => new { entity.CourseId, entity.StudentId, entity.MockTestId, entity.IsDeleted };
-                });
+                await _requestSafeCachingService.SafeRequest<List<MockTestResult>>(
+                    key: $"Add_MockTestResults_{string.Join("_", mockTestResults.Select(mtr => $"{mtr.CourseId}_{mtr.StudentId}_{mtr.MockTestId}_{mtr.IsDeleted}"))}",
+                    safeFunction: async () =>
+                    {
+                        await _mockTestResultRepository.BulkMergeAsync(mockTestResults, bulk =>
+                        {
+                            bulk.ColumnPrimaryKeyExpression = entity => new { entity.CourseId, entity.StudentId, entity.MockTestId, entity.IsDeleted };
+                        });
+                        return mockTestResults;
+                    });
             }
         }
 

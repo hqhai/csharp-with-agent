@@ -6,13 +6,20 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
-    using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
-    using Fsel.Shared.Enums;
+    using Fsel.Course.Domain.Models.EntityModels.PlacementTestModels;
+    using Fsel.Course.Domain.Models.EntityModels.UserNavigationActionModels;
+    using Fsel.Course.Lms.Application.Queries.CourseChangeQuery;
+    using Fsel.Course.Lms.Application.Services.ApplicationServices.ChangeCourse;
+    using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums.ErrorCodes;
+    using MassTransit.Mediator;
     using MediatR;
-    using Microsoft.EntityFrameworkCore;
+    using Microsoft.AspNetCore.Http;
+    using IMediator = MediatR.IMediator;
 
     public class GetAllSubjectsQuery : IRequest<MethodResult<IList<SubjectModel>>>
     {
@@ -20,61 +27,72 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
 
     public class GetAllSubjectsQueryHandler : IRequestHandler<GetAllSubjectsQuery, MethodResult<IList<SubjectModel>>>
     {
-        private readonly ICategoryRepository _categoryRepository;
-        private readonly ICategoryCachingService _categoryCachingService;
+        private readonly IChangeCourseService _changeCourseService;
+        private readonly IUserService _userService;
+        private readonly AuthContext _authContext;
+        private readonly MediatR.IMediator _mediator;
 
-        public GetAllSubjectsQueryHandler(ICategoryRepository categoryRepository, ICategoryCachingService categoryCachingService)
+        public GetAllSubjectsQueryHandler(IUserService userService,
+            IChangeCourseService changeCourseService,
+            AuthContext authContext,
+            IMediator mediator)
         {
-            _categoryRepository = categoryRepository;
-            _categoryCachingService = categoryCachingService;
+            _changeCourseService = changeCourseService;
+            _userService = userService;
+            _authContext = authContext;
+            _mediator = mediator;
         }
 
         public async Task<MethodResult<IList<SubjectModel>>> Handle(GetAllSubjectsQuery request, CancellationToken cancellationToken)
         {
-            var subjects = await _categoryCachingService.GetOrSetAsync("all", async (ctx, _) =>
+            var methodResult = new MethodResult<IList<SubjectModel>>();
+            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            if (!studentResult.IsSuccessStatusCode)
             {
-                var categories = await _categoryRepository.ReadQueryable
-                    .Where(x => x.Type == EnumTypeCategory.Subject
-                                && x.Status == EnumStatus.Active
-                                && x.ParentId == null)
-                    .ToListAsync(cancellationToken);
-                foreach (var category in categories)
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
+                return methodResult;
+            }
+
+            var student = studentResult.Content?.Result;
+            if (student == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                return methodResult;
+            }
+
+            var subjectAggregate = await _changeCourseService.GetChangeSubjectAggreate(student, cancellationToken);
+            var subjectModels = subjectAggregate.GetSubjectTree();
+
+            var getUserNavigationResult = await _mediator.Send(new GetUserNavigationQuery(), cancellationToken);
+            if (getUserNavigationResult.IsOK && getUserNavigationResult?.Result?.Status == EnumNavigateActionStatus.ChooseProgram)
+            {
+                var lastestLearningProgramId = getUserNavigationResult.Result.FromInfo?.ProgramId;
+                if (lastestLearningProgramId.HasValue)
                 {
-                    await LoadChildCategory(category);
+                    foreach (var model in subjectModels)
+                    {
+                        SetLastestLearnedPromgram(model, lastestLearningProgramId.Value);
+                    }
                 }
+            }
 
-                return categories;
-            }, token: cancellationToken);
-
-            var subjectModels = subjects.Select(x => GetSubjectModels(x)).ToList();
             return new MethodResult<IList<SubjectModel>>() { Result = subjectModels, StatusCode = 200 };
         }
 
-        private async Task LoadChildCategory(Category category)
+        private static void SetLastestLearnedPromgram(SubjectModel subjectModel, Guid lastestId)
         {
-            category.Categorys = await _categoryRepository.ReadQueryable.Where(x => x.ParentId == category.Id && x.Status == EnumStatus.Active).ToListAsync();
-            foreach (var child in category.Categorys)
+            if (subjectModel.ChildSubjects.Any())
             {
-                await LoadChildCategory(child);
+                foreach (var subject in subjectModel.ChildSubjects)
+                {
+                    SetLastestLearnedPromgram(subject, lastestId);
+                }
+                subjectModel.IsLastestLearned = subjectModel.ChildSubjects.Any(x => x.IsLastestLearned);
             }
-        }
-
-        private SubjectModel GetSubjectModels(Category category)
-        {
-            var subjectModel = new SubjectModel
+            else
             {
-                Id = category.Id,
-                Name = category.Name,
-                Type = category.Type.ToString(),
-                TestMode = category.TestMode,
-                ChildSubjects = new List<SubjectModel>()
-            };
-            foreach (var child in category.Categorys)
-            {
-                subjectModel.ChildSubjects.Add(GetSubjectModels(child));
+                subjectModel.IsLastestLearned = subjectModel.Id == lastestId;
             }
-
-            return subjectModel;
         }
     }
 }

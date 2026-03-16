@@ -4,56 +4,59 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
 {
     using System.Threading;
     using System.Threading.Tasks;
-    using Domain.Entities.TestConfigs;
-    using Domain.Enums;
     using Common.ActionResults;
     using Common.Enums.ErrorCodes;
     using Core.Base;
     using Domain.Models.EntityModels.PlacementTestModels;
-    using Services.ApplicationServices;
-    using Services.ApplicationServices.Aggregates;
-    using Services.UserServices;
-    using Shared.Enums;
-    using Shared.Enums.ErrorCodes;
-    using Shared.Helpers;
+    using Fsel.Course.Domain.Enums;
+    using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Domain.Models.EntityModels.ChangeCourseModels;
+    using Fsel.Course.Domain.Models.EntityModels.UserNavigationActionModels;
+    using Fsel.Course.Lms.Application.Queries.CourseChangeQuery;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
+    using Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates;
+    using Fsel.Course.Lms.Application.Services.ApplicationServices.ChangeCourse;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
-    using Nest;
+    using Services.UserServices;
+    using Shared.Enums.ErrorCodes;
+    using Shared.Helpers;
 
-    public class ChosePtFlowCommand : MediatR.IRequest<MethodResult<PtStateModel>>
+    public class ChosePtFlowCommand : IRequest<MethodResult<PtStateModel>>
     {
-        public ChosePtFlowCommand(Guid projectId)
+        public ChosePtFlowCommand(Guid programId)
         {
-            ProjectId = projectId;
+            ProgramId = programId;
         }
 
-        public Guid ProjectId { get; set; }
+        public Guid ProgramId { get; set; }
     }
 
     public class ChosePtFlowCommandHandler : IRequestHandler<ChosePtFlowCommand, MethodResult<PtStateModel>>
     {
         private readonly IUserService _userService;
-        private readonly IServiceProvider _serviceProvider;
         private readonly AuthContext _authContext;
-        private readonly IFlowService _flowService;
-        private readonly ITestService _testService;
-        private readonly Core.Base.Interfaces.IRepository<TestGroupResult> _testGroupResult;
-        private readonly ICategoryService _categoryService;
+        private readonly IChangeCourseService _changeCourseService;
+        private readonly IMediator _mediator;
+        private readonly IServiceProvider _serviceProvider;
+        private readonly ICategoryRepository _categoryRepository;
+        private readonly SendMailFinishPTPublisher _sendMailFinishPTPublisher;
 
         public ChosePtFlowCommandHandler(AuthContext authContext,
-            IFlowService flowService,
-            ITestService testService,
-            IUserService userService, Core.Base.Interfaces.IRepository<TestGroupResult> testGroupResult,
-            ICategoryService categoryService,
-            IServiceProvider serviceProvider)
+            IUserService userService,
+            IChangeCourseService changeCourseService,
+            IMediator mediator,
+            IServiceProvider serviceProvider,
+            ICategoryRepository categoryRepository,
+            SendMailFinishPTPublisher sendMailFinishPTPublisher)
         {
             _authContext = authContext;
-            _flowService = flowService;
-            _testService = testService;
             _userService = userService;
-            _categoryService = categoryService;
+            _changeCourseService = changeCourseService;
+            _mediator = mediator;
             _serviceProvider = serviceProvider;
-            _testGroupResult = testGroupResult;
+            _categoryRepository = categoryRepository;
+            _sendMailFinishPTPublisher = sendMailFinishPTPublisher;
         }
 
         public async Task<MethodResult<PtStateModel>> Handle(ChosePtFlowCommand request, CancellationToken cancellationToken)
@@ -80,56 +83,88 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 return methodResult;
             }
 
-            var isExistPt = await _testGroupResult.Queryable.AnyAsync(x => x.StudentId == student.Id && x.TestType == EnumTestType.PlacementTest, cancellationToken);
-            if (isExistPt)
+            var navigateActionResult = await _mediator.Send(new GetUserNavigationQuery(), cancellationToken);
+            if (!navigateActionResult.IsOK
+                || (navigateActionResult.Result?.Status != EnumNavigateActionStatus.ChooseProgram
+                && navigateActionResult.Result?.Status != EnumNavigateActionStatus.NotDoingYetAnything))
             {
-                methodResult.AddErrorBadRequest("PT is started or completed");
+                methodResult.AddErrorBadRequest("This is not time to select program");
                 return methodResult;
             }
 
-            var programContainPtFound = await _categoryService.GetProgramContainPtBySelectedProject(request.ProjectId, cancellationToken);
-            if (programContainPtFound != null)
+            var category = await _categoryRepository.ReadQueryable.FirstOrDefaultAsync(x => x.Id == request.ProgramId);
+
+            if (category.Type == Shared.Enums.EnumTypeCategory.Program)
             {
-                if (programContainPtFound.TestMode is EnumTestMode.Custom)
+                var changeProgramAggregate = await _changeCourseService.GetChangeProgramAggreate(student, cancellationToken);
+
+                var changeProgramDirective = changeProgramAggregate.ChangeProgram(new ChangeProgramRequest
                 {
-                    var age = DateTimeHelper.GetYearOld(student.User.Birthday);
-                    var flowMatch = await _flowService.GetHierarchicalFlowByCondition(x => x.ProgramId == programContainPtFound.Id
-                                                                                           && x.Status == EnumStatus.Active
-                                                                                           && x.FromAge <= age && x.ToAge >= age);
+                    ProgramId = request.ProgramId,
+                });
 
-                    if (flowMatch?.StepFlows.FirstOrDefault() == null)
+                if (changeProgramDirective?.Action == EnumChangeProgramAction.ChangeAndStartPt)
+                {
+                    var testGroupResult = await _changeCourseService.InitForMustDoPtProgram(new ChangeCourseModel
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(flowMatch));
-                        return methodResult;
-                    }
+                        OwnPtProgramId = changeProgramDirective.ProgramOwnPt.Value,
+                        ToProgramId = changeProgramDirective.ToProgramId,
+                        StudentId = student.Id,
+                        Age = DateTimeHelper.GetYearOld(student.User.Birthday),
+                    });
 
-                    var firstStepFlow = flowMatch.StepFlows?.FirstOrDefault();
-                    if (firstStepFlow == null)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(firstStepFlow));
-                        return methodResult;
-                    }
-
-                    var testGroupResult =
-                        await _testService.InitTestGroupResultForFlow(flowMatch.Id, request.ProjectId, programContainPtFound.Id, student.Id, EnumTestType.PlacementTest);
-
-                    var aggregate = new FlowTestResultAggregate(testGroupResult, _serviceProvider);
+                    var aggregate = new FlowTestResultAggregate(testGroupResult, _serviceProvider, _sendMailFinishPTPublisher);
                     await aggregate.Start();
                     methodResult.Result = await aggregate.ExpotStateData();
                 }
-                else if (programContainPtFound.TestMode == EnumTestMode.Not)
+                else if (changeProgramDirective?.Action == EnumChangeProgramAction.ChangeDirectlyBecauseByPass)
                 {
-                    var testGroupResult =
-                        await _testService.InitTestGroupResultForFlow(null, request.ProjectId, request.ProjectId, student.Id, EnumTestType.PlacementTest, isByPass: true);
-                    methodResult.Result = new PtStateModel { Status = EnumResultStatus.ByPass, TestGroupResultId = testGroupResult.Id, StudentId = student.Id };
+                    var testGroupResult = await _changeCourseService.InitForProgramByPassPt(new ChangeCourseModel
+                    {
+                        ToProgramId = changeProgramDirective.ToProgramId,
+                        OwnPtProgramId = changeProgramDirective.ToProgramId,
+                        StudentId = student.Id,
+                        Age = DateTimeHelper.GetYearOld(student.User.Birthday),
+                    });
+
+                    methodResult.Result = new PtStateModel { Status = testGroupResult.Status, TestGroupResultId = testGroupResult.Id, StudentId = student.Id };
                 }
+                else if (changeProgramDirective?.Action == EnumChangeProgramAction.ChangeToProgramExistedPt
+                    && navigateActionResult?.Result?.RelatedHistoryId != null
+                    && changeProgramDirective?.RelatedPtResultId != null)
+                {
+                    //var testGroupResult = await _changeCourseService.InitForProgramExistedPt(navigateActionResult.Result.RelatedHistoryId.Value, request.ProgramId, changeProgramDirective.RelatedPtResultId.Value);
+                    //methodResult.Result = new PtStateModel { Status = testGroupResult.Status, TestGroupResultId = testGroupResult.Id, StudentId = student.Id };
+                    methodResult.AddErrorBadRequest("Cannot select this program becahse it had pt");
+                }
+                else
+                {
+                    methodResult.AddErrorBadRequest("Data is wrong for changeProgramDirective");
+                }
+
+                return methodResult;
             }
             else
             {
-                methodResult.AddErrorBadRequest("Not found program contain PT");
-            }
+                var changeProgramAggregate = await _changeCourseService.GetChangeSubjectAggreate(student, cancellationToken);
 
-            return methodResult;
+                var changeProgramDirective = changeProgramAggregate.SelectProjectSubject(new ChangeProgramRequest
+                {
+                    ProgramId = request.ProgramId,
+                });
+
+                if (changeProgramDirective?.Action != EnumChangeSubjectAction.ChangeToRecentCourse || changeProgramDirective?.CourseResultId == null)
+                {
+                    methodResult.AddErrorBadRequest("The selected ProjectId is wrong");
+                }
+                else
+                {
+                    var ptResult = await _changeCourseService.SwitchDirectlyToExistCourseForChangeLevel(changeProgramDirective.CourseResultId.Value, student.Id);
+                    methodResult.Result = new PtStateModel { StudentId = student.Id, TestGroupResultId = ptResult.Id, Status = ptResult.Status };
+                }
+
+                return methodResult;
+            }
         }
     }
 }

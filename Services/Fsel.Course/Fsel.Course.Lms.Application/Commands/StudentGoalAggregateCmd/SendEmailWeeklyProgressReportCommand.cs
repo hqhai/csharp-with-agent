@@ -29,7 +29,8 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
         private readonly IUserService _userService;
         private const string Subject = "[FSEL] Cùng FSEL quay lại đúng nhịp nhé";
 
-        public SendEmailWeeklyProgressReportCommandHandler(ISenderService senderService, IStudentGoalAggregateRepository studentGoalAggregateRepository, IStudentGoalSummaryRepository studentGoalSummaryRepository, IUserService userService)
+        public SendEmailWeeklyProgressReportCommandHandler(ISenderService senderService, IStudentGoalAggregateRepository studentGoalAggregateRepository,
+            IStudentGoalSummaryRepository studentGoalSummaryRepository, IUserService userService)
         {
             _senderService = senderService;
             _studentGoalAggregateRepository = studentGoalAggregateRepository;
@@ -63,8 +64,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
                                        TotalCompletedLessons = baseQ.TotalCompletedLessons,
                                        CreatedFullName = baseQ.CreatedFullName,
                                        CreatedDate = baseQ.CreatedDate,
-                                       CourseType = baseQ.CourseType,
-                                       CourseLevel = baseQ.CourseLevel,
+                                       LevelId = baseQ.LevelId,
                                        CourseId = baseQ.CourseId,
                                        ConsecutiveBehindWeeks = baseQ.ConsecutiveBehindWeeks,
                                        CompletedLessons = sum.CompletedLessons, // tổng số lesson đã hoàn thành trong tuần
@@ -94,46 +94,19 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
                 }
 
                 var tasks = queryData
-                             .Where(p => !string.IsNullOrEmpty(p.Email) && p.Email.IsValidEmail())
-                             .Select(p => _senderService.SendEmailAsync(new SendEmailByTemplateCommandModel()
-                             {
-                                 ToEmails = new List<string> { p.Email ?? string.Empty },
-                                 Subject = Subject,
-                                 Template = GetSenderTemplate(p.CombinedProgress),
-                                 Params = new
-                                 {
-                                     StudentName = p.FullName,
-                                     NumberLesson = p.CompletedLessons,
-                                     TargetLesson = p.LessonsPerWeek,
-                                     TotalLesson = p.TotalTargetLessons
-                                 },
-                                 Receivers = new List<SendReceiverCommandModel>()
-                                 {
-                                     new SendReceiverCommandModel()
-                                     {
-                                         Email = p.Email,
-                                         ReceiverId = p.UserId
-                                     }
-                                 }
-                             }))
-                             .ToList();
+                    .Where(p => !string.IsNullOrEmpty(p.Email) && p.Email.IsValidEmail())
+                    .Select(p => _senderService.SendEmailAsync(new SendEmailByTemplateCommandModel()
+                    {
+                        ToEmails = new List<string> { p.Email ?? string.Empty },
+                        Subject = Subject,
+                        Template = GetSenderTemplate(p.CombinedProgress),
+                        Params = new { StudentName = p.FullName, NumberLesson = p.CompletedLessons, TargetLesson = p.LessonsPerWeek, TotalLesson = p.TotalTargetLessons },
+                        Receivers = new List<SendReceiverCommandModel>() { new() { Email = p.Email, ReceiverId = p.UserId } }
+                    }))
+                    .ToList();
 
                 await Task.WhenAll(tasks);
             }
-
-            //await _senderService.SendEmailAsync(new SendEmailByTemplateCommandModel()
-            //{
-            //    ToEmails = new List<string> { "nguyenhuukhoa5462@gmail.com" },
-            //    Subject = Subject,
-            //    Template = request.SenderTemplate,
-            //    Params = new
-            //    {
-            //        StudentName = "Khoa Ozil",
-            //        NumberLesson = 1,
-            //        TargetLesson = 12,
-            //        TotalLesson = 123
-            //    }
-            //});
 
             return methodResult;
         }

@@ -98,6 +98,10 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
                 return methodResult;
             }
             var moduleLessons = await GetLessonModelsAsync(lessonResult, lesson, lessonModules);
+            if (moduleLessons.Any())
+            {
+                moduleLessons = GroupHomeWorkModuleLesson(moduleLessons);
+            }
 
             var lessonDto = _mapper.Map<LessonDtoModel>(lesson);
             if (lessonDto != null)
@@ -147,6 +151,80 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
             return moduleResults;
         }
 
+        private static List<ModuleLessonModel> GroupHomeWorkModuleLesson(
+            IList<ModuleLessonModel> moduleLessonModels)
+        {
+            var homeworkModules = moduleLessonModels
+                .Where(x => x.LessonConfigType == EnumLessonConfigType.HomeWork)
+                .ToList();
+
+            var groupedHomework = homeworkModules
+                .GroupBy(x => x.OpenOrder)
+                .SelectMany(g => SplitByConsecutiveDisplayOrder(g))
+                .ToList();
+
+            return moduleLessonModels
+                .Where(x => x.LessonConfigType != EnumLessonConfigType.HomeWork)
+                .Concat(groupedHomework)
+                .OrderBy(x => x.DisplayOrder)
+                .ToList();
+        }
+
+        private static IEnumerable<ModuleLessonModel> SplitByConsecutiveDisplayOrder(IEnumerable<ModuleLessonModel> modules)
+        {
+            var ordered = modules
+                .OrderBy(x => x.DisplayOrder)
+                .ToList();
+
+            var buffer = new List<ModuleLessonModel>();
+
+            foreach (var current in ordered)
+            {
+                if (buffer.Count == 0)
+                {
+                    buffer.Add(current);
+                    continue;
+                }
+
+                var last = buffer[^1];
+
+                if (current.DisplayOrder == last.DisplayOrder + 1)
+                {
+                    buffer.Add(current);
+                }
+                else
+                {
+                    yield return BuildHomeworkGroup(buffer);
+                    buffer = new List<ModuleLessonModel> { current };
+                }
+            }
+
+            if (buffer.Count > 0)
+            {
+                yield return BuildHomeworkGroup(buffer);
+            }
+        }
+
+        private static ModuleLessonModel BuildHomeworkGroup(List<ModuleLessonModel> group)
+        {
+            if (group.Count == 1)
+            {
+                return group[0];
+            }
+
+            var first = group[0];
+
+            return new ModuleLessonModel
+            {
+                LessonConfigType = first.LessonConfigType,
+                LessonId = first.LessonId,
+                OpenOrder = first.OpenOrder,
+                DisplayOrder = first.DisplayOrder,
+                Name = first.Name,
+                SubModules = group
+            };
+        }
+
         private void BuildVideoModuleLesson(
         LessonModule module,
         IDictionary<Guid, (Video Video, LessonModule lessonModule, VideoResult VideoResult)> videoResultsByOriginalId,
@@ -156,7 +234,6 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
             if (videoResultsByOriginalId.TryGetValue(module.Id, out var videoResult))
             {
                 var dto = _mapper.Map<ModuleLessonModel>(module);
-                dto.Name = videoResult.Video.Name;
                 dto.ObjectId = videoResult.Video.Id;
                 dto.Result = _mapper.Map<ResultModel>(videoResult.VideoResult);
                 moduleResults.Add(dto);
@@ -166,7 +243,6 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
             if (videoDics.TryGetValue(module.OriginalId, out var video))
             {
                 var dto = _mapper.Map<ModuleLessonModel>(module);
-                dto.Name = video.Name;
                 dto.ObjectId = video.Id;
                 moduleResults.Add(dto);
             }
@@ -182,7 +258,6 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
             if (classForumResultsByOriginalId.TryGetValue(module.OriginalId, out var forumResult))
             {
                 var dto = _mapper.Map<ModuleLessonModel>(module);
-                dto.Name = lesson.Name;
                 dto.ObjectId = forumResult.ClassForum.Id;
                 dto.Result = _mapper.Map<ResultModel>(forumResult.ClassForumResult);
                 moduleResults.Add(dto);
@@ -192,7 +267,6 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
             if (classForumDics.TryGetValue(module.OriginalId, out var forum))
             {
                 var dto = _mapper.Map<ModuleLessonModel>(module);
-                dto.Name = lesson.Name;
                 dto.ObjectId = forum.Id;
                 moduleResults.Add(dto);
             }
@@ -207,8 +281,6 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
             if (homeWorkResultsByOriginalId.TryGetValue(module.Id, out var hwResult))
             {
                 var dto = _mapper.Map<ModuleLessonModel>(module);
-                dto.Name = hwResult.HomeWork.Name;
-                dto.Code = hwResult.HomeWork.Code;
                 dto.ObjectId = hwResult.HomeWork.Id;
                 dto.Result = _mapper.Map<ResultModel>(hwResult.HomeWorkResult);
                 moduleResults.Add(dto);
@@ -218,7 +290,6 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
             if (homeWorkDics.TryGetValue(module.OriginalId, out var hw))
             {
                 var dto = _mapper.Map<ModuleLessonModel>(module);
-                dto.Name = hw.Name;
                 dto.ObjectId = hw.Id;
                 moduleResults.Add(dto);
             }
@@ -234,7 +305,6 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
             if (documentResultsByOriginalId.TryGetValue(module.OriginalId, out var docResult))
             {
                 var dto = _mapper.Map<ModuleLessonModel>(module);
-                dto.Name = lesson.Name;
                 dto.ObjectId = docResult.Document.Id;
                 dto.Result = _mapper.Map<ResultModel>(docResult.DocumentResult);
                 moduleResults.Add(dto);
@@ -244,7 +314,6 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
             if (documentDics.TryGetValue(module.OriginalId, out var doc))
             {
                 var dto = _mapper.Map<ModuleLessonModel>(module);
-                dto.Name = lesson.Name;
                 dto.ObjectId = doc.Id;
                 moduleResults.Add(dto);
             }

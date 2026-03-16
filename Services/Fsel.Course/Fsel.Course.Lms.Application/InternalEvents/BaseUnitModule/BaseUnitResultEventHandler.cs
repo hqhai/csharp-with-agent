@@ -8,9 +8,12 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseUnitModule
     using Fsel.Course.Domain.Entities.V1i1;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Lms.Application.Commands.OtherCmd;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServices.UnitItemServices;
     using Fsel.Shared.Constants;
+    using Microsoft.AspNetCore.Cors.Infrastructure;
     using Microsoft.EntityFrameworkCore;
 
     public interface IUnitResultUpdater
@@ -26,6 +29,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseUnitModule
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly ITestGroupResultRepository _testGroupResultRepository;
         private readonly IUnitItemInitializerFactory _unitItemInitializerFactory;
+        private readonly SendMailCompleteUnitPublisher _sendMailCompleteUnitPublisher;
 
         public BaseUnitResultEventHandler(
             IUnitModuleCachingService unitModuleCachingService,
@@ -33,7 +37,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseUnitModule
             IUnitResultRepository unitResultRepository,
             ILessonResultRepository lessonResultRepository,
             ITestGroupResultRepository testGroupResultRepository,
-            IUnitItemInitializerFactory unitItemInitializerFactory)
+            IUnitItemInitializerFactory unitItemInitializerFactory,
+            SendMailCompleteUnitPublisher sendMailCompleteUnitPublisher)
         {
             _unitModuleCachingService = unitModuleCachingService;
             _unitModuleRepository = unitModuleRepository;
@@ -41,6 +46,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseUnitModule
             _lessonResultRepository = lessonResultRepository;
             _testGroupResultRepository = testGroupResultRepository;
             _unitItemInitializerFactory = unitItemInitializerFactory;
+            _sendMailCompleteUnitPublisher = sendMailCompleteUnitPublisher;
         }
 
         /// <summary>
@@ -58,6 +64,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseUnitModule
             if (!unitModules.Any())
             {
                 unitResult.Percent = ValueSettings.PercentMaxValue;
+                if (unitResult.Status == EnumResultStatus.Done)
+                {
+                    unitResult.CompletionDate = DateTime.UtcNow;
+                }
                 unitResult.Status = EnumResultStatus.Done;
 
                 await _unitResultRepository.BulkUpdateList(new List<UnitResult> { unitResult }, bulk =>
@@ -65,11 +75,15 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseUnitModule
                     bulk.ColumnInputExpression = entity => new
                     {
                         entity.Percent,
-                        entity.Status
+                        entity.Status,
+                        entity.CompletionDate
                     };
                 });
 
                 await _unitResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+                await _sendMailCompleteUnitPublisher.Publish(new SendMailCompleteUnitCommandModel() { UnitResultId = unitResult.Id }, cancellationToken);
+
                 return;
             }
 
@@ -113,7 +127,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseUnitModule
                 .Concat(testResults.SelectMany(x => x.SkillScores ?? Enumerable.Empty<SkillScores>()));
 
             var aggregatedSkillScores = allSkillScores
-                .GroupBy(s => new { s.SkillId, s.Skill })
+                .GroupBy(s => new { s.SkillId })
                 .Select(g =>
                 {
                     var first = g.First();
@@ -123,6 +137,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseUnitModule
                         Skill = first.Skill,
                         SkillId = first.SkillId,
                         SkillName = first.SkillName,
+                        SkillFilePath = first.SkillFilePath,
                         Scores = g.Sum(x => x.Scores),
                         TotalCount = g.Sum(x => x.TotalCount),
                         CorrectCount = g.Sum(x => x.CorrectCount),
@@ -150,6 +165,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseUnitModule
             unitResult.CorrectCount = totalCorrectCount;
             unitResult.CorrectTotal = totalCorrectTotal;
             unitResult.Percent = totalPercentModule;
+            if (unitResult.Status != EnumResultStatus.Done)
+            {
+                unitResult.CompletionDate = DateTime.UtcNow;
+            }
             unitResult.Status = EnumResultStatus.Done;
 
             await _unitResultRepository.BulkUpdateList(new List<UnitResult> { unitResult }, bulk =>
@@ -160,11 +179,14 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseUnitModule
                     entity.CorrectTotal,
                     entity.Percent,
                     entity.SkillScoresStr,
-                    entity.Status
+                    entity.Status,
+                    entity.CompletionDate
                 };
             });
 
             await _unitResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+            await _sendMailCompleteUnitPublisher.Publish(new SendMailCompleteUnitCommandModel() { UnitResultId = unitResult.Id }, cancellationToken);
         }
 
         /// <summary>

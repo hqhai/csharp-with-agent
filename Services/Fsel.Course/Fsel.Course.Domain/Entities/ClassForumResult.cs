@@ -40,7 +40,9 @@ namespace Fsel.Course.Domain.Entities
 
         [NotMapped]
         public int? TimeCount
-        { get { return ClassForumResultFiles.Select(p => p.TimeCount).Sum(); } }
+        {
+            get { return ClassForumResultFiles.Select(p => p.TimeCount).Sum(); }
+        }
 
         [MaxLength(10000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? GradingAlFeedback { get; set; }
@@ -86,6 +88,9 @@ namespace Fsel.Course.Domain.Entities
 
         public EnumSubmissionCount? SubmissionCount { get; set; }
 
+        [MaxLength(10000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? AITranslationContent { get; set; }
+
         /// <summary>
         /// Số câu trả lời đúng của Student
         /// </summary>
@@ -125,6 +130,9 @@ namespace Fsel.Course.Domain.Entities
             set { SkillScoresStr = Common.Helpers.ConvertHelper.Serialize(value); }
         }
 
+        public DateTime? NewDate { get; set; }
+        public DateTime? ProcessDate { get; set; }
+        public DateTime? CompletionDate { get; set; }
         public bool IsPendingSpeechToText { get; set; }
 
         public Guid? LessonModuleId { get; set; }

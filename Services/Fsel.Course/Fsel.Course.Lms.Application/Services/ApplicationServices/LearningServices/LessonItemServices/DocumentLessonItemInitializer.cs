@@ -10,17 +10,22 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
     using Fsel.Course.Domain.Entities.V1i1;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Shared.ApplicationServices.CacheServices;
     using Microsoft.EntityFrameworkCore;
 
     public class DocumentLessonItemInitializer : ILessonItemInitializer
     {
         private readonly IDocumentRepository _documentRepository;
         private readonly IDocumentResultRepository _documentResultRepository;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
 
-        public DocumentLessonItemInitializer(IDocumentRepository documentRepository, IDocumentResultRepository documentResultRepository)
+        public DocumentLessonItemInitializer(IDocumentRepository documentRepository,
+            IDocumentResultRepository documentResultRepository,
+            IRequestSafeCachingService requestSafeCachingService)
         {
             _documentRepository = documentRepository;
             _documentResultRepository = documentResultRepository;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         public async Task<VoidMethodResult> InitializeAsync(LessonModule lessonModule, LessonResult lessonResult, CancellationToken cancellationToken)
@@ -34,21 +39,22 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
             }
 
             var documentResult = await _documentResultRepository.Queryable.Where(x => x.LessonResultId == lessonResult.Id)
-                                                          .Where(x => x.LessonModuleId == lessonModule.Id)
-                                                          .FirstOrDefaultAsync(cancellationToken);
+                                                                .Where(x => x.LessonModuleId == lessonModule.Id)
+                                                                .FirstOrDefaultAsync(cancellationToken);
             if (documentResult != null)
             {
                 if (documentResult.Status == EnumResultStatus.Unfinished)
                 {
                     documentResult.Status = EnumResultStatus.New;
+                    documentResult.NewDate = DateTime.UtcNow;
                     await _documentResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
                 }
 
                 return methodResult;
             }
             var document = await _documentRepository.ReadQueryable.Where(x => x.OriginalId == lessonModule.OriginalId)
-                                      .Where(x => x.VersionStatus == EnumVersionStatus.LastVersion)
-                                      .FirstOrDefaultAsync(cancellationToken);
+                                                    .Where(x => x.VersionStatus == EnumVersionStatus.LastVersion)
+                                                    .FirstOrDefaultAsync(cancellationToken);
 
             if (document == null)
             {
@@ -62,13 +68,20 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
                 LessonResultId = lessonResult.Id,
                 StudentId = lessonResult.StudentId,
                 Status = EnumResultStatus.New,
+                NewDate = DateTime.UtcNow,
                 DocumentId = document.Id,
             };
+            await _requestSafeCachingService.SafeRequest(
+                key: $"Add_DocumentResult_{documentResult.LessonModuleId}_{documentResult.LessonResultId}_{documentResult.IsDeleted}",
+                safeFunction: async () =>
+                {
+                    await _documentResultRepository.BulkMergeAsync(new List<DocumentResult> { documentResult }, bulk =>
+                    {
+                        bulk.ColumnPrimaryKeyExpression = c => new { c.LessonModuleId, c.LessonResultId, c.IsDeleted };
+                    });
+                    return documentResult;
+                });
 
-            await _documentResultRepository.BulkMergeAsync(new List<DocumentResult> { documentResult }, bulk =>
-            {
-                bulk.ColumnPrimaryKeyExpression = c => new { c.LessonModuleId, c.LessonResultId, c.IsDeleted };
-            });
             return methodResult;
         }
     }

@@ -52,7 +52,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             var teacherResult = await _userService.GetTeacherByUserIdAsync(_authContext.CurrentUserId);
             var teacherId = teacherResult.Content?.Result?.Id;
 
-            var classForumResultQuery = await _classForumResultRepository.Queryable
+            var classForumResultQuery = await _classForumResultRepository.ReadQueryable
                                     .Include(x => x.LessonResult)
                                     .ThenInclude(x => x!.Lesson)
                                     .ThenInclude(x => x!.UnitLessons)

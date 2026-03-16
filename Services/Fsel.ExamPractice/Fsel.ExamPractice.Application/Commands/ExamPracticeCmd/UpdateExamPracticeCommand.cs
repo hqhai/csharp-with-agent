@@ -22,181 +22,346 @@ namespace Fsel.ExamPractice.Application.Commands.ExamPracticeCmd
 
     public class UpdateExamPracticeCommandHandler : IRequestHandler<UpdateExamPracticeCommand, MethodResult<ExamPracticeModel>>
     {
-        private readonly IExamPracticeRepository _examPracticeRepository;
+        private readonly IExamPracticeRepository _repo;
         private readonly IMapper _mapper;
-        private readonly ExamPracticeHelper _examPracticeHelper;
-        private readonly IExamPracticeResultRepository _examPracticeResultRepository;
+        private readonly ExamPracticeHelper _helper;
+        private readonly IExamPracticeResultRepository _resultRepo;
         private readonly ISystemService _systemService;
 
-        public UpdateExamPracticeCommandHandler(IExamPracticeRepository examPracticeRepository,
+        public UpdateExamPracticeCommandHandler(
+            IExamPracticeRepository examPracticeRepository,
             IMapper mapper,
             ExamPracticeHelper examPracticeHelper,
             IExamPracticeResultRepository examPracticeResultRepository,
             ISystemService systemService)
         {
-            _examPracticeRepository = examPracticeRepository;
+            _repo = examPracticeRepository;
             _mapper = mapper;
-            _examPracticeHelper = examPracticeHelper;
-            _examPracticeResultRepository = examPracticeResultRepository;
+            _helper = examPracticeHelper;
+            _resultRepo = examPracticeResultRepository;
             _systemService = systemService;
         }
 
         public async Task<MethodResult<ExamPracticeModel>> Handle(UpdateExamPracticeCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<ExamPracticeModel>();
-            var examPractice = await _examPracticeRepository.GetByIdAsync(request.Id);
-            if (examPractice == null)
+            var result = new MethodResult<ExamPracticeModel>();
+
+            // 1) Load + guard status
+            var entity = await _repo.GetByIdAsync(request.Id);
+            if (!EnsureEntityCanBeUpdated(entity, request, result))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(examPractice), request.Id);
-                return methodResult;
+                return result;
             }
-            if (examPractice.Status == EnumExamPracticeStatus.Cloned)
+            // 2) Validate code basic + unique (exclude current)
+            if (!await ValidateCodeAsync(request, entity!, result, cancellationToken))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumExamPracticeErrorCode.LockedClonedStatus), nameof(examPractice.Status), examPractice.Status);
-                return methodResult;
+                return result;
             }
-            if (string.IsNullOrEmpty(request.Code))
+            // 3) Validate type/subtype
+            if (!ValidateTypeAndSubType(request, result))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Code), request.Code);
-                return methodResult;
+                return result;
             }
-            if (request.ProvinceId.HasValue)
+            // 4) Resolve province name (nếu có)
+            if (!await TryResolveProvinceAsync(request, entity!, result))
             {
-                var locationResults = await _systemService.GetLocationByIdsAsync(new GetLocationsByIdsQueryModel { IdsStr = request.ProvinceId.Value.ToString() });
-                if (!locationResults.IsSuccessStatusCode)
+                return result;
+            }
+            // 5) Validate business rules for ExamPractice (gom toàn bộ rule trùng vào 1 chỗ)
+            if (!ValidateExamPracticeRules(request, entity!, result))
+            {
+                return result;
+            }
+            // 6) Check clone logic (has result + change active fields)
+            var shouldClone = await ShouldCloneAsync(entity!, request, cancellationToken);
+            if (shouldClone)
+            {
+                // Khi clone: chỉ validate leaf sections đủ question rồi set status cloned
+                if (!EnsureAllLeafSectionsHaveQuestion(request, result))
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallSystemServiceError));
-                    return methodResult;
-                }
-                var locations = locationResults.Content?.Result;
-                if (locations == null || !locations.Any())
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(locations), request.ProvinceId);
-                    return methodResult;
-                }
-                examPractice.Province = locations.FirstOrDefault()?.Name;
-            }
-            var existCode = await _examPracticeRepository.Queryable.AnyAsync(x => x.Code == request.Code && x.Id != examPractice.Id, cancellationToken);
-            if (existCode)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Code), request.Code);
-                return methodResult;
-            }
-            if (request.Type == EnumExamPracticeType.IELTS && !new[] { EnumExamPracticeSubType.FullMockTest, EnumExamPracticeSubType.SkillMockTest }.Any(x => x == request.SubType))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.Type), request.SubType);
-                return methodResult;
-            }
-            if (request.Type == EnumExamPracticeType.ExamPractice && !new[] { EnumExamPracticeSubType.Practice, EnumExamPracticeSubType.UniversityEntrance, EnumExamPracticeSubType.HighschoolEntrance }.Any(x => x == request.SubType))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.Type), request.SubType);
-                return methodResult;
-            }
-            if (examPractice.Status == EnumExamPracticeStatus.Active && request.Type == EnumExamPracticeType.ExamPractice)
-            {
-                if (!request.StartDate.HasValue)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.StartDate), request.StartDate);
-                    return methodResult;
-                }
-                if (!request.EndDate.HasValue)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.EndDate), request.EndDate);
-                    return methodResult;
+                    return result;
                 }
 
-                if (request.StartDate >= request.EndDate)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.StartDate), nameof(request.EndDate));
-                    return methodResult;
-                }
-                if (new[] { EnumExamPracticeSubType.Practice, EnumExamPracticeSubType.HighschoolEntrance }.Any(x => x == request.SubType) && !request.ProvinceId.HasValue)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.ProvinceId), request.SubType);
-                    return methodResult;
-                }
-                if (request.SubType == EnumExamPracticeSubType.Practice && string.IsNullOrEmpty(request.SchoolGrade))
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.SchoolGrade), request.SubType);
-                    return methodResult;
-                }
-            }
-
-            if (request.Type == EnumExamPracticeType.ExamPractice)
-            {
-                if (request.StartDate.HasValue && request.EndDate.HasValue && request.StartDate >= request.EndDate)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.StartDate), nameof(request.EndDate));
-                    return methodResult;
-                }
-                if (request.ProvinceId.HasValue && !new[] { EnumExamPracticeSubType.Practice, EnumExamPracticeSubType.HighschoolEntrance }.Any(x => x == request.SubType))
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.ProvinceId), request.SubType);
-                    return methodResult;
-                }
-                if (request.SubType != EnumExamPracticeSubType.Practice && !string.IsNullOrEmpty(request.SchoolGrade))
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.SchoolGrade), request.SubType);
-                    return methodResult;
-                }
-            }
-
-            var existResult = await _examPracticeResultRepository.Queryable.AnyAsync(x => x.ExamPracticeId == request.Id, cancellationToken);
-            if (existResult && await _examPracticeHelper.IsChangeValueActive(examPractice, request))
-            {
-                var examPracticeSectionCurrents = _examPracticeHelper.GetLeafSections(request.ExamPracticeSections);
-                if (!_examPracticeHelper.AllSectionsHaveAtLeastOneQuestion(examPracticeSectionCurrents))
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumExamPracticeErrorCode.MissingRequiredData), nameof(examPractice.Status), EnumExamPracticeStatus.Active);
-                    return methodResult;
-                }
-                examPractice.Status = EnumExamPracticeStatus.Cloned;
+                entity!.Status = EnumExamPracticeStatus.Cloned;
             }
             else
             {
-                _mapper.Map(request, examPractice);
-                if (!examPractice.IsValid())
+                // 7) Apply update to entity + validate entity
+                ApplyRequestToEntity(request, entity!);
+                if (!ValidateEntity(entity!, result))
                 {
-                    methodResult.AddErrorBadRequest(examPractice.ErrorMessages);
-                    return methodResult;
-                }
-                if (!request.IsDraft && request.Type == EnumExamPracticeType.ExamPractice)
-                {
-                    var examPracticeSectionCurrents = _examPracticeHelper.GetLeafSections(request.ExamPracticeSections);
-                    if (!_examPracticeHelper.AllSectionsHaveAtLeastOneQuestion(examPracticeSectionCurrents))
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumExamPracticeErrorCode.MissingRequiredData), nameof(examPractice.Status), EnumExamPracticeStatus.Active);
-                        return methodResult;
-                    }
-                    if (examPractice.Status == EnumExamPracticeStatus.Draft)
-                    {
-                        examPractice.Status = EnumExamPracticeStatus.Active;
-                        examPractice.ActivatedAt = DateTime.UtcNow;
-                    }
+                    return result;
                 }
 
-                var examPracticeSections = new List<ExamPracticeSection>();
-                var method = await _examPracticeHelper.MapSectionsRecursively(examPractice, request.ExamPracticeSections, examPracticeSections);
-                if (!method.IsOK)
+                // 8) Publish rule (không draft) cho ExamPractice
+                if (!ApplyPublishRuleIfNeeded(request, entity!, result))
                 {
-                    methodResult.AddErrorBadRequest(method.ErrorMessages);
-                    return methodResult;
+                    return result;
                 }
 
-                await _examPracticeHelper.DeleteExamPracticeSectionsAsync(request);
-                examPractice.ExamPracticeSections = examPracticeSections;
+                // 9) Map sections + delete old + assign new
+                if (!await ReplaceSectionsAsync(entity!, request, result))
+                {
+                    return result;
+                }
             }
-            await _examPracticeRepository.ExecuteTransactionAsync(async () =>
-            {
-                _examPracticeRepository.Update(examPractice);
-                await _examPracticeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                methodResult.Result = _mapper.Map<ExamPracticeModel>(examPractice);
-                return methodResult;
-            });
 
-            await _examPracticeHelper.UpdateExamPracticeSectionScoreAsync(examPractice).ConfigureAwait(false);
-            return methodResult;
+            // 10) Persist
+            await PersistAsync(entity!, result, cancellationToken);
+
+            // 11) Post: update score
+            if (result.Result != null)
+            {
+                await _helper.UpdateExamPracticeSectionScoreAsync(entity!).ConfigureAwait(false);
+            }
+            return result;
+        }
+
+        // -------------------- Guards & Validations --------------------
+
+        private static bool EnsureEntityCanBeUpdated(Domain.Entities.ExamPractice? entity, UpdateExamPracticeCommand request, MethodResult<ExamPracticeModel> result)
+        {
+            if (entity == null)
+            {
+                result.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(entity), request.Id);
+                return false;
+            }
+
+            if (entity.Status == EnumExamPracticeStatus.Cloned)
+            {
+                result.AddErrorBadRequest(nameof(EnumExamPracticeErrorCode.LockedClonedStatus), nameof(entity.Status), entity.Status);
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(request.Code))
+            {
+                result.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Code), request.Code);
+                return false;
+            }
+
+            return true;
+        }
+
+        private async Task<bool> ValidateCodeAsync(UpdateExamPracticeCommand request, Domain.Entities.ExamPractice entity, MethodResult<ExamPracticeModel> result, CancellationToken ct)
+        {
+            var existCode = await _repo.Queryable.AnyAsync(x => x.Code == request.Code && x.Id != entity.Id, ct);
+            if (existCode)
+            {
+                result.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Code), request.Code);
+                return false;
+            }
+            return true;
+        }
+
+        private static bool ValidateTypeAndSubType(UpdateExamPracticeCommand request, MethodResult<ExamPracticeModel> result)
+        {
+            // Nếu bạn đã có request.Type.GetSubTypes() như Create thì dùng giống Create là đẹp nhất.
+            // Ở đây giữ đúng logic gốc (IELTS/ExamPractice list cụ thể) để không đổi behavior.
+            if (request.Type == EnumExamPracticeType.IELTS &&
+                !new[] { EnumExamPracticeSubType.FullMockTest, EnumExamPracticeSubType.SkillMockTest }.Contains(request.SubType))
+            {
+                result.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.Type), request.SubType);
+                return false;
+            }
+
+            if (request.Type == EnumExamPracticeType.ExamPractice &&
+                !new[] { EnumExamPracticeSubType.Practice, EnumExamPracticeSubType.UniversityEntrance, EnumExamPracticeSubType.HighschoolEntrance }.Contains(request.SubType))
+            {
+                result.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.Type), request.SubType);
+                return false;
+            }
+
+            return true;
+        }
+
+        private async Task<bool> TryResolveProvinceAsync(UpdateExamPracticeCommand request, Domain.Entities.ExamPractice entity, MethodResult<ExamPracticeModel> result)
+        {
+            if (!request.ProvinceId.HasValue)
+            {
+                return true;
+            }
+
+            var locationResults = await _systemService.GetLocationByIdsAsync(
+                new GetLocationsByIdsQueryModel { IdsStr = request.ProvinceId.Value.ToString() });
+
+            if (!locationResults.IsSuccessStatusCode)
+            {
+                result.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallSystemServiceError));
+                return false;
+            }
+
+            var locations = locationResults.Content?.Result;
+            if (locations == null || !locations.Any())
+            {
+                result.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(locations), request.ProvinceId);
+                return false;
+            }
+
+            entity.Province = locations.First().Name;
+            return true;
+        }
+
+        private static bool ValidateExamPracticeRules(UpdateExamPracticeCommand request, Domain.Entities.ExamPractice entity, MethodResult<ExamPracticeModel> result)
+        {
+            if (request.Type != EnumExamPracticeType.ExamPractice)
+            {
+                return true;
+            }
+
+            // rule chung: nếu có đủ start/end thì start < end
+            if (request.StartDate.HasValue && request.EndDate.HasValue && request.StartDate >= request.EndDate)
+            {
+                result.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.StartDate), nameof(request.EndDate));
+                return false;
+            }
+
+            // rule: Province chỉ hợp lệ với Practice/HighschoolEntrance
+            if (request.ProvinceId.HasValue &&
+                request.SubType is not (EnumExamPracticeSubType.Practice or EnumExamPracticeSubType.HighschoolEntrance))
+            {
+                result.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.ProvinceId), request.SubType);
+                return false;
+            }
+
+            // rule: không phải Practice thì SchoolGrade phải rỗng
+            if (request.SubType != EnumExamPracticeSubType.Practice && !string.IsNullOrEmpty(request.SchoolGrade))
+            {
+                result.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.SchoolGrade), request.SubType);
+                return false;
+            }
+
+            // rule riêng khi entity đang Active (giữ đúng logic gốc)
+            if (entity.Status == EnumExamPracticeStatus.Active)
+            {
+                if (!request.StartDate.HasValue)
+                {
+                    result.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.StartDate), request.StartDate);
+                    return false;
+                }
+
+                if (!request.EndDate.HasValue)
+                {
+                    result.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.EndDate), request.EndDate);
+                    return false;
+                }
+
+                // Khi Active: Practice/HighschoolEntrance thì bắt buộc có ProvinceId (logic gốc)
+                if (request.SubType is EnumExamPracticeSubType.Practice or EnumExamPracticeSubType.HighschoolEntrance)
+                {
+                    if (!request.ProvinceId.HasValue)
+                    {
+                        result.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.ProvinceId), request.SubType);
+                        return false;
+                    }
+                }
+
+                // Khi Active: Practice phải có SchoolGrade (logic gốc)
+                if (request.SubType == EnumExamPracticeSubType.Practice && string.IsNullOrEmpty(request.SchoolGrade))
+                {
+                    result.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.SchoolGrade), request.SubType);
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private async Task<bool> ShouldCloneAsync(Domain.Entities.ExamPractice entity, UpdateExamPracticeCommand request, CancellationToken ct)
+        {
+            var existResult = await _resultRepo.Queryable.AnyAsync(x => x.ExamPracticeId == request.Id, ct);
+            if (!existResult)
+            {
+                return false;
+            }
+
+            return await _helper.IsChangeValueActive(entity, request);
+        }
+
+        private bool EnsureAllLeafSectionsHaveQuestion(UpdateExamPracticeCommand request, MethodResult<ExamPracticeModel> result)
+        {
+            var leafSections = _helper.GetLeafSections(request.ExamPracticeSections);
+            if (_helper.AllSectionsHaveAtLeastOneQuestion(leafSections))
+            {
+                return true;
+            }
+
+            result.AddErrorBadRequest(nameof(EnumExamPracticeErrorCode.MissingRequiredData),
+                nameof(Domain.Entities.ExamPractice.Status),
+                EnumExamPracticeStatus.Active);
+            return false;
+        }
+
+        private void ApplyRequestToEntity(UpdateExamPracticeCommand request, Domain.Entities.ExamPractice entity)
+        {
+            // Province đã resolve vào entity ở trên (nếu có)
+            _mapper.Map(request, entity);
+        }
+
+        private static bool ValidateEntity(Domain.Entities.ExamPractice entity, MethodResult<ExamPracticeModel> result)
+        {
+            if (entity.IsValid())
+            {
+                return true;
+            }
+
+            result.AddErrorBadRequest(entity.ErrorMessages);
+            return false;
+        }
+
+        private bool ApplyPublishRuleIfNeeded(UpdateExamPracticeCommand request, Domain.Entities.ExamPractice entity, MethodResult<ExamPracticeModel> result)
+        {
+            if (request.IsDraft || request.Type != EnumExamPracticeType.ExamPractice)
+            {
+                return true;
+            }
+
+            if (!EnsureAllLeafSectionsHaveQuestion(request, result))
+            {
+                return false;
+            }
+
+            if (entity.Status == EnumExamPracticeStatus.Draft)
+            {
+                entity.Status = EnumExamPracticeStatus.Active;
+                entity.ActivatedAt = DateTime.UtcNow;
+            }
+
+            return true;
+        }
+
+        // -------------------- Sections Replace --------------------
+
+        private async Task<bool> ReplaceSectionsAsync(
+            Domain.Entities.ExamPractice entity,
+            UpdateExamPracticeCommand request,
+            MethodResult<ExamPracticeModel> result)
+        {
+            var newSections = new List<ExamPracticeSection>();
+
+            var mapResult = await _helper.MapSectionsRecursively(entity, request.ExamPracticeSections, newSections);
+            if (!mapResult.IsOK)
+            {
+                result.AddErrorBadRequest(mapResult.ErrorMessages);
+                return false;
+            }
+
+            await _helper.DeleteExamPracticeSectionsAsync(request);
+            entity.ExamPracticeSections = newSections;
+            return true;
+        }
+
+        // -------------------- Persist --------------------
+
+        private async Task PersistAsync(Domain.Entities.ExamPractice entity, MethodResult<ExamPracticeModel> result, CancellationToken ct)
+        {
+            await _repo.ExecuteTransactionAsync(async () =>
+            {
+                _repo.Update(entity);
+                await _repo.UnitOfWork.SaveChangesAsync(ct).ConfigureAwait(false);
+                result.Result = _mapper.Map<ExamPracticeModel>(entity);
+                return result;
+            });
         }
     }
 }

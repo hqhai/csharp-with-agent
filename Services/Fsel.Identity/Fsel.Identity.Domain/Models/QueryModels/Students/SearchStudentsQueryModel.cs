@@ -36,5 +36,36 @@ namespace Fsel.Identity.Domain.Models.QueryModels.Students
 
         public EnumCourseLevel? CourseLevel { get; set; }
         public EnumCourseType? CourseType { get; set; }
+
+        public string? ListProgram { get; set; }
+        public string? ListLevel { get; set; }
+        public string? ListSubject { get; set; }
+
+        [BindNever]
+        public IList<Guid>? Subjects
+        {
+            get
+            {
+                return ListSubject.ToList<Guid>();
+            }
+        }
+
+        [BindNever]
+        public IList<Guid>? Programs
+        {
+            get
+            {
+                return ListProgram.ToList<Guid>();
+            }
+        }
+
+        [BindNever]
+        public IList<Guid>? Levels
+        {
+            get
+            {
+                return ListLevel.ToList<Guid>();
+            }
+        }
     }
 }

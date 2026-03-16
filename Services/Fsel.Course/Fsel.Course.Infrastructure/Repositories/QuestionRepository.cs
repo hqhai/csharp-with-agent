@@ -56,8 +56,8 @@ namespace Fsel.Course.Infrastructure.Repositories
         {
             try
             {
-                return await Queryable.Include(x => x.HomeWorkQuestions)
-                                    .WhereBulkContains(ids, x => x.Id).ToListAsync();
+                return await ReadQueryable.Include(x => x.HomeWorkQuestions)
+                                          .WhereBulkContains(ids, x => x.Id).ToListAsync();
             }
             catch (Exception)
             {

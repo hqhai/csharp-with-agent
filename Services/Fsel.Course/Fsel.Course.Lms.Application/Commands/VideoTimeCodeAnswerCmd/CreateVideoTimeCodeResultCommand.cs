@@ -10,6 +10,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Shared.ApplicationServices.CacheServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -27,16 +28,19 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
         private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
         private readonly IMapper _mapper;
         private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
 
         public CreateVideoTimeCodeResultCommandHandler(IVideoResultRepository videoResultRepository,
             IVideoTimeCodeRepository videoTimeCodeRepository,
             IMapper mapper,
-            IVideoTimeCodeResultRepository videoTimeCodeResultRepository)
+            IVideoTimeCodeResultRepository videoTimeCodeResultRepository,
+            IRequestSafeCachingService requestSafeCachingService)
         {
             _videoResultRepository = videoResultRepository;
             _videoTimeCodeRepository = videoTimeCodeRepository;
             _mapper = mapper;
             _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         public async Task<MethodResult<VideoTimeCodeResultModel>> Handle(CreateVideoTimeCodeResultCommand request, CancellationToken cancellationToken)
@@ -63,7 +67,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
 
         private async Task<VideoTimeCodeResult> GetAndUpdateVideoTimeCodeResultAsync(VideoTimeCode videoTimeCode, VideoResult videoResult)
         {
-            var videoTimeCodeResult = await _videoTimeCodeResultRepository.Queryable
+            var videoTimeCodeResult = await _videoTimeCodeResultRepository.Queryable.AsNoTracking()
                                                 .Where(x => x.VideoTimeCodeId == videoTimeCode.Id && x.VideoResultId == videoResult.Id)
                                                 .FirstOrDefaultAsync();
             if (videoTimeCodeResult == null)
@@ -80,10 +84,16 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
 
                 try
                 {
-                    await _videoTimeCodeResultRepository.BulkMergeAsync(new List<VideoTimeCodeResult> { videoTimeCodeResult }, bulk =>
-                    {
-                        bulk.ColumnPrimaryKeyExpression = entity => new { entity.VideoResultId, entity.VideoTimeCodeId, entity.IsDeleted };
-                    });
+                    await _requestSafeCachingService.SafeRequest<VideoTimeCodeResult>(
+                        key: $"Add_VideoTimeCodeResult_{videoTimeCodeResult.VideoResultId}_{videoTimeCodeResult.VideoTimeCodeId}_{videoTimeCodeResult.IsDeleted}",
+                        safeFunction: async () =>
+                        {
+                            await _videoTimeCodeResultRepository.BulkMergeAsync(new List<VideoTimeCodeResult> { videoTimeCodeResult }, bulk =>
+                            {
+                                bulk.ColumnPrimaryKeyExpression = entity => new { entity.VideoResultId, entity.VideoTimeCodeId, entity.IsDeleted };
+                            });
+                            return videoTimeCodeResult;
+                        });
                 }
                 catch
                 {
@@ -97,6 +107,10 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
         private async Task UpdateVideoResult(VideoResult videoResult, Guid videoTimeCodeId)
         {
             videoResult.CurrentVideoTimeCodeId = videoTimeCodeId;
+            if (!videoResult.ProcessDate.HasValue)
+            {
+                videoResult.ProcessDate = DateTime.UtcNow;
+            }
             await _videoResultRepository.BulkUpdateList(new List<VideoResult> { videoResult }, bulk =>
             {
                 bulk.ColumnInputExpression = entity => new { entity.CurrentVideoTimeCodeId };

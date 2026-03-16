@@ -8,6 +8,9 @@ WORKDIR /app
 EXPOSE 80
 EXPOSE 443
 
+COPY install.sh /usr/local/bin/install.sh
+RUN chmod +x /usr/local/bin/install.sh && /usr/local/bin/install.sh
+
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
 COPY ["Services/Fsel.Sender/Fsel.Sender.Api/Fsel.Sender.Api.csproj", "Services/Fsel.Sender/Fsel.Sender.Api/"]

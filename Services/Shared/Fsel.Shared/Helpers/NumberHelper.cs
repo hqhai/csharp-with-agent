@@ -22,6 +22,17 @@ namespace Fsel.Shared.Helpers
             return rounded / 4;
         }
 
+        public static double CustomRound(double value)
+        {
+            double integerPart = Math.Truncate(value);
+            double decimalPart = value - integerPart;
+
+            if (decimalPart <= 0.5)
+                return Math.Floor(value);
+            else
+                return Math.Ceiling(value);
+        }
+
         public static double RoundNumberDouble(double number)
         {
             double fractionalPart = number - Math.Floor(number);

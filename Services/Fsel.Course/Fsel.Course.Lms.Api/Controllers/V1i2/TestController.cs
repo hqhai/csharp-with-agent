@@ -8,7 +8,6 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i2
     using Common.ActionResults;
     using Common.Attributes;
     using Common.Constants;
-    using Domain.Enums;
     using Domain.Models.EntityModels.PlacementTestModels;
     using Domain.Models.EntityModels.TestModels;
     using MediatR;
@@ -20,7 +19,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i2
     [ApiVersions(ApiSettings.APIVersion1i2)]
     [Route(Settings.APIDefaultRoute + "/test")]
     [ApiController]
-    [Permission(role: nameof(EnumRole.Student))]
+    [Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
     public class TestController : ControllerBase
     {
         private readonly IMediator _mediator;

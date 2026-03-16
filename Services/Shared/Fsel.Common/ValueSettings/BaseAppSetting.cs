@@ -14,6 +14,8 @@ namespace Fsel.Common.ValueSettings
         public string? SenderApiUrl { get; set; }
         public string? UserApiUrl { get; set; }
         public string? ClassApiUrl { get; set; }
+        public string? StorageApiUrl { get; set; }
+        public string? SystemApiUrl { get; set; }
     }
 
     public class Jwt

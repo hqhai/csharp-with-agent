@@ -185,6 +185,18 @@ namespace Fsel.Shared.Helpers
                 urls.Add(url);
             }
 
+            if (isAudio)
+            {
+                string audioTagPattern = @"<audio[^>]*\ssrc=""([^""]+)""[^>]*>";
+
+                var audioTagMatches = Regex.Matches(inputHtml, audioTagPattern, RegexOptions.Singleline | RegexOptions.IgnoreCase);
+
+                foreach (Match match in audioTagMatches)
+                {
+                    urls.Add(match.Groups[1].Value);
+                }
+            }
+
             return urls;
         }
 
@@ -388,6 +400,18 @@ namespace Fsel.Shared.Helpers
                 return Regex.Replace(input.Trim().ToLowerInvariant(), @"\s+", " ");
             }
 
+            // Hàm loại bỏ mọi khoảng trắng
+            private static string RemoveWhitespace(string input)
+            {
+                if (string.IsNullOrWhiteSpace(input))
+                {
+                    return string.Empty;
+                }
+
+                var normalized = input.Trim().ToLowerInvariant();
+                return Regex.Replace(normalized, @"\s+", "");
+            }
+
             // Hàm loại bỏ toàn bộ dấu câu
             public static string RemovePunctuation(string input)
             {
@@ -444,6 +468,16 @@ namespace Fsel.Shared.Helpers
                 }
                 string noPunctuation = RemovePunctuation(input);
                 return NormalizeWhitespaceAndCase(noPunctuation);
+            }
+
+            public static string CleanTextV2(string input)
+            {
+                if (string.IsNullOrWhiteSpace(input))
+                {
+                    return string.Empty;
+                }
+                string noPunctuation = RemovePunctuation(input);
+                return RemoveWhitespace(noPunctuation);
             }
 
             // Hàm xử lý danh sách đáp án

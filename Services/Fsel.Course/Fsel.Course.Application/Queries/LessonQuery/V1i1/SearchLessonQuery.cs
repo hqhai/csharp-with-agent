@@ -113,6 +113,7 @@ namespace Fsel.Course.Application.Queries.LessonQuery.V1i1
                 UpdatedFullName = x.Lesson.UpdatedFullName,
                 UpdatedUserId = x.Lesson.UpdatedUserId,
                 Name = x.Lesson.Name,
+                Code = x.Lesson.Code,
                 Status = x.Lesson.Status,
                 LevelId = x.Lesson.LevelId,
                 ProgramId = x.Lesson.ProgramId,

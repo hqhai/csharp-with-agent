@@ -18,8 +18,7 @@ namespace Fsel.Course.Domain.Entities
         public int ConsecutiveBehindWeeks { get; set; }
         public EnumCombinedProgress? CurrentCombinedProgress { get; set; }
         public EnumCombinedProgress? CombinedProgress { get; set; }
-        public EnumCourseLevel CourseLevel { get; set; }
-        public EnumCourseType CourseType { get; set; }
+
         public bool IsActive { get; set; }
 
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
@@ -35,6 +34,12 @@ namespace Fsel.Course.Domain.Entities
         public Guid CourseId { get; set; }
         public Guid CourseGoalId { get; set; }
         public Guid CourseGoalConfigId { get; set; }
+        public Guid CourseResultId { get; set; }
+
+        public Guid? LevelId { get; set; }
+        public Level? Level { get; set; }
+        public Guid? ProgramId { get; set; }
+        public Category? Program { get; set; }
         public ICollection<StudentGoalSummary> StudentGoalSummaries { get; set; } = new List<StudentGoalSummary>();
     }
 }

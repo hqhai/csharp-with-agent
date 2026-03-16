@@ -3,6 +3,7 @@
 namespace Fsel.Course.Domain.Entities
 {
     using System.ComponentModel.DataAnnotations;
+    using Fsel.Common.Attributes;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
     using Fsel.Course.Domain.Entities.FlowConfigs;
@@ -11,13 +12,19 @@ namespace Fsel.Course.Domain.Entities
     public class Level : Entity
     {
         [MaxLength(200, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [RegexValid(Regex = @"^[^<>]*$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
         public string? Name { get; set; }
 
         [MaxLength(200, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [RegexValid(Regex = @"^[^<>]*$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
         public string? Code { get; set; }
 
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [RegexValid(Regex = @"^[^<>]*$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
         public string? Description { get; set; }
+
+        [MaxLength(2000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? PTDescription { get; set; }
 
         public int LevelOrder { get; set; }
 
@@ -37,5 +44,7 @@ namespace Fsel.Course.Domain.Entities
 
         public ICollection<TestGroupResult> TestGroupResults { get; set; } = new List<TestGroupResult>();
         public ICollection<TestGroupResult> TestGroupResultsForCurrentLevel { get; set; } = new List<TestGroupResult>();
+        public ICollection<TestGroupResult> TestGroupResultsForEmailLevel { get; set; } = new List<TestGroupResult>();
+        public ICollection<StudentGoalAggregate> StudentGoalAggregates { get; set; } = new List<StudentGoalAggregate>();
     }
 }

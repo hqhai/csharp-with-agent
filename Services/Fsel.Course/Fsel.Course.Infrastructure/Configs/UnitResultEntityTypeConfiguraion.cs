@@ -2,9 +2,7 @@
 
 namespace Fsel.Course.Infrastructure.Configs
 {
-    using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
-    using Fsel.Course.Domain.Enums;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -39,10 +37,10 @@ namespace Fsel.Course.Infrastructure.Configs
                    .WithMany(b => b.UnitResults)
                    .HasForeignKey(b => b.CourseResultId)
                    .OnDelete(DeleteBehavior.NoAction);
-
-            builder.HasIndex(c => new { c.CourseId, c.UnitId, c.StudentId }).IsUnique().HasFilter("[IsDeleted] = 0");
             builder.HasIndex(c => new { c.StudentId, c.Status });
-            builder.HasIndexIncludeAllProperties(c => new { c.CreatedUserId });
+            //builder.HasIndexIncludeAllProperties(c => new { c.CreatedUserId });
+
+            builder.HasIndex(c => new { c.CourseResultId, c.CourseModuleId, c.IsDeleted });
         }
     }
 }

@@ -128,7 +128,6 @@ namespace Fsel.Identity.Application.Queries.UserQuery
 
             var userModel = _mapper.Map<UserProfileModel>(userView ?? user);
             userModel.IsEnabledExtra = isEnabledExtra;
-            _mapper.Map(userView, userModel);
 
             if (userRoles.FirstOrDefault() == EnumRole.Student.ToString() || userRoles.FirstOrDefault() == EnumRole.StudentCampus.ToString())
             {

@@ -13,14 +13,11 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
     using Fsel.Course.Domain.Models.CommandModels.FinalTestAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
-    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.UserServices;
-    using Fsel.Shared.Constants;
-    using Fsel.Shared.Enums;
+    using Fsel.Shared.ApplicationServices.CacheServices;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
-    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -41,6 +38,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
         private readonly IUserService _userService;
         private readonly ICourseRepository _courseRepository;
         private readonly QuestBoardPublisher _questBoardPublisher;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
 
         public CreateFinalTestAnswerCommandHandler(
             IQuestionRepository questionRepository
@@ -52,7 +50,8 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
             , IUserService userService
             , ICourseRepository courseRepository,
               QuestBoardPublisher questBoardPublisher,
-              QuestionConverter questionConverter)
+              QuestionConverter questionConverter,
+              IRequestSafeCachingService requestSafeCachingService)
         {
             _questionRepository = questionRepository;
             _finalTestAnswerRepository = finalTestAnswerRepository;
@@ -64,6 +63,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
             _courseRepository = courseRepository;
             _questBoardPublisher = questBoardPublisher;
             _questionConverter = questionConverter;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         public async Task<MethodResult<FinalTestResultModel>> Handle(CreateFinalTestAnswerCommand request, CancellationToken cancellationToken)
@@ -113,10 +113,16 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                     Status = EnumResultStatus.Process
                 };
 
-                await _finalTestResultRepository.BulkMergeAsync(new List<FinalTestResult> { finalTestResult }, bulk =>
-                {
-                    bulk.ColumnPrimaryKeyExpression = c => new { c.CourseId, c.StudentId, c.FinalTestId, c.IsDeleted };
-                });
+                await _requestSafeCachingService.SafeRequest<FinalTestResult>(
+                    key: $"Add_FinalTestResult_{finalTestResult.CourseId}_{finalTestResult.StudentId}_{finalTestResult.FinalTestId}_{finalTestResult.IsDeleted}",
+                    safeFunction: async () =>
+                    {
+                        await _finalTestResultRepository.BulkMergeAsync(new List<FinalTestResult> { finalTestResult }, bulk =>
+                        {
+                            bulk.ColumnPrimaryKeyExpression = c => new { c.CourseId, c.StudentId, c.FinalTestId, c.IsDeleted };
+                        });
+                        return finalTestResult;
+                    });
             }
             else if (finalTestResult.Status == EnumResultStatus.Done)
             {

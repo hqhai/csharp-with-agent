@@ -14,6 +14,7 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.ApplicationServices.CacheServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels.CampusModel;
     using MediatR;
@@ -35,8 +36,9 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
         private readonly ITrainingService _trainingService;
         private readonly ICourseResultRepository _courseResultRepository;
         private readonly IMediator _mediator;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
 
-        public DeleteStudentsFromCurriculumCommandHandler(ICurriculumRepository curriculumRepository, ICurriculumStudentRepository curriculumStudentRepository, IUserService userService, ICourseRepository courseRepository, ITrainingService trainingService, IMediator mediator, ICourseResultRepository courseResultRepository)
+        public DeleteStudentsFromCurriculumCommandHandler(ICurriculumRepository curriculumRepository, ICurriculumStudentRepository curriculumStudentRepository, IUserService userService, ICourseRepository courseRepository, ITrainingService trainingService, IMediator mediator, ICourseResultRepository courseResultRepository, IRequestSafeCachingService requestSafeCachingService)
         {
             _curriculumRepository = curriculumRepository;
             _curriculumStudentRepository = curriculumStudentRepository;
@@ -45,6 +47,7 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
             _trainingService = trainingService;
             _mediator = mediator;
             _courseResultRepository = courseResultRepository;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         public async Task<MethodResult<bool>> Handle(DeleteStudentsFromCurriculumCommand request, CancellationToken cancellationToken)
@@ -171,10 +174,16 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
 
                 if (createCourseResults.Any())
                 {
-                    await _courseResultRepository.BulkMergeAsync(createCourseResults, bulk =>
-                    {
-                        bulk.ColumnPrimaryKeyExpression = c => new { c.CourseId, c.StudentId, c.IsDeleted };
-                    });
+                    await _requestSafeCachingService.SafeRequest(
+                    key: $"Add_CourseResults_{string.Join("_", createCourseResults.Select(vtca => $"{vtca.CourseId}_{vtca.WorkingStatus}_{vtca.StudentId}_{vtca.IsDeleted}"))}",
+                        safeFunction: async () =>
+                        {
+                            await _courseResultRepository.BulkMergeAsync(createCourseResults, bulk =>
+                            {
+                                bulk.ColumnPrimaryKeyExpression = c => new { c.CourseId, c.WorkingStatus, c.StudentId, c.IsDeleted };
+                            });
+                            return createCourseResults;
+                        });
                 }
 
                 if (updateCourseResults.Any())

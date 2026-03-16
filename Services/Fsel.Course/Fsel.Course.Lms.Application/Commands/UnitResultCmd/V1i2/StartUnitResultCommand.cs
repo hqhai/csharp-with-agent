@@ -84,10 +84,12 @@ namespace Fsel.Course.Lms.Application.Commands.UnitResultCmd.V1i2
                 if (courseResult.Status == EnumResultStatus.New)
                 {
                     courseResult.Status = EnumResultStatus.Process;
+                    courseResult.ProcessDate = DateTime.UtcNow;
                     await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
                 }
 
                 unitResult.Status = EnumResultStatus.Process;
+                unitResult.ProcessDate = DateTime.UtcNow;
                 await _unitResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
 
                 return methodResult;

@@ -9,6 +9,7 @@ using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Audio;
 using Microsoft.CognitiveServices.Speech.PronunciationAssessment;
 using Microsoft.Extensions.Logging;
+using System.Net.Http;
 
 namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
 {
@@ -21,19 +22,45 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
         private readonly AppSetting _appSetting;
         private readonly IUnitRepository _unitRepository;
         private readonly ILogger<PronuciationAssessmentService> _logger;
+        private readonly IHttpClientFactory _httpClientFactory;
         private const int LowAccuracyScore = 60;
         private const int MediumAccuracyScore = 80;
+
+        /// <summary>
+        /// Xác định ngôn ngữ dựa trên nội dung văn bản
+        /// Trả về "ja-JP" nếu chứa ký tự Hán tự, ngược lại trả về "en-US"
+        /// </summary>
+        private static string DetectLanguageFromText(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+            {
+                return "en-US";
+            }
+
+            // Kiểm tra xem có chứa ký tự Hán tự (CJK Unified Ideographs: U+4E00 - U+9FFF)
+            foreach (char c in text)
+            {
+                if (c >= 0x4E00 && c <= 0x9FFF)
+                {
+                    return "ja-JP";
+                }
+            }
+
+            // Mặc định là tiếng Anh nếu không có ký tự Hán tự
+            return "en-US";
+        }
 
         /// <summary>
         /// Khởi tạo dịch vụ đánh giá phát âm với Azure
         /// </summary>
         /// <param name="subscriptionKey">Khóa đăng ký của Azure</param>
         /// <param name="region">Khu vực của dịch vụ</param>
-        public PronuciationAssessmentService(AppSetting appSetting, ILogger<PronuciationAssessmentService> logger, IUnitRepository unitRepository)
+        public PronuciationAssessmentService(AppSetting appSetting, ILogger<PronuciationAssessmentService> logger, IUnitRepository unitRepository, IHttpClientFactory httpClientFactory)
         {
             _appSetting = appSetting;
             _logger = logger;
             _unitRepository = unitRepository;
+            _httpClientFactory = httpClientFactory;
             _speechConfig = SpeechConfig.FromSubscription(_appSetting!.AzureAiConfig!.SecondApiKey, _appSetting!.AzureAiConfig!.Location);
             _speechConfig.SpeechRecognitionLanguage = _appSetting!.AzureAiConfig!.SpeechRecognitionLanguage;
 
@@ -54,6 +81,10 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
             {
                 throw new ArgumentNullException(nameof(referenceText), "Văn bản tham chiếu không được để trống");
             }
+
+            // Gán lại ngôn ngữ dựa trên referenceText
+            _speechConfig.SpeechRecognitionLanguage = DetectLanguageFromText(referenceText);
+
             var pronunciationConfig = PronunciationAssessmentConfig.FromJson($"{{\"referenceText\":\"{referenceText}\",\"gradingSystem\":\"HundredMark\",\"granularity\":\"Phoneme\",\"enableSyllableLevelAssessment\":true,\"enablePhonemeLevelAssessment\":true,\"enableProsodyAssessment\":true}}");
 
             using var audioConfig = AudioConfig.FromDefaultMicrophoneInput();
@@ -179,7 +210,8 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                 {
                     // Tải file từ URL
                     localFilePath = Path.Combine(Path.GetTempPath(), $"audio_{Guid.NewGuid()}.wav");
-                    using (var httpClient = new HttpClient())
+                    var httpClient = _httpClientFactory.CreateClient();
+                    try
                     {
                         using (var response = await httpClient.GetAsync(audioFilePath))
                         {
@@ -189,6 +221,11 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                                 await response.Content.CopyToAsync(fileStream);
                             }
                         }
+                    }
+                    catch (HttpRequestException ex)
+                    {
+                        _logger.LogError(ex, "Failed to download audio file from URL: {Url}, StatusCode: {StatusCode}", audioFilePath, ex.StatusCode);
+                        throw new InvalidOperationException($"Không thể tải file âm thanh từ URL: {audioFilePath}. Lỗi: {ex.Message}", ex);
                     }
                 }
 
@@ -209,6 +246,9 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                 }
 
                 // Bước 3: Cấu hình và thực hiện đánh giá phát âm với RecognizeOnceAsync
+                // Gán lại ngôn ngữ dựa trên referenceText
+                _speechConfig.SpeechRecognitionLanguage = DetectLanguageFromText(referenceText);
+
                 var pronunciationConfig = PronunciationAssessmentConfig.FromJson($"{{\"referenceText\":\"{referenceText}\",\"gradingSystem\":\"HundredMark\",\"granularity\":\"Phoneme\",\"enableSyllableLevelAssessment\":true,\"enablePhonemeLevelAssessment\":true,\"enableProsodyAssessment\":true,\"enableMiscue\":\"true\"}}");
 
                 // Đảm bảo sử dụng IPA
@@ -394,6 +434,9 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                 throw new ArgumentNullException(nameof(referenceText), "Văn bản tham chiếu không được để trống");
             }
 
+            // Gán lại ngôn ngữ dựa trên referenceText
+            _speechConfig.SpeechRecognitionLanguage = DetectLanguageFromText(referenceText);
+
             var unit = await _unitRepository.GetByIdAsync(unitId);
             var pronunciationConfig = PronunciationAssessmentConfig.FromJson($"{{\"referenceText\":\"{referenceText}\",\"gradingSystem\":\"HundredMark\",\"granularity\":\"Phoneme\",\"enableSyllableLevelAssessment\":true,\"enablePhonemeLevelAssessment\":true,\"enableProsodyAssessment\":true}}");
 
@@ -432,8 +475,8 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                 {
                     // Tải file từ URL
                     localFilePath = Path.Combine(Path.GetTempPath(), $"audio_{Guid.NewGuid()}.wav");
-
-                    using (var httpClient = new HttpClient())
+                    var httpClient = _httpClientFactory.CreateClient();
+                    try
                     {
                         using (var response = await httpClient.GetAsync(audioFilePath))
                         {
@@ -443,6 +486,11 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                                 await response.Content.CopyToAsync(fileStream);
                             }
                         }
+                    }
+                    catch (HttpRequestException ex)
+                    {
+                        _logger.LogError(ex, "Failed to download audio file from URL: {Url}, StatusCode: {StatusCode}", audioFilePath, ex.StatusCode);
+                        throw new InvalidOperationException($"Không thể tải file âm thanh từ URL: {audioFilePath}. Lỗi: {ex.Message}", ex);
                     }
                 }
 
@@ -463,6 +511,9 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                 }
 
                 // Bước 3: Cấu hình và thực hiện đánh giá phát âm với continuous recognition
+                // Gán lại ngôn ngữ dựa trên referenceText
+                _speechConfig.SpeechRecognitionLanguage = DetectLanguageFromText(referenceText);
+
                 //var pronunciationConfig = PronunciationAssessmentConfig.FromJson($"{{\"referenceText\":\"{referenceText}\",\"gradingSystem\":\"HundredMark\",\"granularity\":\"Phoneme\",\"enableSyllableLevelAssessment\":true,\"enablePhonemeLevelAssessment\":true,\"enableProsodyAssessment\":true,\"enableMiscue\":\"true\"}}");
                 var pronunciationConfig = new PronunciationAssessmentConfig(
                 referenceText: referenceText,

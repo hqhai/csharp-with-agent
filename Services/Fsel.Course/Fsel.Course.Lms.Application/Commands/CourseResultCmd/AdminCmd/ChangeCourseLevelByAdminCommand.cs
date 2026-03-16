@@ -14,9 +14,11 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd.AdminCmd
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Queues.Publishers;
+    using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.TrainingServices.CommandModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.ApplicationServices.CacheServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Models.ShareModels;
@@ -43,6 +45,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd.AdminCmd
         private readonly ICourseResultRepository _courseResultRepository;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
 
         public ChangeCourseLevelCommandHandler(IMapper mapper
             , ITrainingService trainingService
@@ -52,7 +55,8 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd.AdminCmd
             , ILogger<ChangeCourseLevelByAdminCommand> logger
             , ICourseResultRepository courseResultRepository
             , NotificationMessagePublisher notificationMessagePublisher
-            , IHttpContextAccessor httpContextAccessor)
+            , IHttpContextAccessor httpContextAccessor
+            , IRequestSafeCachingService requestSafeCachingService)
         {
             _mapper = mapper;
             _trainingService = trainingService;
@@ -63,6 +67,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd.AdminCmd
             _courseResultRepository = courseResultRepository;
             _notificationMessagePublisher = notificationMessagePublisher;
             _httpContextAccessor = httpContextAccessor;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         public async Task<MethodResult<CourseResultModel>> Handle(ChangeCourseLevelByAdminCommand request, CancellationToken cancellationToken)
@@ -150,16 +155,23 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd.AdminCmd
                     }
                     try
                     {
-                        await _courseResultRepository.BulkMergeAsync(new List<CourseResult> { courseResult }, bulk =>
+                        await _requestSafeCachingService.SafeRequest<CourseResult>(
+                        key: $"Add_CourseResult_{courseResult.CourseId}_{courseResult.StudentId}_{courseResult.WorkingStatus}_{courseResult.IsDeleted}",
+                        safeFunction: async () =>
                         {
-                            bulk.ColumnPrimaryKeyExpression = c => new { c.CourseId, c.StudentId, c.IsDeleted };
+                            await _courseResultRepository.BulkMergeAsync(new List<CourseResult> { courseResult }, bulk =>
+                            {
+                                bulk.ColumnPrimaryKeyExpression = c => new { c.CourseId, c.StudentId, c.WorkingStatus, c.IsDeleted };
+                            });
+                            return courseResult;
                         });
                     }
                     catch (Exception ex)
                     {
                         _logger.LogWarning($"Log Duplicate CourseResult : {ex.Message}");
-                        courseResult = await _courseResultRepository.Queryable.Where(x => x.WorkingStatus == EnumWorkingStatus.Active && x.StudentId == student.Id)
-                                                                              .FirstOrDefaultAsync(cancellationToken) ?? new CourseResult();
+                        courseResult = await _courseResultRepository.Queryable
+                                                                    .Where(x => x.WorkingStatus == EnumWorkingStatus.Active && x.StudentId == student.Id)
+                                                                    .FirstOrDefaultAsync(cancellationToken) ?? new CourseResult();
                     }
                 }
                 else

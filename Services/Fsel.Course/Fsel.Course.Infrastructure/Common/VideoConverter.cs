@@ -18,6 +18,7 @@ namespace Fsel.Course.Infrastructure.Common
     using Fsel.Course.Domain.Models.CommandModels.Videos;
     using Fsel.Course.Domain.Models.CommandModels.VideoTimeCodes;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Shared.ApplicationServices.CacheServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using Microsoft.EntityFrameworkCore;
@@ -40,6 +41,7 @@ namespace Fsel.Course.Infrastructure.Common
         private readonly IQuestionShuffleRepository _questionShuffleRepository;
         private readonly IQuestionExplanationErrorRepository _questionExplanationErrorRepository;
         private readonly ISkillRepository _skillRepository;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
         private const int NumberOfQuestion = 1;
         private List<VideoTimeCode> DeleteVideoTimeCodes = new List<VideoTimeCode>();
         private List<Exercise> DeleteExercises = new List<Exercise>();
@@ -60,7 +62,8 @@ namespace Fsel.Course.Infrastructure.Common
             , IMapper mapper
             , IQuestionShuffleRepository questionShuffleRepository
             , IQuestionExplanationErrorRepository questionExplanationErrorRepository
-            , ISkillRepository skillRepository)
+            , ISkillRepository skillRepository
+            , IRequestSafeCachingService requestSafeCachingService)
         {
             _videoRepository = videoRepository;
             _questionRepository = questionRepository;
@@ -78,6 +81,7 @@ namespace Fsel.Course.Infrastructure.Common
             _questionShuffleRepository = questionShuffleRepository;
             _questionExplanationErrorRepository = questionExplanationErrorRepository;
             _skillRepository = skillRepository;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         #region ADD
@@ -286,36 +290,11 @@ namespace Fsel.Course.Infrastructure.Common
                 return methodResult;
             }
 
-            var isExistName = await _videoRepository.Queryable.AnyAsync(x => x.Name == request.Name && (!request.OriginalId.HasValue || (x.OriginalId != request.OriginalId && x.Id != request.OriginalId)));
+            var isExistName = await _videoRepository.Queryable.AnyAsync(x => x.Name == request.Name);
             if (isExistName)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNameIsExist), nameof(request.Name), request.Name);
                 return methodResult;
-            }
-            switch (request.CourseLevel.GetEnumCourseType())
-            {
-                case EnumCourseType.Academic:
-                    break;
-
-                case EnumCourseType.Ielts:
-                    if (request.VideoTimeCodes.Any(x => x.TimeCodeType != EnumTimeCodeType.Standalone))
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.IeltsAcceptsStandalone),
-                            nameof(request.VideoTimeCodes),
-                            request.VideoTimeCodes.Where(x => x.TimeCodeType != EnumTimeCodeType.Standalone).Select(x => x.DisplayTime));
-                        return methodResult;
-                    }
-                    break;
-
-                case EnumCourseType.EnglishFoundation:
-                    if (request.VideoTimeCodes.Any(x => x.TimeCodeType == EnumTimeCodeType.SkillTest))
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.AdultFoundationNotAcceptsSkillTest),
-                            nameof(request.VideoTimeCodes),
-                            request.VideoTimeCodes.Where(x => x.TimeCodeType != EnumTimeCodeType.Standalone).Select(x => x.DisplayTime));
-                        return methodResult;
-                    }
-                    break;
             }
 
             var method = await AddTimeCodeToVideo(video, request.VideoTimeCodes);
@@ -542,7 +521,7 @@ namespace Fsel.Course.Infrastructure.Common
                 return methodResult;
             }
 
-            var isExistName = await _videoRepository.Queryable.AnyAsync(x => x.Name == request.Name && x.Id != request.Id && (!video.OriginalId.HasValue || (x.OriginalId != video.OriginalId && x.Id != video.OriginalId)));
+            var isExistName = await _videoRepository.Queryable.AnyAsync(x => x.Name == request.Name && x.Id != request.Id && (x.OriginalId != video.OriginalId && x.Id != video.OriginalId));
             if (isExistName)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNameIsExist), nameof(request.Name), request.Name);
@@ -632,9 +611,9 @@ namespace Fsel.Course.Infrastructure.Common
         {
             ArgumentNullException.ThrowIfNull(videoResult);
 
-            var videoTimeCodeResults = await _videoTimeCodeResultRepository.Queryable.Include(x => x.VideoTimeCode)
+            var videoTimeCodeResults = await _videoTimeCodeResultRepository.ReadQueryable
+                                                .Include(x => x.VideoTimeCode)
                                                 .Where(x => x.VideoResultId == videoResult.Id && x.CreatedDate >= videoResult.CreatedDate)
-                                                .Where(x => !(videoResult.Status == EnumResultStatus.Done) || x.UpdatedDate <= videoResult.UpdatedDate)
                                                 .ToListAsync(cancellationToken);
 
             // Tính token cho Standalone TimeCode
@@ -660,16 +639,16 @@ namespace Fsel.Course.Infrastructure.Common
                     g.SelectMany(v => v.SkillScores!)
                      .GroupBy(s => new
                      {
-                         s.Skill,      // EnumCourseSkill (cũ)
                          s.SkillId,    // Guid? / int? (mới)
                          s.SkillName,  // string? (mới)
+                         s.SkillFilePath,
                          TimeCodeType = g.Key
                      })
                      .Select(x => new
                      {
                          Type = x.Key.TimeCodeType,
-                         Skill = x.Key.Skill,
                          SkillId = x.Key.SkillId,
+                         SkillFilePath = x.Key.SkillFilePath,
                          SkillName = x.Key.SkillName,
                          CorrectCount = x.Sum(y => y.CorrectCount),
                          TotalCount = x.Sum(y => y.TotalCount),
@@ -690,9 +669,9 @@ namespace Fsel.Course.Infrastructure.Common
                         .Where(x => x.TotalQuestion != 0)
                         .Select(x => new SkillScores
                         {
-                            Skill = x.Skill,        // EnumCourseSkill (dùng hiện tại)
                             SkillId = x.SkillId,      // dùng dần về sau
                             SkillName = x.SkillName,    // dùng dần về sau
+                            SkillFilePath = x.SkillFilePath,
                             TotalCount = x.TotalCount,
                             CorrectQuestion = x.CorrectQuestion,
                             CorrectCount = x.CorrectCount,
@@ -700,7 +679,7 @@ namespace Fsel.Course.Infrastructure.Common
                             CountQuestion = x.CountQuestion,
                             TokenReceived = x.TokenReceived,
                         })
-                        .OrderBy(s => s.Skill)   // có thể thêm ThenBy(s => s.SkillName) nếu muốn
+                        .OrderBy(s => s.SkillName)   // có thể thêm ThenBy(s => s.SkillName) nếu muốn
                         .ToList()
                 })
                 .ToList();
@@ -708,13 +687,94 @@ namespace Fsel.Course.Infrastructure.Common
             return (videoSkillScores, tokenConfig?.TokenFirst, tokenConfig?.TokenLast);
         }
 
-        public async Task<(IList<VideoSkillScores>, bool)> GetVideoSkillScores(VideoResult videoResult, CancellationToken cancellationToken)
+        public async Task<(IList<VideoSkillScores>, bool)> GetVideoSkillScoresV2(VideoResult videoResult, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(videoResult);
+
             var videoTimeCodeResults = await _videoTimeCodeResultRepository.ReadQueryable
                     .Include(x => x.VideoTimeCode)
                     .Where(x => x.VideoResultId == videoResult.Id && x.CreatedDate >= videoResult.CreatedDate)
-                    .Where(x => !(videoResult.Status == EnumResultStatus.Done) || x.UpdatedDate <= videoResult.UpdatedDate)
+                    .ToListAsync(cancellationToken);
+
+            var answers = videoTimeCodeResults.Where(x => x.CorrectTotal > 0 && x.SkillScores != null && x.SkillScores.Any())
+                            .GroupBy(x => new { x.VideoTimeCode!.TimeCodeType })
+                            .SelectMany(g => g.SelectMany(x => x.SkillScores!).GroupBy(x => new { x.SkillId, g.Key.TimeCodeType }).Select(x => new
+                            {
+                                Type = x.Key.TimeCodeType,
+                                SkillId = x.Key.SkillId,
+                                CorrectCount = x.Sum(y => y.CorrectCount),
+                                TotalAnswer = x.Sum(y => y.CountQuestion),
+                                TokenReceived = x.Sum(x => x.TokenReceived)
+                            })).ToList();
+
+            var videoTimeCodes = await _videoTimeCodeRepository.ReadQueryable
+                                    .Include(x => x.TimeCodeExercises)
+                                    .ThenInclude(x => x.Exercise)
+                                    .ThenInclude(x => x!.ExerciseQuestions)
+                                    .ThenInclude(x => x.Question)
+                                    .Where(x => x.VideoId == videoResult.VideoId)
+                                    .ToListAsync(cancellationToken);
+
+            var listGroupVideoTimeCode = videoTimeCodes.GroupBy(x => x.TimeCodeType)
+                                        .Select(x =>
+                                            x.SelectMany(x => x.TimeCodeExercises).Select(x => x.Exercise)
+                                            .GroupBy(x => x!.SkillId)
+                                            .Select(y => new
+                                            {
+                                                Type = x.Key,
+                                                SkillId = y.Key,
+                                                Questions = y.SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question)
+                                                            .Where(x => !x!.Ungraded && x.QuestionType != EnumQuestionType.ExercisePreparation)
+                                                            .Select(x => new
+                                                            {
+                                                                TotalCount = x!.CorrectTotal,
+                                                                TotalQuestion = NumberOfQuestion
+                                                            })
+                                            }))
+                                        .ToList();
+
+            var listGroupQuestion = listGroupVideoTimeCode.SelectMany(x => x).Where(x => x.Questions.Any()).Select(x => new
+            {
+                Type = x.Type,
+                SkillId = x.SkillId,
+                TotalCount = x.Questions.Sum(x => x.TotalCount),
+                TotalQuestion = x.Questions.Sum(x => x.TotalQuestion)
+            });
+
+            var skills = await _skillRepository.ReadQueryable.ToListAsync(cancellationToken);
+            var types = Enum.GetValues(typeof(EnumTimeCodeType)).Cast<EnumTimeCodeType>();
+            var scoreQuery = from type in types
+                             select new VideoSkillScores
+                             {
+                                 Type = type,
+                                 SkillScores = (from skill in skills
+                                                join questionTimeCodeQ in listGroupQuestion on skill.Id equals questionTimeCodeQ.SkillId into questionTimeCodeQ_jointable
+                                                from questionTimeCodeQJ in questionTimeCodeQ_jointable.DefaultIfEmpty()
+                                                join answerTimeCodeQ in answers.AsQueryable() on skill.Id equals answerTimeCodeQ.SkillId into answerTimeCodeQ_jointable
+                                                from answerTimeCodeQJ in answerTimeCodeQ_jointable.DefaultIfEmpty()
+                                                where questionTimeCodeQJ != null && questionTimeCodeQJ.Type == type && (!(answerTimeCodeQJ != null) || answerTimeCodeQJ.Type == type)
+                                                select new SkillScores
+                                                {
+                                                    SkillId = skill.Id,
+                                                    SkillName = skill.Name,
+                                                    SkillFilePath = skill.FilePath,
+                                                    TotalCount = questionTimeCodeQJ.TotalCount,
+                                                    CorrectCount = answerTimeCodeQJ != null ? answerTimeCodeQJ.CorrectCount : default,
+                                                    TotalQuestion = questionTimeCodeQJ.TotalQuestion,
+                                                    CountQuestion = answerTimeCodeQJ != null ? answerTimeCodeQJ.TotalAnswer : default,
+                                                    TokenReceived = answerTimeCodeQJ != null ? answerTimeCodeQJ.TokenReceived : default,
+                                                }).ToList()
+                             };
+            return (scoreQuery.ToList(), listGroupQuestion.Sum(x => x.TotalQuestion) != answers.Sum(x => x.TotalAnswer));
+        }
+
+        public async Task<(IList<VideoSkillScores>, bool)> GetVideoSkillScores(VideoResult videoResult, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(videoResult);
+
+            var videoTimeCodeResults = await _videoTimeCodeResultRepository.ReadQueryable
+                    .Include(x => x.VideoTimeCode)
+                    .Where(x => x.VideoResultId == videoResult.Id && x.CreatedDate >= videoResult.CreatedDate)
                     .ToListAsync(cancellationToken);
 
             var answers = videoTimeCodeResults.Where(x => x.CorrectTotal > 0 && x.SkillScores != null && x.SkillScores.Any())
@@ -727,7 +787,8 @@ namespace Fsel.Course.Infrastructure.Common
                                 TotalAnswer = x.Sum(y => y.CountQuestion),
                                 TokenReceived = x.Sum(x => x.TokenReceived)
                             })).ToList();
-            var videoTimeCodes = await _videoTimeCodeRepository.ReadQueryable.Include(x => x.TimeCodeExercises)
+            var videoTimeCodes = await _videoTimeCodeRepository.ReadQueryable
+                                    .Include(x => x.TimeCodeExercises)
                                     .ThenInclude(x => x.Exercise)
                                     .ThenInclude(x => x!.ExerciseQuestions)
                                     .ThenInclude(x => x.Question)
@@ -787,36 +848,56 @@ namespace Fsel.Course.Infrastructure.Common
         public async Task<int> GetHighestStreak(VideoResult videoResult)
         {
             ArgumentNullException.ThrowIfNull(videoResult);
-            var questionIds = await (from baseQ in _videoTimeCodeRepository.Queryable
-                                     join te in _timeCodeExerciseRepository.Queryable on baseQ.Id equals te.VideoTimeCodeId
-                                     join e in _exerciseRepository.Queryable on te.ExerciseId equals e.Id
-                                     join eq in _exerciseQuestionRepository.Queryable on e.Id equals eq.ExerciseId
-                                     join q in _questionRepository.Queryable on eq.QuestionId equals q.Id
-                                     where baseQ.VideoId == videoResult.VideoId && baseQ.TimeCodeType == EnumTimeCodeType.Standalone
-                                      && !q.Ungraded && q.QuestionType != EnumQuestionType.ExercisePreparation
-                                     select q.Id).ToListAsync();
 
-            var answerQuery = from baseQ in _questionRepository.Queryable.WhereBulkContains(questionIds, x => x.Id)
-                              join vtca in _videoTimeCodeAnswerRepository.Queryable.Where(x => x.CreatedDate >= videoResult.CreatedDate && x.VideoResultId == videoResult.Id) on baseQ.Id equals vtca.QuestionId
-                              where vtca.VideoResultId == videoResult.Id
-                              orderby baseQ.CreatedDate
-                              select vtca.IsCorrect == true && vtca.IsFirstSubmit;
-            var highestStreaks = await answerQuery.ToListAsync();
-            if (highestStreaks == null)
-            {
-                return default;
-            }
-            return highestStreaks.GetHighestStreak();
+            var correctnessTimeline = await (from vtc in _videoTimeCodeRepository.ReadQueryable
+                                             join te in _timeCodeExerciseRepository.ReadQueryable
+                                                 on vtc.Id equals te.VideoTimeCodeId
+                                             join eq in _exerciseQuestionRepository.ReadQueryable
+                                                 on te.ExerciseId equals eq.ExerciseId
+                                             join q in _questionRepository.ReadQueryable
+                                                 on eq.QuestionId equals q.Id
+
+                                             join a in _videoTimeCodeAnswerRepository.ReadQueryable on q.Id equals a.QuestionId into answerGroup
+                                             from a in answerGroup.DefaultIfEmpty()
+
+                                             where vtc.VideoId == videoResult.VideoId
+                                             && a.VideoResultId == videoResult.Id
+                                             && !q.Ungraded
+                                             && q.QuestionType != EnumQuestionType.ExercisePreparation
+                                             && a.CreatedDate >= videoResult.CreatedDate
+                                             orderby q.CreatedDate
+                                             select a != null && a.IsCorrect == true && a.IsFirstSubmit)
+                                             .ToListAsync();
+
+            return correctnessTimeline.GetHighestStreak();
         }
 
         public async Task<int> GetHighestStreak(VideoTimeCodeResult videoTimeCodeResult)
         {
-            var answers = await _videoTimeCodeAnswerRepository.Queryable.Where(x => x.VideoTimeCodeResultId == videoTimeCodeResult.Id)
-                                                .Where(x => x.CreatedDate >= videoTimeCodeResult.CreatedDate)
-                                                .Where(q => q.Question != null && !q.Question.Ungraded && q.Question.QuestionType != EnumQuestionType.ExercisePreparation)
-                                                .OrderBy(x => x.Question!.CreatedDate)
-                                                .Select(x => x.IsCorrect == true && x.IsFirstSubmit).ToListAsync();
-            return answers.GetHighestStreak();
+            ArgumentNullException.ThrowIfNull(videoTimeCodeResult);
+
+            var correctnessTimeline = await (
+                from vtc in _videoTimeCodeRepository.ReadQueryable
+                join te in _timeCodeExerciseRepository.ReadQueryable
+                    on vtc.Id equals te.VideoTimeCodeId
+                join eq in _exerciseQuestionRepository.ReadQueryable
+                    on te.ExerciseId equals eq.ExerciseId
+                join q in _questionRepository.ReadQueryable
+                    on eq.QuestionId equals q.Id
+
+                join a in _videoTimeCodeAnswerRepository.ReadQueryable on q.Id equals a.QuestionId into answerGroup
+                from a in answerGroup.DefaultIfEmpty()
+
+                where vtc.Id == videoTimeCodeResult.VideoTimeCodeId
+                && a.VideoTimeCodeResultId == videoTimeCodeResult.Id
+                && !q.Ungraded
+                && q.QuestionType != EnumQuestionType.ExercisePreparation
+                && a.CreatedDate >= videoTimeCodeResult.CreatedDate
+                orderby q.CreatedDate
+                select a != null && a.IsCorrect == true && a.IsFirstSubmit
+            ).ToListAsync();
+
+            return correctnessTimeline.GetHighestStreak();
         }
 
         private static bool GetUngraded(VideoTimeCode? videoTimeCode)
@@ -914,7 +995,7 @@ namespace Fsel.Course.Infrastructure.Common
                     questionModel.Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: !(isCheck)).Item1;
 
                     var questionShuffle = questionShuffles.FirstOrDefault(x => x.QuestionId == question.Id);
-                    (questionModel.Config, string? questionShuffleStr) = _questionTypeConverter.QuestionShuffleConverterObject(questionModel.Config, question.QuestionType, questionShuffle?.ShuffleConfigs);
+                    (questionModel.Config, string? questionShuffleStr) = _questionTypeConverter.QuestionShuffleConverterObject(questionModel.Config, question.QuestionType, isCheck, questionShuffle?.ShuffleConfigs);
                     if (!string.IsNullOrEmpty(questionShuffleStr) && (questionShuffle == null || questionShuffle.ShuffleConfigStr != questionShuffleStr))
                     {
                         if (questionShuffle == null)
@@ -975,7 +1056,7 @@ namespace Fsel.Course.Infrastructure.Common
                 questionModel.Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: !(isCheck)).Item1;
 
                 var questionShuffle = questionShuffles.FirstOrDefault(x => x.QuestionId == question.Id);
-                (questionModel.Config, string? questionShuffleStr) = _questionTypeConverter.QuestionShuffleConverterObject(questionModel.Config, question.QuestionType, questionShuffle?.ShuffleConfigs);
+                (questionModel.Config, string? questionShuffleStr) = _questionTypeConverter.QuestionShuffleConverterObject(questionModel.Config, question.QuestionType, isCheck, questionShuffle?.ShuffleConfigs);
                 if (!string.IsNullOrEmpty(questionShuffleStr) && (questionShuffle == null || questionShuffle.ShuffleConfigStr != questionShuffleStr))
                 {
                     if (questionShuffle == null)
@@ -1209,10 +1290,16 @@ namespace Fsel.Course.Infrastructure.Common
                     };
                 }).ToList();
 
-                await _videoTimeCodeAnswerRepository.BulkMergeAsync(videoTimeCodeAnswers, bulk =>
-                {
-                    bulk.ColumnPrimaryKeyExpression = c => new { c.VideoResultId, c.VideoTimeCodeResultId, c.VideoTimeCodeId, c.QuestionId, c.IsDeleted };
-                });
+                await _requestSafeCachingService.SafeRequest(
+                       key: $"Add_VideoTimeCodeAnswer_{string.Join("_", videoTimeCodeAnswers.Select(hwa => $"{hwa.VideoTimeCodeResultId}_{hwa.QuestionId}_{hwa.IsDeleted}"))}",
+                       safeFunction: async () =>
+                       {
+                           await _videoTimeCodeAnswerRepository.BulkMergeAsync(videoTimeCodeAnswers, bulk =>
+                           {
+                               bulk.ColumnPrimaryKeyExpression = c => new { c.VideoTimeCodeResultId, c.QuestionId, c.IsDeleted };
+                           });
+                           return videoTimeCodeAnswers;
+                       });
             }
             if (updateVideoTimeCodeAnswers != null && updateVideoTimeCodeAnswers.Any())
             {

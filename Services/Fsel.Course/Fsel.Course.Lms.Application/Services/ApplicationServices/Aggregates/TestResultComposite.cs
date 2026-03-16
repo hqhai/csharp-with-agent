@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Models.EntityModels.PlacementTestModels;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using Microsoft.Extensions.DependencyInjection;
 
     public class TestResultComposite : ResultComposite
@@ -26,21 +27,25 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 TestResultId = TestResult.Id,
                 PercentResult = TestResult.Percent,
                 Status = TestResult.Status,
+                Description = Test?.Description,
                 Children = childStates,
+                Score = TestResult.Score,
                 UpdatedDate = TestResult?.UpdatedDate ?? TestResult?.CreatedDate
             };
             return stateModel;
         }
 
-        public override async Task Submit(Guid id)
+        public override async Task Submit(SubmitContext context)
         {
-            var skillMatch = Children.FirstOrDefault(x => x.IsBelongTo(id));
-            skillMatch?.Submit(id);
+            var skillMatch = Children.FirstOrDefault(x => x.IsBelongTo(context.Id));
+            skillMatch?.Submit(context);
+
             if (Children.All(c => c is TestSectionResultComposite tcr && tcr.TestSectionResult.Status == EnumResultStatus.Done))
             {
                 var test = await ServiceProvider.GetRequiredService<ITestService>().GetHierachicalTestById(TestResult.TestId.Value);
                 TestResult.Status = EnumResultStatus.Done;
                 TestResult.CorrectCount = Children.Cast<TestSectionResultComposite>().Sum(x => x.TestSectionResult.CorrectCount);
+                TestResult.Percent = NumberHelper.GetPercent(TestResult.CorrectCount, TestResult.CorrectTotal);
                 TestResult.SkillScores = Children.Cast<TestSectionResultComposite>().SelectMany(x =>
                 {
                     var correspondSection = test.TestSections.FirstOrDefault(y => y.Id == x.TestSectionResult.TestSectionId);
@@ -54,18 +59,31 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
                     return skillScores;
                 }).ToList();
+
+                if (context.ScoringFormulaType.HasValue)
+                {
+                    if (context.ScoringFormulaType == EnumScoringFormulaType.Percent)
+                    {
+                        TestResult.PercentModule = Children.Cast<TestSectionResultComposite>().Sum(x => x.TestSectionResult.PercentModule);
+                    }
+                    else if (context.ScoringFormulaType == EnumScoringFormulaType.BandScore)
+                    {
+                        TestResult.Score = Children.Cast<TestSectionResultComposite>().Sum(x => x.TestSectionResult.ScoreModule ?? default);
+                    }
+                }
             }
         }
 
-        public override async Task SubmitTest(Guid id, EnumScoringFormulaType? scoringFormulaType = null)
+        public override async Task SubmitTest(SubmitContext context)
         {
-            var skillMatch = Children.FirstOrDefault(x => x.IsBelongTo(id));
-            skillMatch?.SubmitTest(id, TestResult.Test?.ScoringFormulaType);
+            var skillMatch = Children.FirstOrDefault(x => x.IsBelongTo(context.Id));
+            skillMatch?.SubmitTest(context);
             if (Children.All(c => c is TestSectionResultComposite tcr && tcr.TestSectionResult.Status == EnumResultStatus.Done))
             {
                 var test = await ServiceProvider.GetRequiredService<ITestService>().GetHierachicalTestById(TestResult.TestId.Value);
                 TestResult.Status = EnumResultStatus.Done;
                 TestResult.CorrectCount = Children.Cast<TestSectionResultComposite>().Sum(x => x.TestSectionResult.CorrectCount);
+                TestResult.Percent = NumberHelper.GetPercent(TestResult.CorrectCount, TestResult.CorrectTotal);
                 TestResult.SkillScores = Children.Cast<TestSectionResultComposite>().SelectMany(x =>
                 {
                     var correspondSection = test.TestSections.FirstOrDefault(y => y.Id == x.TestSectionResult.TestSectionId);
@@ -75,10 +93,25 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                     {
                         skillScore.SkillId = correspondSection?.SkillId;
                         skillScore.SkillName = correspondSection?.Skill?.Name;
+                        skillScore.SkillFilePath = correspondSection?.Skill?.FilePath;
                     }
 
                     return skillScores;
                 }).ToList();
+
+                TestResult.HighestStreak = Children.Cast<TestSectionResultComposite>().Max(x => x.TestSectionResult.HighestStreak);
+
+                if (context.ScoringFormulaType.HasValue)
+                {
+                    if (context.ScoringFormulaType == EnumScoringFormulaType.Percent)
+                    {
+                        TestResult.PercentModule = Children.Cast<TestSectionResultComposite>().Sum(x => x.TestSectionResult.PercentModule);
+                    }
+                    else if (context.ScoringFormulaType == EnumScoringFormulaType.BandScore)
+                    {
+                        TestResult.Score = NumberHelper.RoundNumberDouble(Children.Cast<TestSectionResultComposite>().Sum(x => x.TestSectionResult.ScoreModule ?? default));
+                    }
+                }
             }
         }
 
@@ -146,6 +179,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 TestResultId = TestResult.Id,
                 PercentResult = TestResult.Percent,
                 Status = TestResult.Status,
+                Description = Test?.Description,
                 Children = childStates,
                 StepFlowId = TestResult.StepFlowId,
                 UpdatedDate = TestResult?.UpdatedDate ?? TestResult?.CreatedDate
@@ -153,7 +187,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             return stateModel;
         }
 
-        public async Task LoadTestHierarchicalData()
+        public override async Task LoadTestHierarchicalData()
         {
             if (TestResult.TestId == null)
             {
@@ -162,6 +196,19 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
             var testService = ServiceProvider.GetRequiredService<ITestService>();
             Test = await testService.GetHierachicalTestById(TestResult.TestId.Value);
+
+            if (Children != null && Test != null)
+            {
+                foreach (var child in Children.Where(x => x is TestSectionResultComposite).Cast<TestSectionResultComposite>())
+                {
+                    var testSection = Test.TestSections.FirstOrDefault(x => x.Id == child.TestSectionResult.TestSectionId);
+                    if (testSection != null)
+                    {
+                        child.TestSection = testSection;
+                        await child.LoadTestHierarchicalData();
+                    }
+                }
+            }
         }
     }
 }

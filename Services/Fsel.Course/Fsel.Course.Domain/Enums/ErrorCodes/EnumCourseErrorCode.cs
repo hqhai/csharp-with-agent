@@ -122,6 +122,16 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Course Module Not Null
         /// </summary>
-        CourseModulesNotNull
+        CourseModulesNotNull,
+
+        /// <summary>
+        /// Course is used
+        /// </summary>
+        CourseIsUsed,
+
+        /// <summary>
+        /// TotalPercentModule <= 99 || > 100
+        /// </summary>
+        TotalPercentModuleInvalid
     }
 }

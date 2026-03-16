@@ -64,10 +64,10 @@ namespace Fsel.System.Application.Commands.CourseGoalCmd
 
         private async Task<MethodResult<IList<CourseGoalModel>>> AddAsync(CreateCourseGoalCommand request, CancellationToken cancellationToken)
         {
-            MethodResult<IList<CourseGoalModel>> methodResult = new MethodResult<IList<CourseGoalModel>>();
+            var methodResult = new MethodResult<IList<CourseGoalModel>>();
             var courseGoal = await _courseGoalRepository.Queryable.Include(x => x.CourseGoalConfigs)
-                                                    .Where(x => x.CourseLevel == request.CourseLevel)
-                                                    .Where(x => x.CourseType == request.CourseType)
+                                                    .Where(x => x.LevelId == request.LevelId)
+                                                    .Where(x => x.ProgramId == request.ProgramId)
                                                     .FirstOrDefaultAsync(x => x.GoalCategory == request.GoalCategory, cancellationToken);
 
             if (courseGoal == null)
@@ -143,8 +143,8 @@ namespace Fsel.System.Application.Commands.CourseGoalCmd
         {
             VoidMethodResult methodResult = new VoidMethodResult();
             var courseGoals = await _courseGoalRepository.Queryable.Include(x => x.CourseGoalConfigs)
-                                                      .Where(x => x.CourseLevel == request.CourseLevel)
-                                                      .Where(x => x.CourseType == request.CourseType)
+                                                      .Where(x => x.LevelId == request.LevelId)
+                                                      .Where(x => x.ProgramId == request.ProgramId)
                                                       .Where(x => x.GoalCategory != request.GoalCategory)
                                                       .ToListAsync();
             foreach (var courseGoal in courseGoals)
@@ -177,7 +177,7 @@ namespace Fsel.System.Application.Commands.CourseGoalCmd
             }
             var existing = await _courseGoalRepository.Queryable.Include(x => x.CourseGoalConfigs).WhereBulkContains(request.Classes.Select(x => x.ClassId), x => x.ClassId)
                 .Where(x => x.SchoolId == request.SchoolId && x.GoalCategory == request.GoalCategory)
-                .Where(x => x.CourseLevel == request.CourseLevel && x.CourseType == request.CourseType)
+                .Where(x => x.LevelId == request.LevelId && x.ProgramId == request.ProgramId)
                 .ToListAsync(cancellationToken);
 
             var existingByClassId = existing.ToDictionary(x => x.ClassId ?? Guid.Empty, x => x);

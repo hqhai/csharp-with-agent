@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
-using static Sentry.MeasurementUnit;
 
 // Đảm bảo rằng bạn đã thêm namespace của ConnectionTracker
 
@@ -21,6 +20,7 @@ namespace Fsel.Realtime.Application.Hubs
         private readonly FeatureAccessTimePublisher _accessTimePublisher;
         private readonly AuthContext _authContext;
         private readonly ILogger<FeatureAccessTimeHub> _logger;
+
         private string? UserAgent
         {
             get
@@ -48,6 +48,7 @@ namespace Fsel.Realtime.Application.Hubs
             ConnectionTracker.Instance.RecordConnectionStart(Context.ConnectionId);
             _logger.LogInformation($"Connected FeatureAccessTime Socket: {Context.ConnectionId}, DateTime: {DateTime.UtcNow}");
         }
+
         public async Task AccessFeature(TrackingTimeModel model)
         {
             var userAgent = UserAgent;
@@ -62,7 +63,6 @@ namespace Fsel.Realtime.Application.Hubs
                 trackingModel.AccessTime = duration;
                 await _accessTimePublisher.Publish(trackingModel, CancellationToken.None);
                 _logger.LogInformation($"Invoke FeatureAccessTime Socket: {Context.ConnectionId},type: {trackingModel.EnumFeature}, duration : {duration}, model :{ConvertHelper.Serialize(trackingModel)}");
-
             }
 
             ConnectionTracker.Instance.RecordConnectionStart(Context.ConnectionId, model);
@@ -70,48 +70,53 @@ namespace Fsel.Realtime.Application.Hubs
 
         public override async Task OnDisconnectedHubAsync(Exception? exception)
         {
+            var httpContext = Context.GetHttpContext();
+            var query = httpContext?.Request.Query;
 
-            var userAgent = UserAgent;
-
-            string type = (Context.GetHttpContext()?.Request.Query["Type"].ToString()!);
+            var type = query?["Type"].ToString();
             var duration = ConnectionTracker.Instance.RecordConnectionEnd(Context.ConnectionId);
-
             var trackingModel = ConnectionTracker.Instance.GetModel(Context.ConnectionId);
 
-            _logger.LogInformation($"Disconect FeatureAccessTime Socket: {Context.ConnectionId},  duration : {duration}, type : {type}");
+            _logger.LogInformation(
+                "Disconnect FeatureAccessTime Socket: {ConnectionId}, duration: {Duration}, type: {Type}",
+                Context.ConnectionId, duration, type);
+
+            TrackingTimeModel model;
+
             if (trackingModel != null)
             {
                 trackingModel.AccessTime = duration;
-                await _accessTimePublisher.Publish(trackingModel, CancellationToken.None);
+                model = trackingModel;
             }
             else
             {
+                var userId = _authContext.CurrentUserId;
 
-                Guid userId = _authContext.CurrentUserId;
-                string lessonId = Context.GetHttpContext()?.Request.Query["LessonId"].ToString()!;
-                string unitId = Context.GetHttpContext()?.Request.Query["UnitId"].ToString()!;
-                string courseId = Context.GetHttpContext()?.Request.Query["CourseId"].ToString()!;
-                string objectId = Context.GetHttpContext()?.Request.Query["ObjectId"].ToString()!;
-
-                TrackingTimeModel model = new TrackingTimeModel
+                model = new TrackingTimeModel
                 {
                     UserId = userId,
                     EnumFeature = type,
-                    ObjectId = string.IsNullOrEmpty(objectId) ? null : new Guid(objectId),
-                    UnitId = string.IsNullOrEmpty(unitId) ? null : new Guid(unitId),
-                    LessonId = string.IsNullOrEmpty(lessonId) ? null : new Guid(lessonId),
-                    CourseId = string.IsNullOrEmpty(courseId) ? null : new Guid(courseId),
+                    CourseResultId = ParseGuid(query?["CourseResultId"]),
+                    CourseId = ParseGuid(query?["CourseId"]),
+                    UnitId = ParseGuid(query?["UnitId"]),
+                    LessonId = ParseGuid(query?["LessonId"]),
+                    ObjectId = ParseGuid(query?["ObjectId"]),
                     AccessTime = duration,
-                    UserAgent = userAgent
+                    UserAgent = UserAgent
                 };
 
-                if (!string.IsNullOrEmpty(userId.ToString()))
+                if (userId != Guid.Empty)
                 {
                     await Groups.RemoveGroupAsync(Context.ConnectionId, userId.ToString());
                 }
-
-                await _accessTimePublisher.Publish(model, CancellationToken.None);
             }
+
+            await _accessTimePublisher.Publish(model, CancellationToken.None);
+        }
+
+        private static Guid? ParseGuid(string? value)
+        {
+            return Guid.TryParse(value, out var guid) ? guid : null;
         }
     }
 }

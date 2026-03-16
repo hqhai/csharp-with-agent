@@ -186,7 +186,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             }
             var unitResult = await GetUnitResultProgressAsync(courseResult, cancellationToken);
 
-            var unitResultDones = await _unitResultRepository.Queryable.Include(x => x.Unit).Where(x => x.StudentId == courseResult.StudentId && x.Status == EnumResultStatus.Done)
+            var unitResultDones = await _unitResultRepository.Queryable.Include(x => x.Unit).Where(x => x.StudentId == courseResult.StudentId && x.Status == EnumResultStatus.Done && x.CourseResultId == courseResult.Id)
                                                        .OrderByDescending(x => x.CreatedDate).ToListAsync(cancellationToken);
             if (unitResult == null)
             {
@@ -208,7 +208,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
         private async Task<UnitResult?> GetUnitResultProgressAsync(CourseResult courseResult, CancellationToken cancellationToken)
         {
             var unitResults = await _unitResultRepository.Queryable.Include(x => x.Unit)
-                                                        .Where(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId)
+                                                        .Where(x => x.StudentId == courseResult.StudentId && x.CourseResultId == courseResult.Id)
                                                         .Where(x => x.Status != EnumResultStatus.Unfinished)
                                                         .OrderByDescending(x => x.CreatedDate)
                                                         .ToListAsync(cancellationToken);

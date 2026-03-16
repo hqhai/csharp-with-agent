@@ -9,17 +9,15 @@ namespace Fsel.System.Domain.Models.EntityModels
     public class ChatbotConfigModel : BaseModel
     {
         public string? ProgramName { get; set; }
+        public Guid ProgramId { get; set; }
         public string? CourseName { get; set; }
         public string? CEFRLevel { get; set; }
         public string? UnitNumber { get; set; }
-
         public string? UnitTopic { get; set; }
         public int NumberSkill { get; set; }
         public EnumChatbotConfigStatus Status { get; set; }
         public Guid UnitId { get; set; }
-
         public IList<ChatbotSkillConfigModel>? ChatbotSkillConfigs { get; set; }
-
         public ChatbotTokenConfigsModel? ChatbotTokenConfigs { get; set; }
     }
 }

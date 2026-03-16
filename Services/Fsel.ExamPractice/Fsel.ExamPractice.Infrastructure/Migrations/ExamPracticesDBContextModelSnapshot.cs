@@ -664,6 +664,9 @@ namespace Fsel.ExamPractice.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
 
+                    b.Property<Guid?>("AiPromptManagerId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("ConfigStr")
                         .HasColumnType("nvarchar(max)");
 

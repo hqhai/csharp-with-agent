@@ -34,7 +34,7 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
                 return methodResult;
             }
 
-            var featureAccessTimes = _featureAccessTimeRepository.Queryable.WhereBulkContains(request.UserIds, p => p.CreatedUserId);
+            var featureAccessTimes = _featureAccessTimeRepository.ReadQueryable.WhereBulkContains(request.UserIds, p => p.CreatedUserId);
 
             if (request.StartDate.HasValue)
             {

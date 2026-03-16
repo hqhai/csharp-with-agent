@@ -70,13 +70,13 @@ namespace Fsel.Course.Application.Queries.VideoQuery
                 return methodResult;
             }
 
-            var queryTimeCode = _videoTimeCodeRepository.Queryable;
+            var queryTimeCode = _videoTimeCodeRepository.ReadQueryable;
             if (request.TimeCodeType.HasValue)
             {
                 queryTimeCode = queryTimeCode.Where(x => x.TimeCodeType == request.TimeCodeType);
             }
 
-            var queryVideo = _videoRepository.Queryable.Where(x => !x.IsArchive).Where(v => v.VersionStatus == EnumVersionStatus.LastVersion);
+            var queryVideo = _videoRepository.ReadQueryable.Where(x => !x.IsArchive).Where(v => v.VersionStatus == EnumVersionStatus.LastVersion);
             request.Keyword = request.Keyword?.Trim().ToLower(CultureInfo.CurrentCulture);
             if (!string.IsNullOrEmpty(request.Keyword))
             {
@@ -110,9 +110,9 @@ namespace Fsel.Course.Application.Queries.VideoQuery
                          select video;
 
             var query = from baseQ in queryVideo.Distinct()
-                        join level in _levelRepository.Queryable on baseQ.LevelId equals level.Id into levelJoin
+                        join level in _levelRepository.ReadQueryable on baseQ.LevelId equals level.Id into levelJoin
                         from level in levelJoin.DefaultIfEmpty()
-                        join videoResultGroup in _videoResultRepository.Queryable on baseQ.Id equals videoResultGroup.VideoId into videoResults
+                        join videoResultGroup in _videoResultRepository.ReadQueryable on baseQ.Id equals videoResultGroup.VideoId into videoResults
                         select new VideoSearchModel
                         {
                             Id = baseQ.Id,
@@ -141,10 +141,10 @@ namespace Fsel.Course.Application.Queries.VideoQuery
             var videoIds = lists.Select(x => x.Id).ToList();
 
             var videoSkills = await (
-                              from vtc in _videoTimeCodeRepository.Queryable.WhereBulkContains(videoIds, x => x.VideoId)
-                              join tce in _timeCodeExerciseRepository.Queryable on vtc.Id equals tce.VideoTimeCodeId
-                              join e in _exerciseRepository.Queryable on tce.ExerciseId equals e.Id
-                              join s in _skillRepository.Queryable on e.SkillId equals s.Id into skillJoin
+                              from vtc in _videoTimeCodeRepository.ReadQueryable.WhereBulkContains(videoIds, x => x.VideoId)
+                              join tce in _timeCodeExerciseRepository.ReadQueryable on vtc.Id equals tce.VideoTimeCodeId
+                              join e in _exerciseRepository.ReadQueryable on tce.ExerciseId equals e.Id
+                              join s in _skillRepository.ReadQueryable on e.SkillId equals s.Id into skillJoin
                               from s in skillJoin.DefaultIfEmpty() // LEFT JOIN
                               select new
                               {

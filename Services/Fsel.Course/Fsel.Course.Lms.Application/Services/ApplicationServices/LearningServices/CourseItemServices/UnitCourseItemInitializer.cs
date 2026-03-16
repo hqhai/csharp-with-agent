@@ -12,18 +12,22 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Infrastructure.Repositories;
+    using Fsel.Shared.ApplicationServices.CacheServices;
     using Microsoft.EntityFrameworkCore;
 
     public class UnitCourseItemInitializer : ICourseItemInitializer
     {
         private readonly IUnitRepository _unitRepository;
         private readonly IUnitResultRepository _unitResultRepository;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
 
         public UnitCourseItemInitializer(IUnitRepository unitRepository,
-            IUnitResultRepository unitResultRepository)
+            IUnitResultRepository unitResultRepository,
+            IRequestSafeCachingService requestSafeCachingService = null)
         {
             _unitRepository = unitRepository;
             _unitResultRepository = unitResultRepository;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         public async Task<VoidMethodResult> InitializeAsync(CourseModule courseModule, CourseResult courseResult, CancellationToken cancellationToken)
@@ -62,15 +66,21 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
             {
                 StudentId = courseResult.StudentId,
                 Status = EnumResultStatus.New,
+                NewDate = DateTime.UtcNow,
                 CourseId = courseResult.CourseId,
                 CourseModuleId = courseModule.Id,
                 CourseResultId = courseResult.Id,
                 UnitId = unit.Id,
             };
-
-            await _unitResultRepository.BulkMergeAsync(new List<UnitResult> { unitResult }, bulk =>
+            await _requestSafeCachingService.SafeRequest<UnitResult>(
+            key: $"Add_UnitResult_{unitResult.CourseResultId}_{unitResult.CourseModuleId}_{unitResult.IsDeleted}",
+            safeFunction: async () =>
             {
-                bulk.ColumnPrimaryKeyExpression = c => new { c.CourseResultId, c.CourseModuleId, c.IsDeleted };
+                await _unitResultRepository.BulkMergeAsync(new List<UnitResult> { unitResult }, bulk =>
+                {
+                    bulk.ColumnPrimaryKeyExpression = c => new { c.CourseResultId, c.CourseModuleId, c.IsDeleted };
+                });
+                return unitResult;
             });
 
             return methodResult;

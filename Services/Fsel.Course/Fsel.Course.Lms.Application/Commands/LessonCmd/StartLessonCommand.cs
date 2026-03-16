@@ -17,6 +17,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
     using Fsel.Course.Domain.Models.CommandModels.Lessons;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.ApplicationServices.CacheServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
@@ -41,6 +42,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
         private readonly IHomeWorkRepository _homeWorkRepository;
         private readonly IVideoResultRepository _videoResultRepository;
         private readonly IHomeWorkResultRepository _homeWorkResultRepository;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
 
         public StartLessonCommandHandler(ICourseRepository courseRepository
             , IUnitRepository unitRepository
@@ -53,7 +55,8 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
             , ICourseResultRepository courseResultRepository
             , IHomeWorkRepository homeWorkRepository
             , IVideoResultRepository videoResultRepository
-            , IHomeWorkResultRepository homeWorkResultRepository)
+            , IHomeWorkResultRepository homeWorkResultRepository
+            , IRequestSafeCachingService requestSafeCachingService)
         {
             _courseRepository = courseRepository;
             _unitRepository = unitRepository;
@@ -67,6 +70,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
             _homeWorkRepository = homeWorkRepository;
             _videoResultRepository = videoResultRepository;
             _homeWorkResultRepository = homeWorkResultRepository;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         public async Task<MethodResult<LessonResultModel>> Handle(StartLessonCommand request, CancellationToken cancellationToken)
@@ -124,10 +128,16 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
                     StudentId = lessonResult.StudentId,
                     LessonResultId = lessonResult.Id
                 };
-                await _videoResultRepository.BulkMergeAsync(new List<VideoResult> { videoResult }, bulk =>
-                {
-                    bulk.ColumnPrimaryKeyExpression = c => new { c.LessonResultId, c.StudentId, c.VideoId, c.IsDeleted };
-                });
+                await _requestSafeCachingService.SafeRequest<VideoResult>(
+                    key: $"Add_VideoResult_{videoResult.LessonResultId}_{videoResult.StudentId}_{videoResult.VideoId}_{videoResult.IsDeleted}",
+                    safeFunction: async () =>
+                    {
+                        await _videoResultRepository.BulkMergeAsync(new List<VideoResult> { videoResult }, bulk =>
+                        {
+                            bulk.ColumnPrimaryKeyExpression = c => new { c.LessonResultId, c.StudentId, c.VideoId, c.IsDeleted };
+                        });
+                        return videoResult;
+                    });
             }
             if (!await _homeWorkResultRepository.Queryable.AnyAsync(x => x.LessonResultId == lessonResult.Id, cancellationToken))
             {
@@ -145,10 +155,16 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
                     LessonResultId = lessonResult.Id,
                 }).ToList();
 
-                await _homeWorkResultRepository.BulkMergeAsync(homeWorkResults, bulk =>
-                {
-                    bulk.ColumnPrimaryKeyExpression = c => new { c.LessonResultId, c.StudentId, c.HomeWorkId, c.IsDeleted };
-                });
+                await _requestSafeCachingService.SafeRequest<List<HomeWorkResult>>(
+                    key: $"Add_HomeWorkResults_{string.Join("_", homeWorkResults.Select(hwr => $"{hwr.LessonResultId}_{hwr.StudentId}_{hwr.HomeWorkId}_{hwr.IsDeleted}"))}",
+                    safeFunction: async () =>
+                    {
+                        await _homeWorkResultRepository.BulkMergeAsync(homeWorkResults, bulk =>
+                        {
+                            bulk.ColumnPrimaryKeyExpression = c => new { c.LessonResultId, c.StudentId, c.HomeWorkId, c.IsDeleted };
+                        });
+                        return homeWorkResults;
+                    });
             }
 
             lessonResult.Status = EnumResultStatus.Process;
@@ -188,7 +204,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
                 return methodResult;
             }
 
-            var unitResult = await _unitResultRepository.Queryable.Where(x => x.CourseId == request.CourseId && x.StudentId == studentId)
+            var unitResult = await _unitResultRepository.Queryable.Where(x => x.CourseResultId == courseResult.Id)
                                                                   .FirstOrDefaultAsync(x => x.UnitId == request.UnitId, cancellationToken);
             if (unitResult == null)
             {
@@ -217,7 +233,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lesson.LessonHomeWorks));
                 return methodResult;
             }
-            var lessonResult = await _lessonResultRepository.Queryable.Where(x => x.LessonId == request.LessonId && x.UnitId == request.UnitId)
+            var lessonResult = await _lessonResultRepository.Queryable.Where(x => x.LessonId == request.LessonId && x.UnitResultId == unitResult.Id)
                                                                          .FirstOrDefaultAsync(x => x.CourseId == request.CourseId && x.StudentId == studentId, cancellationToken);
             if (lessonResult == null)
             {

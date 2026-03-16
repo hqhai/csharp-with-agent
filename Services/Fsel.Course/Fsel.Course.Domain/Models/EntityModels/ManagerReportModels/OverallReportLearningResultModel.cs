@@ -6,6 +6,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.ManagerReportModels
 
     public class OverallReportLearningResultModel
     {
+        public int MaxUnitCount { get; set; }
         public long TotalStudent { get; set; }
         public double OverallAvgPercent { get; set; }
         public double OverallAvgPercentFinal { get; set; }

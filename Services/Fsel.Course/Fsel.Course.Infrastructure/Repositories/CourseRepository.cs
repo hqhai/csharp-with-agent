@@ -15,9 +15,6 @@ namespace Fsel.Course.Infrastructure.Repositories
     public class CourseRepository : BaseRepository<EntityCourse>, ICourseRepository
     {
         private readonly IUnitResultRepository _unitResultRepository;
-        private readonly IFinalTestResultRepository _finalTestResultRepository;
-        private readonly IMockTestResultRepository _mockTestResultRepository;
-        private readonly IUnitRepository _unitRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly IMapper _mapper;
         private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
@@ -38,9 +35,6 @@ namespace Fsel.Course.Infrastructure.Repositories
             ICourseResultRepository courseResultRepository) : base(dbContext, courseReadDbContext, authContext, mapper)
         {
             _unitResultRepository = unitResultRepository;
-            _finalTestResultRepository = finalTestResultRepository;
-            _mockTestResultRepository = mockTestResultRepository;
-            _unitRepository = unitRepository;
             _lessonResultRepository = lessonResultRepository;
             _mapper = mapper;
             _courseUnitMockTestRepository = courseUnitMockTestRepository;
@@ -199,7 +193,7 @@ namespace Fsel.Course.Infrastructure.Repositories
             var displayOrderUnit = 1;
             var unitResult = await _unitResultRepository.Queryable.Include(x => x.Unit).ThenInclude(x => x!.CourseUnitMockTests)
                 .Where(x => !arrivalDate.HasValue || (x!.UpdatedDate ?? x.CreatedDate).Date <= arrivalDate.Value.Date)
-                .Where(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId && x.Status != EnumResultStatus.Unfinished)
+                .Where(x => x.CourseResultId == courseResult.Id && x.Status != EnumResultStatus.Unfinished)
                 .OrderByDescending(x => x.CreatedDate)
                 .ThenByDescending(x => x.UpdatedDate)
                 .FirstOrDefaultAsync();
@@ -207,7 +201,7 @@ namespace Fsel.Course.Infrastructure.Repositories
             {
                 displayOrderUnit = unitResult.Unit?.CourseUnitMockTests.FirstOrDefault()?.DisplayOrder ?? default;
                 var lessonResults = await _lessonResultRepository.Queryable.Where(x => !arrivalDate.HasValue || (x!.UpdatedDate ?? x.CreatedDate).Date <= arrivalDate.Value.Date)
-                                    .Where(x => x.StudentId == courseResult.StudentId && x.UnitId == unitResult.UnitId && x.CourseId == courseResult.CourseId)
+                                    .Where(x => x.StudentId == courseResult.StudentId && x.UnitResultId == unitResult.Id)
                                     .ToListAsync();
                 if (lessonResults != null && lessonResults.Any())
                 {
@@ -233,9 +227,9 @@ namespace Fsel.Course.Infrastructure.Repositories
             }
             var query = from baseQ in _courseResultRepository.Queryable
                         join cum in _courseUnitMockTestRepository.Queryable on baseQ.CourseId equals cum.CourseId
-                        join ur in _unitResultRepository.Queryable on new { baseQ.CourseId, baseQ.StudentId, UnitId = cum.UnitId } equals new { ur.CourseId, ur.StudentId, UnitId = (Guid?)ur.UnitId }
+                        join ur in _unitResultRepository.Queryable on baseQ.Id equals ur.CourseResultId
                         join ul in _unitLessonRepository.Queryable on ur.UnitId equals ul.UnitId
-                        join lr in _lessonResultRepository.Queryable on new { ur.CourseId, ur.StudentId, ur.UnitId } equals new { lr.CourseId, lr.StudentId, lr.UnitId }
+                        join lr in _lessonResultRepository.Queryable on ur.Id equals lr.UnitResultId
                         where courseResults.Select(x => x.StudentId).Contains(baseQ.StudentId) && baseQ.WorkingStatus == Shared.Enums.EnumWorkingStatus.Active
                         group new { baseQ, lr, ur, cum, ul } by new { baseQ.CourseId, baseQ.StudentId } into g
                         select new UnitCurrentPositionModel
@@ -254,13 +248,14 @@ namespace Fsel.Course.Infrastructure.Repositories
                 return unitCurrentPositions;
             }
             var courseIds = courseResults.Select(x => x.CourseId).ToList();
+            var courseResultIds = courseResults.Select(x => x.Id).ToList();
             var studentIds = courseResults.Select(x => x.StudentId).ToList();
             var lessonResults = new List<LessonResult>();
 
             var unitResults = await _unitResultRepository.Queryable.Include(x => x.Unit).ThenInclude(x => x!.CourseUnitMockTests.Where(x => courseIds.Contains(x.CourseId)))
                  .Where(x => !arrivalDate.HasValue || (x!.UpdatedDate ?? x.CreatedDate).Date <= arrivalDate.Value.Date)
                  .Where(x => x.Status != EnumResultStatus.Unfinished)
-                 .Where(x => courseIds.Contains(x.CourseId) && studentIds.Contains(x.StudentId))
+                 .Where(x => courseResultIds.Contains(x.CourseResultId ?? Guid.Empty))
                  .GroupBy(x => x.StudentId)
                  .Where(x => x.Any())
                  .Select(x => x.OrderByDescending(x => x.UpdatedDate).ThenByDescending(x => x.CreatedDate).FirstOrDefault()!)
@@ -268,7 +263,7 @@ namespace Fsel.Course.Infrastructure.Repositories
             if (unitResults != null)
             {
                 lessonResults = await _lessonResultRepository.Queryable.Where(x => !arrivalDate.HasValue || (x!.UpdatedDate ?? x.CreatedDate).Date <= arrivalDate.Value.Date)
-                                       .Where(x => courseIds.Contains(x.CourseId) && studentIds.Contains(x.StudentId))
+                                       .Where(x => courseResultIds.Contains(x.CourseResultId ?? Guid.Empty) && studentIds.Contains(x.StudentId))
                                        .ToListAsync();
 
                 lessonResults = lessonResults.Join(unitResults,

@@ -29,6 +29,7 @@ namespace Fsel.Course.Application.Queries.CourseQuery
         private readonly ILevelRepository _levelRepository;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
+        private readonly ICourseResultRepository _courseResultRepository;
 
         public GetCourseQueryHandler(IMapper mapper,
                                      ICourseRepository courseRepository,
@@ -36,7 +37,8 @@ namespace Fsel.Course.Application.Queries.CourseQuery
                                      ITestRepository testRepository,
                                      ICategoryRepository categoryRepository,
                                      ILevelRepository levelRepository,
-                                     IUserService userService)
+                                     IUserService userService,
+                                     ICourseResultRepository courseResultRepository)
         {
             _courseRepository = courseRepository;
             _unitRepository = unitRepository;
@@ -45,6 +47,7 @@ namespace Fsel.Course.Application.Queries.CourseQuery
             _levelRepository = levelRepository;
             _userService = userService;
             _mapper = mapper;
+            _courseResultRepository = courseResultRepository;
         }
 
         public async Task<MethodResult<CourseModel>> Handle(GetCourseQuery request, CancellationToken cancellationToken)
@@ -67,6 +70,8 @@ namespace Fsel.Course.Application.Queries.CourseQuery
             var courseModel = _mapper.Map<CourseModel>(course);
 
             await SetField(courseModel, cancellationToken);
+
+            courseModel.IsUsed = await _courseResultRepository.Queryable.AnyAsync(p => p.CourseId == course.Id, cancellationToken);
 
             methodResult.Result = courseModel;
             methodResult.StatusCode = StatusCodes.Status200OK;

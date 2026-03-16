@@ -13,5 +13,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public int? TotalLessonDone { get; set; }
         public bool IsLearnStudent { get; set; }
         public string? PTStatus { get; set; }
+        public string? Level { get; set; }
+        public string? Program { get; set; }
+        public string? Subject { get; set; }
     }
 }

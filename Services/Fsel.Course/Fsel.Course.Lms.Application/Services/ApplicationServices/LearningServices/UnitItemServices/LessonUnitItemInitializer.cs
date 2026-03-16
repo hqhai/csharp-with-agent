@@ -9,18 +9,23 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
     using Fsel.Course.Domain.Entities.V1i1;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
+    using Fsel.Shared.ApplicationServices.CacheServices;
     using Microsoft.EntityFrameworkCore;
 
     public class LessonUnitItemInitializer : IUnitItemInitializer
     {
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly ILessonRepository _lessonRepository;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
 
         public LessonUnitItemInitializer(ILessonResultRepository lessonResultRepository,
-            ILessonRepository lessonRepository)
+            ILessonRepository lessonRepository,
+            IRequestSafeCachingService requestSafeCachingService)
         {
             _lessonResultRepository = lessonResultRepository;
             _lessonRepository = lessonRepository;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         public async Task<VoidMethodResult> InitializeAsync(UnitModule unitModule, UnitResult unitResult, CancellationToken cancellationToken)
@@ -42,14 +47,15 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
                 if (lessonResult.Status == EnumResultStatus.Unfinished)
                 {
                     lessonResult.Status = EnumResultStatus.New;
+                    lessonResult.NewDate = DateTime.UtcNow;
                     await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
                 }
                 return methodResult;
             }
 
             var lesson = await _lessonRepository.ReadQueryable.Where(x => x.OriginalId == unitModule.OriginalId)
-                                         .Where(x => x.VersionStatus == EnumVersionStatus.LastVersion)
-                                         .FirstOrDefaultAsync(cancellationToken);
+                                                .Where(x => x.VersionStatus == EnumVersionStatus.LastVersion)
+                                                .FirstOrDefaultAsync(cancellationToken);
 
             if (lesson == null)
             {
@@ -61,6 +67,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
             {
                 StudentId = unitResult.StudentId,
                 Status = EnumResultStatus.New,
+                NewDate = DateTime.UtcNow,
                 UnitModuleId = unitModule.Id,
                 UnitId = unitResult.UnitId,
                 LessonId = lesson.Id,
@@ -69,9 +76,15 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
                 CourseResultId = unitResult.CourseResultId,
             };
 
-            await _lessonResultRepository.BulkMergeAsync(new List<LessonResult> { lessonResult }, bulk =>
+            await _requestSafeCachingService.SafeRequest(
+            key: $"Add_LessonResult_{lessonResult.UnitModuleId}_{lessonResult.UnitResultId}_{lessonResult.IsDeleted}",
+            safeFunction: async () =>
             {
-                bulk.ColumnPrimaryKeyExpression = c => new { c.UnitModuleId, c.UnitResultId, c.IsDeleted };
+                await _lessonResultRepository.BulkMergeAsync(new List<LessonResult> { lessonResult }, bulk =>
+                {
+                    bulk.ColumnPrimaryKeyExpression = c => new { c.UnitModuleId, c.UnitResultId, c.IsDeleted };
+                });
+                return lessonResult;
             });
             return methodResult;
         }

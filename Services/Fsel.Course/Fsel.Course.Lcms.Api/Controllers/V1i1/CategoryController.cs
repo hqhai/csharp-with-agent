@@ -4,7 +4,9 @@ namespace Fsel.Course.Lcms.Api.Controllers.V1i1
 {
     using System.Net;
     using System.Threading.Tasks;
+    using Application.Queries.LevelQuery;
     using Asp.Versioning;
+    using Domain.Models.EntityModels;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Common.Models;
@@ -35,6 +37,15 @@ namespace Fsel.Course.Lcms.Api.Controllers.V1i1
         public async Task<IActionResult> GetEnumCourseSourceDatasAsync([FromQuery] EnumCourseSourceData courseSource)
         {
             var queryResult = await _mediator.Send(new GetEnumQuery { EnumCourseSourceData = courseSource }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        [HttpGet("all-course-level")]
+        [ProducesResponseType(typeof(MethodResult<MethodResult<IList<SubjectModel>>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetLevelInCategories()
+        {
+            var queryResult = await _mediator.Send(new GetLevelInCategoryQuery()).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

@@ -16,6 +16,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
     using Fsel.Course.Domain.Models.EntityModels.CachingModels;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
+    using Fsel.Shared.ApplicationServices.CacheServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using Microsoft.EntityFrameworkCore;
@@ -24,9 +25,9 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
     {
         Task<VideoModel?> GetVideoModelAsync(VideoResult videoResult, CancellationToken cancellationToken = default);
 
-        Task<(IList<SkillScores>?, IList<SkillScores>, bool)> GetSkillScoresAsync(VideoTimeCodeResult videoTimeCodeResult, VideoTimeCode videoTimeCode, CancellationToken cancellationToken = default);
+        Task<(IList<SkillScores>?, IList<SkillScores>, bool)> GetSkillScoresAsync(VideoTimeCodeResult videoTimeCodeResult, VideoTimeCode videoTimeCode, bool isTimeUp, CancellationToken cancellationToken = default);
 
-        Task<VoidMethodResult> CreateAnswers(CreateVideoTimeCodeAnswerV1i1CommandModel request, VideoTimeCode videoTimeCode, VideoTimeCodeResult videoTimeCodeResult, CancellationToken cancellationToken = default);
+        Task<VoidMethodResult> CreateAnswers(CreateVideoTimeCodeAnswerV1i1CommandModel request, VideoTimeCodeResult videoTimeCodeResult, CancellationToken cancellationToken = default);
 
         Task<long> UpdateVideoAnswers(VideoTimeCode videoTimeCode, VideoTimeCodeResult videoTimeCodeResult, bool isDoneTimeCode = false, bool isSubmit = true, CancellationToken cancellationToken = default);
     }
@@ -43,6 +44,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
         private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
         private readonly IVideoTimeCodeAnswerRepository _videoTimeCodeAnswerRepository;
         private readonly QuestionConverter _questionConverter;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
 
         public VideoService(
             IVideoRepository videoRepository,
@@ -54,7 +56,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             IExerciseQuestionRepository exerciseQuestionRepository,
             IVideoTimeCodeRepository videoTimeCodeRepository,
             IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository,
-            QuestionConverter questionConverter)
+            QuestionConverter questionConverter,
+            IRequestSafeCachingService requestSafeCachingService)
         {
             _videoRepository = videoRepository;
             _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
@@ -66,6 +69,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             _videoTimeCodeRepository = videoTimeCodeRepository;
             _videoTimeCodeAnswerRepository = videoTimeCodeAnswerRepository;
             _questionConverter = questionConverter;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         #region Build VideoModel
@@ -94,7 +98,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             var indexProcess = GetIndexProcess(videoTimeCodes, videoResult.CurrentVideoTimeCodeId);
 
             // 2. Load data từ DB 1 lần, convert sang lookup/dict
-            var timeCodeResultDict = await LoadVideoTimeCodeResultDictAsync(videoResult.Id);
+            var timeCodeResultDict = await LoadVideoTimeCodeResultDictAsync(videoResult);
             var timeCodeQuestionLookup = await LoadTimeCodeQuestionLookupAsync(video.Id);
 
             // 3. Build từng VideoTimeCodeModel
@@ -176,11 +180,11 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             return videoTimeCode;
         }
 
-        private async Task<Dictionary<Guid, VideoTimeCodeResult?>> LoadVideoTimeCodeResultDictAsync(Guid videoResultId)
+        private async Task<Dictionary<Guid, VideoTimeCodeResult?>> LoadVideoTimeCodeResultDictAsync(VideoResult videoResult)
         {
-            return await _videoTimeCodeResultRepository.ReadQueryable
-                                                       .Where(x => x.VideoResultId == videoResultId)
-                                                       .ToDictionaryAsync(x => x.VideoTimeCodeId, x => (VideoTimeCodeResult?)x);
+            var videoTimeCodeResults = await _videoTimeCodeResultRepository.ReadQueryable.Where(x => x.VideoResultId == videoResult.Id && x.CreatedDate >= videoResult.CreatedDate)
+                                                                           .ToListAsync();
+            return videoTimeCodeResults.ToDictionary(x => x.VideoTimeCodeId, x => (VideoTimeCodeResult?)x);
         }
 
         private async Task<ILookup<Guid, TimeCodeQuestionModel>> LoadTimeCodeQuestionLookupAsync(Guid videoId)
@@ -288,6 +292,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             var video = await _videoRepository.ReadQueryable
                                                   .Where(x => x.Id == id)
                                                   .Include(v => v.VideoTimeCodes)
+                                                  .Include(v => v.VideoSubFilePaths)
                                                   .FirstOrDefaultAsync();
             return video;
         }
@@ -296,15 +301,21 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
 
         #region Create Answers
 
-        public async Task<VoidMethodResult> CreateAnswers(CreateVideoTimeCodeAnswerV1i1CommandModel request, VideoTimeCode videoTimeCode, VideoTimeCodeResult videoTimeCodeResult, CancellationToken cancellationToken = default)
+        public async Task<VoidMethodResult> CreateAnswers(CreateVideoTimeCodeAnswerV1i1CommandModel request, VideoTimeCodeResult videoTimeCodeResult, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(request);
-            ArgumentNullException.ThrowIfNull(videoTimeCode);
             ArgumentNullException.ThrowIfNull(videoTimeCodeResult);
             VoidMethodResult methodResult = new VoidMethodResult();
+
+            if (request.Answers == null || !request.Answers.Any())
+            {
+                return methodResult;
+            }
+
+            var videoTimeCode = videoTimeCodeResult.VideoTimeCode;
             var videoTimeCodeAnswers = await _videoTimeCodeAnswerRepository.Queryable
-                                                .Where(x => x.VideoResultId == request.VideoResultId && x.VideoTimeCodeId == request.VideoTimeCodeId)
-                                                .ToListAsync(cancellationToken);
+                                                                           .Where(x => x.VideoTimeCodeResultId == videoTimeCodeResult.Id)
+                                                                           .ToListAsync(cancellationToken);
 
             var timeCodeQuestions = await GetDetailtTimeCodeQuestionsAsync(request.VideoTimeCodeId);
             var requestQuestionIds = request.Answers.Select(x => x.QuestionId).ToList();
@@ -314,9 +325,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                                                     .ToHashSet();
 
             // Tìm các QuestionId không thuộc TimeCode
-            var invalidQuestionIds = requestQuestionIds
-                .Where(q => !validQuestionIds.Contains(q))
-                .ToList();
+            var invalidQuestionIds = requestQuestionIds.Where(q => !validQuestionIds.Contains(q)).ToList();
             if (invalidQuestionIds.Any())
             {
                 // Báo lỗi rõ ràng
@@ -374,16 +383,22 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             {
                 if (createVideoTimeCodeAnswers.Any())
                 {
-                    await _videoTimeCodeAnswerRepository.BulkMergeAsync(createVideoTimeCodeAnswers, bulk =>
-                    {
-                        bulk.ColumnPrimaryKeyExpression = entity => new { entity.VideoResultId, entity.VideoTimeCodeResultId, entity.QuestionId, entity.IsDeleted };
-                    });
+                    await _requestSafeCachingService.SafeRequest(
+                       key: $"Add_VideoTimeCodeAnswers_{string.Join('_', createVideoTimeCodeAnswers.Select(x => $"{x.VideoTimeCodeResultId}_{x.QuestionId}_{x.IsDeleted}"))}",
+                       safeFunction: async () =>
+                       {
+                           await _videoTimeCodeAnswerRepository.BulkMergeAsync(createVideoTimeCodeAnswers, bulk =>
+                           {
+                               bulk.ColumnPrimaryKeyExpression = entity => new { entity.VideoTimeCodeResultId, entity.QuestionId, entity.IsDeleted };
+                           });
+                           return createVideoTimeCodeAnswers;
+                       });
                 }
                 else if (updateVideoTimeCodeAnswers.Any())
                 {
                     await _videoTimeCodeAnswerRepository.BulkUpdateList(updateVideoTimeCodeAnswers, bulk =>
                     {
-                        bulk.IgnoreOnUpdateExpression = entity => new { entity.VideoResultId, entity.VideoTimeCodeResultId, entity.QuestionId };
+                        bulk.IgnoreOnUpdateExpression = entity => new { entity.VideoTimeCodeResultId, entity.QuestionId, entity.IsDeleted };
                     });
                 }
             }
@@ -410,6 +425,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
         public async Task<(IList<SkillScores>?, IList<SkillScores>, bool)> GetSkillScoresAsync(
         VideoTimeCodeResult videoTimeCodeResult,
         VideoTimeCode videoTimeCode,
+        bool isTimeUp,
         CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(videoTimeCode);
@@ -435,9 +451,16 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             // Còn câu nào chưa Done không?
 
             var hasNotDone = false;
-            if (videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone && videoTimeCodeAnswers.Count == timeCodeQuestions.Count)
+            if (videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone)
             {
-                hasNotDone = videoTimeCodeResult.Status != EnumResultStatus.New || videoTimeCodeAnswers.All(x => x.Status == EnumAnswerStatus.Done);
+                if (videoTimeCodeAnswers.Count == timeCodeQuestions.Count)
+                {
+                    hasNotDone = videoTimeCodeResult.Status != EnumResultStatus.New || videoTimeCodeAnswers.All(x => x.Status == EnumAnswerStatus.Done);
+                }
+                else if (isTimeUp)
+                {
+                    hasNotDone = videoTimeCodeResult.Status != EnumResultStatus.New;
+                }
             }
             else if (videoTimeCode.TimeCodeType == EnumTimeCodeType.UnitTest || videoTimeCode.TimeCodeType == EnumTimeCodeType.SkillTest)
             {
@@ -447,7 +470,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             // Group theo CourseSkill (lấy từ timeCodeQuestions)
             var groupedBySkill = timeCodeQuestions
                 .Where(x => x.Question != null)
-                .GroupBy(x => new { x.CourseSkill, x.Skill?.Id, x.Skill?.Name });     // nếu property tên khác thì sửa lại chỗ này
+                .GroupBy(x => new { x.CourseSkill, x.Skill.Id });     // nếu property tên khác thì sửa lại chỗ này
 
             var ungradedScores = new List<SkillScores>();
             var gradedScores = new List<SkillScores>();
@@ -455,8 +478,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             foreach (var skillGroup in groupedBySkill)
             {
                 var courseSkill = skillGroup.Key.CourseSkill;
-                var skillId = skillGroup.Key.Id;
-                var skillName = skillGroup.Key.Name;
+                var skill = skillGroup.First().Skill;
 
                 // Câu hỏi chưa chấm (Ungraded)
                 var ungradedQuestions = skillGroup
@@ -470,13 +492,13 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                     .Select(x => x.Question!)
                     .ToList();
 
-                var ungraded = BuildSkillScores(ungradedQuestions, answersByQuestionId, courseSkill, skillId, skillName);
+                var ungraded = BuildSkillScores(ungradedQuestions, answersByQuestionId, courseSkill, skill);
                 if (ungraded != null)
                 {
                     ungradedScores.Add(ungraded);
                 }
 
-                var graded = BuildSkillScores(gradedQuestions, answersByQuestionId, courseSkill, skillId, skillName);
+                var graded = BuildSkillScores(gradedQuestions, answersByQuestionId, courseSkill, skill);
                 if (graded != null)
                 {
                     gradedScores.Add(graded);
@@ -490,8 +512,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
         IList<Question> questions,
         IDictionary<Guid, List<VideoTimeCodeAnswer>> answersByQuestionId,
         EnumCourseSkill courseSkill,
-        Guid? skillId,
-        string? skillName)
+        SkillViewModel? skill)
         {
             if (questions == null || questions.Count == 0)
             {
@@ -514,10 +535,10 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                 CorrectCount = correctCount,
                 CorrectQuestion = allAnswers.Count(a => a.IsCorrect == true),
                 CountQuestion = allAnswers.Count,
-                Skill = courseSkill,
                 TotalCount = totalCount,
-                SkillId = skillId,
-                SkillName = skillName,
+                SkillId = skill?.Id,
+                SkillName = skill?.Name,
+                SkillFilePath = skill?.FilePath,
                 TotalQuestion = totalQuestion,
                 Scores = correctCount.GetIeltsScore(courseSkill),
                 TokenReceived = tokenReceived

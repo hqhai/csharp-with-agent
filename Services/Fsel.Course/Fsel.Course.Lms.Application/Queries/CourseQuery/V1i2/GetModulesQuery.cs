@@ -37,6 +37,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i2
         private readonly ICourseResultRepository _courseResultRepository;
         private readonly ICourseModuleCachingService _courseModuleCachingService;
         private readonly ILessonResultRepository _lessonResultRepository;
+        private readonly ITestGroupResultRepository _testGroupResultRepository;
 
         public GetModulesQueryHandler(
             AuthContext authContext,
@@ -47,7 +48,8 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i2
             ITestRepository testRepository,
             ICourseResultRepository courseResultRepository,
             ICourseModuleCachingService courseModuleCachingService,
-            ILessonResultRepository lessonResultRepository)
+            ILessonResultRepository lessonResultRepository,
+            ITestGroupResultRepository testGroupResultRepository)
         {
             _authContext = authContext;
             _userService = userService;
@@ -58,6 +60,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i2
             _courseResultRepository = courseResultRepository;
             _courseModuleCachingService = courseModuleCachingService;
             _lessonResultRepository = lessonResultRepository;
+            _testGroupResultRepository = testGroupResultRepository;
         }
 
         public async Task<MethodResult<IList<ModuleCourseModel>>> Handle(GetModulesQuery request, CancellationToken cancellationToken)
@@ -94,10 +97,30 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i2
             var lessonResults = await _lessonResultRepository.ReadQueryable
                                                              .Where(x => courseResult.Id == x.CourseResultId)
                                                              .Where(x => x.CourseId == courseResult.CourseId)
+                                                             .Where(x => x.Status == EnumResultStatus.Done)
+                                                             .Select(x => new
+                                                             {
+                                                                 x.UnitResultId,
+                                                                 x.Id
+                                                             })
                                                              .ToListAsync(cancellationToken);
 
-            var lessonResultDic = lessonResults.Where(x => x.UnitResultId.HasValue).GroupBy(x => x.UnitResultId!.Value)
-                                     .ToDictionary(x => x.Key, x => x.Count(y => y.Status == EnumResultStatus.Done));
+            var testGroupResults = await _testGroupResultRepository.ReadQueryable
+                                                      .Where(x => courseResult.Id == x.CourseResultId)
+                                                      .Where(x => x.CourseId == courseResult.CourseId && x.UnitResultId.HasValue)
+                                                      .Where(x => x.Status == EnumResultStatus.Done)
+                                                      .Select(x => new
+                                                      {
+                                                          x.UnitResultId,
+                                                          x.Id
+                                                      })
+                                                      .ToListAsync(cancellationToken);
+
+            var allResults = lessonResults.Concat(testGroupResults).ToList();
+
+            var lessonResultDic = allResults.Where(x => x.UnitResultId.HasValue)
+                                            .GroupBy(x => x.UnitResultId!.Value)
+                                            .ToDictionary(x => x.Key, x => x.Count());
 
             return courseModules.OrderBy(x => x.DisplayOrder)
                 .Select(module => ProcessModule(module, unitResultsByOriginalId, unitDics, testResultsByOriginalId, testDics, lessonResultDic))
@@ -139,10 +162,11 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i2
             {
                 if (lessonResultDic.TryGetValue(unit.UnitResult.Id, out var countDone))
                 {
-                    dto.ProgressPrecent = (int)NumberHelper.GetPercent(countDone, unit.Unit.LessonCount);
+                    dto.ProgressPrecent = (int)NumberHelper.GetPercent(countDone, unit.Unit.LessonCount + unit.Unit.TestCount);
                 }
                 dto.Name = unit.Unit.Name;
                 dto.Code = unit.Unit.Code;
+                dto.Description = unit.Unit.Description;
                 dto.ObjectId = unit.Unit.Id;
                 dto.Result = _mapper.Map<ResultModel>(unit.UnitResult);
             }
@@ -154,6 +178,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i2
             var dto = _mapper.Map<ModuleCourseModel>(module);
             dto.Name = unit.Name;
             dto.Code = unit.Code;
+            dto.Description = unit.Description;
             dto.ObjectId = unit.Id;
             return dto;
         }
@@ -164,6 +189,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i2
             dto.ObjectId = test.Test.Id;
             dto.Name = test.Test.Name;
             dto.Code = test.Test.Code;
+            dto.Description = test.Test.Description;
             dto.Result = _mapper.Map<ResultModel>(test.TestResult);
             dto.ProgressPrecent = test.TestGroupResult.Status == EnumResultStatus.Done ? ValueSettings.PercentMaxValue : ValueSettings.PercentMinValue;
             return dto;
@@ -175,6 +201,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i2
             dto.ObjectId = test.Id;
             dto.Name = test.Name;
             dto.Code = test.Code;
+            dto.Description = test.Description;
             return dto;
         }
 

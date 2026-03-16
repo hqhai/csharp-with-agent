@@ -17,6 +17,7 @@ namespace Fsel.Course.Domain.Entities
     public class ClassForumDetailResult : Entity, ISubmissionCount
     {
         private const int MaxScore = 2;
+        private const int MaxPronunciationScore = 5;
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(5000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
@@ -30,6 +31,9 @@ namespace Fsel.Course.Domain.Entities
             get { return _wordContent; }
             set { _wordContent = value; WordCount = StringHelper.CountWords(value); }
         }
+
+        [MaxLength(10000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? AITranslationContent { get; set; }
 
         private int? _wordCount;
         private EnumMediaType? _mediaType;
@@ -61,18 +65,24 @@ namespace Fsel.Course.Domain.Entities
         {
             get
             {
-                double score = default;
-
-                if (!string.IsNullOrEmpty(GradingAlFeedback))
-                {
-                    var classForumAIs = Common.Helpers.ConvertHelper.Deserialize<List<ClassForumAIModel>>(GradingAlFeedback);
-                    if (classForumAIs != null && classForumAIs.Any())
-                    {
-                        score = classForumAIs.Sum(x => x.Score);
-                    }
-                }
-                return score;
+                return GetGradingScore() + PronunciationScore;
             }
+        }
+
+        public double GetGradingScore()
+        {
+            double score = default;
+
+            if (!string.IsNullOrEmpty(GradingAlFeedback))
+            {
+                var classForumAIs = Common.Helpers.ConvertHelper.Deserialize<List<ClassForumAIModel>>(GradingAlFeedback);
+                if (classForumAIs != null && classForumAIs.Any())
+                {
+                    score = classForumAIs.Sum(x => x.Score);
+                }
+            }
+
+            return score;
         }
 
         [NotMapped]
@@ -100,7 +110,18 @@ namespace Fsel.Course.Domain.Entities
         {
             get
             {
-                return CorrectCount + Score + PronunciationScore;
+                double count = 0;
+
+                if (!string.IsNullOrEmpty(GradingAlFeedback))
+                {
+                    var classForumAIs = Common.Helpers.ConvertHelper.Deserialize<List<ClassForumAIModel>>(GradingAlFeedback);
+                    if (classForumAIs != null && classForumAIs.Any())
+                    {
+                        count = classForumAIs.Count * MaxScore;
+                    }
+                }
+
+                return PronunciationScore == 0 ? count + PronunciationScore : count + MaxPronunciationScore;
             }
         }
 

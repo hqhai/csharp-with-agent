@@ -17,16 +17,6 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
     public class GetStudentsDashboardQuery : IRequest<MethodResult<IList<StudentDtoModel>>>
     {
         public string? SchoolClassStr { get; set; }
-        public string? EnumCourseLevelStr { get; set; }
-
-        [JsonIgnore]
-        public IList<EnumCourseLevel>? CourseLevels
-        {
-            get
-            {
-                return EnumCourseLevelStr.ToList<EnumCourseLevel>();
-            }
-        }
 
         [JsonIgnore]
         public IList<string>? SchoolClasses
@@ -87,10 +77,7 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
             {
                 query = query.Where(x => !string.IsNullOrEmpty(x.SchoolClass) && request.SchoolClasses.Any(y => y == x.SchoolClass));
             }
-            if (request.CourseLevels != null && request.CourseLevels.Any())
-            {
-                query = query.Where(x => x.CourseLevel.HasValue && request.CourseLevels.Contains(x.CourseLevel.Value));
-            }
+
             var lists = await query.AsNoTracking().ToListAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             methodResult.Result = lists;
             methodResult.StatusCode = StatusCodes.Status200OK;

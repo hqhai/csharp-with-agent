@@ -81,10 +81,11 @@ namespace Fsel.Course.Application.Commands.LessonCmd.V1i1
             }
 
             await _versionEntityUpdater.UpdateEntity(lesson, newVersionLesson,
-                async (_, _) => isCheckUnit,
+                async (_, entity) => isCheckUnit,
                 async (oldEntity, newEntity) =>
                 {
                     oldEntity.Name = newEntity.Name;
+                    oldEntity.Code = newEntity.Code;
                     oldEntity.InstructionContent = newEntity.InstructionContent;
                     oldEntity.VideoCount = newEntity.VideoCount;
                     oldEntity.ClassForumCount = newEntity.ClassForumCount;
@@ -101,7 +102,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd.V1i1
                 }
             );
 
-            methodResult.Result = _mapper.Map<LessonModel>(newVersionLesson);
+            methodResult.Result = _mapper.Map<LessonModel>(lesson);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
@@ -109,11 +110,11 @@ namespace Fsel.Course.Application.Commands.LessonCmd.V1i1
         private static void LessonModuleHandler(Lesson lesson, Lesson newVersionLesson, Lesson newEntity, Lesson oldEntity)
         {
             var keys = newVersionLesson.LessonModules
-                .Select(x => (x.OriginalId, x.LessonConfigType, x.OpenOrder))
+                .Select(x => (x.OriginalId, x.LessonConfigType, x.DisplayNumber))
                 .ToHashSet();
 
             var removedModules = lesson.LessonModules
-                .Where(u => !keys.Contains((u.OriginalId, u.LessonConfigType, u.OpenOrder)))
+                .Where(u => !keys.Contains((u.OriginalId, u.LessonConfigType, u.DisplayNumber)))
                 .ToList();
             if (removedModules.Any())
             {
@@ -125,7 +126,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd.V1i1
 
             foreach (var module in newEntity.LessonModules)
             {
-                var existingModule = lesson.LessonModules.FirstOrDefault(m => m.OriginalId == module.OriginalId && m.LessonConfigType == module.LessonConfigType);
+                var existingModule = lesson.LessonModules.FirstOrDefault(m => m.OriginalId == module.OriginalId && m.LessonConfigType == module.LessonConfigType && m.DisplayNumber == module.DisplayNumber);
                 if (existingModule != null)
                 {
                     existingModule.Name = module.Name;

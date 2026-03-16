@@ -15,6 +15,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.ApplicationServices.CacheServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
@@ -37,6 +38,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
         private readonly IQuestionRepository _questionRepository;
         private readonly IUserService _userService;
         private readonly AuthContext _authContext;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
 
         public CreateVideoTimeCodeAnswerCommandHandler(
              IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository
@@ -47,7 +49,8 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             , IQuestionRepository questionRepository,
               QuestBoardPublisher questBoardPublisher,
               AuthContext authContext,
-              IUserService userService)
+              IUserService userService,
+              IRequestSafeCachingService requestSafeCachingService)
         {
             _videoTimeCodeAnswerRepository = videoTimeCodeAnswerRepository;
             _videoResultRepository = videoResultRepository;
@@ -58,6 +61,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             _questBoardPublisher = questBoardPublisher;
             _authContext = authContext;
             _userService = userService;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         public async Task<MethodResult<bool>> Handle(CreateVideoTimeCodeAnswerCommand request, CancellationToken cancellationToken)
@@ -184,9 +188,15 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                         videoTimeCodeResult.Status = EnumResultStatus.Done;
                     }
 
-                    await _videoTimeCodeAnswerRepository.BulkMergeAsync(videoTimeCodeAnswers, bulk =>
+                    await _requestSafeCachingService.SafeRequest<List<VideoTimeCodeAnswer>>(
+                    key: $"Add_VideoTimeCodeAnswers_{string.Join("_", videoTimeCodeAnswers.Select(vtca => $"{vtca.VideoTimeCodeResultId}_{vtca.QuestionId}_{vtca.IsDeleted}"))}",
+                    safeFunction: async () =>
                     {
-                        bulk.ColumnPrimaryKeyExpression = entity => new { entity.VideoResultId, entity.VideoTimeCodeResultId, entity.QuestionId, entity.IsDeleted };
+                        await _videoTimeCodeAnswerRepository.BulkMergeAsync(videoTimeCodeAnswers, bulk =>
+                        {
+                            bulk.ColumnPrimaryKeyExpression = entity => new { entity.VideoTimeCodeResultId, entity.QuestionId, entity.IsDeleted };
+                        });
+                        return videoTimeCodeAnswers;
                     });
                 }
                 else if (updateVideoTimeCodeAnswers.Any())
@@ -251,9 +261,15 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                     Status = EnumResultStatus.New
                 };
 
-                await _videoTimeCodeResultRepository.BulkMergeAsync(new List<VideoTimeCodeResult> { videoTimeCodeResult }, bulk =>
+                await _requestSafeCachingService.SafeRequest<VideoTimeCodeResult>(
+                key: $"Add_VideoTimeCodeResult_{videoTimeCodeResult.VideoTimeCodeId}_{videoTimeCodeResult.VideoResultId}_{videoTimeCodeResult.IsDeleted}",
+                safeFunction: async () =>
                 {
-                    bulk.ColumnPrimaryKeyExpression = c => new { c.VideoTimeCodeId, c.StudentId, c.VideoResultId, c.IsDeleted };
+                    await _videoTimeCodeResultRepository.BulkMergeAsync(new List<VideoTimeCodeResult> { videoTimeCodeResult }, bulk =>
+                    {
+                        bulk.ColumnPrimaryKeyExpression = c => new { c.VideoTimeCodeId, c.StudentId, c.VideoResultId, c.IsDeleted };
+                    });
+                    return videoTimeCodeResult;
                 });
             }
             return videoTimeCodeResult;

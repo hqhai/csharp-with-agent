@@ -5,14 +5,13 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
     using System.Linq.Dynamic.Core;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.EntityModels.DashboardModels;
-    using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Enums;
@@ -22,7 +21,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
     using Microsoft.EntityFrameworkCore;
     using static Fsel.Shared.Constants.ValueSettings;
 
-    public class GetOverallHomeQuery : IRequest<MethodResult<OverallHomeModel>>
+    public class GetOverallHomeQuery : MediatR.IRequest<MethodResult<OverallHomeModel>>
     {
     }
 
@@ -32,29 +31,47 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
         private readonly ICourseResultRepository _courseResultRepository;
         private readonly IMapper _mapper;
         private readonly AuthContext _authContext;
-        private readonly ManagerProgressHelper _managerProgressHelper;
         private readonly IUnitResultRepository _unitResultRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
-        private readonly IMockTestResultRepository _mockTestResultRepository;
+        private readonly IUnitRepository _unitRepository;
+        private readonly ICourseRepository _courseRepository;
+        private readonly ILessonRepository _lessonRepository;
+        private readonly ITestGroupResultRepository _testGroupResultRepository;
+        private readonly IHomeWorkResultRepository _homeWorkResultRepository;
+        private readonly IDocumentResultRepository _documentResultRepository;
+        private readonly IClassForumResultRepository _classForumResultRepository;
+        private readonly IVideoResultRepository _videoResultRepository;
 
         public GetOverallHomeQueryHandler(
             IUserService userService,
             ICourseResultRepository courseResultRepository,
+            ICourseRepository courseRepository,
+            IUnitRepository unitRepository,
+            ILessonRepository lessonRepository,
+            ITestGroupResultRepository testGroupResultRepository,
+            IHomeWorkResultRepository homeWorkResultRepository,
+            IDocumentResultRepository documentResultRepository,
+            IClassForumResultRepository classForumResultRepository,
+            IVideoResultRepository videoResultRepository,
             IMapper mapper,
             AuthContext authContext,
-            ManagerProgressHelper managerProgressHelper,
             IUnitResultRepository unitResultRepository,
-            ILessonResultRepository lessonResultRepository,
-            IMockTestResultRepository mockTestResultRepository)
+            ILessonResultRepository lessonResultRepository)
         {
             _userService = userService;
             _courseResultRepository = courseResultRepository;
+            _courseRepository = courseRepository;
+            _unitRepository = unitRepository;
+            _lessonRepository = lessonRepository;
+            _testGroupResultRepository = testGroupResultRepository;
+            _homeWorkResultRepository = homeWorkResultRepository;
+            _documentResultRepository = documentResultRepository;
+            _classForumResultRepository = classForumResultRepository;
+            _videoResultRepository = videoResultRepository;
             _mapper = mapper;
             _authContext = authContext;
-            _managerProgressHelper = managerProgressHelper;
             _unitResultRepository = unitResultRepository;
             _lessonResultRepository = lessonResultRepository;
-            _mockTestResultRepository = mockTestResultRepository;
         }
 
         public async Task<MethodResult<OverallHomeModel>> Handle(GetOverallHomeQuery request, CancellationToken cancellationToken)
@@ -64,7 +81,6 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
             var methodResult = new MethodResult<OverallHomeModel>();
             var overallHome = new OverallHomeModel();
 
-            // 1) Student
             var methodStudent = await GetStudentModelAsync();
             if (!methodStudent.IsOK)
             {
@@ -73,7 +89,6 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
             }
             var student = methodStudent.Result!;
 
-            // 2) CourseResult (đang Active)
             var methodCourse = await GetCourseResultAsync(student.Id, cancellationToken);
             if (!methodCourse.IsOK)
             {
@@ -82,22 +97,16 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
             }
             var courseResult = methodCourse.Result!;
 
-            // 3) Tiến độ tổng thể khoá học
-            var (currentProgress, progress) =
-                await _managerProgressHelper.GetCompleteCourseAsync(_mapper.Map<CourseResultModel>(courseResult));
-            overallHome.ProgressPercent = NumberHelper.GetPercent(currentProgress, progress);
+            overallHome.ProgressPercent = await GetCurrentProgressPercentAsync(courseResult, cancellationToken);
 
-            // 4) UnitResult mới nhất
-            var unitResult = await _unitResultRepository.Queryable.Include(x => x.Unit)
-                .Where(x => x.StudentId == student.Id && x.CourseId == courseResult.CourseId)
+            var unitResult = await _unitResultRepository.ReadQueryable.Include(x => x.Unit)
+                .Where(x => x.StudentId == student.Id && x.CourseResultId == courseResult.Id)
                 .OrderBy(x => x.Status == EnumResultStatus.Process ? ValueOrderIndex.OrderIndexProcess :
                                       x.Status == EnumResultStatus.New ? ValueOrderIndex.OrderIndexNew :
                                       x.Status == EnumResultStatus.Done ? ValueOrderIndex.OrderIndexDone : ValueOrderIndex.OrderIndexOther)
                 .ThenByDescending(x => x.UpdatedDate ?? x.CreatedDate)
-                .AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken);
 
-            // Nếu chưa có UnitResult => không có dữ liệu để tính % của unit hiện tại
             if (unitResult == null)
             {
                 methodResult.Result = overallHome;
@@ -105,30 +114,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
                 return methodResult;
             }
             overallHome.Name = unitResult.Unit?.Name;
-
-            // 5) Lấy song song các status của LessonResult & MockTestResult trong Unit hiện tại
-            var lessonStatuses = await _lessonResultRepository.Queryable
-                .Where(x => x.UnitId == unitResult.UnitId
-                            && x.CourseId == courseResult.CourseId
-                            && x.StudentId == student.Id)
-                .AsNoTracking()
-                .Select(x => x.Status)
-                .ToListAsync(cancellationToken);
-
-            var mockStatuses = await _mockTestResultRepository.Queryable
-                .Where(x => x.UnitId == unitResult.UnitId
-                            && x.CourseId == courseResult.CourseId
-                            && x.StudentId == student.Id)
-                .AsNoTracking()
-                .Select(x => x.Status)
-                .ToListAsync(cancellationToken);
-
-            // 6) Gộp & tính %
-            var allStatuses = lessonStatuses.Concat(mockStatuses).ToList();
-            var total = allStatuses.Count;
-            var done = allStatuses.Count(s => s == EnumResultStatus.Done);
-            overallHome.ProgressUnitPercent = NumberHelper.GetPercent(done, total);
-            // 7) Trả kết quả
+            overallHome.ProgressUnitPercent = await GetUnitCurrentProgressPercentAsync(unitResult, student.Id, cancellationToken);
             methodResult.Result = overallHome;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
@@ -137,7 +123,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
         private async Task<MethodResult<StudentModel>> GetStudentModelAsync()
         {
             var methodResult = new MethodResult<StudentModel>();
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId /*, ct nếu method hỗ trợ */);
+            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentResult));
@@ -160,7 +146,6 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
             var methodResult = new MethodResult<CourseResult>();
 
             var courseResult = await _courseResultRepository.Queryable
-                .Include(x => x.Course)
                 .Where(x => x.StudentId == studentId && x.WorkingStatus == EnumWorkingStatus.Active)
                 .OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate)
                 .AsNoTracking()
@@ -174,6 +159,135 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
 
             methodResult.Result = courseResult;
             return methodResult;
+        }
+
+        private async Task<double> GetCurrentProgressPercentAsync(CourseResult courseResult, CancellationToken cancellationToken)
+        {
+            var course = await _courseRepository.ReadQueryable
+                .Include(x => x.CourseModules)
+                .Where(x => x.Id == courseResult.CourseId)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (course == null)
+            {
+                return default;
+            }
+
+            var originalUnitIds = course.CourseModules
+                .Where(x => x.CourseConfigType == EnumCourseConfigType.Unit)
+                .Select(x => x.OriginalId)
+                .Distinct()
+                .ToList();
+
+            var units = await _unitRepository.ReadQueryable
+                .Include(x => x.UnitModules)
+                .Where(x => originalUnitIds.Contains(x.OriginalId) && x.VersionStatus == EnumVersionStatus.LastVersion)
+                .ToListAsync(cancellationToken);
+
+            var originalLessonIds = units.SelectMany(x => x.UnitModules)
+                .Where(x => x.UnitConfigType == EnumUnitConfigType.Lesson)
+                .Select(x => x.OriginalId)
+                .Distinct()
+                .ToList();
+
+            var lessons = await _lessonRepository.ReadQueryable
+                .Include(x => x.LessonModules)
+                .Where(x => originalLessonIds.Contains(x.OriginalId) && x.VersionStatus == EnumVersionStatus.LastVersion)
+                .ToListAsync(cancellationToken);
+
+            var totalModules = course.CourseModules.Count(x => x.CourseConfigType == EnumCourseConfigType.Test)
+                 + units.SelectMany(x => x.UnitModules).Count(x => x.UnitConfigType == EnumUnitConfigType.Test)
+                 + lessons.SelectMany(x => x.LessonModules).Count();
+
+            var numberOfTestDone = await _testGroupResultRepository.ReadQueryable
+                .Where(x => x.CourseResultId == courseResult.Id && x.Status == EnumResultStatus.Done)
+                .CountAsync(cancellationToken);
+
+            var studentId = courseResult.StudentId;
+
+            var learnedLessionResultIds = await _lessonResultRepository.ReadQueryable
+                .Where(x => x.CourseResultId == courseResult.Id && (x.Status == EnumResultStatus.Done || x.Status == EnumResultStatus.Process))
+                .Select(x => x.Id)
+                .ToListAsync(cancellationToken);
+
+            var numberOfHomeworkDone = await _homeWorkResultRepository.ReadQueryable
+                .Where(x => x.StudentId == studentId && learnedLessionResultIds.Contains(x.LessonResultId) && x.Status == EnumResultStatus.Done)
+                .CountAsync(cancellationToken);
+
+            var numberOfDocumentDone = await _documentResultRepository.ReadQueryable
+                .Where(x => x.StudentId == studentId && learnedLessionResultIds.Contains(x.LessonResultId) && x.Status == EnumResultStatus.Done)
+                .CountAsync(cancellationToken);
+
+            var numberOfClassForumDone = await _classForumResultRepository.ReadQueryable
+                .Where(x => x.StudentId == studentId && learnedLessionResultIds.Contains(x.LessonResultId) && x.ResultStatus == EnumResultStatus.Done)
+                .CountAsync(cancellationToken);
+
+            var numberOfVideoDone = await _videoResultRepository.ReadQueryable
+                .Where(x => x.StudentId == studentId && learnedLessionResultIds.Contains(x.LessonResultId) && x.Status == EnumResultStatus.Done)
+                .CountAsync(cancellationToken);
+
+            return NumberHelper.GetPercent(
+                numberOfTestDone
+                + numberOfHomeworkDone
+                + numberOfDocumentDone
+                + numberOfClassForumDone
+                + numberOfVideoDone,
+                totalModules);
+        }
+
+        private async Task<double> GetUnitCurrentProgressPercentAsync(UnitResult unitResult, Guid studentId, CancellationToken cancellationToken)
+        {
+            var unit = await _unitRepository.ReadQueryable
+                .Include(x => x.UnitModules)
+                .Where(x => x.Id == unitResult.UnitId && x.VersionStatus == EnumVersionStatus.LastVersion)
+                .ToListAsync(cancellationToken);
+
+            var originalLessonIds = unit.SelectMany(x => x.UnitModules)
+                .Where(x => x.UnitConfigType == EnumUnitConfigType.Lesson)
+                .Select(x => x.OriginalId)
+                .Distinct()
+                .ToList();
+
+            var lessons = await _lessonRepository.ReadQueryable
+                .Include(x => x.LessonModules)
+                .Where(x => originalLessonIds.Contains(x.OriginalId) && x.VersionStatus == EnumVersionStatus.LastVersion)
+                .ToListAsync(cancellationToken);
+
+            var totalModulesOfUnit = unit.SelectMany(x => x.UnitModules).Count(x => x.UnitConfigType == EnumUnitConfigType.Test) + lessons.SelectMany(x => x.LessonModules).Count();
+
+            var numberOfTestDone = await _testGroupResultRepository.ReadQueryable
+                .Where(x => x.UnitResultId == unitResult.Id && x.StudentId == studentId && x.Status == EnumResultStatus.Done)
+                .CountAsync(cancellationToken);
+
+            var learnedLessionResultIds = await _lessonResultRepository.ReadQueryable
+                .Where(x => x.UnitResultId == unitResult.Id && x.StudentId == studentId && (x.Status == EnumResultStatus.Done || x.Status == EnumResultStatus.Process))
+                .Select(x => x.Id)
+                .ToListAsync(cancellationToken);
+
+            var numberOfHomeworkDone = await _homeWorkResultRepository.ReadQueryable
+                .Where(x => x.StudentId == studentId && learnedLessionResultIds.Contains(x.LessonResultId) && x.Status == EnumResultStatus.Done)
+                .CountAsync(cancellationToken);
+
+            var numberOfDocumentDone = await _documentResultRepository.ReadQueryable
+                .Where(x => x.StudentId == studentId && learnedLessionResultIds.Contains(x.LessonResultId) && x.Status == EnumResultStatus.Done)
+                .CountAsync(cancellationToken);
+
+            var numberOfClassForumDone = await _classForumResultRepository.ReadQueryable
+                .Where(x => x.StudentId == studentId && learnedLessionResultIds.Contains(x.LessonResultId) && x.ResultStatus == EnumResultStatus.Done)
+                .CountAsync(cancellationToken);
+
+            var numberOfVideoDone = await _videoResultRepository.ReadQueryable
+                .Where(x => x.StudentId == studentId && learnedLessionResultIds.Contains(x.LessonResultId) && x.Status == EnumResultStatus.Done)
+                .CountAsync(cancellationToken);
+
+            return NumberHelper.GetPercent(
+                numberOfTestDone
+                + numberOfHomeworkDone
+                + numberOfDocumentDone
+                + numberOfClassForumDone
+                + numberOfVideoDone,
+                totalModulesOfUnit);
         }
     }
 }

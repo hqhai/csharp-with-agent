@@ -11,6 +11,7 @@ using Fsel.Course.Infrastructure.Common;
 using Fsel.Course.Infrastructure.Common.LessonHelpers;
 using Fsel.Course.Infrastructure.Repositories;
 using Fsel.Course.Infrastructure.ValueSettings;
+using Fsel.Shared.ApplicationServices.CacheServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -120,6 +121,7 @@ builder.Services.AddScoped<IStudentGoalSummaryRepository, StudentGoalSummaryRepo
 builder.Services.AddScoped<IAiPromptManagerRepository, AiPromptManagerRepository>();
 builder.Services.AddScoped<IAiCriteriaConfigRepository, AiFeatureConfigRepository>();
 builder.Services.AddScoped<ICourseModuleRepository, CourseModuleRepository>();
+builder.Services.AddScoped<ICourseChangingHistoryRepository, CourseChangingHistoryRepository>();
 builder.Services.AddScoped<ITestResultRepository, TestResultRepository>();
 builder.Services.AddScoped<ITestGroupResultRepository, TestGroupResultRepository>();
 builder.Services.AddScoped<IDocumentResultRepository, DocumentResultRepository>();
@@ -141,11 +143,12 @@ builder.Services.AddScoped<TestConverter>();
 builder.Services.AddScoped<LinQAnswerHelper>();
 builder.Services.AddScoped<SubjectConditionHelper>();
 
+builder.Services.AddScoped<IRequestSafeCachingService, RequestSafeCachingService>();
+
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
 builder.AddRefitClients(typeof(IStorageService), appSetting?.Services?.StorageApiUrl);
 
 var app = builder.Build();
-
 app.UseServices();
 app.Run();

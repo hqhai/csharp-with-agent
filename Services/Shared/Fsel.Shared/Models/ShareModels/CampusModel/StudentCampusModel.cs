@@ -22,6 +22,7 @@ namespace Fsel.Shared.Models.ShareModels.CampusModel
         public Guid StudentId { get; set; }
         public Guid? SchoolId { get; set; }
         public Guid? SchoolClassId { get; set; }
+        public Guid? CourseId { get; set; }
         public IList<StudentCampusLearningProgressModel>? LearningProgresses { get; set; }
     }
 
@@ -73,9 +74,14 @@ namespace Fsel.Shared.Models.ShareModels.CampusModel
 
         public EnumCourseType CourseType { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
+        public string? ProgramName { get; set; }
+        public string? LevelName { get; set; }
         public string? CourseName { get; set; }
+        public string? SubjectName { get; set; }
         public string? CurriculumName { get; set; }
         public Guid CurriculumId { get; set; }
+        public Guid CourseCloneId { get; set; }
+        public bool IsLearning { get; set; }
     }
 
     public enum EnumStudentCampusLearningStatus

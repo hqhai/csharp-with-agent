@@ -24,6 +24,7 @@ namespace Fsel.Course.Infrastructure.Common.LessonHelpers
             var lesson = new Lesson
             {
                 Name = _createRequest.Name,
+                Code = _createRequest.Code,
                 InstructionContent = _createRequest.InstructionContent,
                 VideoCount = _createRequest.LessonModules?.Count(m => m.LessonConfigType == EnumLessonConfigType.Video) ?? default,
                 ClassForumCount = _createRequest.LessonModules?.Count(m => m.LessonConfigType == EnumLessonConfigType.ClassForum) ?? default,

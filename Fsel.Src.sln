@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.4.33403.182
+# Visual Studio Version 18
+VisualStudioVersion = 18.3.11408.92
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Fsel.Course", "Fsel.Course", "{7FDF6C08-1B24-4D79-BC5D-63213C874C90}"
 EndProject
@@ -179,6 +179,10 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityServer4", "Packages\IdentityServer\IdentityServer4\src\IdentityServer4.csproj", "{38A86C2D-F4AC-4A02-A59A-3CE07151F6E4}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityServer4.Storage", "Packages\IdentityServer\Storage\src\IdentityServer4.Storage.csproj", "{09393233-701D-491B-B86D-6D88C41F0169}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Fsel.Course", "Fsel.Course", "{086A4F17-4058-4B12-90CD-1651CF155E9B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fsel.Course.Lms.Application.Test", "Tests\Fsel.Course\Fsel.Course.Lms.Application.Test\Fsel.Course.Lms.Application.Test.csproj", "{1F3E99D2-3E1E-A8E3-7F4C-2FF04E7C6E5F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -442,6 +446,10 @@ Global
 		{09393233-701D-491B-B86D-6D88C41F0169}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{09393233-701D-491B-B86D-6D88C41F0169}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{09393233-701D-491B-B86D-6D88C41F0169}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F3E99D2-3E1E-A8E3-7F4C-2FF04E7C6E5F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F3E99D2-3E1E-A8E3-7F4C-2FF04E7C6E5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F3E99D2-3E1E-A8E3-7F4C-2FF04E7C6E5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F3E99D2-3E1E-A8E3-7F4C-2FF04E7C6E5F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -527,6 +535,8 @@ Global
 		{DAAAA814-3DFA-4976-89EB-E14898844C87} = {99B47819-BF90-415A-977C-F5E63175FBB0}
 		{38A86C2D-F4AC-4A02-A59A-3CE07151F6E4} = {99B47819-BF90-415A-977C-F5E63175FBB0}
 		{09393233-701D-491B-B86D-6D88C41F0169} = {99B47819-BF90-415A-977C-F5E63175FBB0}
+		{086A4F17-4058-4B12-90CD-1651CF155E9B} = {59DE02A4-17D3-42F9-A1D8-823589A563D0}
+		{1F3E99D2-3E1E-A8E3-7F4C-2FF04E7C6E5F} = {086A4F17-4058-4B12-90CD-1651CF155E9B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C3F5014D-C4B6-471E-9F07-3E7AE3B37304}

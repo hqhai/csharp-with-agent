@@ -5,6 +5,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Course.Domain.IRepositories;
@@ -22,10 +23,14 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
     public class SearchCourseQueryHandler : IRequestHandler<SearchCourseQuery, MethodResult<PagingItemsModel<CourseSearchModel>>>
     {
         private readonly ICourseRepository _courseRepository;
+        private readonly ICategoryRepository _categoryRepository;
+        private readonly ILevelRepository _levelRepository;
 
-        public SearchCourseQueryHandler(ICourseRepository courseRepository)
+        public SearchCourseQueryHandler(ICourseRepository courseRepository, ICategoryRepository categoryRepository, ILevelRepository levelRepository)
         {
             _courseRepository = courseRepository;
+            _categoryRepository = categoryRepository;
+            _levelRepository = levelRepository;
         }
 
         public async Task<MethodResult<PagingItemsModel<CourseSearchModel>>> Handle(SearchCourseQuery request, CancellationToken cancellationToken)
@@ -33,8 +38,11 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<PagingItemsModel<CourseSearchModel>>();
 
-            var courseQuery = _courseRepository.Queryable.Where(p => !p.IsArchive && !p.ParentCourseId.HasValue && p.Status == EnumCourseStatus.Active)
-                              .Select(course => new CourseSearchModel
+            var courseQuery = from course in _courseRepository.Queryable
+                              join p in _categoryRepository.Queryable.Include(p => p.CategoryParent) on course.ProgramId equals p.Id
+                              join l in _levelRepository.Queryable on course.LevelId equals l.Id
+                              where !course.IsArchive && course.Status == EnumCourseStatus.Active && course.VersionStatus == EnumVersionStatus.LastVersion
+                              select new CourseSearchModel
                               {
                                   Id = course.Id,
                                   Name = course.Name,
@@ -49,7 +57,13 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
                                   UpdatedUserId = course.UpdatedUserId,
                                   UpdatedFullName = course.UpdatedFullName,
                                   CourseType = course.CourseType,
-                              });
+                                  Program = p.Name,
+                                  ProgramId = p.Id,
+                                  LevelName = l.Name,
+                                  LevelId = l.Id,
+                                  Subject = p.CategoryParent != null ? p.CategoryParent.Name : null,
+                                  SubjectId = p.CategoryParent != null ? p.CategoryParent.Id : null,
+                              };
 
             request.Keyword = request.Keyword?.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
             if (!string.IsNullOrEmpty(request.Keyword))
@@ -57,14 +71,14 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
                 courseQuery = courseQuery.Where(m => !string.IsNullOrEmpty(m.Code) && m.Code.Contains(request.Keyword) || !string.IsNullOrEmpty(m.Name) && m.Name.Contains(request.Keyword));
             }
 
-            if (request.CourseLevel.HasValue)
+            if (request.ProgramIds != null && request.ProgramIds.Count > 0)
             {
-                courseQuery = courseQuery.Where(m => m.CourseLevel == request.CourseLevel);
+                courseQuery = courseQuery.Where(m => m.ProgramId.HasValue && request.ProgramIds.Contains(m.ProgramId.Value));
             }
 
-            if (request.CourseType.HasValue)
+            if (request.LevelIds != null && request.LevelIds.Count > 0)
             {
-                courseQuery = courseQuery.Where(m => m.CourseType == request.CourseType);
+                courseQuery = courseQuery.Where(m => m.LevelId.HasValue && request.LevelIds.Contains(m.LevelId.Value));
             }
 
             int totalItem = await courseQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);

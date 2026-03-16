@@ -19,6 +19,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public EnumHomeWorkType Type { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
         public EnumCourseSkill CourseSkill { get; set; }
+
         public EnumCourseType CourseType
         {
             get { return EnumCourseLevelHelper.GetEnumCourseType(CourseLevel); }
@@ -31,5 +32,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid OriginalId { get; set; }
         public string? Level { get; set; }
         public string? SkillName { get; set; }
+        public Guid? SubjectId { get; set; }
+        public string? Subject { get; set; }
     }
 }

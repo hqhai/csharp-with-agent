@@ -16,14 +16,18 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
     public class Test : Entity, IVersionEntity
     {
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        [RegexValid(Regex = @"^[a-zA-Z0-9_ ]{1,150}$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
-        [MaxLength(150, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [RegexValid(Regex = @"^[^<>]*$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
+        [MaxLength(200, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Name { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [RegexValid(Regex = @"^[a-zA-Z0-9_]{1,150}$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
         [MaxLength(150, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Code { get; set; }
+
+        [RegexValid(Regex = @"^[^<>]*$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
+        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? Description { get; set; }
 
         public bool IsArchive { get; set; }
         public Guid OriginalId { get; set; }
@@ -67,27 +71,64 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
             return !ErrorMessages.Any();
         }
 
+        private static bool IsInvalidBasicLayout(EnumTestLayoutType layoutType, TestSection testSection)
+        {
+            return layoutType == EnumTestLayoutType.Basic
+                   && testSection.TestAISettings.Any();
+        }
+
+        private const int SpeakingMocktestSectionCount = 1;
+        private const int WritingMocktestSectionCount = 2;
+
+        private static bool IsInvalidNonBasicLayout(EnumTestLayoutType layoutType, TestSection testSection)
+        {
+            return layoutType != EnumTestLayoutType.Basic && testSection.TestSectionQuestions.Any();
+        }
+
+        private static bool IsInvalidSpeakingMocktest(EnumTestLayoutType layoutType, TestSection testSection)
+        {
+            return layoutType == EnumTestLayoutType.SpeakingMocktest
+                   && testSection.TestSections.Count != SpeakingMocktestSectionCount;
+        }
+
+        private static bool IsInvalidWritingMocktest(EnumTestLayoutType layoutType, TestSection testSection)
+        {
+            return layoutType == EnumTestLayoutType.WritingMocktest
+                   && testSection.TestSections.Count != WritingMocktestSectionCount;
+        }
+
         private void ValidateTestLayout(TestSection testSection)
         {
-            if (testSection.LayoutType.HasValue)
+            if (!testSection.LayoutType.HasValue)
             {
-                var isLayOutBasicError = testSection.LayoutType == EnumTestLayoutType.Basic && testSection.TestAISettings.Any();
-                var isLayOutError = testSection.LayoutType != EnumTestLayoutType.Basic && testSection.TestSectionQuestions.Any();
-                if (isLayOutError || isLayOutBasicError)
-                {
-                    AddErrorResults(new ErrorResult
-                    {
-                        ErrorCode = nameof(EnumSystemErrorCode.InValidFormat),
-                        Errors =
-                        {
-                            new Error
-                            {
-                                FieldName =nameof(testSection.LayoutType),
-                            }
-                        }
-                    });
-                }
+                return;
             }
+
+            var layoutType = testSection.LayoutType.Value;
+
+            if (IsInvalidBasicLayout(layoutType, testSection)
+                || IsInvalidNonBasicLayout(layoutType, testSection)
+                || IsInvalidSpeakingMocktest(layoutType, testSection)
+                || IsInvalidWritingMocktest(layoutType, testSection))
+            {
+                AddLayoutTypeError(layoutType);
+            }
+        }
+
+        private void AddLayoutTypeError(EnumTestLayoutType layoutType)
+        {
+            AddErrorResults(new ErrorResult
+            {
+                ErrorCode = nameof(EnumSystemErrorCode.InValidFormat),
+                Errors =
+                {
+                    new Error
+                    {
+                        FieldName = nameof(TestSection.LayoutType),
+                        ErrorValues = new List<object>{ layoutType }
+                    }
+                }
+            });
         }
 
         private void ValidateTestSectionRecursively(TestSection section)
@@ -219,12 +260,12 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
                         {
                             ErrorCode = nameof(EnumSystemErrorCode.Required),
                             Errors =
-                        {
-                            new Error
-                                {
-                                    FieldName = nameof(p.Percent),
-                                }
-                        },
+                    {
+                        new Error
+                            {
+                                FieldName = nameof(p.Percent),
+                            }
+                    },
                         });
                         result = false;
                     }
@@ -235,12 +276,12 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
                         {
                             ErrorCode = nameof(EnumSystemErrorCode.Required),
                             Errors =
-                        {
-                            new Error
-                                {
-                                    FieldName = nameof(p.ScoringFormulaConfigs),
-                                }
-                        },
+                    {
+                        new Error
+                            {
+                                FieldName = nameof(p.ScoringFormulaConfigs),
+                            }
+                    },
                         });
                         result = false;
                     }
@@ -302,12 +343,12 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
                                 {
                                     ErrorCode = nameof(EnumSystemErrorCode.Required),
                                     Errors =
-                        {
-                            new Error
-                                {
-                                    FieldName = nameof(x.Percent),
-                                }
-                        },
+                            {
+                                new Error
+                                    {
+                                        FieldName = nameof(x.Percent),
+                                    }
+                            },
                                 });
                                 result = false;
                             }
@@ -335,12 +376,12 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
                     {
                         ErrorCode = nameof(EnumSystemErrorCode.Min),
                         Errors =
+                {
+                    new Error
                         {
-                            new Error
-                                {
-                                    FieldName = nameof(totalPercentSkill),
-                                }
-                        },
+                            FieldName = nameof(totalPercentSkill),
+                        }
+                },
                     });
                     result = false;
                 }
@@ -348,8 +389,6 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
             else
             {
                 double totalPercentSkill = 0;
-                double totalPercentPart = 0;
-                double totalPercentExercise = 0;
 
                 TestSections.ForEach(p =>
                 {
@@ -363,18 +402,20 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
                         {
                             ErrorCode = nameof(EnumSystemErrorCode.Required),
                             Errors =
-                        {
-                            new Error
-                                {
-                                    FieldName = nameof(p.Percent),
-                                }
-                        },
+                    {
+                        new Error
+                            {
+                                FieldName = nameof(p.Percent),
+                            }
+                    },
                         });
                         result = false;
                     }
 
                     if (p.TestSections != null && p.TestSections.Any())
                     {
+                        double totalPercentPart = 0;
+
                         p.TestSections.ForEach(x =>
                         {
                             if (x.Percent.HasValue)
@@ -387,18 +428,20 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
                                 {
                                     ErrorCode = nameof(EnumSystemErrorCode.Required),
                                     Errors =
-                        {
-                            new Error
-                                {
-                                    FieldName = nameof(p.Percent),
-                                }
-                        },
+                            {
+                                new Error
+                                    {
+                                        FieldName = nameof(p.Percent),
+                                    }
+                            },
                                 });
                                 result = false;
                             }
 
                             if (x.LayoutType == EnumTestLayoutType.Basic && x.TestSections != null && x.TestSections.Any())
                             {
+                                double totalPercentExercise = 0;
+
                                 x.TestSections.ForEach(n =>
                                 {
                                     if (n.Percent.HasValue)
@@ -411,63 +454,65 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
                                         {
                                             ErrorCode = nameof(EnumSystemErrorCode.Required),
                                             Errors =
-                        {
-                            new Error
-                                {
-                                    FieldName = nameof(p.Percent),
-                                }
-                        },
+                                    {
+                                        new Error
+                                            {
+                                                FieldName = nameof(p.Percent),
+                                            }
+                                    },
                                         });
                                         result = false;
                                     }
                                 });
+
+                                if (totalPercentExercise <= 99 || totalPercentExercise > 100)
+                                {
+                                    AddErrorResults(new ErrorResult
+                                    {
+                                        ErrorCode = nameof(EnumSystemErrorCode.Min),
+                                        Errors =
+                                {
+                                    new Error
+                                        {
+                                            FieldName = nameof(totalPercentExercise),
+                                        }
+                                },
+                                    });
+                                    result = false;
+                                }
                             }
                         });
-                    }
-                });
-                if (totalPercentExercise <= 99 || totalPercentExercise > 100)
-                {
-                    AddErrorResults(new ErrorResult
-                    {
-                        ErrorCode = nameof(EnumSystemErrorCode.Min),
-                        Errors =
-                        {
-                            new Error
-                                {
-                                    FieldName = nameof(totalPercentExercise),
-                                }
-                        },
-                    });
-                    result = false;
-                }
 
-                if (totalPercentPart <= 99 || totalPercentPart > 100)
-                {
-                    AddErrorResults(new ErrorResult
-                    {
-                        ErrorCode = nameof(EnumSystemErrorCode.Min),
-                        Errors =
+                        if (totalPercentPart <= 99 || totalPercentPart > 100)
+                        {
+                            AddErrorResults(new ErrorResult
+                            {
+                                ErrorCode = nameof(EnumSystemErrorCode.Min),
+                                Errors =
                         {
                             new Error
                                 {
                                     FieldName = nameof(totalPercentPart),
                                 }
                         },
-                    });
-                    result = false;
-                }
+                            });
+                            result = false;
+                        }
+                    }
+                });
+
                 if (totalPercentSkill <= 99 || totalPercentSkill > 100)
                 {
                     AddErrorResults(new ErrorResult
                     {
                         ErrorCode = nameof(EnumSystemErrorCode.Min),
                         Errors =
+                {
+                    new Error
                         {
-                            new Error
-                                {
-                                    FieldName = nameof(totalPercentSkill),
-                                }
-                        },
+                            FieldName = nameof(totalPercentSkill),
+                        }
+                },
                     });
                     result = false;
                 }

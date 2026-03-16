@@ -135,10 +135,26 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         [HttpPost("select-course-by-choose-level")]
-        [Permission(role: nameof(EnumRole.Student))]
+        [Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
         public async Task<IActionResult> GetLevelsBySelectedProgram([FromBody] ChooseCourseByLevelCommand request)
         {
             var queryResult = await _mediator.Send(request).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        [HttpPost("change-subject")]
+        [Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
+        public async Task<IActionResult> ChangeSubject([FromBody] ChangeSubjectCommand request)
+        {
+            var queryResult = await _mediator.Send(request).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        [HttpGet("get-levels-for-change")]
+        [Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
+        public async Task<IActionResult> GetLevelsForChange()
+        {
+            var queryResult = await _mediator.Send(new GetLevelsForChangeQuery()).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

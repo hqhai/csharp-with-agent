@@ -7,6 +7,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.AiCriteriaConfig
     public class UpdateSettingAiFeatureCommandModel
     {
         public Guid ProjectId { get; set; }
+        public Guid? ObjectId { get; set; }
         public EnumSubFeatureType SubFeatureType { get; set; }
         public double SettingTemperature { get; set; }
         public double SettingWordMaxLength { get; set; }

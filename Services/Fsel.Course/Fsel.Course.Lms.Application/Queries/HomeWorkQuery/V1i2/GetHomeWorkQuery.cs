@@ -77,7 +77,9 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery.V1i2
             }
             var studentId = studentsResult.Content?.Result?.Id;
 
-            var homeWorkResult = await _homeWorkResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.HomeWorkResultId && x.LessonModuleId == request.LessonModuleId && x.StudentId == studentId, cancellationToken);
+            var homeWorkResult = await _homeWorkResultRepository.Queryable.AsNoTracking()
+                                                                .Where(x => x.LessonModuleId == request.LessonModuleId && x.StudentId == studentId)
+                                                                .FirstOrDefaultAsync(x => x.Id == request.HomeWorkResultId, cancellationToken);
             if (homeWorkResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWorkResult));
@@ -88,8 +90,8 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery.V1i2
                 methodResult.AddErrorBadRequest(nameof(EnumResultErrorCode.ResultStatusUnfinished), nameof(homeWorkResult));
                 return methodResult;
             }
-            var homeWork = await _homeWorkRepository.GetAsync(homeWorkResult);
 
+            var homeWork = await _homeWorkRepository.GetAsync(homeWorkResult);
             if (homeWork == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWork));
@@ -128,7 +130,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery.V1i2
                 questionModel.CorrectStatus = GetCorrectStatus(homeWorkAnswer);
                 questionModel.IsReportExplanation = questionExplanationErrors.Any(x => x.QuestionId == question.Id);
                 questionModel.Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: !(isCheck)).Item1;
-                (questionModel.Config, string? questionShuffleStr) = _questionTypeConverter.QuestionShuffleConverterObject(questionModel.Config, question.QuestionType, questionShuffle?.ShuffleConfigs);
+                (questionModel.Config, string? questionShuffleStr) = _questionTypeConverter.QuestionShuffleConverterObject(questionModel.Config, question.QuestionType, isCheck, questionShuffle?.ShuffleConfigs);
                 if (!string.IsNullOrEmpty(questionShuffleStr) && (questionShuffle == null || questionShuffle.ShuffleConfigStr != questionShuffleStr))
                 {
                     if (questionShuffle == null)

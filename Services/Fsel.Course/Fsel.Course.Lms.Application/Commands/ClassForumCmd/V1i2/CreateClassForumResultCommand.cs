@@ -19,6 +19,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
@@ -29,6 +30,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
     using CreateClassForumResultCommandModel = Domain.Models.CommandModels.ClassForumResults.V1i2.CreateClassForumResultCommandModel;
+    using Fsel.Shared.ApplicationServices.CacheServices;
 
     public class CreateClassForumResultCommand : CreateClassForumResultCommandModel, IRequest<MethodResult<ClassForumResultModel>>
     {
@@ -53,6 +55,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
         private readonly IHostEnvironment _environment;
         private readonly IClassForumResultFileRepository _classForumResultFileRepository;
         private readonly QuestBoardPublisher _questBoardPublisher;
+        private readonly ClassForumPronunciationPublisher _classForumPronunciationPublisher;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
 
         public const int DisplayOrderFirst = 0;
         public const int DisplayOrderSecond = 1;
@@ -73,7 +77,9 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
             SetTimeClassForumDonePublisher setTimeClassForumDonePublisher,
             QuestBoardPublisher questBoardPublisher,
             IHostEnvironment environment,
-            IClassForumResultFileRepository classForumResultFileRepository)
+            IClassForumResultFileRepository classForumResultFileRepository,
+            ClassForumPronunciationPublisher classForumPronunciationPublisher,
+            IRequestSafeCachingService requestSafeCachingService)
         {
             _mapper = mapper;
             _createTokenHistoryPublisher = createTokenHistoryPublisher;
@@ -92,6 +98,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
             _questBoardPublisher = questBoardPublisher;
             _environment = environment;
             _classForumResultFileRepository = classForumResultFileRepository;
+            _classForumPronunciationPublisher = classForumPronunciationPublisher;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         public async Task<MethodResult<ClassForumResultModel>> Handle(CreateClassForumResultCommand request, CancellationToken cancellationToken)
@@ -239,6 +247,11 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
             if (classForumDetailResult != null && request.IsSubmit)
             {
                 await PublishAIClassForumResponseAsync(classForumDetailResult, classForum, request, cancellationToken);
+
+                if (classForum.Layout == EnumClassForumLayout.Speaking)
+                {
+                    await _classForumPronunciationPublisher.Publish(new ClassForumPronunciationConsumerModel { ClassForumDetailResultId = classForumDetailResult.Id }, cancellationToken);
+                }
             }
 
             var classForumDetailResults = await _classForumDetailResultRepository.Queryable.Where(x => classForumResult != null && x.ClassForumResultId == classForumResult.Id)
@@ -300,9 +313,9 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
 
             await _classForumDetailResultRepository.BulkUpdateList(new List<ClassForumDetailResult> { classForumDetailResult }, bulk =>
             {
-                bulk.IgnoreOnUpdateExpression = c => new { c.ClassForumResultId, c.SubmissionCount };
+                bulk.IgnoreOnUpdateExpression = c => new { c.ClassForumResultId, c.SubmissionCount, c.AITranslationContent };
             });
-            var classForumResultFileNews = classForumDetailResult.ClassForumResultFiles;
+            var classForumResultFileNews = classForumDetailResult.ClassForumResultFiles.ToList();
 
             var classForumResultFiles = await _classForumResultFileRepository.Queryable.Where(x => x.ClassForumDetailResultId == classForumDetailResult.Id)
                 .ToListAsync(cancellationToken);
@@ -319,7 +332,13 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
                     file.ClassForumDetailResultId = classForumDetailResult.Id; // Set foreign key nếu cần
                 }
 
-                await _classForumResultFileRepository.BulkMergeAsync(classForumResultFileNews);
+                await _requestSafeCachingService.SafeRequest<List<ClassForumResultFile>>(
+                    key: $"Add_ClassForumResultFiles_{string.Join("_", classForumResultFileNews.Select(hwa => $"{hwa.ClassForumDetailResultId}_{hwa.FilePath}"))}",
+                    safeFunction: async () =>
+                    {
+                        await _classForumResultFileRepository.BulkMergeAsync(classForumResultFileNews);
+                        return classForumResultFileNews;
+                    });
             }
 
             methodResult.Result = classForumDetailResult;
@@ -383,16 +402,22 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
                 ProcessDate = request.IsSubmit && submissionCount == EnumSubmissionCount.FirstSubmit ? DateTime.UtcNow : null,
                 ClassForumResultId = classForumResult.Id,
             };
-
+            classForumResult.ProcessDate = DateTime.UtcNow;
             classForumDetailResult.MediaType = MediaHelper.GetMediaType(classForumDetailResult.ClassForumResultFiles.Select(x => x.FilePath).FirstOrDefault());
 
             try
             {
-                await _classForumDetailResultRepository.BulkMergeAsync(new List<ClassForumDetailResult> { classForumDetailResult }, bulk =>
-                {
-                    bulk.ColumnPrimaryKeyExpression = c => new { c.ClassForumResultId, c.SubmissionCount, c.IsDeleted };
-                });
-                var classForumResultFiles = classForumDetailResult.ClassForumResultFiles;
+                await _requestSafeCachingService.SafeRequest<ClassForumDetailResult>(
+                    key: $"Add_ClassForumDetailResult_{classForumDetailResult.ClassForumResultId}_{classForumDetailResult.SubmissionCount}_{classForumDetailResult.IsDeleted}",
+                    safeFunction: async () =>
+                    {
+                        await _classForumDetailResultRepository.BulkMergeAsync(new List<ClassForumDetailResult> { classForumDetailResult }, bulk =>
+                        {
+                            bulk.ColumnPrimaryKeyExpression = c => new { c.ClassForumResultId, c.SubmissionCount, c.IsDeleted };
+                        });
+                        return classForumDetailResult;
+                    });
+                var classForumResultFiles = classForumDetailResult.ClassForumResultFiles.ToList();
                 if (classForumResultFiles.Any())
                 {
                     foreach (var file in classForumResultFiles)
@@ -400,7 +425,13 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
                         file.ClassForumDetailResultId = classForumDetailResult.Id; // Set foreign key nếu cần
                     }
 
-                    await _classForumResultFileRepository.BulkMergeAsync(classForumResultFiles);
+                    await _requestSafeCachingService.SafeRequest<List<ClassForumResultFile>>(
+                    key: $"Add_ClassForumResultFiles_{string.Join("_", classForumResultFiles.Select(hwa => $"{hwa.ClassForumDetailResultId}_{hwa.FilePath}"))}",
+                        safeFunction: async () =>
+                        {
+                            await _classForumResultFileRepository.BulkMergeAsync(classForumResultFiles);
+                            return classForumResultFiles;
+                        });
                 }
             }
             catch (Exception ex)

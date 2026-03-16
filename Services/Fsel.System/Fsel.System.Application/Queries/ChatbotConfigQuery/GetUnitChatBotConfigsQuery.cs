@@ -20,6 +20,7 @@ namespace Fsel.System.Application.Queries.ChatbotConfigQuery
     {
         private readonly IChatbotConfigRepository _chatbotConfigRepository;
         private readonly IMapper _mapper;
+
         public GetUnitChatBotConfigsQueryHandler(IChatbotConfigRepository chatbotConfigRepository, IMapper mapper)
         {
             _chatbotConfigRepository = chatbotConfigRepository;
@@ -37,10 +38,10 @@ namespace Fsel.System.Application.Queries.ChatbotConfigQuery
                 return methodResult;
             }
 
-            var chatbotConfigs = _chatbotConfigRepository.Queryable
-                                                              .Include(x => x.ChatbotSkillConfigs)
-                                                              .Include(x => x.ChatbotTokenConfigs)
-                                                              .Where(x => request.UnitIds.Contains(x.UnitId)).ToList();
+            var chatbotConfigs = await _chatbotConfigRepository.ReadQueryable
+                                                               .Include(x => x.ChatbotSkillConfigs)
+                                                               .Where(x => request.UnitIds.Contains(x.UnitId))
+                                                               .ToListAsync(cancellationToken);
 
             methodResult.Result = _mapper.Map<IList<ChatbotConfigModel>>(chatbotConfigs);
             methodResult.StatusCode = StatusCodes.Status200OK;

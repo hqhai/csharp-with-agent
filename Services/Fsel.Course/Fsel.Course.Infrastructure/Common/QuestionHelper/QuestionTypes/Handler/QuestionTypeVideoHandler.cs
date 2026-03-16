@@ -9,8 +9,11 @@ namespace Fsel.Course.Infrastructure.Common.QuestionHelper.QuestionTypes.Handler
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers;
+    using Fsel.Course.Domain.Entities.TestConfigs;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Infrastructure.Common.QuestionHelper.QuestionTypes.Interface;
+    using Fsel.Shared.ApplicationServices.CacheServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using Fsel.Shared.Models.ShareModels.QuestionResultConfigModels;
@@ -21,14 +24,20 @@ namespace Fsel.Course.Infrastructure.Common.QuestionHelper.QuestionTypes.Handler
         private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
         private readonly QuestionResultQueueModel _request;
         private readonly IExerciseQuestionRepository _exerciseQuestionRepository;
+        private readonly IVideoTimeCodeAnswerRepository _videoTimeCodeAnswerRepository;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
 
         public QuestionTypeVideoHandler(IVideoTimeCodeResultRepository videoTimeCodeResultRepository,
                                        QuestionResultQueueModel request,
-                                       IExerciseQuestionRepository exerciseQuestionRepository)
+                                       IExerciseQuestionRepository exerciseQuestionRepository,
+                                       IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository,
+                                       IRequestSafeCachingService requestSafeCachingService)
         {
             _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
             _request = request;
             _exerciseQuestionRepository = exerciseQuestionRepository;
+            _videoTimeCodeAnswerRepository = videoTimeCodeAnswerRepository;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         public async Task<MethodResult<bool>> ExecuteAsync(CancellationToken cancellationToken)
@@ -36,7 +45,6 @@ namespace Fsel.Course.Infrastructure.Common.QuestionHelper.QuestionTypes.Handler
             var methodResult = new MethodResult<bool>();
 
             var videoTimeCodeResult = await _videoTimeCodeResultRepository.Queryable
-                                                                          .Include(x => x.VideoTimeCodeAnswers)
                                                                           .FirstOrDefaultAsync(x => x.Id == _request.TResultId, cancellationToken);
             if (videoTimeCodeResult == null)
             {
@@ -55,54 +63,68 @@ namespace Fsel.Course.Infrastructure.Common.QuestionHelper.QuestionTypes.Handler
                     break;
             }
 
-            await _videoTimeCodeResultRepository.ExecuteTransactionAsync(async () =>
-            {
-                _videoTimeCodeResultRepository.Update(videoTimeCodeResult);
-                await _videoTimeCodeResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-                methodResult.Result = true;
-                return methodResult;
-            });
-
             return methodResult;
         }
 
         private async Task UpsertVideoAnswerAsync<TAnswer>(
-          VideoTimeCodeResult result,
-          Guid questionId,
-          Action<TAnswer> mutate,                 // cập nhật dữ liệu answer
-          Func<TAnswer> createFactory,            // khởi tạo answer mặc định
-          CancellationToken ct
-      ) where TAnswer : class
+        VideoTimeCodeResult result,
+        Guid questionId,
+        Action<TAnswer> mutate,
+        Func<TAnswer> createFactory,
+        CancellationToken ct)
+        where TAnswer : class
         {
-            var vta = result.VideoTimeCodeAnswers
-                            .FirstOrDefault(x => x.QuestionId == questionId);
+            var entity = await _videoTimeCodeAnswerRepository.Queryable
+                .FirstOrDefaultAsync(x => x.VideoTimeCodeResultId == result.Id && x.QuestionId == questionId, ct);
 
-            TAnswer answer;
-
-            if (vta != null)
+            TAnswer model;
+            if (entity != null)
             {
-                // Deserialize sang kiểu mong muốn, nếu null thì tạo mới
-                answer = vta.Answer.Deserialize<TAnswer>() ?? createFactory();
-                mutate(answer);
-                vta.Answer = answer;
+                model = entity.Answer.Deserialize<TAnswer>() ?? createFactory();
+                mutate(model);
+
+                entity.Answer = model;
+                try
+                {
+                    await _videoTimeCodeAnswerRepository.BulkUpdateList(new List<VideoTimeCodeAnswer> { entity }, bulk =>
+                    {
+                        bulk.ColumnInputExpression = entity => new { entity.Answer };
+                    });
+                }
+                catch { }
             }
             else
             {
                 var exerciseId = await GetExerciseIdAsync(ct);
-                answer = createFactory();
-                mutate(answer);
 
-                result.VideoTimeCodeAnswers.Add(new VideoTimeCodeAnswer
+                model = createFactory();
+                mutate(model);
+
+                entity = new VideoTimeCodeAnswer
                 {
                     QuestionId = questionId,
                     ExerciseId = exerciseId,
                     VideoTimeCodeId = result.VideoTimeCodeId,
                     VideoResultId = result.VideoResultId,
-                    VideoTimeCodeResultId = result.VideoTimeCodeId, // hoặc _request.TResultId nếu đúng
-                    Answer = answer,
+                    VideoTimeCodeResultId = result.Id,
+                    Answer = model,
+                    IsFirstSubmit = result.Status == EnumResultStatus.New,
                     Status = EnumAnswerStatus.Process
-                });
+                };
+                try
+                {
+                    await _requestSafeCachingService.SafeRequest(
+                        key: $"Add_VideoTimeCodeAnswer_{entity.VideoTimeCodeResultId}_{entity.QuestionId}_{entity.IsDeleted}",
+                        safeFunction: async () =>
+                        {
+                            await _videoTimeCodeAnswerRepository.BulkMergeAsync(new List<VideoTimeCodeAnswer> { entity }, bulk =>
+                            {
+                                bulk.ColumnPrimaryKeyExpression = c => new { c.VideoTimeCodeResultId, c.QuestionId, c.IsDeleted };
+                            });
+                            return entity;
+                        });
+                }
+                catch { }
             }
         }
 

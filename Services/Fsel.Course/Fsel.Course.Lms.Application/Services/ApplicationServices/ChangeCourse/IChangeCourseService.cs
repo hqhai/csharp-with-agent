@@ -1,0 +1,704 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Course.Lms.Application.Services.ApplicationServices.ChangeCourse
+{
+    using System;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using Fsel.Common.Enums;
+    using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Entities.TestConfigs;
+    using Fsel.Course.Domain.Enums;
+    using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Domain.Models.EntityModels.ChangeCourseModels;
+    using Fsel.Course.Lms.Application.Commands.CourseResultCmd.V1i2;
+    using Fsel.Course.Lms.Application.Services.ApplicationServices;
+    using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
+    using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Course.Lms.Application.Services.UserServices.CommandModels;
+    using Fsel.Course.Lms.Application.Services.UserServices.Models;
+    using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
+    using MediatR;
+    using Microsoft.EntityFrameworkCore;
+
+    public interface IChangeCourseService
+    {
+        Task<TestGroupResult> InitForMustDoPtProgram(ChangeCourseModel changeCourseRequest);
+
+        Task<TestGroupResult> InitForProgramByPassPt(ChangeCourseModel changeCourseRequest);
+
+        Task<TestGroupResult> InitForProgramExistedPt(Guid relatedHistoryId, Guid toProgramId, Guid relatedPtResultId);
+
+        Task InitForChangeSubject(Guid studentId);
+
+        Task SelectCourseLevelAfterPt(SelectCourseLevelRequest request);
+
+        Task SwitchDirectlyToNewCourse(SelectCourseLevelRequest request);
+
+        Task SwitchDirectlyToNewCourseForChangeCourse(SelectCourseLevelRequest request);
+
+        Task<TestGroupResult?> SwitchDirectlyToExistCourseForChangeLevel(Guid courseResultId, Guid studentId);
+
+        Task SwitchDirectlyToExistCourseForSelectLevelAfterPt(Guid courseResultId, Guid studentId, Guid? relatedHistoryId = null);
+
+        Task<ChangeCourseAggregate> GetChangeCourseAggreate(StudentModel student, Guid? levelId, CancellationToken cancellationToken);
+
+        Task<ChangeCourseAggregate> GetChangeSubjectAggreate(StudentModel student, CancellationToken cancellationToken);
+
+        Task<ChangeCourseAggregate> GetChangeProgramAggreate(StudentModel student, CancellationToken cancellationToken);
+    }
+
+    public class ChangeCourseService : IChangeCourseService
+    {
+        private readonly ICourseChangingHistoryRepository _courseChangingHistoryRepository;
+        private readonly ITestGroupResultRepository _testGroupResultRepository;
+        private readonly IFlowService _flowService;
+        private readonly ICourseRepository _courseRepository;
+        private readonly ICourseResultRepository _courseResultRepository;
+        private readonly ICategoryCachingService _categoryCachingService;
+        private readonly IUserService _userService;
+        private readonly ISubjectConditionRepository _categoryRepository;
+        private readonly IMediator _mediator;
+
+        public ChangeCourseService(ICourseChangingHistoryRepository courseChangingHistoryRepository,
+            ITestGroupResultRepository testGroupResultRepository,
+            IFlowService flowService,
+            ICourseRepository courseRepository,
+            ICourseResultRepository courseResultRepository,
+            IUserService userService,
+            ICategoryCachingService categoryCachingService,
+            ISubjectConditionRepository categoryRepository,
+            IMediator mediator)
+        {
+            _courseChangingHistoryRepository = courseChangingHistoryRepository;
+            _testGroupResultRepository = testGroupResultRepository;
+            _flowService = flowService;
+            _courseRepository = courseRepository;
+            _courseResultRepository = courseResultRepository;
+            _categoryCachingService = categoryCachingService;
+            _userService = userService;
+            _categoryRepository = categoryRepository;
+            _mediator = mediator;
+        }
+
+        public async Task<TestGroupResult> InitForMustDoPtProgram(ChangeCourseModel changeCourseRequest)
+        {
+            ArgumentNullException.ThrowIfNull(changeCourseRequest);
+
+            var flowMatch = await _flowService.GetHierarchicalFlowByCondition(x => x.ProgramId == changeCourseRequest.OwnPtProgramId
+                                                                                   && x.Status == EnumStatus.Active
+                                                                                   && x.FromAge <= changeCourseRequest.Age && x.ToAge >= changeCourseRequest.Age);
+            if (flowMatch?.StepFlows.FirstOrDefault() == null)
+            {
+                return null;
+            }
+
+            var firstStepFlow = flowMatch.StepFlows?.FirstOrDefault();
+            if (firstStepFlow == null)
+            {
+                return null;
+            }
+
+            var testGroupResult = new TestGroupResult
+            {
+                Id = Guid.NewGuid(),
+                ProgramId = changeCourseRequest.ToProgramId,
+                ProgramIdOfPt = changeCourseRequest.OwnPtProgramId,
+                FlowId = flowMatch.Id,
+                StudentId = changeCourseRequest.StudentId,
+                TestType = EnumTestType.PlacementTest,
+                Status = EnumResultStatus.New
+            };
+            _testGroupResultRepository.Add(testGroupResult);
+
+            var waitSelectProgramHistory = await _courseChangingHistoryRepository.Queryable
+                .Where(x => x.StudentId == changeCourseRequest.StudentId && x.Status == EnumChangingStatus.InprogressSelectProgram)
+                .OrderByDescending(x => x.CreatedDate)
+                .FirstOrDefaultAsync();
+
+            if (waitSelectProgramHistory == null)
+            {
+                var history = new CourseChangingHistory
+                {
+                    Id = Guid.NewGuid(),
+                    StudentId = changeCourseRequest.StudentId,
+                    ToLevelId = changeCourseRequest.ToLevelId,
+                    ToProgramId = changeCourseRequest.ToProgramId,
+                    PtResultId = testGroupResult.Id,
+                    FromInfo = changeCourseRequest.FromInfo,
+                    Action = changeCourseRequest.Action,
+                    CreatedDate = DateTime.UtcNow,
+                    Status = EnumChangingStatus.InProgressPt
+                };
+                _courseChangingHistoryRepository.Add(history);
+            }
+            else
+            {
+                waitSelectProgramHistory.ToLevelId = changeCourseRequest.ToLevelId;
+                waitSelectProgramHistory.ToProgramId = changeCourseRequest.ToProgramId;
+                waitSelectProgramHistory.Status = EnumChangingStatus.InProgressPt;
+                waitSelectProgramHistory.PtResultId = testGroupResult.Id;
+            }
+
+            var courseResults = await _courseResultRepository.Queryable
+                .Where(x => x.StudentId == changeCourseRequest.StudentId && x.WorkingStatus == EnumWorkingStatus.Active)
+                .ToListAsync();
+            foreach (var courseResult in courseResults)
+            {
+                courseResult.WorkingStatus = EnumWorkingStatus.InActive;
+            }
+
+            await _testGroupResultRepository.UnitOfWork.SaveChangesAsync();
+
+            await _userService.UpdateLearningContextAsync(new UpdateStudentLearningContextCommandModel());
+
+            return testGroupResult;
+        }
+
+        public async Task<TestGroupResult> InitForProgramExistedPt(Guid relatedHistoryId, Guid toProgramId, Guid relatedPtResultId)
+        {
+            var waitSelectProgramHistory = await _courseChangingHistoryRepository.Queryable
+               .Where(x => x.Id == relatedHistoryId && x.Status == EnumChangingStatus.InprogressSelectProgram)
+               .OrderByDescending(x => x.CreatedDate)
+               .FirstOrDefaultAsync();
+
+            if (waitSelectProgramHistory != null)
+            {
+                waitSelectProgramHistory.ToProgramId = toProgramId;
+                waitSelectProgramHistory.PtResultId = relatedPtResultId;
+                waitSelectProgramHistory.Status = EnumChangingStatus.InProgressSelectCourse;
+            }
+            await _testGroupResultRepository.UnitOfWork.SaveChangesAsync();
+
+            var testGroupResult = await _testGroupResultRepository.Queryable
+                .Where(x => x.Id == relatedPtResultId)
+                .FirstOrDefaultAsync();
+
+            return testGroupResult;
+        }
+
+        public async Task InitForChangeSubject(Guid studentId)
+        {
+            var currentCourseResult = await _courseResultRepository.Queryable
+                .Include(x => x.Course)
+                .FirstOrDefaultAsync(x => x.StudentId == studentId && x.WorkingStatus == EnumWorkingStatus.Active);
+
+            var history = new CourseChangingHistory
+            {
+                Id = Guid.NewGuid(),
+                StudentId = studentId,
+                FromInfo = new FromInfo
+                {
+                    LevelId = currentCourseResult?.Course?.LevelId,
+                    ProgramId = currentCourseResult?.Course?.ProgramId,
+                    CourseResultId = currentCourseResult?.Id
+                },
+                Action = EnumChangeCourseAction.ChangeAndStartPt,
+                CreatedDate = DateTime.UtcNow,
+                Status = EnumChangingStatus.InprogressSelectProgram
+            };
+            _courseChangingHistoryRepository.Add(history);
+
+            await _testGroupResultRepository.UnitOfWork.SaveChangesAsync();
+
+            await _userService.UpdateLearningContextAsync(new UpdateStudentLearningContextCommandModel());
+        }
+
+        public async Task<TestGroupResult> InitForProgramByPassPt(ChangeCourseModel changeCourseRequest)
+        {
+            ArgumentNullException.ThrowIfNull(changeCourseRequest);
+
+            var testGroupResult = new TestGroupResult
+            {
+                Id = Guid.NewGuid(),
+                ProgramId = changeCourseRequest.ToProgramId,
+                ProgramIdOfPt = changeCourseRequest.OwnPtProgramId,
+                StudentId = changeCourseRequest.StudentId,
+                TestType = EnumTestType.PlacementTest,
+                Status = EnumResultStatus.ByPass
+            };
+            _testGroupResultRepository.Add(testGroupResult);
+
+            var waitSelectProgramHistory = await _courseChangingHistoryRepository.Queryable
+                .Where(x => x.StudentId == changeCourseRequest.StudentId && x.Status == EnumChangingStatus.InprogressSelectProgram)
+                .OrderByDescending(x => x.CreatedDate)
+                .FirstOrDefaultAsync();
+
+            if (waitSelectProgramHistory != null)
+            {
+                waitSelectProgramHistory.ToProgramId = changeCourseRequest.ToProgramId;
+                waitSelectProgramHistory.PtResultId = testGroupResult.Id;
+                waitSelectProgramHistory.Status = EnumChangingStatus.InProgressSelectCourse;
+            }
+            else
+            {
+                var history = new CourseChangingHistory
+                {
+                    Id = Guid.NewGuid(),
+                    StudentId = changeCourseRequest.StudentId,
+                    ToLevelId = changeCourseRequest.ToLevelId,
+                    ToProgramId = changeCourseRequest.ToProgramId,
+                    PtResultId = testGroupResult.Id,
+                    FromInfo = changeCourseRequest.FromInfo,
+                    Action = changeCourseRequest.Action,
+                    CreatedDate = DateTime.UtcNow,
+                    Status = EnumChangingStatus.InProgressSelectCourse
+                };
+
+                _courseChangingHistoryRepository.Add(history);
+            }
+
+            await _testGroupResultRepository.UnitOfWork.SaveChangesAsync();
+
+            await _userService.UpdateLearningContextAsync(new UpdateStudentLearningContextCommandModel());
+
+            return testGroupResult;
+        }
+
+        public async Task SelectCourseLevelAfterPt(SelectCourseLevelRequest request)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+
+            var courses = await _courseRepository.ReadQueryable.Include(x => x.Program)
+                .ThenInclude(x => x.CategoryParent)
+                .Where(x => x.ProgramId == request.SelectedProgramId
+                            && x.LevelId == request.SelectedLevelId
+                            && x.VersionStatus == EnumVersionStatus.LastVersion
+                            && !x.IsArchive && x.Status == EnumCourseStatus.Active)
+                .ToListAsync();
+            var random = new Random();
+            var course = courses.OrderBy(x => random.Next()).FirstOrDefault();
+
+            if (course == null)
+            {
+                return;
+            }
+
+            var createCourseResult = await _mediator.Send(new SaveCourseResultCommand
+            {
+                StudentId = request.StudentId,
+                CourseId = course.Id
+            });
+
+            if (createCourseResult?.Result != null && createCourseResult.IsOK)
+            {
+                var activeCourseResults = await _courseResultRepository.Queryable
+                .Where(x => x.StudentId == request.StudentId && x.WorkingStatus == EnumWorkingStatus.Active)
+                .ToListAsync();
+                activeCourseResults.ForEach(cr =>
+                {
+                    if (cr.Id != createCourseResult.Result?.Id)
+                    {
+                        cr.WorkingStatus = EnumWorkingStatus.InActive;
+                    }
+                });
+
+                if (request.RelatedHistoryId != null)
+                {
+                    var courseChangingHistory = await _courseChangingHistoryRepository.Queryable
+                                                    .Where(x => x.Id == request.RelatedHistoryId.Value)
+                                                    .FirstOrDefaultAsync();
+
+                    if (courseChangingHistory?.Status == EnumChangingStatus.InProgressSelectCourse)
+                    {
+                        courseChangingHistory.SelectedLevelId = request.SelectedLevelId;
+                        courseChangingHistory.SelectedProgramId = request.SelectedProgramId;
+                        courseChangingHistory.Status = EnumChangingStatus.Completed;
+                        courseChangingHistory.ToCourseResultId = createCourseResult.Result.Id;
+                    }
+                }
+                await _testGroupResultRepository.UnitOfWork.SaveChangesAsync();
+                await UpdateLearningContextAsync(course);
+            }
+        }
+
+        public async Task SwitchDirectlyToNewCourse(SelectCourseLevelRequest request)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+
+            var courses = await _courseRepository.ReadQueryable
+                .Include(x => x.Program)
+                .ThenInclude(x => x.CategoryParent)
+                .Where(x => x.ProgramId == request.SelectedProgramId
+                            && x.LevelId == request.SelectedLevelId
+                            && x.VersionStatus == EnumVersionStatus.LastVersion
+                            && !x.IsArchive && x.Status == EnumCourseStatus.Active)
+                .ToListAsync();
+            var random = new Random();
+            var course = courses.OrderBy(x => random.Next()).FirstOrDefault();
+
+            if (course == null)
+            {
+                return;
+            }
+
+            var createCourseResult = await _mediator.Send(new SaveCourseResultCommand
+            {
+                StudentId = request.StudentId,
+                CourseId = course.Id
+            });
+
+            if (createCourseResult?.Result != null && createCourseResult.IsOK)
+            {
+                var activeCourseResults = await _courseResultRepository.Queryable
+                .Where(x => x.StudentId == request.StudentId && x.WorkingStatus == EnumWorkingStatus.Active)
+                .ToListAsync();
+
+                activeCourseResults.ForEach(cr =>
+                {
+                    if (cr.Id != createCourseResult.Result?.Id)
+                    {
+                        cr.WorkingStatus = EnumWorkingStatus.InActive;
+                    }
+                });
+
+                if (request.RelatedHistoryId != null)
+                {
+                    var courseChangingHistory = await _courseChangingHistoryRepository.Queryable
+                        .FirstOrDefaultAsync(x => x.Id == request.RelatedHistoryId.Value);
+                    if (courseChangingHistory != null && courseChangingHistory.Status == EnumChangingStatus.InProgressSelectCourse)
+                    {
+                        courseChangingHistory.Status = EnumChangingStatus.Completed;
+                        courseChangingHistory.ToCourseResultId = createCourseResult.Result.Id;
+                        await _testGroupResultRepository.UnitOfWork.SaveChangesAsync();
+                    }
+                }
+                await UpdateLearningContextAsync(course);
+            }
+        }
+
+        public async Task SwitchDirectlyToNewCourseForChangeCourse(SelectCourseLevelRequest request)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+
+            var courses = await _courseRepository.ReadQueryable
+                .Include(x => x.Program)
+                .ThenInclude(x => x.CategoryParent)
+                .Where(x => x.ProgramId == request.SelectedProgramId
+                            && x.LevelId == request.SelectedLevelId
+                            && x.VersionStatus == EnumVersionStatus.LastVersion
+                            && !x.IsArchive && x.Status == EnumCourseStatus.Active)
+                .ToListAsync();
+            var random = new Random();
+            var course = courses.OrderBy(x => random.Next()).FirstOrDefault();
+
+            if (course == null)
+            {
+                return;
+            }
+
+            var createCourseResult = await _mediator.Send(new SaveCourseResultCommand
+            {
+                StudentId = request.StudentId,
+                CourseId = course.Id
+            });
+
+            if (createCourseResult?.Result != null && createCourseResult.IsOK)
+            {
+                var activeCourseResults = await _courseResultRepository.Queryable
+                .Where(x => x.StudentId == request.StudentId && x.WorkingStatus == EnumWorkingStatus.Active)
+                .ToListAsync();
+
+                activeCourseResults.ForEach(cr =>
+                {
+                    if (cr.Id != createCourseResult.Result?.Id)
+                    {
+                        cr.WorkingStatus = EnumWorkingStatus.InActive;
+                    }
+                });
+
+                if (!request.PtResultId.HasValue)
+                {
+                    var testGroupResult = new TestGroupResult
+                    {
+                        Id = Guid.NewGuid(),
+                        ProgramId = request.ToProgramId,
+                        ProgramIdOfPt = request.ToProgramId,
+                        StudentId = request.StudentId,
+                        TestType = EnumTestType.PlacementTest,
+                        Status = EnumResultStatus.ByPass
+                    };
+                    request.PtResultId = testGroupResult.Id;
+                    _testGroupResultRepository.Add(testGroupResult);
+                }
+
+
+                var history = new CourseChangingHistory
+                {
+                    Id = Guid.NewGuid(),
+                    StudentId = request.StudentId,
+                    ToLevelId = request.ToLevelId,
+                    ToProgramId = request.ToProgramId,
+                    SelectedLevelId = request.SelectedLevelId,
+                    SelectedProgramId = request.SelectedProgramId,
+                    FromInfo = request.FromInfo,
+                    Action = request.Action,
+                    CreatedDate = DateTime.UtcNow,
+                    Status = EnumChangingStatus.Completed,
+                    PtResultId = request.PtResultId,
+                    ToCourseResultId = createCourseResult.Result.Id
+                };
+
+
+                _courseChangingHistoryRepository.Add(history);
+                await _testGroupResultRepository.UnitOfWork.SaveChangesAsync();
+                await UpdateLearningContextAsync(course);
+            }
+        }
+
+        public async Task SwitchDirectlyToExistCourseForSelectLevelAfterPt(Guid courseResultId, Guid studentId, Guid? relatedHistoryId = null)
+        {
+            var courseResults = _courseResultRepository.Queryable
+                .Where(x => x.StudentId == studentId && x.WorkingStatus == EnumWorkingStatus.Active)
+                .ToList();
+
+            courseResults.ForEach(cr =>
+            {
+                cr.WorkingStatus = EnumWorkingStatus.InActive;
+            });
+
+            var targetCourseResult = await _courseResultRepository.Queryable
+                .Include(x => x.Course)
+                .ThenInclude(x => x.Program)
+                .ThenInclude(x => x.CategoryParent)
+                .FirstOrDefaultAsync(x => x.Id == courseResultId);
+
+            if (targetCourseResult == null)
+            {
+                throw new Exception("Target course result not found");
+            }
+
+            targetCourseResult.WorkingStatus = EnumWorkingStatus.Active;
+
+            if (relatedHistoryId != null)
+            {
+                var courseChangingHistory = await _courseChangingHistoryRepository.Queryable
+                    .FirstOrDefaultAsync(x => x.Id == relatedHistoryId.Value);
+                if (courseChangingHistory != null && courseChangingHistory.Status == EnumChangingStatus.InProgressSelectCourse)
+                {
+                    courseChangingHistory.ToCourseResultId = targetCourseResult.Id;
+                    courseChangingHistory.Status = EnumChangingStatus.Completed;
+                }
+            }
+
+            await _testGroupResultRepository.UnitOfWork.SaveChangesAsync();
+            await UpdateLearningContextAsync(targetCourseResult.Course);
+        }
+
+        public async Task<TestGroupResult?> SwitchDirectlyToExistCourseForChangeLevel(Guid courseResultId, Guid studentId)
+        {
+            var courseResults = _courseResultRepository.Queryable.Include(x => x.Course)
+                .ThenInclude(x => x.Program)
+                .ThenInclude(x => x.CategoryParent)
+                .Where(x => x.StudentId == studentId && x.WorkingStatus == EnumWorkingStatus.Active)
+                .ToList();
+
+            courseResults.ForEach(cr =>
+            {
+                cr.WorkingStatus = EnumWorkingStatus.InActive;
+            });
+
+            var targetCourseResult = await _courseResultRepository.Queryable
+                .Include(x => x.Course)
+                .Include(x => x.CourseChangingHistories)
+                .ThenInclude(x => x.PtTestResult)
+                .FirstOrDefaultAsync(x => x.Id == courseResultId);
+
+            if (targetCourseResult == null)
+            {
+                throw new Exception("Target course result not found");
+            }
+
+            var waitSelectProgramHistory = await _courseChangingHistoryRepository.Queryable
+               .Where(x => x.StudentId == studentId && x.Status == EnumChangingStatus.InprogressSelectProgram)
+               .OrderByDescending(x => x.CreatedDate)
+               .FirstOrDefaultAsync();
+
+            // this case for change level when select project that contain course learned when switch to other subject
+            TestGroupResult? ptResult = null;
+            if (waitSelectProgramHistory != null)
+            {
+                var relatedCourseResultIdHistory = targetCourseResult.CourseChangingHistories.FirstOrDefault(x => x.PtResultId != null);
+                if (relatedCourseResultIdHistory != null)
+                {
+                    waitSelectProgramHistory.PtResultId = relatedCourseResultIdHistory.PtResultId;
+                    waitSelectProgramHistory.ToCourseResultId = courseResultId;
+                    ptResult = relatedCourseResultIdHistory.PtTestResult;
+                }
+                else
+                {
+                    ptResult = await _testGroupResultRepository.Queryable
+                        .Where(x => x.StudentId == studentId
+                                && x.ProgramId == targetCourseResult.Course.ProgramId
+                                && (x.Status == EnumResultStatus.Done || x.Status == EnumResultStatus.ByPass)
+                                && x.TestType == EnumTestType.PlacementTest)
+                        .FirstOrDefaultAsync();
+                    if (ptResult == null)
+                    {
+                        ptResult = new TestGroupResult
+                        {
+                            Id = Guid.NewGuid(),
+                            ProgramId = targetCourseResult.Course.ProgramId,
+                            ProgramIdOfPt = targetCourseResult.Course.ProgramId,
+                            CurrentLevelId = targetCourseResult.Course.LevelId,
+                            StudentId = targetCourseResult.StudentId,
+                            TestType = EnumTestType.PlacementTest,
+                            Status = EnumResultStatus.Done
+                        };
+                        _testGroupResultRepository.Add(ptResult);
+                    }
+
+                    waitSelectProgramHistory.PtResultId = ptResult.Id;
+                }
+
+                waitSelectProgramHistory.ToLevelId = targetCourseResult?.Course?.LevelId;
+                waitSelectProgramHistory.ToProgramId = targetCourseResult.Course.ProgramId.Value;
+                waitSelectProgramHistory.SelectedLevelId = targetCourseResult?.Course?.LevelId;
+                waitSelectProgramHistory.SelectedProgramId = targetCourseResult.Course.ProgramId.Value;
+                waitSelectProgramHistory.Status = EnumChangingStatus.Completed;
+            }
+
+            targetCourseResult.WorkingStatus = EnumWorkingStatus.Active;
+
+            await _testGroupResultRepository.UnitOfWork.SaveChangesAsync();
+            await UpdateLearningContextAsync(targetCourseResult.Course);
+
+            return ptResult;
+        }
+
+        private async Task UpdateLearningContextAsync(Course? course)
+        {
+            await _userService.UpdateLearningContextAsync(new UpdateStudentLearningContextCommandModel
+            {
+                CourseId = course?.Id,
+                LevelId = course?.LevelId,
+                ProgramId = course?.ProgramId,
+                SubjectId = course?.Program?.CategoryParent?.Id
+            });
+        }
+
+        public async Task<ChangeCourseAggregate> GetChangeCourseAggreate(StudentModel student, Guid? levelId, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(student?.Id);
+
+            var subjects = await _categoryCachingService.GetAll(cancellationToken);
+
+            var testGroupResults = await _testGroupResultRepository.ReadQueryable
+                .Include(x => x.CourseChangingHistories)
+                .Include(x => x.CurrentLevel)
+                .Where(x => x.StudentId == student.Id && x.Status == EnumResultStatus.Done)
+                .ToListAsync(cancellationToken);
+
+            var courseResults = await _courseResultRepository.ReadQueryable
+                .Include(x => x.Course)
+                .Where(x => x.StudentId == student.Id && x.WorkingStatus != EnumWorkingStatus.NotWorking)
+                .ToListAsync(cancellationToken);
+
+            var courseChangingHistories = await _courseChangingHistoryRepository.ReadQueryable
+                .Where(x => x.StudentId == student.Id && (x.Status == EnumChangingStatus.Completed || x.Status == EnumChangingStatus.InProgressSelectCourse))
+                .ToListAsync(cancellationToken);
+
+            var currentCourse = courseResults
+                .Where(x => x.StudentId == student.Id && x.CourseId == student.CourseId && x.WorkingStatus == EnumWorkingStatus.Active)
+                .OrderByDescending(x => x.CreatedDate)
+                .FirstOrDefault();
+
+            var changeCourseAggregateBuilder = new ChangeCourseAggregateBuilder(subjects, testGroupResults, courseChangingHistories, currentCourse, student.User, courseResults)
+                .BuildTree(levelId)
+                .BuildProgramInfo()
+                .BuildLevelInfomation();
+
+            await changeCourseAggregateBuilder.BuildLevelAccess(async projectId =>
+            {
+                var subjectCondition = await _categoryRepository.ReadQueryable
+                    .Include(x => x.SubjectConditionRules)
+                    .FirstOrDefaultAsync(x => x.CategoryId == projectId && x.Status && x.Type == EnumConditionType.CourseSuggest, cancellationToken: cancellationToken);
+
+                return subjectCondition?.SubjectConditionRules ?? new List<SubjectConditionRule>();
+            });
+
+            return changeCourseAggregateBuilder.Build();
+        }
+
+        public async Task<ChangeCourseAggregate> GetChangeSubjectAggreate(StudentModel student, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(student?.Id);
+
+            var subjects = await _categoryCachingService.GetAll(cancellationToken);
+
+            var testGroupResults = await _testGroupResultRepository.ReadQueryable
+                .Include(x => x.CourseChangingHistories)
+                .Include(x => x.CurrentLevel)
+                .Where(x => x.StudentId == student.Id && x.Status == EnumResultStatus.Done)
+                .ToListAsync(cancellationToken);
+
+            var courseResults = await _courseResultRepository.ReadQueryable
+                .Include(x => x.Course)
+                .Where(x => x.StudentId == student.Id && x.WorkingStatus != EnumWorkingStatus.NotWorking)
+                .ToListAsync(cancellationToken);
+
+            var courseChangingHistories = await _courseChangingHistoryRepository.ReadQueryable
+                .Where(x => x.StudentId == student.Id && (x.Status == EnumChangingStatus.Completed || x.Status == EnumChangingStatus.InProgressSelectCourse))
+                .ToListAsync(cancellationToken);
+
+            var currentCourse = courseResults
+                .Where(x => x.StudentId == student.Id && x.CourseId == student.CourseId && x.WorkingStatus == EnumWorkingStatus.Active)
+                .OrderByDescending(x => x.CreatedDate)
+                .FirstOrDefault();
+
+            var changeCourseAggregateBuilder = new ChangeCourseAggregateBuilder(subjects,
+                                                                                testGroupResults,
+                                                                                courseChangingHistories,
+                                                                                currentCourse,
+                                                                                student.User,
+                                                                                courseResults)
+                .BuildTree()
+                .BuildProgramInfo()
+                .BuildLevelInfomation();
+
+            return changeCourseAggregateBuilder.Build();
+        }
+
+        public async Task<ChangeCourseAggregate> GetChangeProgramAggreate(StudentModel student, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(student?.Id);
+
+            var subjects = await _categoryCachingService.GetAll(cancellationToken);
+            var testGroupResults = await _testGroupResultRepository.ReadQueryable
+                .Include(x => x.CurrentLevel)
+                .Where(x => x.StudentId == student.Id && x.Status == EnumResultStatus.Done)
+                .ToListAsync(cancellationToken);
+
+            var changeCourseAggregateBuilder = new ChangeCourseAggregateBuilder(subjects, testGroupResults, null, null, student.User)
+                    .BuildTree(null)
+                    .BuildProgramInfo();
+
+            return changeCourseAggregateBuilder.Build();
+        }
+    }
+
+    public record ChangeCourseModel
+    {
+        public Guid StudentId { get; set; }
+        public int Age { get; set; }
+        public Guid ToProgramId { get; set; }
+        public Guid ToLevelId { get; set; }
+        public Guid OwnPtProgramId { get; set; }
+        public FromInfo? FromInfo { get; set; }
+        public EnumChangeCourseAction Action { get; set; }
+    }
+
+    public record SelectCourseLevelRequest
+    {
+        public Guid StudentId { get; set; }
+        public Guid ToProgramId { get; set; }
+        public Guid? ToLevelId { get; set; }
+        public Guid SelectedProgramId { get; set; }
+        public Guid? SelectedLevelId { get; set; }
+        public Guid? PtResultId { get; set; }
+        public FromInfo? FromInfo { get; set; }
+        public Guid? RelatedHistoryId { get; set; }
+        public EnumChangeCourseAction Action { get; set; }
+    }
+}

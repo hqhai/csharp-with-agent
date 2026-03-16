@@ -31,16 +31,18 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<FeatureAccessTimeModel>> methodResult = new MethodResult<IList<FeatureAccessTimeModel>>();
-            var featureAccessTimes = await _featureAccessTimeRepository.Queryable.WhereBulkContains(request.UserIds, p => p.CreatedUserId)
+            var featureAccessTimes = await _featureAccessTimeRepository.ReadQueryable
+                                                    .WhereBulkContains(request.UserIds, p => p.CreatedUserId)
                                                     .GroupBy(p => p.CreatedUserId)
                                                     .Select(g => new
                                                     {
-                                                        UserId = g.Key,
+                                                        CreatedUserId = g.Key,
+                                                        AccessTime = g.Sum(x => x.AccessTime),
                                                         LastFeatureAccessTime = g.OrderByDescending(x => x.LastVisited).FirstOrDefault(),
                                                     })
                                                     .ToListAsync(cancellationToken);
 
-            methodResult.Result = _mapper.Map<IList<FeatureAccessTimeModel>>(featureAccessTimes.Select(x => x.LastFeatureAccessTime));
+            methodResult.Result = _mapper.Map<IList<FeatureAccessTimeModel>>(featureAccessTimes);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

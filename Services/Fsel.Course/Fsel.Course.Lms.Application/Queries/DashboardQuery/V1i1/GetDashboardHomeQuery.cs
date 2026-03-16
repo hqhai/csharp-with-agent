@@ -5,6 +5,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
     using System.Threading;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
@@ -26,29 +27,32 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
     public class GetDashboardHomeQueryHandler : IRequestHandler<GetDashboardHomeQuery, MethodResult<DashboardHomeModel>>
     {
         private readonly IUserService _userService;
+        private readonly ICourseRepository _courseRepository;
+        private readonly ICourseModuleRepository _courseModuleRepository;
+        private readonly IUnitRepository _unitRepository;
         private readonly ICourseResultRepository _courseResultRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
-        private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
         private readonly ILessonNoteRepository _lessonNoteRepository;
-        private readonly IUnitLessonRepository _unitLessonRepository;
         private readonly IMapper _mapper;
         private readonly AuthContext _authContext;
 
         public GetDashboardHomeQueryHandler(IUserService userService
+            , ICourseRepository courseRepository
+            , ICourseModuleRepository courseModuleRepository
+            , IUnitRepository unitRepository
             , ICourseResultRepository courseResultRepository
             , ILessonResultRepository lessonResultRepository
-            , ICourseUnitMockTestRepository courseUnitMockTestRepository
             , ILessonNoteRepository lessonNoteRepository
-            , IUnitLessonRepository unitLessonRepository
             , IMapper mapper
             , AuthContext authContext)
         {
             _userService = userService;
+            _courseRepository = courseRepository;
+            _courseModuleRepository = courseModuleRepository;
+            _unitRepository = unitRepository;
             _courseResultRepository = courseResultRepository;
             _lessonResultRepository = lessonResultRepository;
-            _courseUnitMockTestRepository = courseUnitMockTestRepository;
             _lessonNoteRepository = lessonNoteRepository;
-            _unitLessonRepository = unitLessonRepository;
             _mapper = mapper;
             _authContext = authContext;
         }
@@ -74,7 +78,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
             }
             var courseResult = methodCourse.Result ?? new CourseResult();
 
-            var (totalNote, lessonResult) = await GetTotalNoteAndLessonResultAsync(courseResult, cancellationToken);
+            var (totalNote, lessonResult) = await GetTotalNoteAndLessonResultAsync(courseResult.CourseId, courseResult.StudentId, cancellationToken);
 
             dashboardHome.TotalCoin = student.NumberOfTokenReceived;
             dashboardHome.CountCompleteLesson = await GetTotalLessonCompleteAsync(courseResult, cancellationToken);
@@ -100,32 +104,44 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
             return methodResult;
         }
 
-        private async Task<(int, LessonResult?)> GetTotalNoteAndLessonResultAsync(CourseResult courseResult, CancellationToken cancellationToken)
+        private async Task<(int, LessonResult?)> GetTotalNoteAndLessonResultAsync(Guid courseId, Guid studentId, CancellationToken cancellationToken)
         {
-            var lessonNoteQuerys = await (from baseQ in _lessonResultRepository.Queryable
-                                          join ln in _lessonNoteRepository.Queryable on baseQ.Id equals ln.LessonResultId
-                                          where baseQ.CourseId == courseResult.CourseId && baseQ.StudentId == courseResult.StudentId
+            var lessonNoteQuerys = await (from lessonResult in _lessonResultRepository.ReadQueryable
+                                          join lessonNote in _lessonNoteRepository.ReadQueryable on lessonResult.Id equals lessonNote.LessonResultId
+                                          where lessonResult.CourseId == courseId && lessonResult.StudentId == studentId
                                           select new
                                           {
-                                              LessonNote = ln,
-                                              LessonResult = baseQ,
+                                              LessonNote = lessonNote,
+                                              LessonResult = lessonResult,
                                           }).AsNoTracking().ToListAsync(cancellationToken);
             return (lessonNoteQuerys.Count, lessonNoteQuerys.OrderByDescending(x => (x.LessonNote.UpdatedDate ?? x.LessonNote.CreatedDate)).Select(x => x.LessonResult).FirstOrDefault());
         }
 
         private async Task<int> GetTotalLessonCompleteAsync(CourseResult courseResult, CancellationToken cancellationToken)
         {
-            return await _lessonResultRepository.Queryable.Where(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId)
+            return await _lessonResultRepository.Queryable.Where(x => x.StudentId == courseResult.StudentId && x.CourseResultId == courseResult.Id)
                                                 .Where(x => x.Status == EnumResultStatus.Done)
                                                 .CountAsync(cancellationToken);
         }
 
         private async Task<int> GetTotalLessonAsync(CourseResult courseResult, CancellationToken cancellationToken)
         {
-            return await (from baseQ in _courseUnitMockTestRepository.Queryable
-                          join ul in _unitLessonRepository.Queryable on baseQ.UnitId equals ul.UnitId
-                          where baseQ.CourseId == courseResult.CourseId
-                          select ul.LessonId).CountAsync(cancellationToken);
+            var originalUnitIds = await _courseModuleRepository.ReadQueryable.Where(x => x.CourseId == courseResult.CourseId && x.CourseConfigType == EnumCourseConfigType.Unit)
+                .Select(x => x.OriginalId)
+                .ToListAsync(cancellationToken);
+
+            var units = await _unitRepository.ReadQueryable
+                .Include(x => x.UnitModules)
+                .Where(x => originalUnitIds.Contains(x.OriginalId) && x.VersionStatus == EnumVersionStatus.LastVersion)
+                .ToListAsync(cancellationToken);
+
+            var originalLessonIds = units.SelectMany(x => x.UnitModules)
+                .Where(x => x.UnitConfigType == EnumUnitConfigType.Lesson)
+                .Select(x => x.OriginalId)
+                .Distinct()
+                .ToList();
+
+            return originalLessonIds.Count;
         }
 
         private async Task<MethodResult<StudentModel>> GetStudentModelAsync()

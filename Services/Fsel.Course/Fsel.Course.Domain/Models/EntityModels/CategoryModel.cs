@@ -8,17 +8,13 @@ namespace Fsel.Course.Domain.Models.EntityModels
     public class CategoryModel : BaseModel
     {
         public string? Name { get; set; }
-
+        public string? Thumbnail { get; set; }
         public string? Code { get; set; }
-
         public string? Description { get; set; }
-
         public EnumTypeCategory Type { get; set; }
-
         public EnumStatus Status { get; set; }
-
         public Guid? ParentId { get; set; }
-
+        public bool VstepSetting { get; set; }
         public IList<SubjectConditionModel>? SubjectConditions { get; set; }
     }
 }

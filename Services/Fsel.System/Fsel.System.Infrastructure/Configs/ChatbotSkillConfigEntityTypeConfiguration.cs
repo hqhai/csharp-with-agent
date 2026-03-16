@@ -18,6 +18,13 @@ namespace Fsel.System.Infrastructure.Configs
                    .HasConversion(
                    v => v.ToString(),
                    v => v.EnumParse<EnumCourseSkill>());
+
+            builder.Property(e => e.ChatbotLayout)
+                    .HasMaxLength(100)
+                    .HasConversion(
+                    v => v.ToString(),
+                    v => v.EnumParse<EnumChatbotLayout>());
+
             builder.HasOne(a => a.ChatbotConfig)
                    .WithMany(b => b.ChatbotSkillConfigs)
                    .HasForeignKey(b => b.ChatbotConfigId)

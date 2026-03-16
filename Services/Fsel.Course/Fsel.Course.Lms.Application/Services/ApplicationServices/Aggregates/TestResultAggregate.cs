@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
     using Domain.Enums;
     using Domain.Models.CommandModels.Tests;
     using Domain.Models.EntityModels.TestModels;
+    using Fsel.Course.Domain.Models.EntityModels;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
     using BaseTestStateModel = Domain.Models.EntityModels.PlacementTestModels.BaseTestStateModel;
@@ -34,11 +35,25 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             var testResultComposite = TestResultComposites.FirstOrDefault(t => t.IsBelongTo(id));
             if (testResultComposite != null)
             {
-                await testResultComposite.SubmitTest(id, TestResult.Test?.ScoringFormulaType);
-                await Commit();
+                await testResultComposite.SubmitTest(new SubmitContext { Id = id, ScoringFormulaType = testResultComposite.Test?.ScoringFormulaType });
+                if (TestResult.Status == EnumResultStatus.Done)
+                {
+                    TestResult.CompletionDate = DateTime.UtcNow;
+                    SingleTestResult.Percent = TestResult.Percent;
+                    SingleTestResult.CompletionDate = DateTime.UtcNow;
+                    SingleTestResult.Status = EnumResultStatus.Done;
+                    await CommitTest();
+                    await CommitTestGroup();
+                }
+                else
+                {
+                    if (!TestResult.ProcessDate.HasValue)
+                    {
+                        TestResult.ProcessDate = DateTime.UtcNow;
+                    }
+                    await Commit();
+                }
             }
-
-            await Start();
         }
 
         public async Task Submit(Guid id)
@@ -47,7 +62,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             var testResultComposite = TestResultComposites.FirstOrDefault(t => t.IsBelongTo(id));
             if (testResultComposite != null)
             {
-                await testResultComposite.Submit(id);
+                await testResultComposite.Submit(new SubmitContext { Id = id, ScoringFormulaType = TestResult.Test?.ScoringFormulaType });
                 await Commit();
             }
 
@@ -108,6 +123,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             if (TestResult.Status == EnumResultStatus.New)
             {
                 TestResult.Status = EnumResultStatus.Process;
+                TestResult.ProcessDate = DateTime.UtcNow;
                 if (!TestResult.SectionResults.Any())
                 {
                     var testService = ServiceProvider.GetRequiredService<ITestService>();
@@ -207,7 +223,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
             if (request.IsSubmit)
             {
-                await Submit(request.SectionResultId);
+                await SubmitTest(request.SectionResultId);
             }
         }
 
@@ -228,6 +244,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 TestResult.TestAnswers = hierarchicalTestResult.TestAnswers;
             }
             testResultComposite.GenerateChildren();
+            await testResultComposite.LoadTestHierarchicalData();
         }
 
         public async Task UpdateTestResultDetailInfo(TestStateModel? testStateModel)
@@ -256,6 +273,25 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                     var sectionStateModel = new SectionStateModel()
                     {
                         Name = skill.TestSection?.Skill?.Name,
+                        TestLayoutType = skill.TestSection?.LayoutType,
+                        FilePath = skill.TestSection?.Skill?.FilePath,
+                        HighestStreak = skill.HighestStreak,
+                        Answer = skill.TestAnswers.Select(x => new AnswerModel
+                        {
+                            GradingAlFeedback = x.GradingAlFeedback,
+                            SpeechTextAnswer = x.SpeechTextAnswer,
+                        }).FirstOrDefault(),
+                        PercentResult = skill.Percent,
+                        CurrentSectionTimeCodeId = skill.CurrentSectionTimeCodeId,
+                        ScoringFormulaConfigs = skill.TestSection?.ScoringFormulaConfigs,
+                        ScoreModule = skill.ScoreModule,
+                        SkillScores = skill.SkillScores,
+                        TestScores = skill.TestScores.OrderBy(x => x.CreatedDate).Select(x => new TestScoreModel
+                        {
+                            Criteria = x.Criteria,
+                            Feedback = x.Feedback,
+                            Score = x.Score
+                        }).ToList(),
                         SectionResultId = skill.Id,
                         CorrectCount = skill.CorrectCount,
                         TotalCount = skill.CorrectTotal,
@@ -268,10 +304,6 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             }
         }
 
-        private async Task UpdateLayoutAI(Guid sectionGroupId)
-        {
-        }
-
         private async Task Commit()
         {
             var repositoryTestResult = ServiceProvider.GetRequiredService<IRepository<TestResult>>();
@@ -279,6 +311,22 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             {
                 await repositoryTestResult.UnitOfWork.SaveChangesAsync();
             }
+        }
+
+        private async Task CommitTest()
+        {
+            var repositoryTestResult = ServiceProvider.GetRequiredService<IRepository<TestResult>>();
+            if (repositoryTestResult.DbContext.ChangeTracker.HasChanges())
+            {
+                await repositoryTestResult.UnitOfWork.SaveChangesAsync();
+            }
+        }
+
+        private async Task CommitTestGroup()
+        {
+            var repositoryTestGroupResult = ServiceProvider.GetRequiredService<IRepository<TestGroupResult>>();
+            repositoryTestGroupResult.Update(SingleTestResult);
+            await repositoryTestGroupResult.UnitOfWork.SaveEntitiesAsync();
         }
     }
 }

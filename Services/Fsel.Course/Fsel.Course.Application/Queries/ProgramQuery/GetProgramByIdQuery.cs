@@ -67,6 +67,7 @@ namespace Fsel.Course.Application.Queries.ProgramQuery
                                      Code = g.Key.Code,
                                      Description = g.Key.Description,
                                      Status = g.Key.Status,
+                                     Thumbnail = g.Key.Thumbnail,
                                      TestMode = g.Key.TestMode,
                                      IsTestDefault = g.Key.IsTestDefault,
                                      Type = g.Key.Type,
@@ -77,16 +78,18 @@ namespace Fsel.Course.Application.Queries.ProgramQuery
                                      UpdatedDate = g.Key.UpdatedDate,
                                      UpdatedFullName = g.Key.UpdatedFullName,
                                      UpdatedUserId = g.Key.UpdatedUserId,
-                                     Levels = g.Select(b => new LevelModel
+                                     Levels = g.OrderBy(x => x.LevelOrder).Select(b => new LevelModel
                                      {
                                          Id = b.Id,
                                          Name = b.Name,
                                          Code = b.Code,
                                          LevelOrder = b.LevelOrder,
                                          Description = b.Description,
+                                         PTDescription = b.PTDescription,
                                          Skils = _skillLevelRepository.Queryable
                                                                       .Include(x => x.Skill)
                                                                       .Where(sl => sl.LevelId == b.Id)
+                                                                      .OrderBy(x => x.CreatedDate)
                                                                       .Select(sl => new SkillViewModel
                                                                       {
                                                                           Id = sl.SkillId,

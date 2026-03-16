@@ -14,8 +14,10 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid? CourseId { get; set; }
         public EnumCourseType CourseType { get; set; }
         public EnumCourseLevel Level { get; set; }
+        public string? Subject { get; set; }
         public string? ContentProgress { get; set; }
-        public int DisplayOrderUnit { get; set; }
-        public int DisplayOrderLesson { get; set; }
+        public int? DisplayOrderUnit { get; set; }
+        public int? DisplayOrderLesson { get; set; }
+        public string? Program { get; set; }
     }
 }

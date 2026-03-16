@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
 {
+    using AutoMapper;
     using Common.ActionResults;
     using Core.Base;
     using Core.Base.BaseModels;
@@ -27,16 +28,19 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
         private readonly IStudentGoalSummaryRepository _studentGoalSummaryRepository;
         private readonly IUserService _userService;
         private readonly AuthContext _authContext;
+        private readonly IMapper _mapper;
 
         public SearchStudentGoalAggregateQueryHandler(IStudentGoalAggregateRepository studentGoalAggregateRepository,
             IStudentGoalSummaryRepository studentGoalSummaryRepository,
             IUserService userService,
-            AuthContext authContext)
+            AuthContext authContext,
+            IMapper mapper)
         {
             _studentGoalAggregateRepository = studentGoalAggregateRepository;
             _studentGoalSummaryRepository = studentGoalSummaryRepository;
             _userService = userService;
             _authContext = authContext;
+            _mapper = mapper;
         }
 
         public async Task<MethodResult<PagingItemsModel<StudentGoalAggregateModel>>> Handle(SearchStudentGoalAggregateQuery request, CancellationToken cancellationToken)
@@ -54,7 +58,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
 
             Guid? schoolId = null;
 
-            var targetRoles = new List<string> { EnumRole.AdminSchool.ToString(), EnumRole.TeacherCampus.ToString(), EnumRole.AdminCampus.ToString() };
+            var targetRoles = new List<string> { nameof(EnumRole.AdminSchool), nameof(EnumRole.TeacherCampus), nameof(EnumRole.AdminCampus) };
 
             var hasMatchedRole = _authContext.Roles != null && _authContext.Roles.Any(r => targetRoles.Contains(r));
             if (hasMatchedRole)
@@ -62,15 +66,15 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
                 schoolId = (await _userService.GetSchoolIdAsync()).Content?.Result;
             }
 
-            var query = _studentGoalAggregateRepository.Queryable.Where(x => x.IsActive);
+            var query = _studentGoalAggregateRepository.ReadQueryable.Where(x => x.IsActive);
             if (schoolId.HasValue)
             {
                 query = query.Where(x => x.SchoolId == schoolId);
             }
 
-            if (request.CourseType.HasValue)
+            if (request.LevelId.HasValue)
             {
-                query = query.Where(x => x.CourseType == request.CourseType);
+                query = query.Where(x => x.LevelId == request.LevelId);
             }
 
             if (request.SchoolId.HasValue)
@@ -86,7 +90,26 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
             if (!string.IsNullOrEmpty(request.ClassIdStr))
             {
                 var classIds = request.ClassIdStr.ToList<Guid>();
-                query = query.WhereBulkContains(classIds, x => x.ClassId);
+                if (classIds != null && classIds.Any())
+                {
+                    query = query.WhereBulkContains(classIds, x => x.ClassId);
+                }
+                else
+                {
+                    return methodResult;
+                }
+            }
+            if (!string.IsNullOrEmpty(request.ProgramIdStr))
+            {
+                var programIds = request.ProgramIdStr.ToList<Guid>();
+                if (programIds != null && programIds.Any())
+                {
+                    query = query.WhereBulkContains(programIds, x => x.ProgramId);
+                }
+                else
+                {
+                    return methodResult;
+                }
             }
 
             if (!string.IsNullOrEmpty(request.Keyword))
@@ -97,30 +120,33 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
             }
 
             var queryData = from baseQ in query
-                join sum in _studentGoalSummaryRepository.Queryable.AsNoTracking() on baseQ.Id equals sum.StudentGoalAggregateId
-                where sum.StartDate.Date <= weekStartUtc && sum.EndDate.Date >= weekEndUtc
-                select new StudentGoalAggregateModel
-                {
-                    Id = baseQ.Id,
-                    ClassName = baseQ.ClassName,
-                    CombinedProgress = baseQ.CombinedProgress,
-                    TotalCompletedLessons = baseQ.TotalCompletedLessons,
-                    CreatedFullName = baseQ.CreatedFullName,
-                    CreatedDate = baseQ.CreatedDate,
-                    CourseType = baseQ.CourseType,
-                    CourseLevel = baseQ.CourseLevel,
-                    CourseId = baseQ.CourseId,
-                    ConsecutiveBehindWeeks = baseQ.ConsecutiveBehindWeeks,
-                    CompletedLessons = sum.CompletedLessons,
-                    CreatedUserId = baseQ.CreatedUserId,
-                    StudentId = baseQ.StudentId,
-                    ProgressStatus = sum.ProgressStatus,
-                    UpdatedDate = baseQ.UpdatedDate,
-                    UpdatedFullName = baseQ.UpdatedFullName,
-                    UpdatedUserId = baseQ.UpdatedUserId,
-                    TotalTargetLessons = sum.TotalTargetLessons,
-                    LessonsPerWeek = sum.LessonsPerWeek,
-                };
+                            join sum in _studentGoalSummaryRepository.ReadQueryable.AsNoTracking() on baseQ.Id equals sum.StudentGoalAggregateId
+                            where sum.StartDate.Date <= weekStartUtc && sum.EndDate.Date >= weekEndUtc
+                            select new StudentGoalAggregateModel
+                            {
+                                Id = baseQ.Id,
+                                ClassName = baseQ.ClassName,
+                                CombinedProgress = baseQ.CombinedProgress,
+                                TotalCompletedLessons = baseQ.TotalCompletedLessons,
+                                CreatedFullName = baseQ.CreatedFullName,
+                                CreatedDate = baseQ.CreatedDate,
+                                LevelId = baseQ.LevelId,
+                                CourseResultId = baseQ.CourseResultId,
+                                ProgramId = baseQ.ProgramId,
+                                CourseId = baseQ.CourseId,
+                                ConsecutiveBehindWeeks = baseQ.ConsecutiveBehindWeeks,
+                                CompletedLessons = sum.CompletedLessons,
+                                CreatedUserId = baseQ.CreatedUserId,
+                                StudentId = baseQ.StudentId,
+                                ProgressStatus = sum.ProgressStatus,
+                                UpdatedDate = baseQ.UpdatedDate,
+                                UpdatedFullName = baseQ.UpdatedFullName,
+                                UpdatedUserId = baseQ.UpdatedUserId,
+                                TotalTargetLessons = sum.TotalTargetLessons,
+                                LessonsPerWeek = sum.LessonsPerWeek,
+                                Level = _mapper.Map<LevelModel>(baseQ.Level),
+                                Program = _mapper.Map<CategoryModel>(baseQ.Program),
+                            };
 
             var lists = await queryData
                 .AsNoTracking()
@@ -167,8 +193,9 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
 
             if (request.StatusStudentCampus != null && request.StatusStudentCampus.Any())
             {
-                var statusList = request.StatusStudentCampus;;
-                lists = lists .Where(l => l.StatusStudentCampus.HasValue && statusList.Contains(l.StatusStudentCampus.Value))
+                var statusList = request.StatusStudentCampus;
+                ;
+                lists = lists.Where(l => l.StatusStudentCampus.HasValue && statusList.Contains(l.StatusStudentCampus.Value))
                     .ToList();
             }
 
@@ -190,6 +217,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
                     ordered = ordered.OrderBy(l => l.TotalCompletedLessons);
                 }
             }
+
             if (!string.IsNullOrEmpty(request.SortCompletedConfig))
             {
                 if (request.SortCompletedConfig.Equals("desc", StringComparison.OrdinalIgnoreCase))
@@ -201,6 +229,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
                     ordered = ordered.OrderBy(l => l.TotalTargetLessons);
                 }
             }
+
             if (!string.IsNullOrEmpty(request.SortSlowProgress))
             {
                 if (request.SortSlowProgress.Equals("desc", StringComparison.OrdinalIgnoreCase))
@@ -212,6 +241,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
                     ordered = ordered.OrderBy(l => l.ConsecutiveBehindWeeks);
                 }
             }
+
             if (!string.IsNullOrEmpty(request.SortDir))
             {
                 if (request.SortDir.Equals("za", StringComparison.OrdinalIgnoreCase))

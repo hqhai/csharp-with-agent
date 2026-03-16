@@ -14,6 +14,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Infrastructure.Repositories;
+    using Fsel.Shared.ApplicationServices.CacheServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
     using MediatR;
@@ -36,6 +37,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
         private readonly IMockTestRepository _mockTestRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly SectionGroupConverter _sectionGroupConverter;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
 
         public StartMockTestCommandHandler(ICourseRepository courseRepository
             , IUnitRepository unitRepository
@@ -43,7 +45,8 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             , AuthContext authContext
             , IMockTestRepository mockTestRepository
             , IMockTestResultRepository mockTestResultRepository
-            , SectionGroupConverter sectionGroupConverter)
+            , SectionGroupConverter sectionGroupConverter
+            , IRequestSafeCachingService requestSafeCachingService)
         {
             _courseRepository = courseRepository;
             _unitRepository = unitRepository;
@@ -52,6 +55,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             _mockTestRepository = mockTestRepository;
             _mockTestResultRepository = mockTestResultRepository;
             _sectionGroupConverter = sectionGroupConverter;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         public async Task<MethodResult<MockTestModel>> Handle(StartMockTestCommand request, CancellationToken cancellationToken)
@@ -100,10 +104,16 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                     StudentId = studentId ?? default,
                     Status = EnumResultStatus.Unfinished
                 };
-                await _mockTestResultRepository.BulkMergeAsync(new List<MockTestResult> { mockTestResult }, bulk =>
-                {
-                    bulk.ColumnPrimaryKeyExpression = c => new { c.CourseId, c.StudentId, c.UnitId, c.MockTestId, c.IsDeleted };
-                });
+                await _requestSafeCachingService.SafeRequest<MockTestResult>(
+                    key: $"Add_MockTestResult_{mockTestResult.CourseId}_{mockTestResult.StudentId}_{mockTestResult.MockTestId}_{mockTestResult.UnitId}_{mockTestResult.IsDeleted}",
+                    safeFunction: async () =>
+                    {
+                        await _mockTestResultRepository.BulkMergeAsync(new List<MockTestResult> { mockTestResult }, bulk =>
+                        {
+                            bulk.ColumnPrimaryKeyExpression = c => new { c.CourseId, c.StudentId, c.UnitId, c.MockTestId, c.IsDeleted };
+                        });
+                        return mockTestResult;
+                    });
             }
 
             var mockTest = await _mockTestRepository.Queryable

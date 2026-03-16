@@ -6,6 +6,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseUnitModule
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServices.UnitItemServices;
     using Fsel.Shared.Helpers;
@@ -23,7 +24,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseUnitModule
             IUnitResultRepository unitResultRepository,
             ILessonResultRepository lessonResultRepository,
             ITestGroupResultRepository testGroupResultRepository,
-            IUnitItemInitializerFactory unitItemInitializerFactory) : base(unitModuleCachingService, unitModuleRepository, unitResultRepository, lessonResultRepository, testGroupResultRepository, unitItemInitializerFactory)
+            IUnitItemInitializerFactory unitItemInitializerFactory, SendMailCompleteUnitPublisher sendMailCompleteUnitPublisher) : base(unitModuleCachingService, unitModuleRepository, unitResultRepository, lessonResultRepository, testGroupResultRepository, unitItemInitializerFactory, sendMailCompleteUnitPublisher)
         {
             _unitModuleRepository = unitModuleRepository;
             _unitResultRepository = unitResultRepository;
@@ -68,6 +69,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseUnitModule
             if (lessonResult == null)
             {
                 return;
+            }
+            if (!lessonResult.CompletionDate.HasValue)
+            {
+                lessonResult.CompletionDate = DateTime.UtcNow;
             }
 
             lessonResult.PercentModule = NumberHelper.ConvertDoublePercent(lessonResult.Percent * percentModule, 2);

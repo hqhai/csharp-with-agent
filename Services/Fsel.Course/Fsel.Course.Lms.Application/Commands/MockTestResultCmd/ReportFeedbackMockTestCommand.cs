@@ -57,7 +57,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
 
             await _studentFeedbackRepository.ExecuteTransactionAsync(async () =>
             {
-                studentFeedback.Feature = EnumFeature.MockTest;
+                studentFeedback.Feature = EnumFeature.FullTest;
                 studentFeedback.Type = EnumStudentFeedBackType.Teacher;
                 studentFeedback = _studentFeedbackRepository.Add(studentFeedback);
                 await _studentFeedbackRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);

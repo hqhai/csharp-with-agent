@@ -30,6 +30,7 @@ namespace Fsel.Course.Application.Queries.AiCriteriaConfigQuery
             _aiCriteriaConfigRepository = aiCriteriaConfigRepository;
             _mapper = mapper;
         }
+
         public async Task<MethodResult<AICriteriaConfigsModel>> Handle(GetAiCriteriaByIdQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
@@ -39,7 +40,7 @@ namespace Fsel.Course.Application.Queries.AiCriteriaConfigQuery
                 .Where(x => x.Id == request.Id)
                 .ToListAsync(cancellationToken);
 
-            if (aiCriteria == null && aiCriteria.Count == 0)
+            if (aiCriteria == null || aiCriteria.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(aiCriteria));
                 return methodResult;

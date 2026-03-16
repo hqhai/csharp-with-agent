@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService.Interface;
@@ -68,7 +69,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
             try
             {
-
                 // Kiểm tra định dạng file và chuyển đổi nếu cần
                 string extension = Path.GetExtension(filePath).ToLower(CultureInfo.InvariantCulture);
                 try
@@ -84,16 +84,22 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                     await _classForumDetailResultRepository.ExecuteTransactionAsync(async () =>
                     {
                         classForumDetailResult.PronunciationAlFeedback = ConvertHelper.Serialize(response);
-                        _classForumDetailResultRepository.Update(classForumDetailResult, false
-                        , x => x.WordContent, x => x.Content
-                        , x => x.WordCount, x => x.SubmissionCount
-                        , x => x.ProcessDate, x => x.CompletionDate
-                        , x => x.Status
-                        // task 5307 chưa lên prod
-                        //, x => x.IsForbiddenImage
-                        //, x => x.IsForbiddenWork, x => x.GradingAiForbidden
-                        , x => x.GradingAlFeedback);
-                        await _classForumDetailResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+                        await _classForumDetailResultRepository.BulkUpdateList(new List<ClassForumDetailResult> { classForumDetailResult }, bulk =>
+                        {
+                            bulk.IgnoreOnUpdateExpression = c => new
+                            {
+                                c.WordContent,
+                                c.Content,
+                                c.WordCount,
+                                c.SubmissionCount,
+                                c.ProcessDate,
+                                c.CompletionDate,
+                                c.Status,
+                                c.ClassForumResultId,
+                                c.GradingAlFeedback,
+                                c.AITranslationContent
+                            };
+                        });
                         methodResult.Result = true;
                         return methodResult;
                     });
@@ -103,7 +109,9 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                         PronunciationAlFeedback = ConvertHelper.Serialize(response),
                         ClassForumResultId = classForumDetailResult.ClassForumResultId,
                         EnumSubmissionCount = classForumDetailResult.SubmissionCount ?? EnumSubmissionCount.FirstSubmit,
-                        PronunciationScore = classForumDetailResult.PronunciationScore
+                        PronunciationScore = classForumDetailResult.PronunciationScore,
+                        CorrectTotal = classForumDetailResult.CorrectTotal,
+                        CorrectCount = classForumDetailResult.CorrectCount
                     }, cancellationToken);
 
                     return methodResult;

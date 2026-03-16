@@ -16,7 +16,8 @@ var appSetting = builder.AddAppSettings<AppSetting>();
 builder.AddServices(appSetting);
 builder.AddOpenIdSwaggerGens(appSetting);
 builder.AddOpenIdAuthenticationJwtBearers(appSetting);
-builder.AddDbContexts<ExamPracticesDBContext>();
+builder.AddDbContexts<ExamPracticesDBContext, ExamPracticesReadDBContext>();
+
 builder.Services.AddScoped<IExamPracticeAnswerRepository, ExamPracticeAnswerRepository>();
 builder.Services.AddScoped<IExamPracticeRepository, ExamPracticeRepository>();
 builder.Services.AddScoped<IExamPracticeResultRepository, ExamPracticeResultRepository>();
@@ -29,6 +30,7 @@ builder.Services.AddScoped<IExamPracticeAICriteriaSettingRepository, ExamPractic
 
 builder.Services.AddScoped<ExamPracticeHelper>();
 builder.Services.AddScoped<ExamPracticeConverter>();
+builder.Services.AddScoped<ExamPracticeCommon>();
 
 builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
 var app = builder.Build();

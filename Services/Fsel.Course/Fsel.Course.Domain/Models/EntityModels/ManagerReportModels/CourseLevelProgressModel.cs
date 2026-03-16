@@ -2,11 +2,10 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels.ManagerReportModels
 {
-    using Fsel.Shared.Enums;
-
     public class CourseLevelProgressModel
     {
-        public EnumCourseLevel CourseLevel { get; set; }
+        public Guid LevelId { get; set; }
+        public string? LevelName { get; set; }
         public int TotalStudent { get; set; }
         public IList<OverallTestResultModel>? OverallTestResults { get; set; }
     }

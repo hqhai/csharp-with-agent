@@ -8,6 +8,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
     using Domain.Enums;
     using Domain.Models.CommandModels.Tests;
     using Domain.Models.EntityModels.PlacementTestModels;
+    using Fsel.Course.Lms.Application.Commands.OtherCmd;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
 
@@ -17,12 +19,15 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
         public IServiceProvider ServiceProvider { get; set; }
 
+        private readonly SendMailFinishPTPublisher _sendMailFinishPTPublisher;
+
         public ICollection<TestResultComposite> TestResultComposites { get; set; } = new List<TestResultComposite>();
 
-        public FlowTestResultAggregate(TestGroupResult testGroupResult, IServiceProvider serviceProvider)
+        public FlowTestResultAggregate(TestGroupResult testGroupResult, IServiceProvider serviceProvider, SendMailFinishPTPublisher sendMailFinishPTPublisher)
         {
             FlowTestResult = testGroupResult;
             ServiceProvider = serviceProvider;
+            _sendMailFinishPTPublisher = sendMailFinishPTPublisher;
         }
 
         public async Task Submit(Guid id)
@@ -31,7 +36,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             var testResultComposite = TestResultComposites?.FirstOrDefault(t => t.IsBelongTo(id));
             if (testResultComposite != null)
             {
-                await testResultComposite.Submit(id);
+                await testResultComposite.Submit(new SubmitContext { Id = id, ScoringFormulaType = testResultComposite.Test?.ScoringFormulaType });
                 await Commit();
             }
 
@@ -53,13 +58,34 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             if (!FlowTestResult.TestResults.Any() || FlowTestResult.TestResults.All(x => x.Status == EnumResultStatus.Done))
             {
                 var flowService = ServiceProvider.GetRequiredService<IFlowService>();
+
                 var node = await flowService.GetNextStep(x => x.Id == FlowTestResult.FlowId, FlowTestResult.TestResults);
 
                 if (node?.StepFlow?.Id == null || node?.IsLeft == true)
                 {
+                    var categoryService = ServiceProvider.GetRequiredService<ICategoryService>();
+                    var level = node?.StepFlow.Level;
+
                     FlowTestResult.CurrentLevelId = node?.StepFlow?.LevelId;
+
+                    if (level != null)
+                    {
+                        var minLevel = await categoryService.LoadPreviousOrMinLevelAsync(level.ProgramId, level.Id);
+                        FlowTestResult.EmailLevelId = minLevel?.Id;
+                    }
+                    FlowTestResult.CompletionDate = DateTime.UtcNow;
                     FlowTestResult.Status = EnumResultStatus.Done;
+                    foreach (var item in FlowTestResult.CourseChangingHistories)
+                    {
+                        if (item.Status == Domain.Entities.EnumChangingStatus.InProgressPt)
+                        {
+                            item.Status = Domain.Entities.EnumChangingStatus.InProgressSelectCourse;
+                        }
+                    }
                     await Commit();
+
+                    await _sendMailFinishPTPublisher.Publish(new SendMailFinishPTModel() { TestGroupResultId = FlowTestResult.Id }, CancellationToken.None);
+
                     return;
                 }
 
@@ -102,7 +128,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 Status = FlowTestResult.Status,
                 StudentId = FlowTestResult.StudentId,
                 Level = FlowTestResult.LevelId?.ToString(),
-                TestStates = TestResultComposites.Select(c => c.ExportState()).ToList()
+                TestStates = TestResultComposites.Select(c => c.ExportState()).OrderBy(x => x.UpdatedDate).ToList()
             };
 
             foreach (var testResult in ptResult.TestStates)
@@ -143,10 +169,13 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                     var testService = ServiceProvider.GetRequiredService<ITestService>();
                     var hierarchicalTestResult = await testService.LoadHierachicalTestResult(x => x.Id == testResult.Id);
                     testResult.SectionResults = hierarchicalTestResult.SectionResults;
+                    testResultComposite.GenerateChildren();
                     await testResultComposite.LoadTestHierarchicalData();
                 }
-
-                testResultComposite.GenerateChildren();
+                else
+                {
+                    testResultComposite.GenerateChildren();
+                }
             }
         }
 

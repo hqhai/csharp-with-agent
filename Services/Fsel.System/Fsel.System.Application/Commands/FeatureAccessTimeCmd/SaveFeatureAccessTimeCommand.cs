@@ -10,6 +10,7 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
     using Fsel.Shared.Helpers;
     using Fsel.System.Application.Commands.QuestBoardCmd;
     using Fsel.System.Application.Services.UserServices;
+    using Fsel.System.Application.Services.UserServices.Models;
     using Fsel.System.Application.Services.UserServices.Models.QueryModels;
     using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.IRepositories;
@@ -34,7 +35,6 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
         private readonly IUserService _userService;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-
         public SaveFeatureAccessTimeCommandHandler(IMapper mapper, IFeatureAccessTimeRepository featureAccessTimeRepository, AuthContext authContext, IMediator mediator, IUserService userService, IHttpContextAccessor httpContextAccessor)
         {
             _mapper = mapper;
@@ -50,32 +50,33 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<FeatureAccessTimeModel> methodResult = new MethodResult<FeatureAccessTimeModel>();
 
+            if (string.IsNullOrEmpty(request.Type) || !request.AccessTime.HasValue)
+            {
+                return methodResult;
+            }
+
             var headers = _httpContextAccessor.HttpContext?.Request?.Headers;
             if (headers != null && headers.ContainsKey("User-Agent"))
             {
                 var headerValue = headers["User-Agent"].ToString();
             }
-
-
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            if (!studentResult.IsSuccessStatusCode)
+            var mr = await GetStudentAsync();
+            if (!mr.IsOK)
             {
-                methodResult.AddError(studentResult.Error);
+                methodResult.AddErrorBadRequest(mr.ErrorMessages);
                 return methodResult;
             }
-            var student = studentResult.Content?.Result;
+            var student = mr.Result!;
 
-            EnumFeature featureType = ConvertType(request.Type!);
-
-            var featureAccessTimeCheck = await _featureAccessTimeRepository.Queryable.OrderByDescending(x => x.LastVisited).FirstOrDefaultAsync(x => x.CreatedUserId == _authContext.CurrentUserId && (x.ObjectId == request.ObjectId || x.EnumFeature == EnumFeature.Other) && x.EnumFeature == featureType, cancellationToken);
-
+            EnumFeature featureType = ConvertType(request.Type);
+            var featureAccessTimeCheck = await GetLatestFeatureAccessTime(featureType, request.ObjectId, cancellationToken);
             bool isActiveToday = featureAccessTimeCheck != null;
             //focus mode
             if (isActiveToday)
             {
                 StudentFocusTimeCommandModel cmd = new StudentFocusTimeCommandModel
                 {
-                    ExecuteTime = (long)request.AccessTime!,
+                    ExecuteTime = request.AccessTime.Value,
                     TargetTime = 0,
                     UserId = _authContext.CurrentUserId,
                 };
@@ -83,13 +84,12 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
             }
 
             //Daily checkin
-            long existsTime = featureAccessTimeCheck != null ? featureAccessTimeCheck.AccessTime + (long)request.AccessTime! : 0;
-
+            long existsTime = featureAccessTimeCheck != null ? featureAccessTimeCheck.AccessTime + request.AccessTime.Value : 0;
             if (existsTime >= ValueSettings.StudentDailyStreak.CheckInGoalTime)
             {
                 StudentDailyStreakCommandModel cmdDaily = new StudentDailyStreakCommandModel
                 {
-                    StudentId = student?.Id ?? default,
+                    StudentId = student.Id,
                     IsUseShield = false,
                     DailyDate = DateTime.UtcNow,
                     UserId = _authContext.CurrentUserId,
@@ -129,11 +129,11 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 //methodResult.Result = _mapper.Map<FeatureAccessTimeModel>(featureAccessTime);
 
-                if ((request.Type == EnumFeature.VideoLesson.ToString() || request.Type == EnumFeature.HomeWork.ToString() || request.Type == EnumFeature.MockTest.ToString() || request.Type == EnumFeature.FinalTest.ToString() || request.Type == EnumFeature.ClassForum.ToString() || request.Type == EnumFeature.ChatBot.ToString()) && request.AccessTime.HasValue)
+                if (TrackableFeatures.Contains(request.Type) && request.AccessTime.HasValue)
                 {
                     int minute = DateTimeHelper.ConvertSecondsToMinutes(request.AccessTime.Value);
-                    await DoQuestBoard(student!.Id, EnumQuestBoardCategory.ExploreTheLearningGalaxy, minute, cancellationToken);
-                    await DoQuestBoard(student!.Id, EnumQuestBoardCategory.LearningSpaceship, minute, cancellationToken);
+                    await DoQuestBoard(student.Id, EnumQuestBoardCategory.ExploreTheLearningGalaxy, minute, cancellationToken);
+                    await DoQuestBoard(student.Id, EnumQuestBoardCategory.LearningSpaceship, minute, cancellationToken);
                 }
 
                 return methodResult;
@@ -141,6 +141,47 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
 
             return methodResult;
         }
+
+        private async Task<MethodResult<StudentModel>> GetStudentAsync()
+        {
+            MethodResult<StudentModel> methodResult = new MethodResult<StudentModel>();
+            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            if (!studentResult.IsSuccessStatusCode)
+            {
+                methodResult.AddError(studentResult.Error);
+                return methodResult;
+            }
+            var student = studentResult.Content?.Result;
+            if (student == null)
+            {
+                return methodResult;
+            }
+            methodResult.Result = student;
+            return methodResult;
+        }
+
+        private async Task<FeatureAccessTime?> GetLatestFeatureAccessTime(
+        EnumFeature featureType,
+        Guid? objectId,
+        CancellationToken ct)
+        {
+            return await _featureAccessTimeRepository.Queryable
+                .Where(x => x.CreatedUserId == _authContext.CurrentUserId &&
+                            x.EnumFeature == featureType &&
+                            (featureType == EnumFeature.Other || x.ObjectId == objectId))
+                .OrderByDescending(x => x.LastVisited)
+                .FirstOrDefaultAsync(ct);
+        }
+
+        private static readonly HashSet<string> TrackableFeatures = new()
+        {
+            EnumFeature.VideoLesson.ToString(),
+            EnumFeature.HomeWork.ToString(),
+            EnumFeature.FullTest.ToString(),
+            EnumFeature.SkillTest.ToString(),
+            EnumFeature.ClassForum.ToString(),
+            EnumFeature.ChatBot.ToString()
+        };
 
         private async Task DoQuestBoard(Guid studentId, EnumQuestBoardCategory category, int value, CancellationToken cancellationToken)
         {
@@ -173,25 +214,23 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
             featureAccessTime.Visit += 1;
             featureAccessTime.AccessTime += accessTime;
             featureAccessTime.LastVisited = DateTime.UtcNow;
-            ;
             featureAccessTime.EnumFeature = ConvertType(request.Type!);
             _featureAccessTimesUpdate.Add(featureAccessTime);
         }
 
-        private static bool IsSameRangeHour(FeatureAccessTime featureAccessTime)
+        private static bool IsSameRangeHour(FeatureAccessTime entity)
         {
-            bool isValid = false;
-            var now = DateTime.UtcNow;
-            var lastVisited = featureAccessTime.LastVisited;
-
-            if (lastVisited!.Value.Year == now.Year
-                       && lastVisited!.Value.Month == now.Month
-                       && lastVisited!.Value.Day == now.Day
-                       && lastVisited!.Value.Hour == now.Hour)
+            if (!entity.LastVisited.HasValue)
             {
-                isValid = true;
+                return false;
             }
-            return isValid;
+            var now = DateTime.UtcNow;
+            var last = entity.LastVisited.Value;
+
+            return last.Year == now.Year &&
+                   last.Month == now.Month &&
+                   last.Day == now.Day &&
+                   last.Hour == now.Hour;
         }
 
         /// <summary>
@@ -232,7 +271,6 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
             }
 
             hourlyAccess.Reverse(); // Đảo ngược thứ tự để thời gian tăng dần
-
             return hourlyAccess;
         }
     }

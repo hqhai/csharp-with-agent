@@ -1242,7 +1242,7 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.ToTable("BlindBoxUsers");
                 });
 
-            modelBuilder.Entity("Fsel.System.Domain.Entities.ChatBot.ChatBot", b =>
+            modelBuilder.Entity("Fsel.System.Domain.Entities.Chatbots.ChatBot", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -1297,11 +1297,16 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<Guid?>("SkillId")
+                    b.Property<string>("SkillFilePath")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid>("SkillId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("SkillName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -1311,7 +1316,10 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("UnitId")
+                    b.Property<Guid>("UnitId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UnitResultId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("UpdatedDate")
@@ -1383,6 +1391,9 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.Property<int>("NumberSkill")
                         .HasColumnType("int");
 
+                    b.Property<Guid>("ProgramId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("ProgramName")
                         .IsRequired()
                         .HasMaxLength(250)
@@ -1431,12 +1442,20 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
 
+                    b.Property<Guid>("AICriteriaConfigId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("AiConfig")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("ChatbotConfigId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ChatbotLayout")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Config")
                         .IsRequired()
@@ -1477,6 +1496,20 @@ namespace Fsel.System.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("SkillFilePath")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid?>("SkillId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("SkillName")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<int>("Token")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
@@ -1656,16 +1689,6 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.Property<string>("ClassName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("CourseLevel")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("CourseType")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
                         .HasColumnOrder(107);
@@ -1702,8 +1725,14 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
+                    b.Property<Guid?>("LevelId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("ProgramId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("SchoolId")
                         .HasColumnType("uniqueidentifier");
@@ -2592,6 +2621,9 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<Guid?>("CourseId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("CourseResultId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedDate")

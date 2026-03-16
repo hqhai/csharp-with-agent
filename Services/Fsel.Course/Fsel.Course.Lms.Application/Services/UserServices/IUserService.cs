@@ -115,6 +115,10 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
         [Get("/v1/user/get-by-student-id/{id}")]
         Task<IApiResponse<MethodResult<StudentModel>>> GetUserByStudentId([FromRoute] Guid id);
 
+        [RefitCache(CacheSettings.TimeCache.OneHour)]
+        [Get("/v1/user/get-by-student-id/{id}")]
+        Task<IApiResponse<MethodResult<StudentModel>>> GetUserByStudentIdWithCache([FromRoute] Guid id);
+
         [Put("/v1/user/update-code-student")]
         Task<IApiResponse<MethodResult<UserModel>>> UpdateCodeStudentAsync([FromBody] UpdateCodeStudentCommandModel command);
 
@@ -197,5 +201,8 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
 
         [Put("/v1/student/update-status/{studentId}")]
         Task<IApiResponse<MethodResult<StudentModel>>> UpdateStatusStudentCampus([FromRoute] Guid studentId, [FromBody] UpdateStatusStudentMode command);
+
+        [Put("/v1/student/update-learning-context")]
+        Task<IApiResponse<MethodResult<StudentModel>>> UpdateLearningContextAsync([Body] UpdateStudentLearningContextCommandModel command);
     }
 }

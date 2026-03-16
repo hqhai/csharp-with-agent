@@ -77,6 +77,7 @@ namespace Fsel.Course.Application.Queries.LessonQuery.V1i1
                                     DocumentCount = g.Key.DocumentCount,
                                     InstructionContent = g.Key.InstructionContent,
                                     Name = g.Key.Name,
+                                    Code = g.Key.Code,
                                     Status = g.Key.Status,
                                     LevelId = g.Key.LevelId,
                                     ProgramId = g.Key.ProgramId,
@@ -86,7 +87,6 @@ namespace Fsel.Course.Application.Queries.LessonQuery.V1i1
                                         Id = x.Id,
                                         SkillId = x.SkillId,
                                         Instruction = x.Instruction,
-
                                     }).ToList(),
                                     LessonModules = g.Select(x => new LessonModuleModel
                                     {
@@ -127,6 +127,8 @@ namespace Fsel.Course.Application.Queries.LessonQuery.V1i1
             var level = await _levelRepository.Queryable.AsNoTracking().FirstOrDefaultAsync(x => x.Id == lesson.LevelId, cancellationToken);
             lesson.NameLevel = level?.Name;
             var category = await _categoryRepository.Queryable.AsNoTracking().FirstOrDefaultAsync(x => x.Id == lesson.ProgramId, cancellationToken);
+            var project = await _categoryRepository.GetSecondLevelFromRootAsync(lesson.ProgramId, cancellationToken);
+            lesson.ProjectId = project?.Id;
             lesson.NameProgram = category?.Name;
 
             if (lesson.LessonInstructions != null && lesson.LessonInstructions.Any())
@@ -158,6 +160,7 @@ namespace Fsel.Course.Application.Queries.LessonQuery.V1i1
                         case EnumLessonConfigType.ClassForum:
                             lessonModule.ClassForum = _mapper.Map<ClassForumModel>(classForum.FirstOrDefault(c => c.OriginalId == lessonModule.OriginalId));
                             break;
+
                         case EnumLessonConfigType.Document:
                             lessonModule.Document = _mapper.Map<DocumentModel>(documents.FirstOrDefault(c => c.OriginalId == lessonModule.OriginalId));
                             break;

@@ -35,5 +35,11 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public bool IsLearnStudent { get; set; }
         public bool? IsDeleted { get; set; }
         public string? StudentCampusCode { get; set; }
+        public Guid? ProgramId { get; set; }
+        public string? Program { get; set; }
+        public Guid? LevelId { get; set; }
+        public string? Level { get; set; }
+        public Guid? SubjectId { get; set; }
+        public string? Subject { get; set; }
     }
 }

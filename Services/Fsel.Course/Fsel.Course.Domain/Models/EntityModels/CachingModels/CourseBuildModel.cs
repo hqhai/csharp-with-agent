@@ -25,6 +25,10 @@ namespace Fsel.Course.Domain.Models.EntityModels.CachingModels
         public Guid? TestId { get; set; }
         public Guid? UnitId { get; set; }
         public Guid OriginalId { get; set; }
+        public EnumResultStatus? Status { get; set; }
+        public Guid? ResultId { get; set; }
+        public string? Description { get; set; }
+        public string? Thumbnail { get; set; }
         public IList<UnitModuleBuildModel> UnitModuleBuilds { get; set; } = new List<UnitModuleBuildModel>();
     }
 
@@ -34,6 +38,11 @@ namespace Fsel.Course.Domain.Models.EntityModels.CachingModels
         public Guid? TestId { get; set; }
         public Guid? LessonId { get; set; }
         public Guid OriginalId { get; set; }
+        public EnumResultStatus? Status { get; set; }
+        public Guid? ResultId { get; set; }
+        public EnumTestType? TestType { get; set; }
+        public string? Description { get; set; }
+        public string? Thumbnail { get; set; }
         public IList<LessonModuleBuildModel> LessonModuleBuilds { get; set; } = new List<LessonModuleBuildModel>();
     }
 
@@ -42,8 +51,13 @@ namespace Fsel.Course.Domain.Models.EntityModels.CachingModels
         public EnumLessonConfigType ConfigType { get; set; }
         public Guid? ClassForumId { get; set; }
         public Guid? VideoId { get; set; }
-        public Guid? HọmeWorkId { get; set; }
+        public Guid? HomeWorkId { get; set; }
         public Guid? DocumentId { get; set; }
         public Guid OriginalId { get; set; }
+        public Guid? ResultId { get; set; }
+        public Guid? CurrentVideoTimeCodeId { get; set; }
+        public string? Description { get; set; }
+        public string? Thumbnail { get; set; }
+        public EnumResultStatus? Status { get; set; }
     }
 }

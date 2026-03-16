@@ -2,28 +2,56 @@
 
 namespace Fsel.Course.Domain.Models.CommandModels.AiCriteriaConfig
 {
+    using System.Collections.Immutable;
     using Enums;
 
-    public record FeatureTypeMap(EnumFeatureMultiple Feature, List<EnumSubFeatureType> SubFeatures);
-    public record FeatureCriteriaMap(EnumSubFeatureType SubFeature, List<EnumCriteriaAi> Criterias);
+    public record FeatureTypeMap(EnumFeatureMultiple Feature, ImmutableList<EnumSubFeatureType> SubFeatures);
+    public record FeatureCriteriaMap(EnumSubFeatureType SubFeature, ImmutableList<EnumCriteriaAi> Criterias);
+
     public static class FeatureModel
     {
-        public static readonly List<FeatureTypeMap> FeatureTypes = new()
+        static FeatureModel()
         {
-            new(EnumFeatureMultiple.Unit,   new() { EnumSubFeatureType.AiPracticeGym }),
-            new(EnumFeatureMultiple.Lesson, new() { EnumSubFeatureType.ClassForumSpeaking, EnumSubFeatureType.ClassForumWriting, EnumSubFeatureType.VideoLesson, EnumSubFeatureType.HomeWork }),
-            new(EnumFeatureMultiple.Test,   new() { EnumSubFeatureType.TestConfigSpeakingLayout, EnumSubFeatureType.TestConfigWritingLayout, EnumSubFeatureType.ShortAnswerBase}),
-        };
+            FeatureSubFeatures = FeatureTypes
+                .ToImmutableDictionary(x => x.Feature, x => (IReadOnlyList<EnumSubFeatureType>)x.SubFeatures);
 
-        public static readonly List<FeatureCriteriaMap> FeatureCriteria = new()
-        {
-            new(EnumSubFeatureType.AiPracticeGym,           new()),
-            new(EnumSubFeatureType.ClassForumSpeaking,      new()),
-            new(EnumSubFeatureType.ClassForumWriting,       new()),
-            new(EnumSubFeatureType.VideoLesson,             new()),
-            new(EnumSubFeatureType.HomeWork,                new()),
-            new(EnumSubFeatureType.TestConfigSpeakingLayout,new() { EnumCriteriaAi.Fc, EnumCriteriaAi.Lr, EnumCriteriaAi.Gra }),
-            new(EnumSubFeatureType.TestConfigWritingLayout, new() { EnumCriteriaAi.Lr, EnumCriteriaAi.Ta, EnumCriteriaAi.Gra, EnumCriteriaAi.Cc }),
-        };
+            SubFeatureCriteria = FeatureCriteria
+                .ToImmutableDictionary(x => x.SubFeature, x => (IReadOnlyList<EnumCriteriaAi>)x.Criterias);
+        }
+
+        public static IReadOnlyDictionary<EnumFeatureMultiple, IReadOnlyList<EnumSubFeatureType>> FeatureSubFeatures { get; private set; }
+        public static IReadOnlyDictionary<EnumSubFeatureType, IReadOnlyList<EnumCriteriaAi>> SubFeatureCriteria { get; private set; }
+
+        private static readonly ImmutableList<FeatureTypeMap> s_featureTypes = ImmutableList.Create(
+            new FeatureTypeMap(EnumFeatureMultiple.Unit, ImmutableList.Create(EnumSubFeatureType.AiPracticeGym)),
+            new FeatureTypeMap(EnumFeatureMultiple.Lesson, ImmutableList.Create(
+                EnumSubFeatureType.ClassForumSpeaking,
+                EnumSubFeatureType.ClassForumWriting,
+                EnumSubFeatureType.VideoLesson,
+                EnumSubFeatureType.Homework
+            )),
+            new FeatureTypeMap(EnumFeatureMultiple.Test, ImmutableList.Create(
+                EnumSubFeatureType.TestConfigSpeakingLayout,
+                EnumSubFeatureType.TestConfigWritingLayout,
+                EnumSubFeatureType.ShortAnswerBase
+            ))
+        );
+
+        private static readonly ImmutableList<FeatureCriteriaMap> s_featureCriteria = ImmutableList.Create(
+            new FeatureCriteriaMap(EnumSubFeatureType.AiPracticeGym, ImmutableList<EnumCriteriaAi>.Empty),
+            new FeatureCriteriaMap(EnumSubFeatureType.ClassForumSpeaking, ImmutableList<EnumCriteriaAi>.Empty),
+            new FeatureCriteriaMap(EnumSubFeatureType.ClassForumWriting, ImmutableList<EnumCriteriaAi>.Empty),
+            new FeatureCriteriaMap(EnumSubFeatureType.VideoLesson, ImmutableList<EnumCriteriaAi>.Empty),
+            new FeatureCriteriaMap(EnumSubFeatureType.Homework, ImmutableList<EnumCriteriaAi>.Empty),
+            new FeatureCriteriaMap(EnumSubFeatureType.TestConfigSpeakingLayout, ImmutableList.Create(
+                EnumCriteriaAi.Fc, EnumCriteriaAi.Lr, EnumCriteriaAi.Gra
+            )),
+            new FeatureCriteriaMap(EnumSubFeatureType.TestConfigWritingLayout, ImmutableList.Create(
+                EnumCriteriaAi.Lr, EnumCriteriaAi.Ta, EnumCriteriaAi.Gra, EnumCriteriaAi.Cc
+            ))
+        );
+
+        public static IReadOnlyList<FeatureTypeMap> FeatureTypes => s_featureTypes;
+        public static IReadOnlyList<FeatureCriteriaMap> FeatureCriteria => s_featureCriteria;
     }
 }

@@ -438,6 +438,8 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                     return methodResult;
                 }
 
+                bool isConfirmOTP = competitionEvent.EventContent?.Actions?.Any(p => p == EnumSchoolEventRuleAction.NotConfirmOTP) ?? false;
+
                 var studentIds = new ConcurrentBag<Guid>();
                 var studentModels = new ConcurrentBag<CreateOrderForStudentsEventCommandModel>();
 
@@ -478,7 +480,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                     Birthday = student.DateOfBirth,
                                     Code = GeneratorCodeAsync(studentRepository, student.DateOfBirth ?? DateTime.MinValue, null),
                                     EmailConfirmed = false,
-                                    PhoneNumberConfirmed = false,
+                                    PhoneNumberConfirmed = isConfirmOTP,
                                     Status = EnumUserStatus.Active,
                                     DefaultPassword = password,
                                     Student = new Student()
@@ -573,7 +575,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                         Birthday = student.ParentDateOfBirth,
                                         Code = GeneratorCodeAsync(parentRepository, student.ParentDateOfBirth ?? DateTime.MinValue, null),
                                         EmailConfirmed = false,
-                                        PhoneNumberConfirmed = false,
+                                        PhoneNumberConfirmed = isConfirmOTP,
                                         Status = EnumUserStatus.Active,
                                         DefaultPassword = password,
                                         Student = new Student()

@@ -76,7 +76,9 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
             }
             var studentId = studentsResult.Content?.Result?.Id;
 
-            var homeWorkResult = await _homeWorkResultRepository.Queryable.FirstOrDefaultAsync(x => x.LessonResultId == request.LessonResultId && x.HomeWorkId == request.HomeWorkId && x.StudentId == studentId, cancellationToken);
+            var homeWorkResult = await _homeWorkResultRepository.Queryable.AsNoTracking()
+                                                                .Where(x => x.HomeWorkId == request.HomeWorkId && x.StudentId == studentId)
+                                                                .FirstOrDefaultAsync(x => x.LessonResultId == request.LessonResultId, cancellationToken);
             if (homeWorkResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWorkResult));
@@ -126,7 +128,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
                 questionModel.CorrectStatus = GetCorrectStatus(homeWorkAnswer);
                 questionModel.IsReportExplanation = questionExplanationErrors.Any(x => x.QuestionId == question.Id);
                 questionModel.Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: !(isCheck)).Item1;
-                (questionModel.Config, string? questionShuffleStr) = _questionTypeConverter.QuestionShuffleConverterObject(questionModel.Config, question.QuestionType, questionShuffle?.ShuffleConfigs);
+                (questionModel.Config, string? questionShuffleStr) = _questionTypeConverter.QuestionShuffleConverterObject(questionModel.Config, question.QuestionType, isCheck, questionShuffle?.ShuffleConfigs);
                 if (!string.IsNullOrEmpty(questionShuffleStr) && (questionShuffle == null || questionShuffle.ShuffleConfigStr != questionShuffleStr))
                 {
                     if (questionShuffle == null)

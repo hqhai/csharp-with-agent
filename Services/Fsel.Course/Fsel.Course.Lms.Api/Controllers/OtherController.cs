@@ -10,7 +10,6 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Course.Lms.Application.Commands.OtherCmd;
     using Fsel.Course.Lms.Application.Queries.OtherFeatureQuery;
     using Fsel.Shared.Constants;
-    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 

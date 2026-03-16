@@ -2,20 +2,19 @@
 
 namespace Fsel.Course.Lms.Application.Commands.CourseCmd
 {
-    using AutoMapper;
     using Core.Base;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Shared.Enums;
+    using Fsel.Course.Domain.Models.EntityModels.ChangeCourseModels;
+    using Fsel.Course.Domain.Models.EntityModels.UserNavigationActionModels;
+    using Fsel.Course.Lms.Application.Queries.CourseChangeQuery;
+    using Fsel.Course.Lms.Application.Services.ApplicationServices.ChangeCourse;
     using MediatR;
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.Logging;
-    using Org.BouncyCastle.Ocsp;
     using Services.UserServices;
     using Shared.Enums.ErrorCodes;
+    using IMediator = MediatR.IMediator;
 
     public class ChooseCourseByLevelCommand : IRequest<MethodResult<CourseModel>>
     {
@@ -26,26 +25,21 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
 
     public class ChooseCourseByLevelCommandHandler : IRequestHandler<ChooseCourseByLevelCommand, MethodResult<CourseModel>>
     {
-        private readonly ICourseRepository _courseRepository;
-        private readonly ILogger<CloneCourseCommand> _logger;
         private readonly IUserService _userService;
-        private readonly IMapper _mapper;
         private readonly AuthContext _authContext;
-        private readonly ICourseResultRepository _courseResultRepository;
+        private readonly IChangeCourseService _changeCourseService;
+        private readonly IMediator _mediator;
 
-        public ChooseCourseByLevelCommandHandler(ICourseRepository courseRepository,
-            ICourseResultRepository courseResultRepository,
+        public ChooseCourseByLevelCommandHandler(
             AuthContext authContext,
-            ILogger<CloneCourseCommand> logger,
+            IChangeCourseService changeCourseService,
             IUserService userService,
-            IMapper mapper)
+            IMediator mediator)
         {
-            _courseRepository = courseRepository;
-            _courseResultRepository = courseResultRepository;
-            _logger = logger;
             _userService = userService;
             _authContext = authContext;
-            _mapper = mapper;
+            _changeCourseService = changeCourseService;
+            _mediator = mediator;
         }
 
         public async Task<MethodResult<CourseModel>> Handle(ChooseCourseByLevelCommand request, CancellationToken cancellationToken)
@@ -66,32 +60,55 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
                 return methodResult;
             }
 
-            var courseResult = await _courseResultRepository.ReadQueryable
-                .FirstOrDefaultAsync(x => x.StudentId == student.Id, cancellationToken);
-            if (courseResult != null)
+            var navigateActionResult = await _mediator.Send(new GetUserNavigationQuery(), cancellationToken);
+            if (!navigateActionResult.IsOK
+                || navigateActionResult.Result?.Status != EnumNavigateActionStatus.ChooseLevel)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorBadRequest($"StudentId: {student.Id} already has a course assigned.");
-                _logger.LogWarning("StudentId: {StudentId} already has a course assigned.", student.Id);
+                methodResult.AddErrorBadRequest("Cant not select level this time");
                 return methodResult;
             }
 
-            var courses = await _courseRepository.ReadQueryable
-                .Where(x => x.ProgramId == request.ProgramId && x.LevelId == request.LevelId && !x.IsArchive && x.Status == EnumCourseStatus.Active).ToListAsync(cancellationToken);
+            var changeCourseAggregate = await _changeCourseService.GetChangeCourseAggreate(student, request.LevelId, cancellationToken);
 
-            var random = new Random();
-            var course = courses.OrderBy(x => random.Next()).FirstOrDefault();
+            var changeCourseDirective =
+                changeCourseAggregate.ChangeCourse(new ChangeCourseRequest { LevelId = request.LevelId, RequestType = EnumChangeCourseRequest.ChangeCourse });
 
-            if (course == null)
+            switch (changeCourseDirective?.Action)
             {
-                methodResult.StatusCode = StatusCodes.Status404NotFound;
-                methodResult.AddErrorBadRequest($"No course found for ProgramId: {request.ProgramId} and LevelId: {request.LevelId}");
-                _logger.LogWarning("No course found for ProgramId: {ProgramId} and LevelId: {LevelId}", request.ProgramId, request.LevelId);
-                return methodResult;
+                case EnumChangeCourseAction.ChangeDirectly:
+                    await _changeCourseService.SelectCourseLevelAfterPt(new SelectCourseLevelRequest
+                    {
+                        StudentId = student.Id,
+                        SelectedProgramId = changeCourseDirective.ToProgramId,
+                        SelectedLevelId = changeCourseDirective.ToLevelId,
+                        RelatedHistoryId = navigateActionResult.Result.RelatedHistoryId
+                    });
+                    break;
+
+                case EnumChangeCourseAction.ChangeDirectlyBecauseByPass:
+                    await _changeCourseService.SwitchDirectlyToNewCourse(
+                        new SelectCourseLevelRequest
+                        {
+                            StudentId = student.Id,
+                            ToProgramId = changeCourseDirective.ToProgramId,
+                            ToLevelId = changeCourseDirective.ToLevelId,
+                            SelectedLevelId = changeCourseDirective.ToLevelId,
+                            SelectedProgramId = changeCourseDirective.ToProgramId,
+                            FromInfo = changeCourseDirective.FromInfo,
+                            RelatedHistoryId = navigateActionResult.Result.RelatedHistoryId,
+                            Action = EnumChangeCourseAction.ChangeDirectlyBecauseByPass
+                        });
+                    break;
+
+                case EnumChangeCourseAction.SwitchToExistedCourse:
+                    await _changeCourseService.SwitchDirectlyToExistCourseForSelectLevelAfterPt(changeCourseDirective.CourseResultId.Value, student.Id, navigateActionResult.Result.RelatedHistoryId);
+                    break;
+
+                case EnumChangeCourseAction.NotAllow or EnumChangeCourseAction.ChangeAndStartPt:
+                    methodResult.AddErrorBadRequest("Level change not allowed");
+                    break;
             }
 
-            await _userService.UpdateCourseToStudentAsync(course.Id);
-            methodResult.Result = new CourseModel { Id = course.Id, Name = course.Name, LevelId = course.LevelId, ProgramId = course.ProgramId };
             return methodResult;
         }
     }

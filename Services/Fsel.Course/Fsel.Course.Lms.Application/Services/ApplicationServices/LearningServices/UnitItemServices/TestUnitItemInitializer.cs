@@ -13,7 +13,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
     using Fsel.Course.Domain.Entities.V1i1;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Infrastructure.Repositories;
+    using Fsel.Shared.ApplicationServices.CacheServices;
     using Microsoft.EntityFrameworkCore;
 
     public class TestUnitItemInitializer : IUnitItemInitializer
@@ -21,14 +21,17 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
         private readonly ITestGroupResultRepository _testGroupResultRepository;
         private readonly ITestResultRepository _testResultRepository;
         private readonly ITestRepository _testRepository;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
 
         public TestUnitItemInitializer(ITestGroupResultRepository testGroupResultRepository,
             ITestResultRepository testResultRepository,
-            ITestRepository testRepository)
+            ITestRepository testRepository,
+            IRequestSafeCachingService requestSafeCachingService)
         {
             _testGroupResultRepository = testGroupResultRepository;
             _testResultRepository = testResultRepository;
             _testRepository = testRepository;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         public async Task<VoidMethodResult> InitializeAsync(UnitModule unitModule, UnitResult unitResult, CancellationToken cancellationToken)
@@ -54,6 +57,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
                             continue;
                         }
                         item.Status = EnumResultStatus.New;
+                        item.NewDate = DateTime.UtcNow;
                     }
 
                     testGroupResult.Status = EnumResultStatus.New;
@@ -80,14 +84,21 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
                 {
                     StudentId = unitResult.StudentId,
                     Status = EnumResultStatus.New,
+                    NewDate = DateTime.UtcNow,
                     TestId = test.Id,
                     TestGroupResultId = testGroupResult.Id,
                 };
 
-                await _testResultRepository.BulkMergeAsync(new List<TestResult> { testResult }, bulk =>
-                {
-                    bulk.ColumnPrimaryKeyExpression = c => new { c.TestGroupResultId, c.TestId, c.StudentId, c.IsDeleted };
-                });
+                await _requestSafeCachingService.SafeRequest(
+                    key: $"Add_TestResult_{testResult.TestGroupResultId}_{testResult.TestId}_{testResult.IsDeleted}",
+                    safeFunction: async () =>
+                    {
+                        await _testResultRepository.BulkMergeAsync(new List<TestResult> { testResult }, bulk =>
+                        {
+                            bulk.ColumnPrimaryKeyExpression = c => new { c.TestGroupResultId, c.TestId, c.IsDeleted };
+                        });
+                        return testResult;
+                    });
             }
 
             return methodResult;
@@ -109,11 +120,16 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
                 StudentId = unitResult.StudentId,
                 Status = EnumResultStatus.New,
             };
-
-            await _testGroupResultRepository.BulkMergeAsync(new List<TestGroupResult> { testGroupResult }, bulk =>
-            {
-                bulk.ColumnPrimaryKeyExpression = c => new { c.UnitModuleId, c.UnitResultId, c.IsDeleted };
-            });
+            await _requestSafeCachingService.SafeRequest(
+                   key: $"Add_TestGroupResult_{testGroupResult.UnitModuleId}_{testGroupResult.UnitResultId}_{testGroupResult.IsDeleted}",
+                   safeFunction: async () =>
+                   {
+                       await _testGroupResultRepository.BulkMergeAsync(new List<TestGroupResult> { testGroupResult }, bulk =>
+                       {
+                           bulk.ColumnPrimaryKeyExpression = c => new { c.UnitModuleId, c.UnitResultId, c.IsDeleted };
+                       });
+                       return testGroupResult;
+                   });
         }
 
         private async Task<TestGroupResult?> GetTestGroupResultAsync(Guid unitResultId, Guid unitModuleId, CancellationToken cancellationToken)

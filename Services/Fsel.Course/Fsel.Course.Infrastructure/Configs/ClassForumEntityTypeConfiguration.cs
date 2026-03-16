@@ -53,8 +53,6 @@ namespace Fsel.Course.Infrastructure.Configs
                    .WithMany(b => b.ClassForums)
                    .HasForeignKey(x => x.ProgramId)
                    .OnDelete(DeleteBehavior.NoAction);
-
-            builder.HasIndex(x => x.LessonId).IsUnique(false);
         }
     }
 }

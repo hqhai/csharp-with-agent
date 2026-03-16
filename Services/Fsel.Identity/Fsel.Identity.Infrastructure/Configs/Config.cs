@@ -84,6 +84,8 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "http://lms.fsel.edu.vn",
                         "https://lms-web-multi-subject-testing.fsel.edu.vn",
                         "http://lms-web-multi-subject-testing.fsel.edu.vn",
+                        "https://lms-web-multi-subject-production.fsel.edu.vn",
+                        "http://lms-web-multi-subject-production.fsel.edu.vn",
                     },
                     PostLogoutRedirectUris =
                     {
@@ -115,6 +117,8 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "http://lms.fsel.edu.vn/auth/login",
                         "https://lms-web-multi-subject-testing.fsel.edu.vn/auth/login",
                         "http://lms-web-multi-subject-testing.fsel.edu.vn/auth/login",
+                        "https://lms-web-multi-subject-production.fsel.edu.vn/auth/login",
+                        "http://lms-web-multi-subject-production.fsel.edu.vn/auth/login",
                     },
 
                     AllowOfflineAccess = true,
@@ -174,8 +178,11 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "https://lcms-pre-prod.fsel.edu.vn",
                         "http://lcms.fsel.edu.vn",
                         "https://lcms.fsel.edu.vn",
+                        "http://lcms-web-multi-subject-testing.fsel.edu.vn",
                         "https://lcms-web-multi-subject-testing.fsel.edu.vn",
-                        "https://lcms-web-multi-subject-testing.fsel.edu.vn"
+                        "http://lcms-web-multi-subject-production.fsel.edu.vn",
+                        "https://lcms-web-multi-subject-production.fsel.edu.vn"
+
                     },
                     PostLogoutRedirectUris =
                     {
@@ -201,6 +208,8 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "https://lcms.fsel.edu.vn",
                         "http://lcms-web-multi-subject-testing.fsel.edu.vn",
                         "https://lcms-web-multi-subject-testing.fsel.edu.vn",
+                        "http://lcms-web-multi-subject-production.fsel.edu.vn",
+                        "https://lcms-web-multi-subject-production.fsel.edu.vn"
                     },
 
                     AllowOfflineAccess = true,
@@ -259,6 +268,8 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "https://lmsadmin.fsel.edu.vn",
                         "http://lmsadmin-multi-subject-testing.fsel.edu.vn",
                         "https://lmsadmin-multi-subject-testing.fsel.edu.vn",
+                        "http://lmsadmin-multi-subject-production.fsel.edu.vn",
+                        "https://lmsadmin-multi-subject-production.fsel.edu.vn"
                     },
                     PostLogoutRedirectUris =
                     {
@@ -284,6 +295,8 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "https://lmsadmin.fsel.edu.vn",
                         "http://lmsadmin-multi-subject-testing.fsel.edu.vn",
                         "https://lmsadmin-multi-subject-testing.fsel.edu.vn",
+                        "http://lmsadmin-multi-subject-production.fsel.edu.vn",
+                        "https://lmsadmin-multi-subject-production.fsel.edu.vn"
                     },
 
                     AllowOfflineAccess = true,
@@ -529,8 +542,8 @@ namespace Fsel.Authentication.Infrastructure.Configs
 
                     RequireClientSecret = false,
                     RequirePkce = false,
-                    RedirectUris = { "fsel-multi-subject-uat://lms-web-multi-subject-testing.fsel.edu.vn" },
-                    PostLogoutRedirectUris = { "fsel-multi-subject-uat://lms-web-multi-subject-testing.fsel.edu.vn" },
+                    RedirectUris = { "fsel-multi-subject-uat://lms-web-multi-subject-testing.fsel.edu.vn", "fsel-multi-subject-uat://lms-web-multi-subject-production.fsel.edu.vn" },
+                    PostLogoutRedirectUris = { "fsel-multi-subject-uat://lms-web-multi-subject-testing.fsel.edu.vn", "fsel-multi-subject-uat://lms-web-multi-subject-production.fsel.edu.vn" },
 
                     AllowOfflineAccess = true,
                     AccessTokenLifetime = 3600,

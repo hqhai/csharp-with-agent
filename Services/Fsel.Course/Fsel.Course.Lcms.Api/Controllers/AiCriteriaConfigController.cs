@@ -8,18 +8,15 @@ namespace Fsel.Course.Lcms.Api.Controllers
     using Asp.Versioning;
     using Common.ActionResults;
     using Common.Constants;
-    using Domain.Enums;
     using Domain.Models.EntityModels.AiPromptManagerModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
     using Shared.Constants;
-    using Shared.Enums;
 
     [ApiController]
     [ApiVersion(ApiSettings.APIVersion1)]
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/ai-criteria-config")]
-    //[Common.Attributes.Permission(role: nameof(EnumRole.MasterAdmin))]
     public class AiCriteriaConfigController : ControllerBase
     {
         private readonly IMediator _mediator;

@@ -98,7 +98,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                                                      .ToListAsync(cancellationToken);
 
             var studentToLearns = await (from baseQ in _courseResultRepository.Queryable.WhereBulkContains(courseStudentIds, x => x.StudentId)
-                                         join lr in _lessonResultRepository.Queryable on new { baseQ.CourseId, baseQ.StudentId } equals new { lr.CourseId, lr.StudentId }
+                                         join lr in _lessonResultRepository.Queryable on baseQ.Id equals lr.CourseResultId
                                          where baseQ.WorkingStatus == EnumWorkingStatus.Active
                                          select baseQ.StudentId).Distinct().ToListAsync(cancellationToken);
 

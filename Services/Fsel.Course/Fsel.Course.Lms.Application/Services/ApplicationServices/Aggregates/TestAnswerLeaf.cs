@@ -20,9 +20,17 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             {
                 QuestionId = TestAnswer.QuestionId,
                 TestAnswerId = TestAnswer.Id,
-                Answer = new AnswerModel { Answer = TestAnswer.Answer, CorrectCount = TestAnswer.CorrectCount, IsCorrect = TestAnswer.IsCorrect, },
+                Answer = new AnswerModel
+                {
+                    Answer = TestAnswer.Answer,
+                    CorrectCount = TestAnswer.CorrectCount,
+                    IsCorrect = TestAnswer.IsCorrect,
+                    GradingAlFeedback = TestAnswer.GradingAlFeedback,
+                    SpeechTextAnswer = TestAnswer.SpeechTextAnswer,
+                    Status = TestAnswer.Status
+                },
                 Status = TestAnswer.Status == EnumAnswerStatus.Done ? EnumResultStatus.Done : EnumResultStatus.Process,
-                UpdatedDate = TestAnswer?.UpdatedDate ?? TestAnswer?.CreatedDate
+                UpdatedDate = TestAnswer?.UpdatedDate ?? TestAnswer?.CreatedDate,
             };
         }
 
@@ -43,13 +51,13 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             return Result != null && Result.Id == id;
         }
 
-        public override async Task Submit(Guid id)
+        public override async Task Submit(SubmitContext context)
         {
             TestAnswer.Status = EnumAnswerStatus.Done;
             await Task.CompletedTask;
         }
 
-        public override async Task SubmitTest(Guid id, EnumScoringFormulaType? scoringFormulaType = null)
+        public override async Task SubmitTest(SubmitContext context)
         {
             TestAnswer.Status = EnumAnswerStatus.Done;
             await Task.CompletedTask;

@@ -21,6 +21,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
     using Fsel.Course.Lms.Application.Services.StorageServices;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
@@ -30,6 +31,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
     using Refit;
+    using Fsel.Shared.ApplicationServices.CacheServices;
 
     public class CreateCFRPendingWordContentCommand : CreateCFRPendingWordContentCommandModel, IRequest<MethodResult<bool>>
     {
@@ -48,6 +50,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
         private readonly SpeechToTextPendingAiPublisher _speechToTextPendingAiPublisher;
         private readonly IStorageService _storageService;
         private readonly ILogger<CreateCFRPendingWordContentCommand> _logger;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
 
         private const int MaxClassForumDetailResultRecord = 2;
         private const int MaxPendingSpeechToText = 2;
@@ -64,7 +67,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
             ISystemService systemService,
             SpeechToTextPendingAiPublisher speechToTextPendingAiPublisher,
             IStorageService storageService,
-            ILogger<CreateCFRPendingWordContentCommand> logger)
+            ILogger<CreateCFRPendingWordContentCommand> logger,
+            IRequestSafeCachingService requestSafeCachingService)
         {
             _userService = userService;
             _classForumResultRepository = classForumResultRepository;
@@ -76,6 +80,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
             _speechToTextPendingAiPublisher = speechToTextPendingAiPublisher;
             _storageService = storageService;
             _logger = logger;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         public async Task<MethodResult<bool>> Handle(CreateCFRPendingWordContentCommand request, CancellationToken cancellationToken)
@@ -187,7 +192,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
                     submissionCount,
                     request.Content ?? string.Empty,
                     request.FormFile);
-
+                classForumResult.ProcessDate = DateTime.UtcNow;
                 classForumResult.ResultStatus = EnumResultStatus.Done;
                 classForumResult.IsPendingSpeechToText = true;
                 await _classForumResultRepository.BulkUpdateList(new List<ClassForumResult> { classForumResult },
@@ -262,18 +267,24 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
                 Status = EnumClassForumResultStatus.PendingSpeechToText,
                 SubmissionCount = submissionCount,
                 ClassForumResultId = classForumResultId,
+                ProcessDate = submissionCount == EnumSubmissionCount.FirstSubmit ? DateTime.UtcNow : null,
                 ClassForumResultFiles = new List<ClassForumResultFile>
                 {
                     new ClassForumResultFile { FilePath = filePath }
                 }
             };
 
-            await _classForumDetailResultRepository.BulkMergeAsync(
-                new List<ClassForumDetailResult> { detail },
-                bulk =>
+            await _requestSafeCachingService.SafeRequest<ClassForumDetailResult>(
+                key: $"Add_ClassForumDetailResult_{detail.SubmissionCount}_{detail.ClassForumResultId}_{detail.IsDeleted}",
+                safeFunction: async () =>
                 {
-                    bulk.ColumnPrimaryKeyExpression =
-                        x => new { x.SubmissionCount, x.ClassForumResultId, x.IsDeleted };
+                    await _classForumDetailResultRepository.BulkMergeAsync(
+                        new List<ClassForumDetailResult> { detail },
+                        bulk =>
+                        {
+                            bulk.ColumnPrimaryKeyExpression = x => new { x.SubmissionCount, x.ClassForumResultId, x.IsDeleted };
+                        });
+                    return detail;
                 });
 
             foreach (var f in detail.ClassForumResultFiles)
@@ -281,7 +292,17 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
                 f.ClassForumDetailResultId = detail.Id;
             }
 
-            await _classForumResultFileRepository.BulkMergeAsync(detail.ClassForumResultFiles);
+            if (detail.ClassForumResultFiles.Any())
+            {
+                var classForumResultFiles = detail.ClassForumResultFiles.ToList();
+                await _requestSafeCachingService.SafeRequest<List<ClassForumResultFile>>(
+                    key: $"Add_ClassForumResultFiles_{string.Join("_", classForumResultFiles.Select(hwa => $"{hwa.ClassForumDetailResultId}_{hwa.FilePath}"))}",
+                    safeFunction: async () =>
+                    {
+                        await _classForumResultFileRepository.BulkMergeAsync(classForumResultFiles);
+                        return classForumResultFiles;
+                    });
+            }
 
             return detail;
         }

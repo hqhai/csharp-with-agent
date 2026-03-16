@@ -66,9 +66,9 @@ namespace Fsel.Course.Infrastructure.Common
             _courseDbContext = courseDbContext;
         }
 
-        public async Task<UnitStudentProgressModel?> GetUnitManager(Guid courseId, Guid unitId, Guid? studentId)
+        public async Task<UnitStudentProgressModel?> GetUnitManager(Guid courseResultId, Guid courseId, Guid unitId, Guid? studentId)
         {
-            var unitResult = await _unitResultRepository.Queryable.FirstOrDefaultAsync(x => x.UnitId == unitId && x.CourseId == courseId && x.StudentId == studentId);
+            var unitResult = await _unitResultRepository.Queryable.FirstOrDefaultAsync(x => x.CourseResultId == courseResultId && x.UnitId == unitId && x.CourseId == courseId && x.StudentId == studentId);
             var unit = await _unitRepository.Queryable.Include(x => x.UnitLessons)
                                             .Include(x => x.UnitSkillMockTests)
                                             .Include(x => x.CourseUnitMockTests.Where(c => c.CourseId == courseId))
@@ -131,7 +131,7 @@ namespace Fsel.Course.Infrastructure.Common
                 if (unitResult != null)
                 {
                     var query = await _lessonResultRepository.Queryable
-                                   .Where(x => x.UnitId == unitResult.UnitId && x.CourseId == unitResult.CourseId && x.StudentId == unitResult.StudentId)
+                                   .Where(x => x.UnitResultId == unitResult.Id && x.StudentId == unitResult.StudentId)
                                    .Select(x => new
                                    {
                                        CountVideo = x.VideoResult != null && x.VideoResult.Status == EnumResultStatus.Done ? 1 : 0,
@@ -166,7 +166,7 @@ namespace Fsel.Course.Infrastructure.Common
             if (lessonIds != null && lessonIds.Any())
             {
                 var query = await _lessonResultRepository.Queryable
-                                  .Where(x => x.CourseId == courseResult.CourseId && x.StudentId == courseResult.StudentId)
+                                  .Where(x => x.CourseResultId == courseResult.Id && x.StudentId == courseResult.StudentId)
                                   .AsNoTracking()
                                   .Select(x => new
                                   {
@@ -847,7 +847,8 @@ namespace Fsel.Course.Infrastructure.Common
                     x.UpdatedDate,
                     x.CreatedDate,
                     x.CompletionDate,
-                    DisplayOrder = x.Unit.CourseUnitMockTests
+                    Name = x.Unit!.Name,
+                    DisplayOrder = x.Unit!.CourseUnitMockTests
                         .Where(c => c.CourseId == x.CourseId)
                         .Select(c => c.Number).FirstOrDefault()
                 })
@@ -880,6 +881,22 @@ namespace Fsel.Course.Infrastructure.Common
                 var studentUnitResults = unitResults
                     .Where(x => x.StudentId == q.StudentId && x.CourseId == q.CourseId)
                     .ToList();
+                var unit = studentUnitResults
+                        .Where(x => x.Status != EnumResultStatus.Unfinished)
+                        .OrderBy(x => x.Status == EnumResultStatus.Process ? ValueOrderIndex.OrderIndexProcess :
+                                      x.Status == EnumResultStatus.New ? ValueOrderIndex.OrderIndexNew :
+                                      x.Status == EnumResultStatus.Done ? ValueOrderIndex.OrderIndexDone :
+                                      ValueOrderIndex.OrderIndexOther)
+                        .ThenByDescending(x => x.UpdatedDate ?? x.CreatedDate)
+                        .FirstOrDefault();
+                var lesson = studentLessonResults
+                        .Where(x => x.Status != EnumResultStatus.Unfinished)
+                        .OrderBy(x => x.Status == EnumResultStatus.Process ? ValueOrderIndex.OrderIndexProcess :
+                                      x.Status == EnumResultStatus.New ? ValueOrderIndex.OrderIndexNew :
+                                      x.Status == EnumResultStatus.Done ? ValueOrderIndex.OrderIndexDone :
+                                      ValueOrderIndex.OrderIndexOther)
+                        .ThenByDescending(x => x.UpdatedDate ?? x.CreatedDate)
+                        .FirstOrDefault();
 
                 return new CourseCompleteModel
                 {
@@ -889,23 +906,9 @@ namespace Fsel.Course.Infrastructure.Common
                         .Where(x => x.Status == EnumResultStatus.Done)
                         .Select(x => x.Id).Distinct().Count(),
 
-                    UnitDisplayOrder = studentUnitResults
-                        .Where(x => x.Status != EnumResultStatus.Unfinished)
-                        .OrderBy(x => x.Status == EnumResultStatus.Process ? ValueOrderIndex.OrderIndexProcess :
-                                      x.Status == EnumResultStatus.New ? ValueOrderIndex.OrderIndexNew :
-                                      x.Status == EnumResultStatus.Done ? ValueOrderIndex.OrderIndexDone :
-                                      ValueOrderIndex.OrderIndexOther)
-                        .ThenByDescending(x => x.UpdatedDate ?? x.CreatedDate)
-                        .Select(x => x.DisplayOrder).FirstOrDefault(),
-
-                    LessonDisplayOrder = studentLessonResults
-                        .Where(x => x.Status != EnumResultStatus.Unfinished)
-                        .OrderBy(x => x.Status == EnumResultStatus.Process ? ValueOrderIndex.OrderIndexProcess :
-                                      x.Status == EnumResultStatus.New ? ValueOrderIndex.OrderIndexNew :
-                                      x.Status == EnumResultStatus.Done ? ValueOrderIndex.OrderIndexDone :
-                                      ValueOrderIndex.OrderIndexOther)
-                        .ThenByDescending(x => x.UpdatedDate ?? x.CreatedDate)
-                        .Select(x => x.DisplayOrder).FirstOrDefault()
+                    UnitDisplayOrder = unit?.DisplayOrder,
+                    UnitName = unit?.Name,
+                    LessonDisplayOrder = lesson.DisplayOrder
                 };
             }).ToList();
 

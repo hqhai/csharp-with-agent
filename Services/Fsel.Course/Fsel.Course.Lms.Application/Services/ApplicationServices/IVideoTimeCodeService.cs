@@ -119,11 +119,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             {
                 foreach (var questionModel in exerciseModel.Questions)
                 {
-                    var videoTimeCodeAnswer = videoTimeCodeAnswers
-                        .FirstOrDefault(x => x.QuestionId == questionModel.Id);
-
-                    var isCheck = videoTimeCodeAnswer?.Status == EnumAnswerStatus.Done;
-
+                    var videoTimeCodeAnswer = videoTimeCodeAnswers.FirstOrDefault(x => x.QuestionId == questionModel.Id);
+                    var isCheck = videoTimeCodeAnswer != null ? videoTimeCodeAnswer.Status == EnumAnswerStatus.Done : videoTimeCodeResult.Status == EnumResultStatus.Done;
                     if (!isCheck)
                     {
                         questionModel.Explanations = null;
@@ -132,7 +129,6 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
 
                     questionModel.CorrectStatus = GetCorrectStatus(videoTimeCodeAnswer);
                     questionModel.IsReportExplanation = questionExplanationErrors.Any(x => x.QuestionId == questionModel.Id);
-
                     questionModel.Config = _questionTypeConverter.QuestionTypeConverterObject(questionModel.Config, questionModel.QuestionType, isDisableAnswers: !isCheck).Item1;
 
                     var questionShuffle = questionShuffles
@@ -142,6 +138,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                         _questionTypeConverter.QuestionShuffleConverterObject(
                             questionModel.Config,
                             questionModel.QuestionType,
+                            isCheck,
                             questionShuffle?.ShuffleConfigs);
 
                     if (!string.IsNullOrEmpty(questionShuffleStr) &&

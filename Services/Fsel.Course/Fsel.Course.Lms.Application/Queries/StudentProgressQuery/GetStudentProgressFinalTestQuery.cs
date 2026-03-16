@@ -101,7 +101,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             {
                 UserId = userId ?? default,
                 ObjectId = finalTestResult.Id,
-                EnumFeature = EnumFeature.FinalTest,
+                EnumFeature = EnumFeature.FullTest,
                 CourseId = course.Id
             });
             var featureAccessTime = featureAccessTimeResult?.Content?.Result;

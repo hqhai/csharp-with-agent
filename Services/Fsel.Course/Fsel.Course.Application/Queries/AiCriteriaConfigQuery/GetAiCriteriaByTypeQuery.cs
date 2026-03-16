@@ -8,6 +8,7 @@ namespace Fsel.Course.Application.Queries.AiCriteriaConfigQuery
     using Domain.Enums;
     using Domain.IRepositories;
     using Domain.Models.EntityModels.AiPromptManagerModels;
+    using Fsel.Common.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -15,6 +16,10 @@ namespace Fsel.Course.Application.Queries.AiCriteriaConfigQuery
     public class GetAiCriteriaByTypeQuery : IRequest<MethodResult<AICriteriaConfigsModel>>
     {
         public EnumSubFeatureType SubFeatureType { get; set; }
+
+        public Guid? ObjectId { get; set; }
+
+        public Guid? ProgramId { get; set; }
     }
 
     public class GetAiCriteriaByTypeQueryHandler : IRequestHandler<GetAiCriteriaByTypeQuery, MethodResult<AICriteriaConfigsModel>>
@@ -33,9 +38,35 @@ namespace Fsel.Course.Application.Queries.AiCriteriaConfigQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<AICriteriaConfigsModel>();
 
+            var hasObjectIdOrProgramId = request.ObjectId != null || request.ProgramId != null;
+
+            // Bước 1: Tìm theo ProgramId hoặc ObjectId
             var aiCriteria = await _aiCriteriaConfigRepository.ReadQueryable
-                .Where(x => x.SubFeatureType == request.SubFeatureType && x.ObjectId == null && x.DefaultType == EnumDefaultType.Default)
+                .Where(x => x.SubFeatureType == request.SubFeatureType
+                    && x.VersionStatus == EnumVersionStatus.LastVersion
+                    && ((request.ObjectId != null && x.ObjectId == request.ObjectId)
+                        || (request.ProgramId != null && x.ProjectId == request.ProgramId)))
                 .ToListAsync(cancellationToken);
+
+            // Bước 2: Nếu không ra kết quả với ProgramId/ObjectId → tìm theo DefaultType = Default
+            if (aiCriteria.Count == 0 && !hasObjectIdOrProgramId)
+            {
+                aiCriteria = await _aiCriteriaConfigRepository.ReadQueryable
+                    .Where(x => x.SubFeatureType == request.SubFeatureType
+                        && x.DefaultType == EnumDefaultType.Default
+                        && x.VersionStatus == EnumVersionStatus.LastVersion)
+                    .ToListAsync(cancellationToken);
+            }
+
+            // Bước 3: Nếu có ProgramId/ObjectId nhưng không tìm thấy → tìm theo DefaultType = Feature
+            if (aiCriteria.Count == 0 && hasObjectIdOrProgramId)
+            {
+                aiCriteria = await _aiCriteriaConfigRepository.ReadQueryable
+                    .Where(x => x.SubFeatureType == request.SubFeatureType
+                        && x.DefaultType == EnumDefaultType.Feature
+                        && x.VersionStatus == EnumVersionStatus.LastVersion)
+                    .ToListAsync(cancellationToken);
+            }
 
             if (aiCriteria.Count == 0)
             {
@@ -48,7 +79,6 @@ namespace Fsel.Course.Application.Queries.AiCriteriaConfigQuery
 
             methodResult.Result = result;
             methodResult.StatusCode = StatusCodes.Status200OK;
-
             return methodResult;
         }
     }

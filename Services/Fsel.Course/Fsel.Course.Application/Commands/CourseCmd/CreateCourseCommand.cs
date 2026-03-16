@@ -77,9 +77,25 @@ namespace Fsel.Course.Application.Commands.CourseCmd
         {
             VoidMethodResult methodResult = new VoidMethodResult();
 
-            if (request.Modules == null || !request.Modules.Any())
+            if (request.CourseModules == null || !request.CourseModules.Any())
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseModulesNotNull), nameof(request.Modules), request.Modules);
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseModulesNotNull), nameof(request.CourseModules), request.CourseModules);
+                return methodResult;
+            }
+
+            foreach (var courseModule in request.CourseModules)
+            {
+                if (courseModule.Percent < 0 || courseModule.Percent > 100)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.TotalPercentModuleInvalid), nameof(courseModule), courseModule.Percent);
+                    return methodResult;
+                }
+            }
+
+            var totalPercentModule = request.CourseModules.Sum(p => p.Percent);
+            if (totalPercentModule <= 99 || totalPercentModule > 100)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.TotalPercentModuleInvalid), nameof(totalPercentModule), totalPercentModule);
                 return methodResult;
             }
 

@@ -24,5 +24,15 @@ namespace Fsel.System.Application.Queues.Publisher
 
             await _queueProvider.Publish(QueueSettings.SystemQueue.NameQueue.SendDictionary, message, cancellationToken).ConfigureAwait(false);
         }
+
+        public async Task PublishSemanticDictionary(SemanticDictionaryQueueModel? message, CancellationToken cancellationToken)
+        {
+            if (message == null)
+            {
+                return;
+            }
+
+            await _queueProvider.Publish(QueueSettings.SystemQueue.NameQueue.SendDictionary, message, cancellationToken).ConfigureAwait(false);
+        }
     }
 }

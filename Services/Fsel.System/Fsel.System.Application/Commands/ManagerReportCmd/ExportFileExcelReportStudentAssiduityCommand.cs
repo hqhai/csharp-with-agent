@@ -41,17 +41,14 @@ namespace Fsel.System.Application.Commands.ManagerReportCmd
                 ListSchool = request.ListSchool,
                 ListSchoolClass = request.ListSchoolClass,
                 ListSchoolGrade = request.ListSchoolGrade,
-                ListCourseLevel = request.ListCourseLevel,
                 IsLearning = request.IsLearning,
                 IsSearchReport = request.IsSearchReport,
                 ListCompletionStatus = request.ListCompletionStatus,
                 ListLearningStatus = request.ListLearningStatus,
-                ListCourseType = request.ListCourseType,
 
                 EndDate = request.EndDate,
                 Keyword = request.Keyword,
                 StartDate = request.StartDate,
-                CourseType = request.CourseType,
             }, cancellationToken);
             var dataOverallResult = await _mediator.Send(new GetOverallReportStudentAssiduityQuery
             {
@@ -60,17 +57,14 @@ namespace Fsel.System.Application.Commands.ManagerReportCmd
                 ListSchool = request.ListSchool,
                 ListSchoolClass = request.ListSchoolClass,
                 ListSchoolGrade = request.ListSchoolGrade,
-                ListCourseLevel = request.ListCourseLevel,
                 IsLearning = request.IsLearning,
                 IsSearchReport = request.IsSearchReport,
                 ListCompletionStatus = request.ListCompletionStatus,
                 ListLearningStatus = request.ListLearningStatus,
-                ListCourseType = request.ListCourseType,
 
                 Keyword = request.Keyword,
                 StartDate = request.StartDate,
                 EndDate = request.EndDate,
-                CourseType = request.CourseType,
             }, cancellationToken);
             var userResult = await _userService.GetUserProfileAsync();
             string schoolName = userResult.Content?.Result?.SchoolName ?? string.Empty;
@@ -93,7 +87,6 @@ namespace Fsel.System.Application.Commands.ManagerReportCmd
                 string learningStatuseStr = string.Join(",", (request.ListLearningStatus.ToList<EnumLearningStatus>() ?? new List<EnumLearningStatus>()).Select(x => x.GetDescription()));
 
                 excelWorksheet.Cells["N2"].Value = Format(excelWorksheet.Cells["M2"].Value, DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam).ToString("dd/MM/yyyy hh:mm tt", CultureInfo.InvariantCulture));
-                excelWorksheet.Cells["H2"].Value = Format(excelWorksheet.Cells["G2"].Value, request.CourseType.HasValue ? request.CourseType.Value : string.Empty);
                 excelWorksheet.Cells["I2"].Value = Format(excelWorksheet.Cells["H2"].Value, learningStatuseStr);
                 excelWorksheet.Cells["J2"].Value = Format(excelWorksheet.Cells["I2"].Value, request.ListSchoolGrade);
                 excelWorksheet.Cells["K2"].Value = Format(excelWorksheet.Cells["J2"].Value, request.ListSchoolClass);

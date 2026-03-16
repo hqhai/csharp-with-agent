@@ -7,15 +7,28 @@ namespace Fsel.Course.Domain.Enums
 
     public enum EnumCriteriaAi
     {
-        [Description("Fluency and Coherence(Lưu loát và mạch lạc)"), Display(Name = "Fluency and Coherence")]
+        [Description("Fluency and Coherence (Lưu loát và mạch lạc)")]
+        [Display(Name = "Fluency and Coherence")]
         Fc,
-        [Description("Lexical Resource(Tài nguyên từ vựng)"), Display(Name = "Lexical Resource")]
+
+        [Description("Lexical Resource (Vốn từ vựng)")]
+        [Display(Name = "Lexical Resource")]
         Lr,
-        [Description("Grammatical Range and Accuracy(Độ chính xác ngữ pháp)"), Display(Name = "Grammatical Range and Accuracy")]
+
+        [Description("Grammatical Range and Accuracy (Phạm vi và độ chính xác ngữ pháp)")]
+        [Display(Name = "Grammatical Range and Accuracy")]
         Gra,
-        [Description("Task Achivement(Hoàn thành nhiệm vụ)"), Display(Name = "Task Achivement")]
+
+        [Description("Task Achievement (Mức độ hoàn thành yêu cầu đề bài)")]
+        [Display(Name = "Task Achievement")]
         Ta,
-        [Description("Coherence and Cohesion(Mạch lạc và gán kết)"), Display(Name = "Coherence and Cohesion")]
+
+        [Description("Coherence and Cohesion (Mạch lạc và liên kết)")]
+        [Display(Name = "Coherence and Cohesion")]
         Cc,
+
+        [Description("Task Response (Mức độ trả lời đúng và đủ yêu cầu đề bài)")]
+        [Display(Name = "Task Response")]
+        Tr,
     }
 }

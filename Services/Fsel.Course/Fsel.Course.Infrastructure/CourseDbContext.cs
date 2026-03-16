@@ -160,6 +160,7 @@ namespace Fsel.Course.Infrastructure
         public DbSet<SubjectCondition> SubjectConditions { get; set; }
         public DbSet<SubjectConditionRule> SubjectConditionRules { get; set; }
         public DbSet<CourseModule> CourseModules { get; set; }
+        public DbSet<CourseChangingHistory> CourseChangingHistories { get; set; }
         public DbSet<Test> Tests { get; set; }
         public DbSet<TestSection> TestSections { get; set; }
         public DbSet<TestSectionQuestion> TestSectionQuestions { get; set; }
@@ -332,6 +333,7 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new AICriteriaConfigsEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LongAnswerSettingTypeConfiguration());
             modelBuilder.ApplyConfiguration(new TestScoreEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new CourseChangingHistoryEntityTypeConfiguration());
 
             //modelBuilder.Ignore<TotalEvaluateInputResultModel>();
             //modelBuilder.Ignore<TotalDetailEvaluateInputResultModel>();

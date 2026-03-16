@@ -19,10 +19,12 @@ namespace Fsel.Course.Application.Commands.CourseCmd
     public class DeleteCourseCommandHandler : IRequestHandler<DeleteCourseCommand, MethodResult<bool>>
     {
         private readonly ICourseRepository _courseRepository;
+        private readonly ICourseResultRepository _courseResultRepository;
 
-        public DeleteCourseCommandHandler(ICourseRepository courseRepository)
+        public DeleteCourseCommandHandler(ICourseRepository courseRepository, ICourseResultRepository courseResultRepository)
         {
             _courseRepository = courseRepository;
+            _courseResultRepository = courseResultRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(DeleteCourseCommand request, CancellationToken cancellationToken)
@@ -42,6 +44,12 @@ namespace Fsel.Course.Application.Commands.CourseCmd
             if (course.Status != EnumCourseStatus.InActive)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotInActive), nameof(course.Status), course.Status);
+                return methodResult;
+            }
+
+            if (await _courseResultRepository.Queryable.AnyAsync(p => p.CourseId == course.Id, cancellationToken))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseIsUsed), nameof(course), course.Id);
                 return methodResult;
             }
 

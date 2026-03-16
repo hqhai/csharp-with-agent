@@ -35,11 +35,11 @@ namespace Fsel.Course.Infrastructure.Repositories
             return rows
                 .Where(x => x.SkillScores != null && x.SkillScores.Any())
                 .SelectMany(x => x.SkillScores!)
-                .GroupBy(x => new { x.SkillId, x.Skill, x.SkillName })
+                .GroupBy(x => new { x.SkillId, x.SkillName })
                 .Select(g => new SkillScores
                 {
                     SkillId = g.Key.SkillId,
-                    Skill = g.Key.Skill,
+                    SkillFilePath = g.Where(x => x.SkillFilePath != null).FirstOrDefault()?.SkillFilePath,
                     SkillName = g.Key.SkillName,
                     CorrectCount = g.Sum(s => s.CorrectCount),
                     CorrectQuestion = g.Sum(s => s.CorrectQuestion ?? 0),

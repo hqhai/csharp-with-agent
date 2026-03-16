@@ -1,4 +1,4 @@
-﻿// Copyright (c) Atlantic. All rights reserved.
+// Copyright (c) Atlantic. All rights reserved.
 
 namespace Fsel.Course.Domain.Models.CommandModels.Ais
 {
@@ -8,11 +8,8 @@ namespace Fsel.Course.Domain.Models.CommandModels.Ais
 
     public class AiJsonResponseModel
     {
-        [JsonPropertyName("parameters")] public AiParameters Parameters { get; set; } = default!;
-    }
-
-    public class AiParameters
-    {
         [JsonPropertyName("feedback")] public JsonElement Feedback { get; set; }
     }
+
+
 }

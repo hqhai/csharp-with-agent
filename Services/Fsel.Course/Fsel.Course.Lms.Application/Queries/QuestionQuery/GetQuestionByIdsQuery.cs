@@ -175,7 +175,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
                 questionModel.Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: !isShowAnswer).Item1;
 
                 var questionShuffle = questionShuffles.FirstOrDefault(x => x.QuestionId == question.Id);
-                (questionModel.Config, string? questionShuffleStr) = _questionTypeConverter.QuestionShuffleConverterObject(questionModel.Config, question.QuestionType, questionShuffle?.ShuffleConfigs);
+                (questionModel.Config, string? questionShuffleStr) = _questionTypeConverter.QuestionShuffleConverterObject(questionModel.Config, question.QuestionType, isShowAnswer, questionShuffle?.ShuffleConfigs);
 
                 if (!string.IsNullOrEmpty(questionShuffleStr) && (questionShuffle == null || questionShuffle.ShuffleConfigStr != questionShuffleStr))
                 {

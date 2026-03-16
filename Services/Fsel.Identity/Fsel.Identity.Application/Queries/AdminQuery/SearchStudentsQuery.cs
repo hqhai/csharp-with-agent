@@ -77,6 +77,21 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
             {
                 queryStudent = queryStudent.Where(m => m.CourseLevel == request.CourseLevel);
             }
+
+            if (request.Subjects != null && request.Subjects.Count > 0)
+            {
+                queryStudent = queryStudent.Where(x => x.SubjectId.HasValue && request.Subjects.Contains(x.SubjectId.Value));
+            }
+
+            if (request.Programs != null && request.Programs.Count > 0)
+            {
+                queryStudent = queryStudent.Where(x => x.ProgramId.HasValue && request.Programs.Contains(x.ProgramId.Value));
+            }
+            if (request.Levels != null && request.Levels.Count > 0)
+            {
+                queryStudent = queryStudent.Where(x => x.LevelId.HasValue && request.Levels.Contains(x.LevelId.Value));
+            }
+
             var targetRoles = new List<string> { EnumRole.AdminSchool.ToString(), EnumRole.TeacherCampus.ToString(), EnumRole.AdminCampus.ToString() };
             var hasMatchedRole = _authContext.Roles != null && _authContext.Roles.Any(r => targetRoles.Contains(r));
             if (hasMatchedRole)
@@ -99,7 +114,7 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 else if (request.Keyword.IsValidPhoneNumber())
                 {
                     var queryPhone = query.Where(m => m.User.PhoneNumber == request.Keyword);
-                    var queryStudentCampus = query.Where(m => m.Student.StudentCampusCode  != null && m.Student.StudentCampusCode == request.Keyword);
+                    var queryStudentCampus = query.Where(m => m.Student.StudentCampusCode != null && m.Student.StudentCampusCode == request.Keyword);
                     query = queryPhone.Union(queryStudentCampus);
                 }
                 else if (Guid.TryParse(request.Keyword, out var guid))
@@ -110,7 +125,7 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 {
                     var queryUserName = query.Where(m => (m.User.UserName != null && m.User.UserName == request.Keyword));
                     var queryFullName = query.Where(m => m.User.FullName != null && EF.Functions.Contains(m.User.FullName, $"\"{request.Keyword}\"") && EF.Functions.Like(m.User.FullName, $"%{request.Keyword}%"));
-                    var queryStudentCampus = query.Where(m => m.Student.StudentCampusCode  != null && m.Student.StudentCampusCode == request.Keyword);
+                    var queryStudentCampus = query.Where(m => m.Student.StudentCampusCode != null && m.Student.StudentCampusCode == request.Keyword);
                     query = queryUserName.Union(queryFullName).Union(queryStudentCampus);
                 }
             }
@@ -134,6 +149,9 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 PasswordDefault = x.User.DefaultPassword,
                 ExpiredDate = x.Student.ExpiredDate,
                 StudentCampusCode = x.Student.StudentCampusCode,
+                ProgramId = x.Student.ProgramId,
+                LevelId = x.Student.LevelId,
+                SubjectId = x.Student.SubjectId
             });
             int totalItem = await dataQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await dataQuery

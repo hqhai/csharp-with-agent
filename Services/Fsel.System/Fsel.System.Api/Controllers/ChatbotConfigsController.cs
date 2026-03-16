@@ -61,6 +61,23 @@ namespace Fsel.System.Api.Controllers
             return commandResult.GetActionResult();
         }
 
+        /// <summary>
+        /// Lưu ChatbotConfig
+        /// </summary>
+        /// <param name="cmd"></param>
+        /// <returns></returns>
+        [HttpDelete("{unitId}")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> DeleteChatbotConfig([FromRoute] Guid unitId)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(new DeleteChatbotConfigCommand
+            {
+                UnitId = unitId
+            }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
         [HttpPost("message")]
         [ProducesResponseType(typeof(MethodResult<ChatBotModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]

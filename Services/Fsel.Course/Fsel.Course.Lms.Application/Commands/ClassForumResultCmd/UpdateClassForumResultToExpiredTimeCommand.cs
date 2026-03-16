@@ -14,6 +14,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
     using Fsel.Course.Lms.Application.Commands.AiCmd;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
@@ -151,7 +152,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             }
             await _classforumDetailResultRepository.BulkUpdateList(classForumDetailResults, bulk =>
             {
-                bulk.IgnoreOnUpdateExpression = c => new { c.ClassForumResultId, c.SubmissionCount };
+                bulk.IgnoreOnUpdateExpression = c => new { c.ClassForumResultId, c.SubmissionCount, c.AITranslationContent };
             });
         }
 
@@ -168,7 +169,11 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             classForumResult.Content = classForumDetailResult.Content;
             classForumResult.SubmissionCount = classForumDetailResult.SubmissionCount;
             classForumResult.GradingAlFeedback = classForumDetailResult.GradingAlFeedback;
-            classForumResult.GradingAlFeedback = ConvertHelper.Serialize(classForumAIs);
+            classForumResult.AITranslationContent = classForumDetailResult.AITranslationContent;
+            if (string.IsNullOrEmpty(classForumResult.GradingAlFeedback))
+            {
+                classForumResult.GradingAlFeedback = ConvertHelper.Serialize(classForumAIs);
+            }
 
             classForumResult.CorrectCount = GetTargetCount(classForumDetailResult, classForumResult);
             classForumResult.CorrectTotal = MaxTagetScore;
@@ -176,6 +181,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             {
                 classForumResult.CorrectCount += classForumAIs.Sum(x => x.Score);
                 classForumResult.CorrectTotal += classForumAIs.Count * MaxScoreClassForum;
+                classForumResult.Percent = NumberHelper.GetPercent(classForumResult.CorrectCount, classForumResult.CorrectTotal);
             }
 
             if (classForumResult.SkillScores != null && classForumResult.SkillScores.Any())
@@ -196,6 +202,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                         Skill = classForumResult.ClassForum?.CourseSkill ?? default,
                         SkillId = classForumResult.ClassForum?.SkillId ?? default,
                         SkillName = classForumResult.ClassForum?.Skill?.Name ?? default,
+                        SkillFilePath = classForumResult.ClassForum?.Skill?.FilePath ?? default
                     }
                 };
             }

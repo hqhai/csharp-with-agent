@@ -7,11 +7,16 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.Interfaces;
     using Fsel.Course.Domain.Entities.TestConfigs;
+    using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.Tests;
     using Fsel.Course.Domain.Models.EntityModels.PlacementTestModels;
+    using Fsel.Course.Domain.Models.EntityModels.UserNavigationActionModels;
+    using Fsel.Course.Lms.Application.Queries.CourseChangeQuery;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
+    using IMediator = MediatR.IMediator;
 
     public class SubmitAnswerCommand : IRequest<MethodResult<PtStateModel>>
     {
@@ -30,17 +35,41 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
     {
         private IRepository<TestGroupResult> _testGroupResult;
         private readonly IServiceProvider _serviceProvider;
+        private readonly ITestSectionResultRepository _testSectionResultRepository;
+        private readonly MediatR.IMediator _mediator;
+        private readonly SendMailFinishPTPublisher _sendMailFinishPTPublisher;
 
-        public SubmitAnswerCommandHandler(IRepository<TestGroupResult> testGroupResult, IServiceProvider serviceProvider)
+        public SubmitAnswerCommandHandler(IRepository<TestGroupResult> testGroupResult,
+            ITestSectionResultRepository testSectionResultRepository,
+            IServiceProvider serviceProvider,
+            IMediator mediator,
+            SendMailFinishPTPublisher sendMailFinishPTPublisher)
         {
             _testGroupResult = testGroupResult;
             _serviceProvider = serviceProvider;
+            _testSectionResultRepository = testSectionResultRepository;
+            _mediator = mediator;
+            _sendMailFinishPTPublisher = sendMailFinishPTPublisher;
         }
 
         public async Task<MethodResult<PtStateModel>> Handle(SubmitAnswerCommand request, CancellationToken cancellationToken)
         {
-            var flowTestResult = await _testGroupResult.Queryable.Where(x => x.StudentId == request.StudentId && x.TestType == Domain.Enums.EnumTestType.PlacementTest)
+            var navigateActionResult = await _mediator.Send(new GetUserNavigationQuery(), cancellationToken);
+            if (!navigateActionResult.IsOK
+                || navigateActionResult.Result?.Status != EnumNavigateActionStatus.ContinuePt
+                || navigateActionResult.Result?.PtResultId == null)
+            {
+                var methodResult = new MethodResult<PtStateModel>
+                {
+                    StatusCode = 400,
+                };
+                methodResult.AddErrorBadRequest("Not pt is process");
+                return methodResult;
+            }
+
+            var flowTestResult = await _testGroupResult.Queryable.Where(x => x.Id == navigateActionResult.Result.PtResultId)
                  .Include(x => x.TestResults)
+                 .Include(x => x.CourseChangingHistories)
                  .FirstOrDefaultAsync(cancellationToken);
 
             if (flowTestResult == null)
@@ -67,7 +96,21 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 };
             }
 
-            var aggregate = new FlowTestResultAggregate(flowTestResult, _serviceProvider);
+            var testSectionResult = await _testSectionResultRepository.Queryable
+                .Where(x => x.Id == request.SectionResultId)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (testSectionResult == null || testSectionResult.Status == Domain.Enums.EnumResultStatus.Done)
+            {
+                var result = new MethodResult<PtStateModel>
+                {
+                    StatusCode = 400,
+                };
+                result.AddErrorBadRequest("Section result not found or already completed.");
+                return result;
+            }
+
+            var aggregate = new FlowTestResultAggregate(flowTestResult, _serviceProvider, _sendMailFinishPTPublisher);
 
             await aggregate.MakeAnswers(new SubmitAnswerCommandModel
             {

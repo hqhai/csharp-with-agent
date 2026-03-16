@@ -5,13 +5,16 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums;
     using Fsel.Common.Helpers;
     using Fsel.Core.Base.Interfaces;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Entities.TestConfigs;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Lms.Application.Commands.AiCmd;
     using Fsel.Course.Lms.Application.Queues.Publishers.Test;
@@ -25,12 +28,16 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
 
     public sealed class SpeakingAITestLayoutHandler : ISpeakingAITestLayoutHandler
     {
+        private const int MaxCorrect = 36;
         private readonly ITestSectionResultRepository _testSectionResultRepository;
         private readonly IProsodyScoreRepository _prosodyScoreRepository;
         private readonly IRepository<TestAnswer> _testAnswerRepository;
         private readonly IRepository<TestScore> _testScoreRepository;
         private readonly IMediator _mediator;
-        private readonly SubmitTestAiSpeakingPublisher _submitTestAiSpeakingPublisher;
+        private readonly SubmitTestAiSpeakingPublisher _publisher;
+        private readonly ITestResultRepository _testResultRepository;
+        private readonly IAiPromptManagerRepository _aiPromptManagerRepository;
+        private readonly ICategoryRepository _categoryRepository;
 
         public SpeakingAITestLayoutHandler(
             ITestSectionResultRepository testSectionResultRepository,
@@ -38,197 +45,504 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
             IRepository<TestAnswer> testAnswerRepository,
             IRepository<TestScore> testScoreRepository,
             IMediator mediator,
-            SubmitTestAiSpeakingPublisher submitTestAiSpeakingPublisher)
+            SubmitTestAiSpeakingPublisher publisher,
+            ITestResultRepository testResultRepository,
+            IAiPromptManagerRepository aiPromptManagerRepository,
+            ICategoryRepository categoryRepository)
         {
             _testSectionResultRepository = testSectionResultRepository;
             _prosodyScoreRepository = prosodyScoreRepository;
             _testAnswerRepository = testAnswerRepository;
             _testScoreRepository = testScoreRepository;
             _mediator = mediator;
-            _submitTestAiSpeakingPublisher = submitTestAiSpeakingPublisher;
+            _publisher = publisher;
+            _testResultRepository = testResultRepository;
+            _aiPromptManagerRepository = aiPromptManagerRepository;
+            _categoryRepository = categoryRepository;
         }
 
-        public async Task HandleAsync(TestSectionResult testSectionResult, TestResult testResult, CancellationToken cancellationToken)
+        #region Entry
+
+        public async Task HandleAsync(TestSectionResult parentSkillSection, TestResult testResult, CancellationToken ct)
         {
+            ArgumentNullException.ThrowIfNull(parentSkillSection);
             ArgumentNullException.ThrowIfNull(testResult);
-            ArgumentNullException.ThrowIfNull(testSectionResult);
-            // === copy logic UpdateTestSpeaking(...) của bạn vào đây ===
-            var testAnswers = await _testAnswerRepository.Queryable
-                .Include(x => x.TestSection)
-                .Where(x => x.TestSectionResultId == testSectionResult.Id)
-                .ToListAsync(cancellationToken);
 
-            var (questionArray, answerArray, averagePronScore, count) = ExtractQuestionAnswerAndPronunciationScores(testAnswers);
-            var scoreRanges = await _prosodyScoreRepository.ReadQueryable.ToListAsync(cancellationToken);
-
-            (long bandScore, string? feedBack) = GetBandScore(averagePronScore, scoreRanges);
-
-            var testScores = new List<TestScore>
+            var children = await LoadChildrenAsync(parentSkillSection.Id, ct);
+            if (!children.Any())
             {
-                new TestScore
-                {
-                    TestSectionResultId = testSectionResult.Id,
-                    TestResultId = testResult.Id,
-                    TestSectionId = testSectionResult.TestSectionId,
-                    Score = bandScore,
-                    Feedback = feedBack,
-                    Criteria = EnumTestScoreCriteria.Pronunciation,
-                }
-            };
-
-            var criteria = new List<EnumTestScoreCriteria>
-            {
-                EnumTestScoreCriteria.GrammaticalRangeAndAccuracy,
-                EnumTestScoreCriteria.LexicalResource,
-                EnumTestScoreCriteria.FluencyAndCoherence
-            };
-
-            foreach (var item in criteria)
-            {
-                var aiResponse = await GetAIResponse(item, questionArray, answerArray, cancellationToken);
-                var responseModel = ConvertHelper.Deserialize<AIEvaluationOutputModel>(aiResponse);
-
-                if (long.TryParse(responseModel?.BandScore, out var bandScoreValue))
-                {
-                    testScores.Add(new TestScore
-                    {
-                        TestSectionResultId = testSectionResult.Id,
-                        TestResultId = testResult.Id,
-                        TestSectionId = testSectionResult.TestSectionId,
-                        Score = bandScoreValue,
-                        Feedback = responseModel?.BandDescriptorText, // nếu model có
-                        Criteria = item
-                    });
-                }
+                ResetSection(parentSkillSection);
+                await PersistAsync(parentSkillSection, children, new List<TestScore>(), ct);
+                return;
             }
 
-            var score = testScores.Sum(x => x.Score);
-            if (testSectionResult.SkillScores == null)
+            var allScores = new List<TestScore>();
+
+            foreach (var child in children)
+            {
+                var answers = await LoadAnswersAsync(child.Id, ct);
+                if (!answers.Any())
+                {
+                    ResetSection(child);
+                    continue;
+                }
+
+                var input = BuildSpeakingInput(answers);
+
+                var childScores = await BuildScoresForChildAsync(
+                    child,
+                    testResult,
+                    input,
+                    ct);
+
+                ApplyScoresToChild(child, testResult, childScores);
+                allScores.AddRange(childScores);
+            }
+
+            ApplyScoresToParent(parentSkillSection, testResult, children);
+            await PersistAsync(parentSkillSection, children, allScores, ct);
+            await PublishAsync(allScores, testResult, ct);
+            await UpdateTestResultIfDoneAsync(testResult, ct);
+        }
+
+        #endregion Entry
+
+        #region Load data
+
+        private async Task<AiPromptManager?> LoadAiPromptManagerAsync(Guid? id, Guid programId, Guid sectionId, CancellationToken ct)
+        {
+            var sectionAiPromptManager = await _aiPromptManagerRepository.ReadQueryable.Include(x => x.AICriteriaConfigs)
+                                                                         .Where(x => x.AICriteriaConfigs.Any(y => y.ObjectId == sectionId))
+                                                                         .FirstOrDefaultAsync(ct);
+            if (sectionAiPromptManager == null)
+            {
+                var subjectId = await _categoryRepository.ReadQueryable.Include(x => x.CategoryParent)
+                                                    .Where(x => x.Id == programId)
+                                                    .Select(x => x.Id)
+                                                    .FirstOrDefaultAsync(ct);
+
+                return await _aiPromptManagerRepository.ReadQueryable
+                    .Where(x => x.ProjectId == subjectId)
+                    .Where(x => !id.HasValue || x.Id == id.Value)
+                    .Where(x => x.VersionStatus == EnumVersionStatus.LastVersion)
+                    .Include(x => x.AICriteriaConfigs)
+                    .FirstOrDefaultAsync(ct);
+            }
+            return sectionAiPromptManager;
+        }
+
+        private async Task<List<TestSectionResult>> LoadChildrenAsync(Guid parentId, CancellationToken ct)
+        {
+            return await _testSectionResultRepository.Queryable
+                .Where(x => x.ParentTestSectionResultId == parentId)
+                .Include(x => x.TestSection)
+                .ThenInclude(x => x.Skill)
+                .ToListAsync(ct);
+        }
+
+        private async Task UpdateTestResultIfDoneAsync(TestResult testResult, CancellationToken cancellationToken)
+        {
+            if (testResult.Status != EnumResultStatus.Done)
             {
                 return;
             }
 
-            // update skillscores giống code bạn
-            var skillScores = new List<SkillScores>();
-            foreach (var skillScore in testSectionResult.SkillScores)
+            // Load tất cả TestSectionResult gốc (không phải con) của TestResult này
+            var rootSectionResults = await _testSectionResultRepository.ReadQueryable
+                .Where(x => x.TestResultId == testResult.Id)
+                .Where(x => !x.ParentTestSectionResultId.HasValue)
+                .ToListAsync(cancellationToken);
+
+            if (rootSectionResults.Count == 0 || !rootSectionResults.All(x => x.Status == EnumResultStatus.Done))
             {
-                if (skillScore.SkillId == testSectionResult.TestSection?.SkillId)
+                return;
+            }
+
+            // =========================
+            // Tổng hợp SkillScores từ các section results
+            // =========================
+            var mergedSkillScores = MergeSkillScoresFromSectionResults(rootSectionResults);
+
+            testResult.SkillScores = mergedSkillScores;
+            testResult.CorrectCount = (int)mergedSkillScores.Sum(x => x.CorrectCount);
+            testResult.CorrectTotal = (int)mergedSkillScores.Sum(x => x.TotalCount);
+            testResult.Percent = NumberHelper.GetPercent(testResult.CorrectCount, testResult.CorrectTotal);
+
+            // =========================
+            // Percent (nếu có)
+            // =========================
+            if (testResult.Test?.ScoringFormulaType == EnumScoringFormulaType.Percent)
+            {
+                testResult.PercentModule = rootSectionResults.Sum(x => x.PercentModule);
+            }
+            else if (testResult.Test?.ScoringFormulaType == EnumScoringFormulaType.BandScore)
+            {
+                testResult.Score = NumberHelper.RoundNumberDouble(rootSectionResults.Sum(x => x.ScoreModule) ?? default);
+            }
+
+            // Persist TestResult
+            await _testResultRepository.BulkUpdateList(
+                new List<TestResult> { testResult },
+                bulk =>
                 {
-                    skillScore.CorrectCount = score;
-                    skillScore.TotalCount = 36;
-                    skillScore.Scores = NumberHelper.RoundReduceNumber((double)score / 4);
+                    bulk.IgnoreOnUpdateExpression = c => new
+                    {
+                        c.StudentId,
+                        c.TestGroupResultId
+                    };
+                });
+
+            await _testResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        private static List<SkillScores> MergeSkillScoresFromSectionResults(List<TestSectionResult> sectionResults)
+        {
+            var dict = new Dictionary<Guid, SkillScores>();
+
+            foreach (var sr in sectionResults)
+            {
+                if (sr.SkillScores == null)
+                {
+                    continue;
                 }
-                skillScores.Add(skillScore);
-            }
 
-            testSectionResult.SkillScores = skillScores;
-            testSectionResult.CorrectCount += (int)score;
-
-            // websocket
-            await SendToWebSocket(testScores, testResult, cancellationToken);
-
-            // persist: bạn đang dùng transaction add scores + bulk update testSectionResult + update testResult
-            await SaveTestScoresAsync(testScores, cancellationToken);
-            await SaveTestSectionResultAsync(testSectionResult, cancellationToken);
-
-            // nếu cần update testResult ở đây thì inject ITestResultRepository vào handler (tách theo responsibility)
-        }
-
-        private async Task SaveTestScoresAsync(List<TestScore> testScores, CancellationToken cancellationToken)
-        {
-            await _testScoreRepository.ExecuteTransactionAsync(async () =>
-            {
-                await _testScoreRepository.AddList(testScores);
-                await _testScoreRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                return new MethodResult<bool>();
-            });
-        }
-
-        private async Task SaveTestSectionResultAsync(TestSectionResult testSectionResult, CancellationToken cancellationToken)
-        {
-            await _testSectionResultRepository.BulkUpdateList(new List<TestSectionResult> { testSectionResult }, bulk =>
-            {
-                bulk.ColumnInputExpression = c => new { c.SkillScoresStr };
-            });
-        }
-
-        private async Task SendToWebSocket(List<TestScore> scores, TestResult testResult, CancellationToken cancellationToken)
-        {
-            foreach (var score in scores)
-            {
-                var model = new SubmitTestAiSpeakingResponseModel
+                foreach (var s in sr.SkillScores)
                 {
-                    CriteriaName = score.Criteria.ToString(),
-                    BandScore = score.Score,
-                    BandDescriptionText = score.Feedback,
-                    TestResultId = testResult.Id,
-                };
-                await _submitTestAiSpeakingPublisher.Publish(model, cancellationToken);
-            }
-        }
+                    if (!s.SkillId.HasValue)
+                    {
+                        continue;
+                    }
 
-        private async Task<string> GetAIResponse(
-            EnumTestScoreCriteria item,
-            IList<string> questionArray,
-            IList<string> answerArray,
-            CancellationToken cancellationToken)
-        {
-            string userAiConfig = BuildSpeakingPromptHelper.CustomAnswerConfigToSendGPT(questionArray, answerArray, item);
+                    if (!dict.TryGetValue(s.SkillId.Value, out var existed))
+                    {
+                        existed = new SkillScores
+                        {
+                            SkillId = s.SkillId,
+                            SkillName = s.SkillName,
+                            SkillFilePath = s.SkillFilePath,
+                        };
+                        dict.Add(s.SkillId.Value, existed);
+                    }
 
-            var aiResponse = await _mediator.Send(new SubmitAICommand
-            {
-                SystemRoleAlConfig = BuildSpeakingPromptHelper.GetConfigByType(item, true),
-                UserAIConfig = userAiConfig,
-                SettingModel = "gpt-4o",
-                SettingTemperature = 1,
-                SettingFrequecy = 0,
-                SettingWordMaxLength = 1000,
-                SettingPresence = 0,
-                SettingTopP = 1
-            }, cancellationToken).ConfigureAwait(false);
+                    // Weighted average score theo TotalCount
+                    var totalBefore = existed.TotalCount;
+                    var totalAfter = totalBefore + s.TotalCount;
 
-            return Shared.Helpers.StringHelper.RemoveMarkdownFromJson(aiResponse ?? string.Empty);
-        }
+                    if (totalAfter > 0)
+                    {
+                        existed.Scores =
+                            ((existed.Scores * totalBefore) + (s.Scores * s.TotalCount))
+                            / totalAfter;
+                    }
 
-        public static (long bandScore, string? comment) GetBandScore(double averagePronScore, List<ProsodyScore>? scoreRanges)
-        {
-            if (scoreRanges == null || scoreRanges.Count == 0)
-            {
-                return (0, string.Empty);
-            }
-
-            foreach (var range in scoreRanges)
-            {
-                if (averagePronScore >= range.MinScore && averagePronScore <= range.MaxScore)
-                {
-                    return ((long)range.BandScore, range.BandComment);
+                    existed.CorrectCount += s.CorrectCount;
+                    existed.TotalCount += s.TotalCount;
                 }
             }
-            return (0, string.Empty);
+
+            foreach (var skill in dict.Values)
+            {
+                skill.Scores = NumberHelper.RoundReduceNumber(skill.Scores);
+            }
+
+            return dict.Values.ToList();
         }
 
-        private static (IList<string>, IList<string>, double, int) ExtractQuestionAnswerAndPronunciationScores(IList<TestAnswer>? testAnswers)
+        private async Task<List<TestAnswer>> LoadAnswersAsync(Guid childId, CancellationToken ct)
         {
-            IList<string> questionArray = new List<string>();
-            IList<string> answerArray = new List<string>();
-            double pronScore = 0;
+            return await _testAnswerRepository.Queryable
+                .Include(x => x.TestSection)
+                .Where(x => x.TestSectionResultId == childId)
+                .ToListAsync(ct);
+        }
+
+        #endregion Load data
+
+        #region Build input
+
+        private static SpeakingEvaluationInput BuildSpeakingInput(IList<TestAnswer> answers)
+        {
+            var questions = new List<string>();
+            var responses = new List<string>();
+
+            double totalPron = 0;
             int count = 0;
 
-            testAnswers ??= new List<TestAnswer>();
-            foreach (var item in testAnswers)
+            foreach (var a in answers)
             {
-                questionArray.Add(item?.TestSection?.Name ?? string.Empty);
-                answerArray.Add(item?.SpeechTextAnswer ?? string.Empty);
-                pronScore += item?.PronunciationScore ?? 0;
+                questions.Add(a.TestSection?.Name ?? string.Empty);
+                responses.Add(a.SpeechTextAnswer ?? string.Empty);
 
-                if ((item?.PronunciationScore ?? 0) != 0)
+                if ((a.PronunciationScore ?? 0) > 0)
                 {
+                    totalPron += a.PronunciationScore!.Value;
                     count++;
                 }
             }
 
-            double averagePronScore = Math.Round(count > 0 ? pronScore / count : 0);
-            return (questionArray, answerArray, averagePronScore, count);
+            return new SpeakingEvaluationInput
+            {
+                Questions = questions,
+                Answers = responses,
+                AveragePronunciationScore = Math.Round(count > 0 ? totalPron / count : 0)
+            };
         }
+
+        private sealed class SpeakingEvaluationInput
+        {
+            public IList<string> Questions { get; init; } = new List<string>();
+            public IList<string> Answers { get; init; } = new List<string>();
+            public double AveragePronunciationScore { get; init; }
+        }
+
+        #endregion Build input
+
+        #region AI scoring (PER CHILD)
+
+        private async Task<List<TestScore>> BuildScoresForChildAsync(
+            TestSectionResult child,
+            TestResult testResult,
+            SpeakingEvaluationInput input,
+            CancellationToken ct)
+        {
+            var scores = new List<TestScore>();
+
+            var ranges = await _prosodyScoreRepository.ReadQueryable.ToListAsync(ct);
+            var aiPromptManager = await LoadAiPromptManagerAsync(child.TestSection?.AiPromptManagerId, testResult.Test?.ProgramId ?? default, child.TestSectionId.Value, ct);
+
+            var (band, comment) = GetBandScore(input.AveragePronunciationScore, ranges);
+
+            scores.Add(CreateScore(child, testResult, EnumTestScoreCriteria.Pronunciation, band, comment));
+
+            foreach (var criteria in new[]
+            {
+                EnumTestScoreCriteria.GrammaticalRangeAndAccuracy,
+                EnumTestScoreCriteria.LexicalResource,
+                EnumTestScoreCriteria.FluencyAndCoherence
+            })
+            {
+                var criteriaAi = TestLayoutDispatchHelper.GetCriteriaAi(criteria);
+
+                var aiConfig = aiPromptManager?.AICriteriaConfigs?.Where(x => x.SubFeatureType == EnumSubFeatureType.TestConfigSpeakingLayout)
+                                               .Where(x => x.VersionStatus == EnumVersionStatus.LastVersion)
+                                               .Where(x => x.TypeCriteriaAi == criteriaAi)
+                                               .OrderBy(x => x.DefaultType)
+                                               .FirstOrDefault();
+
+                var ai = await GetAIResponseAsync(criteria, input, aiPromptManager, aiConfig, ct);
+                var model = ConvertHelper.Deserialize<AIEvaluationOutputModel>(ai);
+
+                if (long.TryParse(model?.BandScore, out var score))
+                {
+                    scores.Add(CreateScore(
+                        child,
+                        testResult,
+                        criteria,
+                        score,
+                        model?.BandDescriptorText));
+                }
+            }
+
+            return scores;
+        }
+
+        private static TestScore CreateScore(
+            TestSectionResult section,
+            TestResult testResult,
+            EnumTestScoreCriteria criteria,
+            long score,
+            string? feedback)
+        {
+            return new TestScore
+            {
+                TestSectionResultId = section.Id,
+                TestResultId = testResult.Id,
+                TestSectionId = section.TestSectionId,
+                Criteria = criteria,
+                Score = score,
+                Feedback = feedback
+            };
+        }
+
+        #endregion AI scoring (PER CHILD)
+
+        #region Apply scores
+
+        private static void ApplyScoresToChild(
+            TestSectionResult child,
+            TestResult testResult,
+            List<TestScore> scores)
+        {
+            var scoringFormulaType = testResult.Test?.ScoringFormulaType;
+            var total = scores.Sum(x => x.Score);
+            child.CorrectCount = (int)total;
+            child.CorrectTotal = MaxCorrect;
+            child.Percent = NumberHelper.GetPercent(child.CorrectCount, child.CorrectTotal);
+            child.SkillScores = BuildSkillScores(child.TestSection, (int)total, MaxCorrect);
+            if (scoringFormulaType == EnumScoringFormulaType.Percent)
+            {
+                var percent = child.TestSection?.Percent ?? default;
+                child.PercentModule = NumberHelper.ConvertDoublePercent(child.Percent * percent, 2);
+            }
+            else if (scoringFormulaType == EnumScoringFormulaType.BandScore)
+            {
+                var score = child.SkillScores[0].Scores;
+                var percent = child.TestSection?.Percent ?? default;
+                child.ScoreModule = NumberHelper.RoundReduceNumber(NumberHelper.ConvertDoublePercent(score * percent, 2));
+            }
+        }
+
+        private static void ApplyScoresToParent(
+            TestSectionResult parent,
+            TestResult testResult,
+            IList<TestSectionResult> children)
+        {
+            parent.CorrectCount = children.Sum(x => x.CorrectCount);
+            parent.CorrectTotal = children.Sum(x => x.CorrectTotal);
+            parent.Percent = NumberHelper.GetPercent(parent.CorrectCount, parent.CorrectTotal);
+            parent.SkillScores = BuildSkillScores(
+                parent.TestSection,
+                parent.CorrectCount,
+                parent.CorrectTotal);
+
+            var scoringFormulaType = testResult.Test?.ScoringFormulaType;
+            if (scoringFormulaType == EnumScoringFormulaType.Percent)
+            {
+                var percent = parent.TestSection?.Percent ?? default;
+                parent.PercentModule = NumberHelper.ConvertDoublePercent(children.Sum(x => x.PercentModule) * percent, 2);
+            }
+            else if (scoringFormulaType == EnumScoringFormulaType.BandScore)
+            {
+                var scores = parent.SkillScores[0].Scores;
+                var percent = parent.TestSection?.Percent ?? default;
+                parent.ScoreModule = NumberHelper.RoundReduceNumber(NumberHelper.ConvertDoublePercent(scores * percent, 2));
+            }
+        }
+
+        private static void ResetSection(TestSectionResult section)
+        {
+            section.CorrectCount = 0;
+            section.CorrectTotal = MaxCorrect;
+            section.Percent = NumberHelper.GetPercent(section.CorrectCount, section.CorrectTotal);
+            section.SkillScores?.Clear();
+        }
+
+        private static List<SkillScores> BuildSkillScores(
+            TestSection? testSection,
+            int correct,
+            int total)
+        {
+            return new List<SkillScores>
+            {
+                new SkillScores
+                {
+                    SkillId = testSection?.SkillId,
+                    SkillFilePath = testSection?.Skill?.FilePath,
+                    SkillName = testSection?.Skill?.Name,
+                    CorrectCount = correct,
+                    TotalCount = total,
+                    Scores = NumberHelper.RoundReduceNumber((double)correct / 4)
+                }
+            };
+        }
+
+        #endregion Apply scores
+
+        #region Persist & Publish
+
+        private async Task PersistAsync(
+            TestSectionResult parent,
+            IList<TestSectionResult> children,
+            List<TestScore> scores,
+            CancellationToken ct)
+        {
+            await _testScoreRepository.ExecuteTransactionAsync(async () =>
+            {
+                if (scores.Any())
+                {
+                    await _testScoreRepository.AddList(scores);
+                    await _testScoreRepository.UnitOfWork.SaveChangesAsync(ct);
+                }
+                return new MethodResult<bool>();
+            });
+
+            await _testSectionResultRepository.BulkUpdateList(children.Append(parent).ToList(),
+            bulk => bulk.ColumnInputExpression = c => new
+            {
+                c.SkillScoresStr,
+                c.CorrectCount,
+                c.CorrectTotal,
+                c.Percent,
+                c.PercentModule,
+                c.ScoreModule
+            });
+        }
+
+        private async Task PublishAsync(
+            IEnumerable<TestScore> scores,
+            TestResult testResult,
+            CancellationToken ct)
+        {
+            foreach (var s in scores)
+            {
+                await _publisher.Publish(
+                    new SubmitTestAiSpeakingResponseModel
+                    {
+                        CriteriaName = s.Criteria.ToString(),
+                        BandScore = s.Score,
+                        BandDescriptionText = s.Feedback,
+                        TestResultId = testResult.Id
+                    }, ct);
+            }
+        }
+
+        #endregion Persist & Publish
+
+        #region AI helpers
+
+        private async Task<string> GetAIResponseAsync(
+            EnumTestScoreCriteria criteria,
+            SpeakingEvaluationInput input,
+            AiPromptManager? aiPromptManager,
+            AICriteriaConfigs? aICriteria,
+            CancellationToken ct)
+        {
+            var userConfig = BuildSpeakingPromptHelper.CustomAnswerConfigToSendGPT(input.Questions, input.Answers, criteria, aICriteria?.UserRole);
+            var systemConfig = !string.IsNullOrEmpty(aICriteria?.SettingAiConfig) ? aICriteria.SettingAiConfig : BuildSpeakingPromptHelper.GetConfigByType(criteria, true);
+            var response = await _mediator.Send(new SubmitAICommand
+            {
+                SystemRoleAlConfig = systemConfig,
+                UserAIConfig = userConfig,
+                SettingModel = aiPromptManager?.AiModel ?? "gpt-4o",
+                SettingTemperature = aICriteria?.SettingTemperature ?? 1,
+                SettingTopP = aICriteria?.SettingTopP ?? 1,
+                SettingPresence = aICriteria?.SettingPresence ?? 0,
+                SettingFrequecy = aICriteria?.SettingFrequency ?? 0,
+                SettingWordMaxLength = aICriteria?.SettingWordMaxLength ?? 1000
+            }, ct);
+
+            return Shared.Helpers.StringHelper.RemoveMarkdownFromJson(response ?? string.Empty);
+        }
+
+        public static (long bandScore, string? comment) GetBandScore(
+            double averagePronScore,
+            List<ProsodyScore>? ranges)
+        {
+            if (ranges == null || ranges.Count == 0)
+                return (0, string.Empty);
+
+            foreach (var r in ranges)
+            {
+                if (averagePronScore >= r.MinScore &&
+                    averagePronScore <= r.MaxScore)
+                {
+                    return ((long)r.BandScore, r.BandComment);
+                }
+            }
+
+            return (0, string.Empty);
+        }
+
+        #endregion AI helpers
     }
 }

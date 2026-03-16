@@ -80,7 +80,8 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
                             School = s.School,
                             Birthday = u.Birthday,
                             DefaultPassword = u.DefaultPassword,
-                            StudentCode = u.Code
+                            StudentCode = u.Code,
+                            CourseId = s.CourseId,
                         };
 
             if (!string.IsNullOrEmpty(request.Keyword))
@@ -147,12 +148,16 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
 
                 var studentIds = lists.Select(p => p.StudentId).ToList();
 
-                var learningProgressResults = await _lmsCourseService.GetStudentsLearningProgress(new GetStudentsLearningProgressQueryModel() { StudentIds = studentIds });
+                var learningProgressResults = await _lmsCourseService.GetStudentsLearningProgress(new GetStudentsLearningProgressQueryModel()
+                {
+                    StudentIds = studentIds
+                });
                 var learningProgress = learningProgressResults.Content?.Result;
 
                 lists.ForEach(p =>
                 {
                     p.LearningProgresses = learningProgress?.Where(x => x.StudentId == p.StudentId).ToList();
+                    p.LearningProgresses.ForEach(x => { x.IsLearning = x.CourseCloneId == p.CourseId; });
                 });
             }
 

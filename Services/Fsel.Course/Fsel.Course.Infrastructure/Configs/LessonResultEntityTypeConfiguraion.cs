@@ -45,10 +45,11 @@ namespace Fsel.Course.Infrastructure.Configs
                     v => v.ToString(),
                     v => v.EnumParse<EnumResultStatus>());
 
-            builder.HasIndex(c => new { c.CourseId, c.UnitId, c.LessonId, c.StudentId }).IsUnique().HasFilter("[IsDeleted] = 0");
             builder.HasIndex(c => new { c.CreatedUserId, c.Status, c.UnitId });
-            builder.HasIndexIncludeAllProperties(c => new { c.CreatedUserId });
             builder.HasIndex(c => new { c.CourseId, c.StudentId, c.Status });
+            builder.HasIndexIncludeAllProperties(c => new { c.CreatedUserId });
+
+            builder.HasIndex(c => new { c.UnitModuleId, c.UnitResultId, c.IsDeleted });
         }
     }
 }

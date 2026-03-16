@@ -14,6 +14,7 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.TestConfigs;
     using Fsel.Course.Domain.Enums;
+    using Fsel.Course.Domain.Models.EntityModels.TestModels;
     using Fsel.Course.Domain.Models.EntityModels.V1i2;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
     using Fsel.Shared.Enums;
@@ -47,13 +48,9 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
             CancellationToken cancellationToken)
         {
             var testSectionResult = await _testSectionResultRepository.ReadQueryable
-                .AsNoTracking()
-                .Include(x => x.TestResult)
-                .Include(x => x.TestSection)
-                .Include(x => x.TestAnswers)
                 .FirstOrDefaultAsync(x => x.Id == request.TestSectionResultId, cancellationToken);
 
-            if (testSectionResult?.TestResult is null)
+            if (testSectionResult is null)
             {
                 return new MethodResult<SectionStateModel>();
             }
@@ -86,17 +83,12 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
                 .GroupBy(s => s.ParentId!.Value)
                 .ToDictionary(g => g.Key, g => g.OrderBy(x => x.DisplayOrder).ToList());
 
-            var answerByQuestionId = (testSectionResult.TestAnswers ?? new List<TestAnswer>())
-                .Where(x => x.QuestionId.HasValue && x.QuestionId.Value != Guid.Empty)
-                .GroupBy(a => a.QuestionId!.Value)
-                .ToDictionary(
-                    g => g.Key,
-                    g => g.OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate).FirstOrDefault());
-
             // ✅ NEW: get TestSectionResults nhỏ (con) để map result cho section con nếu có
             var sectionIds = cached.Sections.Select(s => s.Id).ToList();
 
             var sectionResultBySectionId = await _testSectionResultRepository.ReadQueryable
+                .Include(x => x.TestAnswers)
+                .Include(x => x.TestScores)
                 .AsNoTracking()
                 .Where(r =>
                     r.TestResultId == testSectionResult.TestResultId &&
@@ -104,11 +96,32 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
                     sectionIds.Contains(r.TestSectionId.Value))
                 .ToDictionaryAsync(r => r.TestSectionId!.Value, r => r, cancellationToken);
 
+            // Key của answer có thể là QuestionId hoặc TestSectionId (data lẫn)
+            // => gom tất cả answers và build map theo "key thực tế"
+
+            var answers = sectionResultBySectionId.Values
+                             .Where(sr => sr.TestAnswers != null && sr.TestAnswers.Count > 0)
+                             .SelectMany(sr => sr.TestAnswers)
+                             .Select(a => new
+                             {
+                                 Key = a.QuestionId.HasValue && a.QuestionId.Value != Guid.Empty ? a.QuestionId : (a.TestSectionId ?? Guid.Empty), // nếu model có TestSectionId
+                                 Answer = a
+                             }).Where(x => x.Key != Guid.Empty)
+                            .ToList();
+
+            var answerByKey = answers
+                .GroupBy(x => x.Key!.Value)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(x => x.Answer)
+                          .OrderByDescending(a => a.UpdatedDate ?? a.CreatedDate)
+                          .FirstOrDefault());
+
             var rootModel = MapSectionNode(
                 rootSection,
                 childrenMap,
                 cached.QuestionIdsBySectionId,
-                answerByQuestionId,
+                answerByKey,
                 questionById,
                 sectionResultBySectionId);
 
@@ -128,10 +141,11 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
 
                 var query = sections
                     .Where(x => x.TestSectionQuestions != null && x.TestSectionQuestions.Any())
+                    .OrderBy(x => x.CreatedDate)
                     .SelectMany(x => x.TestSectionQuestions);
 
                 var questionPairs = query
-                    .Select(q => new { SectionId = q.TestSectionId, q.QuestionId })
+                    .Select(q => new { SectionId = q.TestSectionId, q.QuestionId, UpdatedDate = q.UpdatedDate ?? q.CreatedDate })
                     .ToList();
 
                 var questionIdsBySectionId = questionPairs
@@ -139,7 +153,7 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
                     .GroupBy(x => x.SectionId)
                     .ToDictionary(
                         g => g.Key,
-                        g => g.Select(x => x.QuestionId).Distinct().ToList());
+                        g => g.OrderBy(x => x.UpdatedDate).Select(x => x.QuestionId).Distinct().ToList());
 
                 return new CachedSectionTreeModel
                 {
@@ -176,7 +190,7 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
                 var parents = frontier;
                 frontier = new List<Guid>();
 
-                var children = await _testSectionRepository.ReadQueryable
+                var children = await _testSectionRepository.ReadQueryable.Include(x => x.Skill)
                     .Include(x => x.TestSectionQuestions)
                     .ThenInclude(x => x.Question)
                     .AsNoTracking()
@@ -203,7 +217,7 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
             TestSection node,
             Dictionary<Guid, List<TestSection>> childrenMap,
             Dictionary<Guid, List<Guid>> questionsBySectionId,
-            Dictionary<Guid, TestAnswer?> answerByQuestionId,
+            Dictionary<Guid, TestAnswer?> answerByKey,
             Dictionary<Guid, Question> questionById,
             Dictionary<Guid, TestSectionResult> sectionResultBySectionId)
         {
@@ -215,18 +229,25 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
                 SkillScores = nodeResult?.SkillScores,
                 CorrectTotal = nodeResult?.CorrectTotal ?? 0,
                 HighestStreak = nodeResult?.HighestStreak,
-
+                TestScores = nodeResult?.TestScores.OrderBy(x => x.CreatedDate).Select(x => new TestScoreModel
+                {
+                    Criteria = x.Criteria,
+                    Feedback = x.Feedback,
+                    Score = x.Score,
+                }).ToList(),
                 SectionResultId = nodeResult?.Id,
                 Status = nodeResult?.Status ?? EnumResultStatus.New,
                 UpdatedDate = nodeResult?.UpdatedDate,
-                Name = node.Name,
+                Name = node.Name ?? node.Skill?.Name,
                 CorrectCount = nodeResult?.CorrectCount ?? 0,
                 PercentResult = nodeResult?.Percent ?? 0,
                 Config = node.Config,
                 TestLayoutType = node.LayoutType,
                 TotalCount = nodeResult?.CorrectTotal ?? 0,
                 WorkingTime = nodeResult?.WorkingTime ?? 0,
+                ScoreModule = nodeResult?.ScoreModule ?? 0,
                 SectionId = node.Id,
+                CurrentSectionTimeCodeId = nodeResult?.CurrentSectionTimeCodeId,
             };
 
             var children = new List<BaseTestStateModel>();
@@ -240,7 +261,7 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
                         childSection,
                         childrenMap,
                         questionsBySectionId,
-                        answerByQuestionId,
+                        answerByKey,
                         questionById,
                         sectionResultBySectionId));
                 }
@@ -251,8 +272,21 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
             {
                 foreach (var questionId in questionIds)
                 {
-                    children.Add(MapQuestionLeaf(questionId, answerByQuestionId, questionById));
+                    children.Add(MapQuestionLeaf(questionId, answerByKey, questionById));
                 }
+            }
+            // => add 1 leaf dưới section
+            if (answerByKey.TryGetValue(node.Id, out var sectionAns) && sectionAns is not null)
+            {
+                model.Answer = new AnswerModel
+                {
+                    Answer = sectionAns.Answer,
+                    CorrectCount = sectionAns.CorrectCount,
+                    IsCorrect = sectionAns.IsCorrect,
+                    GradingAlFeedback = sectionAns.GradingAlFeedback,
+                    SpeechTextAnswer = sectionAns.SpeechTextAnswer,
+                    Status = model.Status == EnumResultStatus.Done ? sectionAns.Status : EnumAnswerStatus.Process
+                };
             }
 
             model.Children = children;
@@ -278,6 +312,8 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
                 {
                     Answer = ans.Answer,
                     CorrectCount = ans.CorrectCount,
+                    SpeechTextAnswer = ans.SpeechTextAnswer,
+                    GradingAlFeedback = ans.GradingAlFeedback,
                     IsCorrect = ans.IsCorrect,
                     Status = ans.Status
                 };

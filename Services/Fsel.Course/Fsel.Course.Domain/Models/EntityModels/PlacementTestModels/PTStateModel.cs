@@ -6,6 +6,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
     using Entities.TestConfigs;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
+    using Fsel.Course.Domain.Models.EntityModels.TestModels;
     using Newtonsoft.Json;
     using Shared.Enums;
 
@@ -37,11 +38,16 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
     {
         public EnumResultStatus Status { get; set; }
         public DateTime? UpdatedDate { get; set; }
+        public AnswerModel? Answer { get; set; }
+        public IList<TestScoreModel>? TestScores { get; set; }
     }
 
     public class TestStateModel : BaseTestStateModel
     {
         public string? Name { get; set; }
+        public string? Description { get; set; }
+        public EnumScoringFormulaType ScoringFormulaType { get; set; }
+        public double? Score { get; set; }
 
         [JsonProperty("ModuleId")] public Guid? StepFlowId { get; set; }
 
@@ -51,7 +57,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
 
         public double PercentResult { get; set; }
 
-        public List<BaseTestStateModel> Children { get; set; } = new List<BaseTestStateModel>();
+        public IList<BaseTestStateModel> Children { get; set; } = new List<BaseTestStateModel>();
 
         public void UpdateDetailInfo(Test? test)
         {
@@ -61,7 +67,8 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
             }
 
             Name = test.Name;
-
+            Description = test.Description;
+            ScoringFormulaType = test.ScoringFormulaType;
             foreach (var sectionResult in Children)
             {
                 if (sectionResult is not SectionStateModel sectionStateModel)
@@ -77,12 +84,21 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
 
                 sectionStateModel.UpdateDetailInfo(section);
             }
+
+            if (Children != null && Children.Any() && Children.All(c => c is SectionStateModel o && o.Order.HasValue))
+            {
+                Children = Children
+                    .Cast<SectionStateModel>()
+                    .OrderBy(s => s.Order)
+                    .ToList<BaseTestStateModel>();
+            }
         }
     }
 
     public class SectionStateModel : BaseTestStateModel
     {
         public string? Name { get; set; }
+        public string? FilePath { get; set; }
         public Guid? SectionId { get; set; }
         public EnumTestLayoutType? TestLayoutType { get; set; }
         public TestSectionConfig? Config { get; set; }
@@ -93,8 +109,13 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
         public double? WorkingTime { get; set; }
         public double? PercentResult { get; set; }
         public int? HighestStreak { get; set; }
+        public double? ScoreModule { get; set; }
+        public Guid? CurrentSectionTimeCodeId { get; set; }
         public IList<BaseTestStateModel> Children { get; set; } = new List<BaseTestStateModel>();
+        public IList<ScoringFormulaConfig>? ScoringFormulaConfigs { get; set; }
         public IList<SkillScores>? SkillScores { get; set; }
+        public Guid? TestAnswerId { get; set; }
+        public AnswerModel? Answer { get; set; }
 
         public int? Order { get; set; }
 
@@ -105,16 +126,18 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
                 return;
             }
 
-            Order = section?.DisplayOrder;
+            Order = section.DisplayOrder;
             Name = section.Name ?? section.Skill?.Name;
+            FilePath = section.Skill?.FilePath;
             Config = section.Config;
+            ScoringFormulaConfigs = section.ScoringFormulaConfigs;
+            TestLayoutType = section.LayoutType;
             foreach (var sectionResult in Children)
             {
                 if (sectionResult is not SectionStateModel sectionStateModel)
                 {
                     continue;
                 }
-
                 var sectionMatch = section.TestSections.FirstOrDefault(s => s.Id == sectionStateModel.SectionId);
                 if (sectionMatch == null)
                 {
@@ -123,13 +146,23 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
 
                 sectionStateModel.UpdateDetailInfo(sectionMatch);
             }
+
+            if (Children != null && Children.Any() && Children.All(c => c is SectionStateModel o && o.Order.HasValue))
+            {
+                Children = Children
+                    .Cast<SectionStateModel>()
+                    .OrderBy(s => s.Order)
+                    .ToList<BaseTestStateModel>();
+            }
         }
     }
 
     public class QuestionStateModel : BaseTestStateModel
     {
+        public Guid? TestSectionId { get; set; }
         public Guid? QuestionId { get; set; }
         public Guid? TestAnswerId { get; set; }
+        public int DisplayOrder { get; set; }
         public QuestionModel? Question { get; set; }
         public AnswerModel? Answer { get; set; }
     }

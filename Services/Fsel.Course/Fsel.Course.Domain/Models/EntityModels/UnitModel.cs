@@ -11,6 +11,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     {
         public string? Name { get; set; }
         public string? Code { get; set; }
+        public string? Description { get; set; }
         public bool IsActive { get; set; }
         public int DisplayOrder { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
@@ -18,11 +19,14 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public UnitResultModel? UnitResult { get; set; }
         public MockTestModel? SkillMockTest { get; set; }
         public double Percent { get; set; }
+        public bool IsAIPracticeGymEnabled { get; set; }
         public int Version { get; set; }
         public Guid OriginalId { get; set; }
         public Guid? ProgramId { get; set; }
+        public Guid? ProjectId { get; set; }
         public Guid? LevelId { get; set; }
         public IList<HighlightRange>? HighlightRanges { get; set; }
+        public IList<HighlightRange>? ProgressSpeedometerRanges { get; set; }
         public IList<UnitModuleDTO>? UnitModules { get; set; }
     }
 
@@ -41,6 +45,5 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid OriginalId { get; set; }
 
         public V1i1.LessonSearchModel? Lesson { get; set; }
-
     }
 }

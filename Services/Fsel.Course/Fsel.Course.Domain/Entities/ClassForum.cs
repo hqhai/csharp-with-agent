@@ -96,6 +96,8 @@ namespace Fsel.Course.Domain.Entities
         // AICriteria lookup by SubFeatureType + ObjectId (runtime, không lưu trong DB)
         // SubFeatureType = EnumSubFeatureType.ClassForum (implicit)
 
+        public Guid? AiPromptCriteriaId { get; set; }
+
         public ICollection<ClassForumResult> ClassForumResults { get; set; } = new List<ClassForumResult>();
 
         public ICollection<ClassForumResultRandom> ClassForumResultRandoms { get; set; } = new List<ClassForumResultRandom>();
