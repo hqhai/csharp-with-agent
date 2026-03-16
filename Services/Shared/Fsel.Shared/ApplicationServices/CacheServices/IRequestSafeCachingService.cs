@@ -34,9 +34,22 @@ namespace Fsel.Shared.ApplicationServices.CacheServices
 
             if (hadSetCache)
             {
-                var functionResult = await safeFunction();
-                await ClearCache(key);
-                return (true, functionResult);
+                try
+                {
+                    if (safeFunction != null)
+                    {
+                        var functionResult = await safeFunction();
+                        return (true, functionResult);
+                    }
+                    else
+                    {
+                        return (true, default);
+                    }
+                }
+                finally
+                {
+                    await ClearCache(key);
+                }
             }
             else
             {

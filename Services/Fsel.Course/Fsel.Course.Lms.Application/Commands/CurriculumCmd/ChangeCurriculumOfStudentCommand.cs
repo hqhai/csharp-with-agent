@@ -5,21 +5,19 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
     using System.Linq.Dynamic.Core;
     using System.Threading;
     using System.Threading.Tasks;
-    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Entities.TestConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Commands.CourseResultCmd;
-    using Fsel.Course.Lms.Application.Queues.Publishers;
-    using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.TrainingServices.CommandModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Course.Lms.Application.Services.UserServices.CommandModels;
     using Fsel.Shared.ApplicationServices.CacheServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
@@ -37,37 +35,41 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
 
     public class ChangeCurriculumOfStudentCommandHandler : IRequestHandler<ChangeCurriculumOfStudentCommand, MethodResult<bool>>
     {
-        private readonly IMapper _mapper;
         private readonly ITrainingService _trainingService;
         private readonly AuthContext _authContext;
-        private readonly ChangeCourseHelper _changeCourseHelper;
         private readonly ICourseRepository _courseRepository;
-        private readonly SaveUserCourseSettingPublisher _saveUserCourseSettingPublisher;
         private readonly IUserService _userService;
         private readonly ILogger<ChangeCourseLevelCommand> _logger;
         private readonly ICourseResultRepository _courseResultRepository;
-        private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private readonly ICurriculumStudentRepository _curriculumStudentRepository;
         private readonly ICurriculumRepository _curriculumRepository;
-        private readonly ILessonResultRepository _lessonResultRepository;
         private readonly IRequestSafeCachingService _requestSafeCachingService;
+        private readonly ICourseChangingHistoryRepository _courseChangingHistoryRepository;
+        private readonly ITestGroupResultRepository _testGroupResultRepository;
 
-        public ChangeCurriculumOfStudentCommandHandler(IMapper mapper, ITrainingService trainingService, AuthContext authContext, ChangeCourseHelper changeCourseHelper, ICourseRepository courseRepository, SaveUserCourseSettingPublisher saveUserCourseSettingPublisher, IUserService userService, ILogger<ChangeCourseLevelCommand> logger, ICourseResultRepository courseResultRepository, NotificationMessagePublisher notificationMessagePublisher, ICurriculumStudentRepository curriculumStudentRepository, ICurriculumRepository curriculumRepository, ILessonResultRepository lessonResultRepository, IRequestSafeCachingService requestSafeCachingService)
+        public ChangeCurriculumOfStudentCommandHandler(ITrainingService trainingService,
+            AuthContext authContext,
+            ICourseRepository courseRepository,
+            IUserService userService,
+            ILogger<ChangeCourseLevelCommand> logger,
+            ICourseResultRepository courseResultRepository,
+            ICurriculumStudentRepository curriculumStudentRepository,
+            ICurriculumRepository curriculumRepository,
+            IRequestSafeCachingService requestSafeCachingService,
+            ICourseChangingHistoryRepository courseChangingHistoryRepository,
+            ITestGroupResultRepository testGroupResultRepository)
         {
-            _mapper = mapper;
             _trainingService = trainingService;
             _authContext = authContext;
-            _changeCourseHelper = changeCourseHelper;
             _courseRepository = courseRepository;
-            _saveUserCourseSettingPublisher = saveUserCourseSettingPublisher;
             _userService = userService;
             _logger = logger;
             _courseResultRepository = courseResultRepository;
-            _notificationMessagePublisher = notificationMessagePublisher;
             _curriculumStudentRepository = curriculumStudentRepository;
             _curriculumRepository = curriculumRepository;
-            _lessonResultRepository = lessonResultRepository;
             _requestSafeCachingService = requestSafeCachingService;
+            _courseChangingHistoryRepository = courseChangingHistoryRepository;
+            _testGroupResultRepository = testGroupResultRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(ChangeCurriculumOfStudentCommand request, CancellationToken cancellationToken)
@@ -138,6 +140,7 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
                 {
                     courseResult = new CourseResult
                     {
+                        Id = Guid.NewGuid(),
                         CourseId = curriculum.CourseClone.Id,
                         StudentId = student.Id,
                         Status = EnumResultStatus.New,
@@ -151,7 +154,7 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
                     }
                     try
                     {
-                        await _requestSafeCachingService.SafeRequest<CourseResult>(
+                        await _requestSafeCachingService.SafeRequest(
                             key: $"Add_CourseResult_{courseResult.CourseId}_{courseResult.StudentId}_{courseResult.WorkingStatus}_{courseResult.IsDeleted}",
                             safeFunction: async () =>
                             {
@@ -161,6 +164,34 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
                                 });
                                 return courseResult;
                             });
+
+                        var testGroupResult = new TestGroupResult
+                        {
+                            Id = Guid.NewGuid(),
+                            ProgramId = curriculum.Course.ProgramId,
+                            ProgramIdOfPt = curriculum.Course.ProgramId,
+                            StudentId = student.Id,
+                            TestType = EnumTestType.PlacementTest,
+                            Status = EnumResultStatus.Done
+                        };
+                        _testGroupResultRepository.Add(testGroupResult);
+
+                        var history = new CourseChangingHistory
+                        {
+                            Id = Guid.NewGuid(),
+                            StudentId = student.Id,
+                            ToLevelId = curriculum.Course.LevelId,
+                            ToProgramId = curriculum.Course.ProgramId.Value,
+                            SelectedLevelId = curriculum.Course.LevelId,
+                            SelectedProgramId = curriculum.Course.ProgramId.Value,
+                            Action = EnumChangeCourseAction.ChangeDirectly,
+                            CreatedDate = DateTime.UtcNow,
+                            Status = EnumChangingStatus.Completed,
+                            PtResultId = testGroupResult.Id,
+                            ToCourseResultId = courseResult.Id
+                        };
+                        _courseChangingHistoryRepository.Add(history);
+                        await _testGroupResultRepository.UnitOfWork.SaveChangesAsync();
                     }
                     catch (Exception ex)
                     {
@@ -182,6 +213,14 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
                         bulk.IgnoreOnUpdateExpression = c => new { c.CourseId, c.StudentId };
                     });
                 }
+
+                await _userService.UpdateLearningContextAsync(new UpdateStudentLearningContextCommandModel
+                {
+                    CourseId = curriculum.Course?.Id,
+                    LevelId = curriculum.Course?.LevelId,
+                    ProgramId = curriculum.Course?.ProgramId,
+                    SubjectId = curriculum.Course?.Program?.CategoryParent?.Id
+                });
 
                 methodResult.Result = true;
                 methodResult.StatusCode = StatusCodes.Status200OK;
