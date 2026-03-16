@@ -216,7 +216,7 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
 
                 await _userService.UpdateLearningContextAsync(new UpdateStudentLearningContextCommandModel
                 {
-                    CourseId = curriculum.Course?.Id,
+                    CourseId = curriculum.CourseClone.Id,
                     LevelId = curriculum.Course?.LevelId,
                     ProgramId = curriculum.Course?.ProgramId,
                     SubjectId = curriculum.Course?.Program?.CategoryParent?.Id
