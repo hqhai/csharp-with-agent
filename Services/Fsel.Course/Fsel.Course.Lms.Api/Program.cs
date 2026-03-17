@@ -235,6 +235,7 @@ builder.Services.AddScoped<ILearningGoalAggregateService, LearningGoalAggregateS
 builder.Services.AddScoped<IStudentGoalProgressService, StudentGoalProgressService>();
 builder.Services.AddScoped<ILearningService, LearningService>();
 builder.Services.AddScoped<IRequestSafeCachingService, RequestSafeCachingService>();
+builder.Services.AddScoped<ISkillCachingService, SkillCachingService>();
 
 builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();
