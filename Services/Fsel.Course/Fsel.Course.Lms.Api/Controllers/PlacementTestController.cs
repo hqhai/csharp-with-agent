@@ -207,9 +207,9 @@ namespace Fsel.Course.Lms.Api.Controllers
 
         [HttpGet("get-skills")]
         [Permission]
-        public async Task<IActionResult> Get([FromQuery] GetPlacementTestSkillsByProgramIdQuery query)
+        public async Task<IActionResult> Get()
         {
-            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            var queryResult = await _mediator.Send(new GetPlacementTestSkillsByProgramIdQuery()).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }
