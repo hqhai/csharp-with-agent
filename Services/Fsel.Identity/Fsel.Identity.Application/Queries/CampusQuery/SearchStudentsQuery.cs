@@ -37,8 +37,10 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
         private readonly ISchoolClassRepository _schoolClassRepository;
         private readonly IUserSchoolRepository _userSchoolRepository;
         private readonly AuthContext _authContext;
+        private readonly IUserRoleRepository _userRoleRepository;
+        private readonly RoleManager<Role> _roleManager;
 
-        public SearchStudentsQueryHandler(UserManager<User> userManager, IStudentRepository studentRepository, ILmsCourseService lmsCourseService, ISchoolClassRepository schoolClassRepository, AuthContext authContext, IUserSchoolRepository userSchoolRepository)
+        public SearchStudentsQueryHandler(UserManager<User> userManager, IStudentRepository studentRepository, ILmsCourseService lmsCourseService, ISchoolClassRepository schoolClassRepository, AuthContext authContext, IUserSchoolRepository userSchoolRepository, IUserRoleRepository userRoleRepository, RoleManager<Role> roleManager)
         {
             _userManager = userManager;
             _studentRepository = studentRepository;
@@ -46,6 +48,8 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
             _schoolClassRepository = schoolClassRepository;
             _authContext = authContext;
             _userSchoolRepository = userSchoolRepository;
+            _userRoleRepository = userRoleRepository;
+            _roleManager = roleManager;
         }
 
         public async Task<MethodResult<PagingItemsModel<StudentCampusModel>>> Handle(SearchStudentsQuery request, CancellationToken cancellationToken)
@@ -63,7 +67,9 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
 
             var query = from u in _userManager.Users
                         join s in _studentRepository.Queryable on u.Id equals s.UserId
-                        where s.SchoolId == schoolId
+                        join ur in _userRoleRepository.GetQuery() on u.Id equals ur.UserId
+                        join r in _roleManager.Roles on ur.RoleId equals r.Id
+                        where s.SchoolId == schoolId && r.Name == EnumRole.StudentCampus.ToString()
                         select new StudentCampusModel()
                         {
                             Id = u.Id,
