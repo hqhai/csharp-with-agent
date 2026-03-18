@@ -144,7 +144,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                                                     .ThenInclude(p => p.CategoryParent)
                                                     .FirstOrDefaultAsync(p => p.Id == student.CourseId.Value, cancellationToken);
 
-                var category = await _categoryCachingService.GetSubjectRootAsync(course?.ProgramId, cancellationToken);
+                var category = await _categoryCachingService.GetSecondLevelFromRootAsync(course?.ProgramId, cancellationToken);
 
                 settingStudentModel.Course = _mapper.Map<CourseModel>(course);
 
