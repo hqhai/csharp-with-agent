@@ -65,7 +65,6 @@ namespace Fsel.System.Application.Commands.NoticeAccessFeatureCmd
             return methodResult;
         }
 
-
         private async Task CheckStudentsNoActionForSomeDays(int dayAbsent, EnumNotificationContent content, CancellationToken cancellationToken)
         {
             DateTime now = DateTime.Now;
@@ -74,20 +73,14 @@ namespace Fsel.System.Application.Commands.NoticeAccessFeatureCmd
 
             var studentsAbsentIds = await _featureAccessTimeRepository.Queryable
                                             .Where(x => x.CreatedUserId != Guid.Empty)
-                                            .GroupBy(x => x.CreatedUserId)
-                                            .Select(g => new
-                                            {
-                                                UserId = g.Key,
-                                                LastVisit = g.Max(x => x.LastVisited)
-                                            })
-                                            .Where(x => x.LastVisit.HasValue &&
-                                                        x.LastVisit.Value.Date == targetDate &&
-                                                        x.LastVisit.Value.Hour == currentHour)
-                                            .Select(x => x.UserId)
+                                            .Where(x => x.LastVisited.HasValue &&
+                                                    x.LastVisited.Value.Date == targetDate &&
+                                                    x.LastVisited.Value.Hour == currentHour)
+                                            .Select(x => x.CreatedUserId)
+                                            .Distinct()
                                             .ToListAsync(cancellationToken);
 
             await SendNotificationMessage(studentsAbsentIds, content, cancellationToken);
-
         }
 
         private async Task SendNotificationMessage(List<Guid>? userIds, EnumNotificationContent content, CancellationToken cancellationToken)

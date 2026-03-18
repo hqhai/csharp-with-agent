@@ -13,20 +13,24 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Shared.ApplicationServices.CacheServices;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
 
     public class HomeWorkLessonItemInitializer : ILessonItemInitializer
     {
         private readonly IHomeWorkRepository _homeWorkRepository;
         private readonly IHomeWorkResultRepository _homeWorkResultRepository;
         private readonly IRequestSafeCachingService _requestSafeCachingService;
+        private readonly ILogger<HomeWorkLessonItemInitializer> _logger;
 
         public HomeWorkLessonItemInitializer(IHomeWorkRepository homeWorkRepository,
             IHomeWorkResultRepository homeWorkResultRepository,
-            IRequestSafeCachingService requestSafeCachingService)
+            IRequestSafeCachingService requestSafeCachingService,
+            ILogger<HomeWorkLessonItemInitializer> logger)
         {
             _homeWorkRepository = homeWorkRepository;
             _homeWorkResultRepository = homeWorkResultRepository;
             _requestSafeCachingService = requestSafeCachingService;
+            _logger = logger;
         }
 
         public async Task<VoidMethodResult> InitializeAsync(LessonModule lessonModule, LessonResult lessonResult, CancellationToken cancellationToken)
@@ -57,6 +61,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
             var homeWork = await _homeWorkRepository.ReadQueryable
                                                     .Where(x => x.OriginalId == lessonModule.OriginalId)
                                                     .Include(x => x.HomeWorkQuestions)
+                                                    .ThenInclude(x => x.Question)
                                                     .Include(x => x.Skill)
                                                     .Where(x => x.VersionStatus == EnumVersionStatus.LastVersion)
                                                     .FirstOrDefaultAsync(cancellationToken);
@@ -65,7 +70,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWork), lessonModule.OriginalId);
                 return methodResult;
             }
-
+            var correctTotal = homeWork.HomeWorkQuestions.Select(x => x.Question).Sum(x => x?.CorrectTotal ?? default);
             homeWorkResult = new HomeWorkResult
             {
                 LessonResultId = lessonResult.Id,
@@ -73,7 +78,9 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
                 Status = EnumResultStatus.New,
                 NewDate = DateTime.UtcNow,
                 HomeWorkId = homeWork.Id,
+                CorrectTotal = correctTotal,
                 LessonModuleId = lessonModule.Id,
+                SubmissionCount = Shared.Enums.EnumSubmissionCount.FirstSubmit,
                 SkillScores = new List<SkillScores>
                 {
                     new SkillScores
@@ -82,6 +89,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
                         SkillFilePath = homeWork.Skill?.FilePath,
                         SkillName = homeWork.Skill?.Name,
                         TotalQuestion = homeWork.HomeWorkQuestions?.Count ?? 0,
+                        TotalCount = correctTotal,
                     },
                 },
             };
@@ -97,6 +105,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
                     return homeWorkResult;
                 });
 
+            _logger.LogInformation($"Add_HomeWorkResult-{homeWorkResult.Id}-{homeWorkResult.LessonModuleId}-{homeWorkResult.LessonResultId}-{homeWorkResult.SkillScoresStr}");
             return methodResult;
         }
     }
