@@ -94,7 +94,8 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery.V1i2
 
                 if (unitResults != null && unitResults.Any())
                 {
-                    overallScoreModel.SkillScores = unitResults.Where(x => x.SkillScores != null && x.SkillScores.Any())
+                    overallScoreModel.SkillScores = unitResults
+                        .Where(x => x.SkillScores != null && x.SkillScores.Any())
                         .SelectMany(x => x.SkillScores!)
                         .GroupBy(x => new { x.SkillId })
                         .Select(x => new SkillScores
@@ -135,6 +136,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery.V1i2
                         overallScoreModel.ScoringFormulaType = testResult.Test?.ScoringFormulaType;
                         overallScoreModel.SkillScores = testResult.SkillScores;
                         overallScoreModel.IsPlacement = true;
+                        overallScoreModel.Score = testResult.Score;
                         overallScoreModel.Percent = testResult.PercentModule;
                     }
                 }
@@ -144,9 +146,6 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery.V1i2
 
             overallScoreModel.LevelId = course.LevelId;
             overallScoreModel.LevelName = course.Level?.Name;
-
-            overallScoreModel.CourseLevel = course.CourseLevel;
-            overallScoreModel.CourseType = course.CourseType;
 
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = overallScoreModel;

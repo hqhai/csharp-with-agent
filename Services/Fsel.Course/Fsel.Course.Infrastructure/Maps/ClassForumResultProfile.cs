@@ -23,10 +23,15 @@ namespace Fsel.Course.Infrastructure.Maps
             CreateMap<RateClassForumResultCommandModel, ClassForumResult>().IgnoreAllNonExisting();
             CreateMap<RetryClassForumResultCommandModel, ClassForumResult>().IgnoreAllNonExisting();
             CreateMap<ClassForumResult, ClassForumReportModel>().IgnoreAllNonExisting();
-            CreateMap<ClassForum, ClassForumReportModel>().IgnoreAllNonExisting();
+            CreateMap<ClassForum, ClassForumReportModel>()
+                .ForMember(p => p.SkillFilePath, x => x.MapFrom(n => n.Skill != null ? n.Skill.FilePath : null))
+                .ForMember(p => p.SkillId, x => x.MapFrom(n => n.SkillId))
+                .ForMember(p => p.SkillName, x => x.MapFrom(n => n.Skill != null ? n.Skill.Name : null));
+
             CreateMap<ClassForumResult, ClassForumResultInfoModel>()
                 .ForMember(p => p.UnitId, x => x.MapFrom(n => n.LessonResult!.UnitId))
                 .ForMember(p => p.CourseId, x => x.MapFrom(n => n.LessonResult!.CourseId));
+
             CreateMap<ClassForumResult, ClassForumSearchModel>()
                 .ForMember(x => x.PromptName, x => x.MapFrom(y => y.ClassForum != null ? y.ClassForum.PromptName : null))
                 .ForMember(x => x.TaggetWordLimit, x => x.MapFrom(y => y.ClassForum != null ? y.ClassForum.TaggetWordLimit : 0))

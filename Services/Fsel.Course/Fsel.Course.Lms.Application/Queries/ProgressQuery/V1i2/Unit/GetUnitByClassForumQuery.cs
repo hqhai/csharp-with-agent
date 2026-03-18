@@ -106,7 +106,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery.V1i2.Unit
                     on um.OriginalId equals l.OriginalId
                 join lm in _lessonModuleRepository.ReadQueryable.AsNoTracking()
                     on l.Id equals lm.LessonId
-                join cf in _classForumRepository.ReadQueryable.AsNoTracking()
+                join cf in _classForumRepository.ReadQueryable.Include(x => x.Skill).AsNoTracking()
                     on lm.OriginalId equals cf.OriginalId
                 where um.UnitId == request.UnitId
                       && um.UnitConfigType == EnumUnitConfigType.Lesson
@@ -168,7 +168,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery.V1i2.Unit
                 from baseQ in _lessonResultRepository.ReadQueryable
                 join l in _lessonRepository.ReadQueryable on baseQ.LessonId equals l.Id
                 join clr in _classForumResultRepository.ReadQueryable on baseQ.Id equals clr.LessonResultId
-                join cl in _classForumRepository.ReadQueryable on clr.ClassForumId equals cl.Id
+                join cl in _classForumRepository.ReadQueryable.Include(x => x.Skill) on clr.ClassForumId equals cl.Id
                 where baseQ.StudentId == studentId
                       && baseQ.UnitId == request.UnitId
                       && baseQ.CourseId == request.CourseId

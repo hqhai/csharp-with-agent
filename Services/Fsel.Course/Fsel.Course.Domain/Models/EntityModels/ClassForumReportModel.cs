@@ -9,6 +9,10 @@ namespace Fsel.Course.Domain.Models.EntityModels
     public class ClassForumReportModel : BaseModel
     {
         public EnumCourseSkill CourseSkill { get; set; }
+        public string? SkillName { get; set; }
+        public string? SkillFilePath { get; set; }
+        public Guid SkillId { get; set; }
+
         public string? Name { get; set; }
         public Guid LessonId { get; set; }
         public Guid? LessonResultId { get; set; }
