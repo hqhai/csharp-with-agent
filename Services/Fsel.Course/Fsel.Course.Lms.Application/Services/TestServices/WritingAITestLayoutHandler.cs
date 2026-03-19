@@ -167,8 +167,11 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
                 {
                     continue;
                 }
+
+                var subject = await _categoryRepository.GetSecondLevelFromRootAsync(testResult.Test?.ProgramId, cancellationToken);
+
                 var aiPromptManager = await LoadAiPromptManagerAsync(currentSectionResult.TestSection?.AiPromptManagerId,
-                    testResult.Test?.ProgramId ?? default,
+                    subject?.Id ?? default,
                     currentSectionResult.TestSectionId.Value, cancellationToken);
 
                 // load AI config theo sectionId
@@ -263,13 +266,8 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
                                                                          .FirstOrDefaultAsync(ct);
             if (sectionAiPromptManager == null)
             {
-                var subjectId = await _categoryRepository.ReadQueryable.Include(x => x.CategoryParent)
-                                                    .Where(x => x.Id == programId)
-                                                    .Select(x => x.Id)
-                                                    .FirstOrDefaultAsync(ct);
-
                 return await _aiPromptManagerRepository.ReadQueryable
-                    .Where(x => x.ProjectId == subjectId)
+                    .Where(x => x.ProjectId == programId)
                     .Where(x => !id.HasValue || x.Id == id.Value)
                     .Where(x => x.VersionStatus == EnumVersionStatus.LastVersion)
                     .Include(x => x.AICriteriaConfigs)
