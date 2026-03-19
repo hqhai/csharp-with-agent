@@ -10,38 +10,55 @@ namespace Fsel.ExamPractice.Application.Commands.ExamPracticeCmd.V1i1
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base.Interfaces;
+    using Fsel.ExamPractice.Application.Services.SystemServices;
+    using Fsel.ExamPractice.Application.Services.SystemServices.QueryModels;
     using Fsel.ExamPractice.Domain.Entities;
+    using Fsel.ExamPractice.Domain.Enums;
     using Fsel.ExamPractice.Domain.IRepositories;
     using Fsel.ExamPractice.Domain.Models.CommandModels.ExamPractices;
     using Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices;
+    using Fsel.ExamPractice.Infrastructure.Common;
     using Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers;
+    using Fsel.ExamPractice.Infrastructure.Common.Processors;
+    using Fsel.ExamPractice.Infrastructure.Common.Validators;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class UpdateExamPracticeCommand : UpdateExamPracticeCommandModel, IRequest<MethodResult<ExamPracticeModel>>
-    {
-    }
+    { }
 
     public class UpdateExamPracticeCommandHandler : IRequestHandler<UpdateExamPracticeCommand, MethodResult<ExamPracticeModel>>
     {
         private readonly IExamPracticeRepository _repo;
+        private readonly IExamPracticeResultRepository _resultRepo;
         private readonly IMapper _mapper;
         private readonly IVersionEntityUpdater<ExamPractice> _versionUpdater;
-        private readonly ExamPracticeConverter _converter;
-        private readonly ExamPracticeCommon _common;
+        private readonly ExamPracticeHelper _helper;
+        private readonly ISystemService _systemService;
+
+        private readonly Dictionary<EnumExamPracticeType, IUpdateExamPracticeValidator> _validators;
+        private readonly Dictionary<EnumExamPracticeType, IUpdateExamPracticeProcessor> _processors;
 
         public UpdateExamPracticeCommandHandler(
             IExamPracticeRepository examPracticeRepository,
+            IExamPracticeResultRepository examPracticeResultRepository,
             IMapper mapper,
             IVersionEntityUpdater<ExamPractice> versionEntityUpdater,
-            ExamPracticeConverter examPracticeConverter,
-            ExamPracticeCommon examPracticeCommon)
+            ExamPracticeHelper examPracticeHelper,
+            ISystemService systemService,
+            IEnumerable<IUpdateExamPracticeValidator> validators,
+            IEnumerable<IUpdateExamPracticeProcessor> processors)
         {
             _repo = examPracticeRepository;
+            _resultRepo = examPracticeResultRepository;
             _mapper = mapper;
             _versionUpdater = versionEntityUpdater;
-            _converter = examPracticeConverter;
-            _common = examPracticeCommon?.Create() ?? new ExamPracticeCommon().Create();
+            _helper = examPracticeHelper;
+            _systemService = systemService;
+
+            _validators = validators.ToDictionary(v => v.ExamPracticeType);
+            _processors = processors.ToDictionary(p => p.ExamPracticeType);
         }
 
         public async Task<MethodResult<ExamPracticeModel>> Handle(UpdateExamPracticeCommand request, CancellationToken cancellationToken)
@@ -49,111 +66,109 @@ namespace Fsel.ExamPractice.Application.Commands.ExamPracticeCmd.V1i1
             ArgumentNullException.ThrowIfNull(request);
             var result = new MethodResult<ExamPracticeModel>();
 
-            var oldEntity = await _repo.GetByIdAsync(request.Id);
+            // 1) Load entity with includes
+            var oldEntity = await GetEntityWithIncludesAsync(request.Id, cancellationToken);
             if (oldEntity == null)
             {
                 result.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Id), request.Id);
                 return result;
             }
 
-            if (!await ValidateAsync(request, oldEntity, result, cancellationToken))
+            // 2) Resolve external data (province name) BEFORE validation
+            var validationContext = await ResolveValidationContextAsync(request, cancellationToken);
+
+            // 3) Get type-specific validator
+            if (!_validators.TryGetValue(request.Type, out var validator))
             {
+                result.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.Type), request.Type);
                 return result;
             }
-            var isUsingByClient = await _repo.IsUsingByClient(oldEntity.Id);
-            var newEntity = BuildNewVersionEntity(request);
+
+            // 4) Validate using type-specific validator (pass resolved context, not service)
+            var validateResult = await validator.ValidateAsync(request, oldEntity, _repo, _resultRepo, validationContext, _helper, cancellationToken);
+            if (!validateResult.IsOK)
+            {
+                result.AddErrorBadRequest(validateResult.ErrorMessages);
+                return result;
+            }
+
+            // 5) Get type-specific processor
+            if (!_processors.TryGetValue(request.Type, out var processor))
+            {
+                result.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.Type), request.Type);
+                return result;
+            }
+
+            // 6) Check clone logic
+            var shouldClone = await CheckCloneAsync(oldEntity, request, cancellationToken);
+            if (shouldClone)
+            {
+                var cloneValidation = processor.ValidateForClone(request, _helper);
+                if (!cloneValidation.IsOK)
+                {
+                    result.AddErrorBadRequest(cloneValidation.ErrorMessages);
+                    return result;
+                }
+                oldEntity.Status = EnumExamPracticeStatus.Cloned;
+            }
+
+            // 7) Execute update via type-specific processor
+            var isUsedByClient = await _repo.IsUsingByClient(oldEntity.Id);
+            var newEntity = ExamPracticeFactory.Create(request, _mapper).Build();
 
             await _versionUpdater.UpdateEntity(
                 oldEntity,
                 newEntity,
-                (_, __) => Task.FromResult(isUsingByClient),                    // shouldCreateNewVersion?
-                (o, n) => ApplyUpdateAsync(request, o, n, isUsingByClient, result, cancellationToken), // onUpdate
+                (_, __) => Task.FromResult(isUsedByClient),
+                (oldExamPractice, newExamPractice) =>
+                    processor.ApplyUpdateAsync(request, oldExamPractice, newExamPractice, isUsedByClient, shouldClone, _mapper, _helper, result, cancellationToken),
                 null,
-                (o, n) => SetResultAsync(o, n, result)                          // onCompleted
-            );
+                (oldExamPractice, newExamPractice) => SetResultAsync(oldExamPractice, newExamPractice, result, cancellationToken));
 
             result.StatusCode = StatusCodes.Status200OK;
             return result;
         }
 
-        // -------------------- Steps --------------------
-
-        private async Task<bool> ValidateAsync(
-            UpdateExamPracticeCommand request,
-            ExamPractice oldEntity,
-            MethodResult<ExamPracticeModel> result,
-            CancellationToken ct)
+        private async Task<ExamPracticeValidationContext> ResolveValidationContextAsync(UpdateExamPracticeCommand request, CancellationToken ct)
         {
-            var validateBuilder = await ExamPracticeValidateBuilder
-                .Create(request, _repo)
-                .IsValidateQuestion(request.ExamPracticeSections, _mapper)
-                .ValidateDuplicateTestAsync(oldEntity.OriginalId);
+            var context = new ExamPracticeValidationContext();
 
-            var validateResult = validateBuilder.GetResult();
-            if (validateResult.IsOK)
+            // Resolve province name via SystemService
+            if (request.ProvinceId.HasValue)
             {
-                return true;
-            }
-            result.AddErrorBadRequest(validateResult.ErrorMessages);
-            return false;
-        }
+                var locationResults = await _systemService.GetLocationByIdsAsync(
+                    new GetLocationsByIdsQueryModel { IdsStr = request.ProvinceId.Value.ToString() });
 
-        private ExamPractice BuildNewVersionEntity(UpdateExamPracticeCommand request)
-        {
-            // giữ đúng behavior: factory build default
-            return ExamPracticeFactory.Create(request, _mapper).Build();
-        }
-
-        private async Task ApplyUpdateAsync(
-            UpdateExamPracticeCommand request,
-            ExamPractice oldEntity,
-            ExamPractice newEntity,
-            bool isUsingByClient,
-            MethodResult<ExamPracticeModel> result,
-            CancellationToken ct)
-        {
-            // 1) Map request -> old entity (giữ đúng logic của bạn)
-            _mapper.Map(request, oldEntity);
-
-            if (!oldEntity.IsValid())
-            {
-                result.AddErrorBadRequest(oldEntity.ErrorMessages);
-                return;
+                if (locationResults.IsSuccessStatusCode && locationResults.Content?.Result?.Any() == true)
+                {
+                    context.ProvinceName = locationResults.Content.Result.First().Name;
+                }
             }
 
-            // 2) Nếu không bị client dùng, update sections + rebuild index
-            if (!isUsingByClient)
-            {
-                await UpdateSectionsAsync(request, oldEntity, ct);
-            }
+            return context;
         }
 
-        private async Task UpdateSectionsAsync(UpdateExamPracticeCommand request, ExamPractice oldEntity, CancellationToken ct)
+        private async Task<ExamPractice?> GetEntityWithIncludesAsync(Guid id, CancellationToken ct)
         {
-            var currentSections = oldEntity.ExamPracticeSections
-                .OrderBy(x => x.DisplayOrder)
-                .ToList();
-
-            await _converter.HandlerExamPracticeSections(
-                request.ExamPracticeSections,
-                currentSections,
-                oldEntity.Id,
-                null,
-                ct);
-
-            await _converter.DeleteObjectInstance();
-
-            _common.HanderQuestionIndexSection(currentSections);
+            return await _repo.Queryable.FirstOrDefaultAsync(x => x.Id == id, ct);
         }
 
-        private static Task SetResultAsync(ExamPractice oldEntity, ExamPractice newEntity, MethodResult<ExamPracticeModel> result)
+        private async Task<bool> CheckCloneAsync(ExamPractice entity, UpdateExamPracticeCommand request, CancellationToken ct)
         {
-            // giữ đúng behavior: newEntity.Id != Guid.Empty => trả new
+            var existResult = await _resultRepo.Queryable.AnyAsync(x => x.ExamPracticeId == request.Id, ct);
+            if (!existResult)
+                return false;
+            return await _helper.IsChangeValueActive(entity, request);
+        }
+
+        private async Task SetResultAsync(ExamPractice oldEntity, ExamPractice newEntity, MethodResult<ExamPracticeModel> result, CancellationToken ct)
+        {
             var entityToReturn = newEntity.Id != Guid.Empty ? newEntity : oldEntity;
-            result.Result = result.Result = (result as dynamic)?._mapper != null
-                ? null
-                : null;
-            return Task.CompletedTask;
+            result.Result = _mapper.Map<ExamPracticeModel>(entityToReturn);
+            if (result.Result != null)
+            {
+                await _helper.UpdateExamPracticeSectionScoreAsync(entityToReturn).ConfigureAwait(false);
+            }
         }
     }
 }
