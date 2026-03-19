@@ -38,7 +38,8 @@ namespace Fsel.Course.Application.Queries.AiCriteriaConfigQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<AICriteriaConfigsModel>();
 
-            var hasObjectIdOrProgramId = request.ObjectId != null || request.ProgramId != null;
+            var hasObjectId = request.ObjectId != null;
+            var hasProgramIdAndObjectId = request.ProgramId != null && request.ObjectId != null;
 
             // Bước 1: Tìm theo ProgramId hoặc ObjectId
             var aiCriteria = await _aiCriteriaConfigRepository.ReadQueryable
@@ -49,7 +50,7 @@ namespace Fsel.Course.Application.Queries.AiCriteriaConfigQuery
                 .ToListAsync(cancellationToken);
 
             // Bước 2: Nếu không ra kết quả với ProgramId/ObjectId → tìm theo DefaultType = Default
-            if (aiCriteria.Count == 0 && !hasObjectIdOrProgramId)
+            if (aiCriteria.Count == 0 && !hasObjectId)
             {
                 aiCriteria = await _aiCriteriaConfigRepository.ReadQueryable
                     .Where(x => x.SubFeatureType == request.SubFeatureType
@@ -60,7 +61,7 @@ namespace Fsel.Course.Application.Queries.AiCriteriaConfigQuery
             }
 
             // Bước 3: Nếu có ProgramId/ObjectId nhưng không tìm thấy → tìm theo DefaultType = Feature
-            if (aiCriteria.Count == 0 && hasObjectIdOrProgramId)
+            if (aiCriteria.Count == 0 && hasProgramIdAndObjectId)
             {
                 aiCriteria = await _aiCriteriaConfigRepository.ReadQueryable
                     .Where(x => x.SubFeatureType == request.SubFeatureType
