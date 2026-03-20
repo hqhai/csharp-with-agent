@@ -16,10 +16,12 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
     using Fsel.Course.Domain.Entities.TestConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Commands.AiCmd;
     using Fsel.Course.Lms.Application.Queues.Publishers.Test;
     using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService.Models;
     using Fsel.Course.Lms.Application.Services.TestServices.Interface;
+    using Fsel.Shared.ApplicationServices.CacheServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
@@ -38,6 +40,7 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
         private readonly ITestResultRepository _testResultRepository;
         private readonly IAiPromptManagerRepository _aiPromptManagerRepository;
         private readonly ICategoryRepository _categoryRepository;
+        private readonly IRequestSafeCachingService _requestSafeCachingService;
 
         public SpeakingAITestLayoutHandler(
             ITestSectionResultRepository testSectionResultRepository,
@@ -48,7 +51,8 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
             SubmitTestAiSpeakingPublisher publisher,
             ITestResultRepository testResultRepository,
             IAiPromptManagerRepository aiPromptManagerRepository,
-            ICategoryRepository categoryRepository)
+            ICategoryRepository categoryRepository,
+            IRequestSafeCachingService requestSafeCachingService)
         {
             _testSectionResultRepository = testSectionResultRepository;
             _prosodyScoreRepository = prosodyScoreRepository;
@@ -59,6 +63,7 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
             _testResultRepository = testResultRepository;
             _aiPromptManagerRepository = aiPromptManagerRepository;
             _categoryRepository = categoryRepository;
+            _requestSafeCachingService = requestSafeCachingService;
         }
 
         #region Entry
@@ -116,13 +121,8 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
                                                                          .FirstOrDefaultAsync(ct);
             if (sectionAiPromptManager == null)
             {
-                var subjectId = await _categoryRepository.ReadQueryable.Include(x => x.CategoryParent)
-                                                    .Where(x => x.Id == programId)
-                                                    .Select(x => x.Id)
-                                                    .FirstOrDefaultAsync(ct);
-
                 return await _aiPromptManagerRepository.ReadQueryable
-                    .Where(x => x.ProjectId == subjectId)
+                    .Where(x => x.ProjectId == programId)
                     .Where(x => !id.HasValue || x.Id == id.Value)
                     .Where(x => x.VersionStatus == EnumVersionStatus.LastVersion)
                     .Include(x => x.AICriteriaConfigs)
@@ -308,7 +308,9 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
             var scores = new List<TestScore>();
 
             var ranges = await _prosodyScoreRepository.ReadQueryable.ToListAsync(ct);
-            var aiPromptManager = await LoadAiPromptManagerAsync(child.TestSection?.AiPromptManagerId, testResult.Test?.ProgramId ?? default, child.TestSectionId.Value, ct);
+            var subject = await _categoryRepository.GetSecondLevelFromRootAsync(testResult.Test?.ProgramId, ct);
+
+            var aiPromptManager = await LoadAiPromptManagerAsync(child.TestSection?.AiPromptManagerId, subject?.Id ?? default, child.TestSectionId.Value, ct);
 
             var (band, comment) = GetBandScore(input.AveragePronunciationScore, ranges);
 
@@ -330,7 +332,11 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
                                                .FirstOrDefault();
 
                 var ai = await GetAIResponseAsync(criteria, input, aiPromptManager, aiConfig, ct);
-                var model = ConvertHelper.Deserialize<AIEvaluationOutputModel>(ai);
+                var model = ConvertHelper.Deserialize<IList<AIEvaluationOutputModel>>(ai)?.FirstOrDefault();
+                if (model == null)
+                {
+                    model = ConvertHelper.Deserialize<AIEvaluationOutputModel>(ai);
+                }
 
                 if (long.TryParse(model?.BandScore, out var score))
                 {
@@ -456,15 +462,19 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
             List<TestScore> scores,
             CancellationToken ct)
         {
-            await _testScoreRepository.ExecuteTransactionAsync(async () =>
+            if (scores.Any())
             {
-                if (scores.Any())
+                await _requestSafeCachingService.SafeRequest(
+                key: $"Add_TestScores_{parent.Id}",
+                safeFunction: async () =>
                 {
-                    await _testScoreRepository.AddList(scores);
-                    await _testScoreRepository.UnitOfWork.SaveChangesAsync(ct);
-                }
-                return new MethodResult<bool>();
-            });
+                    await _testScoreRepository.BulkMergeAsync(scores, bulk =>
+                    {
+                        bulk.ColumnPrimaryKeyExpression = c => new { c.TestResultId, c.Criteria, c.IsDeleted };
+                    });
+                    return scores;
+                });
+            }
 
             await _testSectionResultRepository.BulkUpdateList(children.Append(parent).ToList(),
             bulk => bulk.ColumnInputExpression = c => new
@@ -507,8 +517,8 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
             AICriteriaConfigs? aICriteria,
             CancellationToken ct)
         {
-            var userConfig = BuildSpeakingPromptHelper.CustomAnswerConfigToSendGPT(input.Questions, input.Answers, criteria, aICriteria?.UserRole);
-            var systemConfig = !string.IsNullOrEmpty(aICriteria?.SettingAiConfig) ? aICriteria.SettingAiConfig : BuildSpeakingPromptHelper.GetConfigByType(criteria, true);
+            var systemConfig = BuildSpeakingPromptHelper.CustomAnswerConfigToSendGPT(input.Questions, input.Answers, criteria, aICriteria?.SettingAiConfig);
+            var userConfig = !string.IsNullOrEmpty(aICriteria?.UserRole) ? aICriteria.UserRole : BuildSpeakingPromptHelper.GetConfigByType(criteria, true);
             var response = await _mediator.Send(new SubmitAICommand
             {
                 SystemRoleAlConfig = systemConfig,
