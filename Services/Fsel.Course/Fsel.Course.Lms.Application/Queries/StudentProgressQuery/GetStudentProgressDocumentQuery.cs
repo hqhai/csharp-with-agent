@@ -111,6 +111,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     var featureAccessTimeResult = await _systemService.GetFeatureAccessTimeAsync(new FeatureAccessTimeQueryModel
                     {
                         UserId = userId,
+                        CourseResultId = lessonResult.CourseResultId,
                         UnitId = request.UnitId,
                         LessonId = request.LessonId,
                         CourseId = request.CourseId,

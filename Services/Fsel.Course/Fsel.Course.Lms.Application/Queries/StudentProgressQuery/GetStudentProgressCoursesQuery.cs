@@ -99,9 +99,10 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
 
             var featureAccessTimeResults = await _systemService.GetFeatureAccessTimesAsync(new FeatureAccessTimesQueryModel
             {
-                FeatureAccessTimes = courseIds.Select(x => new FeatureAccessTimeQueryModel
+                FeatureAccessTimes = query.Select(x => new FeatureAccessTimeQueryModel
                 {
-                    CourseId = x,
+                    CourseId = x.Course.Id,
+                    CourseResultId = x.CourseResult.Id,
                     UserId = userId
                 }).ToList(),
                 UserId = userId
@@ -127,8 +128,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
 
             foreach (var item in query)
             {
-                var featureAccessTime = featureAccessTimes?
-                    .FirstOrDefault(x => x.CourseId == item.Course.Id);
+                var featureAccessTime = featureAccessTimes?.FirstOrDefault(x => x.CourseId == item.Course.Id);
 
                 var learningService = learningServices.FirstOrDefault(p => p.StudentId == request.StudentId && p.LearningTemplateId == item.Course.Id);
                 var totalContentCompleted = learningService?.Children.SelectMany(p => p.Children)?.Sum(p => p.TotalContentCompleted) ?? 0;

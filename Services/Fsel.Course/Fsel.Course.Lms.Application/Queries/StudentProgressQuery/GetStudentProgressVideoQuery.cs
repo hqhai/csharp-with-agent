@@ -115,6 +115,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                         UnitId = request.UnitId,
                         LessonId = request.LessonId,
                         CourseId = request.CourseId,
+                        CourseResultId = lessonResult.Id,
                         EnumFeature = EnumFeature.VideoLesson,
                         ObjectId = request.LessonResultId
                     });
