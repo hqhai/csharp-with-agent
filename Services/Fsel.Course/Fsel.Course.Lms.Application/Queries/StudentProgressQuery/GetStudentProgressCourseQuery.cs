@@ -101,6 +101,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 {
                     new FeatureAccessTimeQueryModel
                     {
+                        CourseResultId = query.CourseResult.Id,
                         CourseId = request.CourseId,
                         UserId = userId
                     },

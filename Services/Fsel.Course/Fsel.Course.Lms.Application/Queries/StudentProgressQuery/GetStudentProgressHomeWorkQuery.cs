@@ -9,7 +9,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -39,7 +38,14 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
         private readonly ICourseResultRepository _courseResultRepository;
         private readonly ILessonRepository _lessonRepository;
 
-        public GetStudentProgressHomeWorkQueryHandler(IUserService userService, IMapper mapper, IHomeWorkRepository homeWorkRepository, ISystemService systemService, IHomeWorkResultRepository homeWorkResultRepository, ILessonResultRepository lessonResultRepository, ICourseResultRepository courseResultRepository, ILessonRepository lessonRepository)
+        public GetStudentProgressHomeWorkQueryHandler(IUserService userService,
+            IMapper mapper,
+            IHomeWorkRepository homeWorkRepository,
+            ISystemService systemService,
+            IHomeWorkResultRepository homeWorkResultRepository,
+            ILessonResultRepository lessonResultRepository,
+            ICourseResultRepository courseResultRepository,
+            ILessonRepository lessonRepository)
         {
             _userService = userService;
             _mapper = mapper;
@@ -97,7 +103,8 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             var homeWorkResults = await _homeWorkResultRepository.Queryable
                                         .Include(p => p.HomeWork).ThenInclude(p => p.HomeWorkQuestions)
                                         .Include(p => p.HomeWork).ThenInclude(p => p.Skill)
-                                        .Where(x => x.LessonResultId == lessonResult.Id && x.StudentId == request.StudentId).ToListAsync(cancellationToken);
+                                        .Where(x => x.LessonResultId == lessonResult.Id && x.StudentId == request.StudentId)
+                                        .ToListAsync(cancellationToken);
 
             var homeWorkResultIds = homeWorkResults.Select(x => x.Id).ToList();
 
@@ -105,6 +112,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             {
                 FeatureAccessTimes = homeWorkResultIds.Select(x => new FeatureAccessTimeQueryModel
                 {
+                    CourseResultId = lessonResult.CourseResultId,
                     CourseId = request.CourseId,
                     UnitId = request.UnitId,
                     LessonId = request.LessonId,
