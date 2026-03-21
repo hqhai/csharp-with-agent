@@ -19,7 +19,7 @@ builder.AddDbContexts<MasterDBContext, MasterReadDbContext>();
 
 builder.Services.AddDataProtection();
 
-builder.Services.AddScoped<IStudentProfileReportRepository, StudentProfileReportRepository>();
+builder.Services.AddScoped(typeof(IMasterBaseRepository<>), typeof(MasterBaseRepository<>));
 
 // Publisher
 //builder.Services.AddScoped<CreateTokenHistoryPublisher>();

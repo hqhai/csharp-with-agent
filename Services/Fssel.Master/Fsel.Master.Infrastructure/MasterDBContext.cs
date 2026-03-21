@@ -44,10 +44,21 @@ namespace Fsel.Master.Infrastructure
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             ArgumentNullException.ThrowIfNull(modelBuilder);
+
+            modelBuilder.Entity<PlacementTestReport>()
+                        .Property(x => x.Status)
+                        .HasConversion<string>();
+
             base.OnModelCreating(modelBuilder);
         }
 
         public DbSet<StudentProfileReport> StudentProfileReports { get; set; }
+        public DbSet<PlacementTestReport> PlacementTestReports { get; set; }
+        public DbSet<StudentCompetitionEvent> StudentCompetitionEvents { get; set; }
+        public DbSet<CompetitionEvent> CompetitionEvents { get; set; }
+        public DbSet<Program> Programs { get; set; }
+        public DbSet<Subject> Subjects { get; set; }
+        public DbSet<Level> Levels { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
