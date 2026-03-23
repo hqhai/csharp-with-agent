@@ -91,14 +91,14 @@ namespace Fsel.Master.Application.Queries.ProgressMetrics
                 x.StudentId,
 
                 UnitId =
-            request.UnitLevel == EnumUnitLevelType.Province ? x.ProvinceId :
-            request.UnitLevel == EnumUnitLevelType.District ? x.DistrictId :
-            x.SchoolId,
+                            request.UnitLevel == EnumUnitLevelType.Province ? x.ProvinceId :
+                            request.UnitLevel == EnumUnitLevelType.District ? x.DistrictId :
+                            x.SchoolId,
 
                 UnitName =
-            request.UnitLevel == EnumUnitLevelType.Province ? x.ProvinceName :
-            request.UnitLevel == EnumUnitLevelType.District ? x.DistrictName :
-            x.SchoolName
+                            request.UnitLevel == EnumUnitLevelType.Province ? x.ProvinceName :
+                            request.UnitLevel == EnumUnitLevelType.District ? x.DistrictName :
+                            x.SchoolName
             });
 
             var placementQuery = from u in unitQuery
