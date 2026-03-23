@@ -228,6 +228,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
 
         public double? Score { get; set; }
 
+        public string? ScoringFormulaType { get; set; }
+
         public IList<SkillScores>? SkillScores { get; set; }
         public IList<UnitResult>? UnitResults { get; set; }
         public IList<Unit>? Units { get; set; }
@@ -590,6 +592,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                     testComponent.UpdatedDate = testResult?.CompletionDate ?? testResult?.UpdatedDate;
                     testComponent.NumberSkill = test.TestSections.Count(x => !x.ParentId.HasValue);
                     testComponent.SkillScores = testResult?.SkillScores;
+                    testComponent.ScoringFormulaType = test.ScoringFormulaType.ToString();
                 }
             });
 

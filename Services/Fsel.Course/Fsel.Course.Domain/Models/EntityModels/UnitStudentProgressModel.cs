@@ -27,5 +27,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public int TotalContentComplete { get; set; }
         public Guid ModuleId { get; set; }
         public int? CurrentLesson { get; set; }
+        public string? ScoringFormulaType { get; set; }
     }
 }
