@@ -21,7 +21,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
     using Fsel.Course.Lms.Application.Services.StorageServices;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.UserServices;
-    using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
+    using Fsel.Shared.ApplicationServices.CacheServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
@@ -31,7 +31,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
     using Refit;
-    using Fsel.Shared.ApplicationServices.CacheServices;
 
     public class CreateCFRPendingWordContentCommand : CreateCFRPendingWordContentCommandModel, IRequest<MethodResult<bool>>
     {
@@ -113,37 +112,24 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
                 return result;
             }
 
-            // ===== Student =====
-            var studentResult = await _userService
-                .GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
-
-            if (!studentResult.IsSuccessStatusCode || studentResult.Content?.Result == null)
+            // ===== Load ClassForumResult by ID =====
+            var classForumResult = await _classForumResultRepository.Queryable
+                                                                    .Include(x => x.ClassForumDetailResults.OrderBy(d => d.CreatedDate))
+                                                                    .FirstOrDefaultAsync(x => x.Id == request.ClassForumResultId, cancellationToken);
+            if (classForumResult == null)
             {
-                result.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), "Student");
+                result.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(ClassForumResult));
                 return result;
             }
 
-            var studentId = studentResult.Content.Result.Id;
-
             // ===== Max pending STT =====
             var pendingCount = await _classForumResultRepository.Queryable
-                .Where(x => x.StudentId == studentId && x.IsPendingSpeechToText)
-                .CountAsync(cancellationToken);
+                                                                .Where(x => x.StudentId == classForumResult.StudentId && x.IsPendingSpeechToText)
+                                                                .CountAsync(cancellationToken);
 
             if (pendingCount >= MaxPendingSpeechToText)
             {
                 result.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.MaxPendingSpeechToText));
-                return result;
-            }
-
-            // ===== Load ClassForumResult by ID =====
-            var classForumResult = await _classForumResultRepository.Queryable
-                .Include(x => x.ClassForumDetailResults.OrderBy(d => d.CreatedDate))
-                .FirstOrDefaultAsync(x => x.Id == request.ClassForumResultId && x.StudentId == studentId, cancellationToken);
-
-            if (classForumResult == null)
-            {
-                result.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(ClassForumResult));
                 return result;
             }
 
@@ -295,7 +281,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
             if (detail.ClassForumResultFiles.Any())
             {
                 var classForumResultFiles = detail.ClassForumResultFiles.ToList();
-                await _requestSafeCachingService.SafeRequest<List<ClassForumResultFile>>(
+                await _requestSafeCachingService.SafeRequest(
                     key: $"Add_ClassForumResultFiles_{string.Join("_", classForumResultFiles.Select(hwa => $"{hwa.ClassForumDetailResultId}_{hwa.FilePath}"))}",
                     safeFunction: async () =>
                     {

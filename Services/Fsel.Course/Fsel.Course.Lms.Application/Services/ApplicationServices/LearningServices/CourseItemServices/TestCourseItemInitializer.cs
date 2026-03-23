@@ -2,6 +2,8 @@
 
 namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServices.CourseItemServices
 {
+    using System;
+    using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -14,6 +16,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Shared.ApplicationServices.CacheServices;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
 
     public class TestCourseItemInitializer : ICourseItemInitializer
     {
@@ -21,62 +24,125 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
         private readonly ITestResultRepository _testResultRepository;
         private readonly ITestRepository _testRepository;
         private readonly IRequestSafeCachingService _requestSafeCachingService;
+        private readonly ILogger<TestCourseItemInitializer> _logger;
 
-        public TestCourseItemInitializer(ITestGroupResultRepository testGroupResultRepository,
+        public TestCourseItemInitializer(
+            ITestGroupResultRepository testGroupResultRepository,
             ITestResultRepository testResultRepository,
             ITestRepository testRepository,
-            IRequestSafeCachingService requestSafeCachingService)
+            IRequestSafeCachingService requestSafeCachingService,
+            ILogger<TestCourseItemInitializer> logger)
         {
             _testGroupResultRepository = testGroupResultRepository;
             _testResultRepository = testResultRepository;
             _testRepository = testRepository;
             _requestSafeCachingService = requestSafeCachingService;
+            _logger = logger;
         }
 
-        public async Task<VoidMethodResult> InitializeAsync(CourseModule courseModule, CourseResult courseResult, CancellationToken cancellationToken)
+        public async Task<VoidMethodResult> InitializeAsync(
+            CourseModule courseModule,
+            CourseResult courseResult,
+            CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(courseModule);
             ArgumentNullException.ThrowIfNull(courseResult);
+
             var methodResult = new VoidMethodResult();
 
-            if (courseModule.CourseConfigType != EnumCourseConfigType.Test)
+            try
             {
-                return methodResult;
-            }
-
-            var testGroupResult = await GetTestGroupResultAsync(courseResult.Id, courseModule.Id, cancellationToken);
-            if (testGroupResult != null)
-            {
-                if (testGroupResult.Status == EnumResultStatus.Unfinished)
+                if (courseModule.CourseConfigType != EnumCourseConfigType.Test)
                 {
-                    foreach (var item in testGroupResult.TestResults)
+                    _logger.LogDebug(
+                        "Skip TestGroupResult initialization because CourseConfigType is not Test. CourseModuleId={CourseModuleId}, CourseResultId={CourseResultId}, ActualType={CourseConfigType}",
+                        courseModule.Id,
+                        courseResult.Id,
+                        courseModule.CourseConfigType);
+
+                    return methodResult;
+                }
+
+                var testGroupResult = await GetTestGroupResultAsync(courseResult.Id, courseModule.Id, cancellationToken);
+
+                if (testGroupResult != null)
+                {
+                    if (testGroupResult.Status == EnumResultStatus.Unfinished)
                     {
-                        if (item.Status != EnumResultStatus.Unfinished)
+                        _logger.LogInformation(
+                            "Found existing TestGroupResult in Unfinished status. Resetting to New. TestGroupResultId={TestGroupResultId}, CourseResultId={CourseResultId}, CourseModuleId={CourseModuleId}, StudentId={StudentId}",
+                            testGroupResult.Id,
+                            courseResult.Id,
+                            courseModule.Id,
+                            courseResult.StudentId);
+
+                        foreach (var item in testGroupResult.TestResults)
                         {
-                            continue;
+                            if (item.Status != EnumResultStatus.Unfinished)
+                            {
+                                continue;
+                            }
+
+                            item.Status = EnumResultStatus.New;
+                            item.NewDate = DateTime.UtcNow;
                         }
-                        item.Status = EnumResultStatus.New;
+
+                        testGroupResult.Status = EnumResultStatus.New;
+
+                        await _testGroupResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+                    }
+                    else
+                    {
+                        _logger.LogDebug(
+                            "TestGroupResult already exists, no initialization needed. TestGroupResultId={TestGroupResultId}, CourseResultId={CourseResultId}, CourseModuleId={CourseModuleId}, Status={Status}, TestResultCount={TestResultCount}",
+                            testGroupResult.Id,
+                            courseResult.Id,
+                            courseModule.Id,
+                            testGroupResult.Status,
+                            testGroupResult.TestResults?.Count ?? 0);
                     }
 
-                    testGroupResult.Status = EnumResultStatus.New;
-                    await _testGroupResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+                    return methodResult;
                 }
-                return methodResult;
-            }
 
-            var test = await _testRepository.ReadQueryable.Where(x => x.OriginalId == courseModule.OriginalId)
-                                            .Where(x => x.VersionStatus == EnumVersionStatus.LastVersion)
-                                            .FirstOrDefaultAsync(cancellationToken);
+                var test = await _testRepository.ReadQueryable
+                    .Where(x => x.OriginalId == courseModule.OriginalId)
+                    .Where(x => x.VersionStatus == EnumVersionStatus.LastVersion)
+                    .FirstOrDefaultAsync(cancellationToken);
 
-            if (test == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(test), courseModule.OriginalId);
-                return methodResult;
-            }
-            await SaveTestGroupResultAsync(courseModule, test, courseResult);
-            testGroupResult = await GetTestGroupResultAsync(courseResult.Id, courseModule.Id, cancellationToken);
-            if (testGroupResult != null)
-            {
+                if (test == null)
+                {
+                    _logger.LogWarning(
+                        "Test not found for CourseModule OriginalId. CourseModuleId={CourseModuleId}, CourseModuleOriginalId={CourseModuleOriginalId}, CourseResultId={CourseResultId}, StudentId={StudentId}",
+                        courseModule.Id,
+                        courseModule.OriginalId,
+                        courseResult.Id,
+                        courseResult.StudentId);
+
+                    methodResult.AddErrorBadRequest(
+                        nameof(EnumSystemErrorCode.DataNotExist),
+                        nameof(test),
+                        courseModule.OriginalId);
+
+                    return methodResult;
+                }
+
+                await SaveTestGroupResultAsync(courseModule, test, courseResult, cancellationToken);
+
+                testGroupResult = await GetTestGroupResultAsync(courseResult.Id, courseModule.Id, cancellationToken);
+
+                if (testGroupResult == null)
+                {
+                    _logger.LogWarning(
+                        "TestGroupResult was not found after initialization. CourseResultId={CourseResultId}, CourseModuleId={CourseModuleId}, StudentId={StudentId}, TestId={TestId}",
+                        courseResult.Id,
+                        courseModule.Id,
+                        courseResult.StudentId,
+                        test.Id);
+
+                    return methodResult;
+                }
+
                 var testResult = new TestResult
                 {
                     StudentId = courseResult.StudentId,
@@ -87,21 +153,46 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
                 };
 
                 await _requestSafeCachingService.SafeRequest(
-                key: $"Add_TestResult_{testResult.TestGroupResultId}_{testResult.TestId}_{testResult.StudentId}_{testResult.IsDeleted}",
-                safeFunction: async () =>
-                {
-                    await _testResultRepository.BulkMergeAsync(new List<TestResult> { testResult }, bulk =>
+                    key: $"Add_TestResult_{testResult.TestGroupResultId}_{testResult.TestId}_{testResult.StudentId}_{testResult.IsDeleted}",
+                    safeFunction: async () =>
                     {
-                        bulk.ColumnPrimaryKeyExpression = c => new { c.TestGroupResultId, c.TestId, c.StudentId, c.IsDeleted };
-                    });
-                    return testResult;
-                });
-            }
+                        await _testResultRepository.BulkMergeAsync(
+                            new List<TestResult> { testResult },
+                            bulk =>
+                            {
+                                bulk.ColumnPrimaryKeyExpression = c => new
+                                {
+                                    c.TestGroupResultId,
+                                    c.TestId,
+                                    c.StudentId,
+                                    c.IsDeleted
+                                };
+                            });
 
-            return methodResult;
+                        return testResult;
+                    });
+
+                return methodResult;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Error while initializing Test course item. CourseModuleId={CourseModuleId}, CourseModuleOriginalId={CourseModuleOriginalId}, CourseResultId={CourseResultId}, StudentId={StudentId}",
+                    courseModule.Id,
+                    courseModule.OriginalId,
+                    courseResult.Id,
+                    courseResult.StudentId);
+
+                throw;
+            }
         }
 
-        private async Task SaveTestGroupResultAsync(CourseModule courseModule, Test test, CourseResult courseResult)
+        private async Task SaveTestGroupResultAsync(
+            CourseModule courseModule,
+            Test test,
+            CourseResult courseResult,
+            CancellationToken cancellationToken)
         {
             var testGroupResult = new TestGroupResult
             {
@@ -119,19 +210,32 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
                 key: $"Add_TestGroupResult_{testGroupResult.CourseModuleId}_{testGroupResult.CourseResultId}_{testGroupResult.IsDeleted}",
                 safeFunction: async () =>
                 {
-                    await _testGroupResultRepository.BulkMergeAsync(new List<TestGroupResult> { testGroupResult }, bulk =>
-                    {
-                        bulk.ColumnPrimaryKeyExpression = c => new { c.CourseModuleId, c.CourseResultId, c.IsDeleted };
-                    });
+                    await _testGroupResultRepository.BulkMergeAsync(
+                        new List<TestGroupResult> { testGroupResult },
+                        bulk =>
+                        {
+                            bulk.ColumnPrimaryKeyExpression = c => new
+                            {
+                                c.CourseModuleId,
+                                c.CourseResultId,
+                                c.IsDeleted
+                            };
+                        });
+
                     return testGroupResult;
                 });
         }
 
-        private async Task<TestGroupResult?> GetTestGroupResultAsync(Guid courseResultId, Guid courseModuleId, CancellationToken cancellationToken)
+        private async Task<TestGroupResult?> GetTestGroupResultAsync(
+            Guid courseResultId,
+            Guid courseModuleId,
+            CancellationToken cancellationToken)
         {
-            return await _testGroupResultRepository.Queryable.Include(x => x.TestResults)
-                                                   .Where(x => x.CourseResultId == courseResultId)
-                                                   .FirstOrDefaultAsync(x => x.CourseModuleId == courseModuleId, cancellationToken);
+            return await _testGroupResultRepository.Queryable
+                .Include(x => x.TestResults)
+                .Where(x => x.CourseResultId == courseResultId)
+                .Where(x => x.CourseModuleId == courseModuleId)
+                .FirstOrDefaultAsync(cancellationToken);
         }
     }
 }

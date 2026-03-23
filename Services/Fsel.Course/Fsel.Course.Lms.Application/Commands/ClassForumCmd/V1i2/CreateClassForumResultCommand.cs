@@ -332,7 +332,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
                     file.ClassForumDetailResultId = classForumDetailResult.Id; // Set foreign key nếu cần
                 }
 
-                await _requestSafeCachingService.SafeRequest<List<ClassForumResultFile>>(
+                await _requestSafeCachingService.SafeRequest(
                     key: $"Add_ClassForumResultFiles_{string.Join("_", classForumResultFileNews.Select(hwa => $"{hwa.ClassForumDetailResultId}_{hwa.FilePath}"))}",
                     safeFunction: async () =>
                     {

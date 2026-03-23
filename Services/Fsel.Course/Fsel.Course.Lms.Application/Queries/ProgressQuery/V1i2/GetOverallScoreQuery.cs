@@ -109,7 +109,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery.V1i2
                             CountQuestion = x.Sum(x => x.CountQuestion),
                             TotalQuestion = x.Sum(x => x.TotalQuestion),
                         }).ToList();
-                    overallScoreModel.Percent = courseResult?.Percent ?? default;
+                    overallScoreModel.Percent = unitResults.Average(x => x.Percent);
                 }
                 else
                 {

@@ -18,7 +18,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
     using Fsel.Course.Lms.Application.Services.StorageServices;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.UserServices;
-    using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
+    using Fsel.Shared.ApplicationServices.CacheServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
@@ -27,10 +27,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Hosting;
-    using Refit;
     using Microsoft.Extensions.Logging;
-    using Fsel.Course.Infrastructure.Repositories;
-    using Fsel.Shared.ApplicationServices.CacheServices;
+    using Refit;
 
     public class CreateCFRPendingWordContentCommand : CreateCFRPendingWordContentCommandModel, IRequest<MethodResult<bool>>
     {
