@@ -75,7 +75,7 @@ namespace Fsel.Course.Lms.Application.Services.AIConfigService
                 .Where(x => x.FeatureMultiple == featureMultiple)
                 .Where(x => !id.HasValue || x.Id == id.Value)
                 .Where(x =>
-                    ((!objectId.HasValue || (x.ObjectId == objectId && x.SubFeatureType == subFeatureType))) ||
+                    (((!objectId.HasValue && x.ProjectId == Guid.Empty) || (x.ObjectId == objectId && x.SubFeatureType == subFeatureType))) ||
                     (x.ObjectId == null && x.SubFeatureType == subFeatureType) ||
                     (x.ObjectId == null && x.SubFeatureType == null))
                 .OrderByDescending(x =>
@@ -162,7 +162,7 @@ namespace Fsel.Course.Lms.Application.Services.AIConfigService
                 .Where(x => x.FeatureMultiple == featureMultiple)
                 .Where(x =>
                     (objectIds != null && x.ObjectId.HasValue && objectIds.Contains(x.ObjectId.Value) && x.SubFeatureType == subFeatureType) ||
-                    (x.ObjectId == null && x.SubFeatureType == subFeatureType) ||
+                    (x.ObjectId == null && x.SubFeatureType == subFeatureType && x.ProjectId == Guid.Empty) ||
                     (x.ObjectId == null && x.SubFeatureType == null))
                 .OrderByDescending(x =>
                     x.ObjectId != null ? 1 :
