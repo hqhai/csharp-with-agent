@@ -2,6 +2,10 @@
 
 namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServices.LessonItemServices
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums;
@@ -22,7 +26,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
         private readonly IRequestSafeCachingService _requestSafeCachingService;
         private readonly ILogger<HomeWorkLessonItemInitializer> _logger;
 
-        public HomeWorkLessonItemInitializer(IHomeWorkRepository homeWorkRepository,
+        public HomeWorkLessonItemInitializer(
+            IHomeWorkRepository homeWorkRepository,
             IHomeWorkResultRepository homeWorkResultRepository,
             IRequestSafeCachingService requestSafeCachingService,
             ILogger<HomeWorkLessonItemInitializer> logger)
@@ -33,80 +38,148 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
             _logger = logger;
         }
 
-        public async Task<VoidMethodResult> InitializeAsync(LessonModule lessonModule, LessonResult lessonResult, CancellationToken cancellationToken)
+        public async Task<VoidMethodResult> InitializeAsync(
+            LessonModule lessonModule,
+            LessonResult lessonResult,
+            CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(lessonModule);
             ArgumentNullException.ThrowIfNull(lessonResult);
-            var methodResult = new VoidMethodResult();
-            if (lessonModule.LessonConfigType != EnumLessonConfigType.HomeWork)
-            {
-                return methodResult;
-            }
 
-            var homeWorkResult = await _homeWorkResultRepository.Queryable.Where(x => x.LessonResultId == lessonResult.Id)
-                                                                .Where(x => x.LessonModuleId == lessonModule.Id)
-                                                                .FirstOrDefaultAsync(cancellationToken);
-            if (homeWorkResult != null)
+            var methodResult = new VoidMethodResult();
+
+            try
             {
-                if (homeWorkResult.Status == EnumResultStatus.Unfinished)
+                if (lessonModule.LessonConfigType != EnumLessonConfigType.HomeWork)
                 {
-                    homeWorkResult.Status = EnumResultStatus.New;
-                    homeWorkResult.NewDate = DateTime.UtcNow;
-                    await _homeWorkResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+                    _logger.LogDebug(
+                        "Skip HomeWork initialization because LessonConfigType is not HomeWork. LessonModuleId={LessonModuleId}, LessonResultId={LessonResultId}, ActualType={LessonConfigType}",
+                        lessonModule.Id,
+                        lessonResult.Id,
+                        lessonModule.LessonConfigType);
+
+                    return methodResult;
                 }
 
-                return methodResult;
-            }
+                var homeWorkResult = await _homeWorkResultRepository.Queryable
+                    .Where(x => x.LessonResultId == lessonResult.Id)
+                    .Where(x => x.LessonModuleId == lessonModule.Id)
+                    .FirstOrDefaultAsync(cancellationToken);
 
-            var homeWork = await _homeWorkRepository.ReadQueryable
-                                                    .Where(x => x.OriginalId == lessonModule.OriginalId)
-                                                    .Include(x => x.HomeWorkQuestions)
-                                                    .ThenInclude(x => x.Question)
-                                                    .Include(x => x.Skill)
-                                                    .Where(x => x.VersionStatus == EnumVersionStatus.LastVersion)
-                                                    .FirstOrDefaultAsync(cancellationToken);
-            if (homeWork == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWork), lessonModule.OriginalId);
-                return methodResult;
-            }
-            var correctTotal = homeWork.HomeWorkQuestions.Select(x => x.Question).Sum(x => x?.CorrectTotal ?? default);
-            homeWorkResult = new HomeWorkResult
-            {
-                LessonResultId = lessonResult.Id,
-                StudentId = lessonResult.StudentId,
-                Status = EnumResultStatus.New,
-                NewDate = DateTime.UtcNow,
-                HomeWorkId = homeWork.Id,
-                CorrectTotal = correctTotal,
-                LessonModuleId = lessonModule.Id,
-                SubmissionCount = Shared.Enums.EnumSubmissionCount.FirstSubmit,
-                SkillScores = new List<SkillScores>
+                if (homeWorkResult != null)
                 {
-                    new SkillScores
+                    if (homeWorkResult.Status == EnumResultStatus.Unfinished)
                     {
-                        SkillId = homeWork.SkillId,
-                        SkillFilePath = homeWork.Skill?.FilePath,
-                        SkillName = homeWork.Skill?.Name,
-                        TotalQuestion = homeWork.HomeWorkQuestions?.Count ?? 0,
-                        TotalCount = correctTotal,
+                        _logger.LogInformation(
+                            "Found existing HomeWorkResult in Unfinished status. Resetting to New. HomeWorkResultId={HomeWorkResultId}, LessonResultId={LessonResultId}, LessonModuleId={LessonModuleId}, StudentId={StudentId}",
+                            homeWorkResult.Id,
+                            lessonResult.Id,
+                            lessonModule.Id,
+                            lessonResult.StudentId);
+
+                        homeWorkResult.Status = EnumResultStatus.New;
+                        homeWorkResult.NewDate = DateTime.UtcNow;
+
+                        await _homeWorkResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+                    }
+                    else
+                    {
+                        _logger.LogDebug(
+                            "HomeWorkResult already exists, no initialization needed. HomeWorkResultId={HomeWorkResultId}, LessonResultId={LessonResultId}, LessonModuleId={LessonModuleId}, Status={Status}",
+                            homeWorkResult.Id,
+                            lessonResult.Id,
+                            lessonModule.Id,
+                            homeWorkResult.Status);
+                    }
+
+                    return methodResult;
+                }
+
+                var homeWork = await _homeWorkRepository.ReadQueryable
+                    .Where(x => x.OriginalId == lessonModule.OriginalId)
+                    .Include(x => x.HomeWorkQuestions)
+                        .ThenInclude(x => x.Question)
+                    .Include(x => x.Skill)
+                    .Where(x => x.VersionStatus == EnumVersionStatus.LastVersion)
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                if (homeWork == null)
+                {
+                    _logger.LogWarning(
+                        "HomeWork not found for LessonModule OriginalId. LessonModuleId={LessonModuleId}, LessonModuleOriginalId={LessonModuleOriginalId}, LessonResultId={LessonResultId}, StudentId={StudentId}",
+                        lessonModule.Id,
+                        lessonModule.OriginalId,
+                        lessonResult.Id,
+                        lessonResult.StudentId);
+
+                    methodResult.AddErrorBadRequest(
+                        nameof(EnumSystemErrorCode.DataNotExist),
+                        nameof(homeWork),
+                        lessonModule.OriginalId);
+
+                    return methodResult;
+                }
+
+                var correctTotal = homeWork.HomeWorkQuestions
+                    .Select(x => x.Question)
+                    .Sum(x => x?.CorrectTotal ?? default);
+
+                homeWorkResult = new HomeWorkResult
+                {
+                    LessonResultId = lessonResult.Id,
+                    StudentId = lessonResult.StudentId,
+                    Status = EnumResultStatus.New,
+                    NewDate = DateTime.UtcNow,
+                    HomeWorkId = homeWork.Id,
+                    CorrectTotal = correctTotal,
+                    LessonModuleId = lessonModule.Id,
+                    SubmissionCount = Shared.Enums.EnumSubmissionCount.FirstSubmit,
+                    SkillScores = new List<SkillScores>
+                    {
+                        new SkillScores
+                        {
+                            SkillId = homeWork.SkillId,
+                            SkillFilePath = homeWork.Skill?.FilePath,
+                            SkillName = homeWork.Skill?.Name,
+                            TotalQuestion = homeWork.HomeWorkQuestions?.Count ?? 0,
+                            TotalCount = correctTotal,
+                        },
                     },
-                },
-            };
+                };
 
-            await _requestSafeCachingService.SafeRequest(
-                key: $"Add_HomeWorkResult_{homeWorkResult.LessonModuleId}_{homeWorkResult.LessonResultId}_{homeWorkResult.IsDeleted}",
-                safeFunction: async () =>
-                {
-                    await _homeWorkResultRepository.BulkMergeAsync(new List<HomeWorkResult> { homeWorkResult }, bulk =>
+                await _requestSafeCachingService.SafeRequest(
+                    key: $"Add_HomeWorkResult_{homeWorkResult.LessonModuleId}_{homeWorkResult.LessonResultId}_{homeWorkResult.IsDeleted}",
+                    safeFunction: async () =>
                     {
-                        bulk.ColumnPrimaryKeyExpression = c => new { c.LessonResultId, c.LessonModuleId, c.IsDeleted };
-                    });
-                    return homeWorkResult;
-                });
+                        await _homeWorkResultRepository.BulkMergeAsync(
+                            new List<HomeWorkResult> { homeWorkResult },
+                            bulk =>
+                            {
+                                bulk.ColumnPrimaryKeyExpression = c => new
+                                {
+                                    c.LessonResultId,
+                                    c.LessonModuleId,
+                                    c.IsDeleted
+                                };
+                            });
 
-            _logger.LogInformation($"Add_HomeWorkResult-{homeWorkResult.Id}-{homeWorkResult.LessonModuleId}-{homeWorkResult.LessonResultId}-{homeWorkResult.SkillScoresStr}");
-            return methodResult;
+                        return homeWorkResult;
+                    });
+
+                return methodResult;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Error while initializing HomeWork lesson item. LessonModuleId={LessonModuleId}, LessonModuleOriginalId={LessonModuleOriginalId}, LessonResultId={LessonResultId}, StudentId={StudentId}",
+                    lessonModule.Id,
+                    lessonModule.OriginalId,
+                    lessonResult.Id,
+                    lessonResult.StudentId);
+
+                throw;
+            }
         }
     }
 }

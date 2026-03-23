@@ -85,28 +85,28 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         /// <summary>
         /// Active Manage Courses
         /// </summary>
-        [HttpPost("change-course-level")]
-        [ProducesResponseType(typeof(MethodResult<IList<LevelDtoModel>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(StudentManagement.Update)]
-        public async Task<IActionResult> ChangeCourseLevel([FromBody] ChangeCourseLevelByAdminCommand command)
-        {
-            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
+        //[HttpPost("change-course-level")]
+        //[ProducesResponseType(typeof(MethodResult<IList<LevelDtoModel>>), (int)HttpStatusCode.OK)]
+        //[ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        //[Permission(StudentManagement.Update)]
+        //public async Task<IActionResult> ChangeCourseLevel([FromBody] ChangeCourseLevelByAdminCommand command)
+        //{
+        //    var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+        //    return commandResult.GetActionResult();
+        //}
 
         /// <summary>
         /// Retake Manage Courses
         /// </summary>
-        [HttpPost("retake-course")]
-        [ProducesResponseType(typeof(MethodResult<CourseResultModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(StudentManagement.Update)]
-        public async Task<IActionResult> RetakeCourse([FromBody] RetakeCourseResultByAdminCommand command)
-        {
-            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
+        //[HttpPost("retake-course")]
+        //[ProducesResponseType(typeof(MethodResult<CourseResultModel>), (int)HttpStatusCode.OK)]
+        //[ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        //[Permission(StudentManagement.Update)]
+        //public async Task<IActionResult> RetakeCourse([FromBody] RetakeCourseResultByAdminCommand command)
+        //{
+        //    var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+        //    return commandResult.GetActionResult();
+        //}
 
         /// <summary>
         /// get course ids by class forum result ids

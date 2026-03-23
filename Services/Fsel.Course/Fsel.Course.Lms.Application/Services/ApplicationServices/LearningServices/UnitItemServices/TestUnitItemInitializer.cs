@@ -134,7 +134,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
 
         private async Task<TestGroupResult?> GetTestGroupResultAsync(Guid unitResultId, Guid unitModuleId, CancellationToken cancellationToken)
         {
-            return await _testGroupResultRepository.Queryable.Where(x => x.UnitResultId == unitResultId)
+            return await _testGroupResultRepository.Queryable.Include(x => x.TestResults)
+                                                   .Where(x => x.UnitResultId == unitResultId)
                                                    .FirstOrDefaultAsync(x => x.UnitModuleId == unitModuleId, cancellationToken);
         }
     }

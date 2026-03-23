@@ -2,11 +2,7 @@
 
 namespace Fsel.Course.Lms.Api.Controllers.V1i1
 {
-    using System.Net;
-    using Asp.Versioning;
-    using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
-    using Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1;
     using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
@@ -16,7 +12,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/class-forum")]
     [ApiController]
-   [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
+    [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
     public class ClassForumController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -26,17 +22,17 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
             _mediator = mediator;
         }
 
-        /// <summary>
-        /// Create Class forum
-        /// </summary>
-        [HttpPost]
-        [MapToApiVersion(ApiSettings.APIVersion1i1)]
-        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> CreateCFRPendingWordContent([FromQuery] CreateCFRPendingWordContentCommand command)
-        {
-            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
+        ///// <summary>
+        ///// Create Class forum
+        ///// </summary>
+        //[HttpPost]
+        //[MapToApiVersion(ApiSettings.APIVersion1i1)]
+        //[ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        //[ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        //public async Task<IActionResult> CreateCFRPendingWordContent([FromQuery] CreateCFRPendingWordContentCommand command)
+        //{
+        //    var queryResult = await _mediator.Send(command).ConfigureAwait(false);
+        //    return queryResult.GetActionResult();
+        //}
     }
 }

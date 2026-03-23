@@ -24,9 +24,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
     public class UpdateCFRPendingWordContentCommand : IRequest<MethodResult<bool>>
     {
         public Guid ClassForumDetailResultId { get; set; }
-
         public string? WordContent { get; set; }
-
         public IList<string>? FilePaths { get; set; }
     }
 
@@ -144,7 +142,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
                 });
 
                 var token = isFirst ? await GetTokenAsync(classForum, classForumResult, course.CourseType) : null;
-                await UpdateClassForumResult(classForumResult, token, cancellationToken);
+                await UpdateClassForumResult(classForumResult, token);
 
                 methodResult.Result = true;
                 methodResult.StatusCode = StatusCodes.Status200OK;
@@ -155,7 +153,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
             await PublishAIClassForumResponseAsync(classForumDetailResult, classForum, request.WordContent ?? string.Empty, cancellationToken);
 
             // chấm Pronunciation
-            if (classForum.CourseSkill == EnumCourseSkill.Speaking)
+            if (classForum.Layout == EnumClassForumLayout.Speaking)
             {
                 await _classForumPronunciationPublisher.Publish(new ClassForumPronunciationConsumerModel { ClassForumDetailResultId = classForumDetailResult.Id }, cancellationToken);
             }
@@ -176,13 +174,20 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
             return methodResult;
         }
 
-        private async Task UpdateClassForumResult(ClassForumResult classForumResult, int? token, CancellationToken cancellationToken)
+        private async Task UpdateClassForumResult(ClassForumResult classForumResult, int? token)
         {
             classForumResult.TokenFirstTime = token;
             classForumResult.IsPendingSpeechToText = false;
             await _classForumResultRepository.BulkUpdateList(new List<ClassForumResult> { classForumResult }, bulk =>
             {
-                bulk.IgnoreOnUpdateExpression = c => new { c.StudentId, c.LessonResultId, c.ClassForumId };
+                bulk.IgnoreOnUpdateExpression = c => new
+                {
+                    c.StudentId,
+                    c.LessonResultId,
+                    c.ClassForumId,
+                    c.ResultStatus,
+                    c.ProcessDate
+                };
             });
         }
 
