@@ -8,6 +8,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
     {
         public Guid StudentId { get; set; }
         public bool IsDonePT { get; set; }
+        public Guid? LevelId { get; set; }
+        public string? LevelName { get; set; }
         public EnumCourseLevel? CourseLevel { get; set; }
     }
 }

@@ -190,6 +190,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     public class ReportCourseLevelModel
     {
         public EnumCourseLevel CourseLevel { get; set; }
+        public string? LevelCode { get; set; }
         public long TotalStudent { get; set; }
         public double Percent { get; set; }
     }
