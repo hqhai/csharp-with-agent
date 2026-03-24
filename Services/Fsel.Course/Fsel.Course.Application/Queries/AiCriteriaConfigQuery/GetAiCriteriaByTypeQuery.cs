@@ -54,6 +54,7 @@ namespace Fsel.Course.Application.Queries.AiCriteriaConfigQuery
                 aiCriteria = await _aiCriteriaConfigRepository.ReadQueryable
                     .Where(x => x.SubFeatureType == request.SubFeatureType
                         && x.DefaultType == EnumDefaultType.Default
+                        && x.ProjectId == Guid.Empty
                         && x.VersionStatus == EnumVersionStatus.LastVersion)
                     .ToListAsync(cancellationToken);
             }
