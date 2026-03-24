@@ -160,6 +160,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     model.ContentProgress = unit.Status == EnumResultStatus.Done ? "1 / 1" : "0 / 1";
                     model.TotalContent = 1;
                     model.TotalContentComplete = unit.Status == EnumResultStatus.Done ? 1 : 0;
+                    model.ScoringFormulaType = unit.ScoringFormulaType;
 
                     model.SkillScores = unit.SkillScores?
                         .Select(p => new TestSkillScores
