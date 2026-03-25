@@ -85,5 +85,10 @@ namespace Fsel.Master.Domain.Models.EntityModels.StudentDashboard
         /// Phần trăm hoàn thành khóa học
         /// </summary>
         public decimal? Percent { get; set; }
+
+        /// <summary>
+        /// Tổng thời gian truy cập (phút)
+        /// </summary>
+        public long? TotalAccessTime { get; set; }
     }
 }

@@ -9,6 +9,7 @@ namespace Fsel.Master.Application.Queries.StudentDashboard
     using Fsel.Common.ActionResults;
     using Fsel.Core.Extensions;
     using Fsel.Master.Domain.Entities;
+    using Fsel.Master.Domain.IRepositories;
     using Fsel.Master.Domain.Models.EntityModels.StudentDashboard;
     using Fsel.Master.Domain.Models.Enums;
     using Fsel.Master.Domain.Models.QueryModels.StudentDashboard;
@@ -19,10 +20,12 @@ namespace Fsel.Master.Application.Queries.StudentDashboard
     public class GetCourseCompletionQueryHandler : IRequestHandler<GetCourseCompletionQuery, MethodResult<CourseCompletionResponseModel>>
     {
         private readonly MasterDBContext _dbContext;
+        private readonly IMasterBaseRepository<Course> _repository;
 
-        public GetCourseCompletionQueryHandler(MasterDBContext dbContext)
+        public GetCourseCompletionQueryHandler(MasterDBContext dbContext, IMasterBaseRepository<Course> repository)
         {
             _dbContext = dbContext;
+            _repository = repository;
         }
 
         public async Task<MethodResult<CourseCompletionResponseModel>> Handle(GetCourseCompletionQuery request, CancellationToken cancellationToken)
@@ -54,7 +57,6 @@ namespace Fsel.Master.Application.Queries.StudentDashboard
                                    join course in _dbContext.Courses
                                        on cr.CourseId equals course.CourseId into courseJoin
                                    from course in courseJoin.DefaultIfEmpty()
-
                                    join level in _dbContext.Levels on course.LevelId equals level.LevelId into levelJoin
                                    from level in levelJoin.DefaultIfEmpty()
                                    where s.ProvinceId != null && s.ProvinceId != Guid.Empty
@@ -95,7 +97,13 @@ namespace Fsel.Master.Application.Queries.StudentDashboard
             // === Top 10 students completed - database-level ===
             var topStudents = await (from x in studentBaseQuery
                                      where x.cr.CompletedLessons >= x.cr.TotalLessons
-                                     orderby x.cr.CompletionDate descending
+                                     let totalAccessTime = _dbContext.LearningActivities
+                                         .Where(la => la.StudentId == x.cr.StudentId
+                                                      && la.CourseId == x.cr.CourseId
+                                                      && la.Feature != EnumFeature.Other
+                                                      && la.LastVisited.HasValue
+                                                      && (la.LastVisited < x.cr.CompletionDate || la.LastVisited < x.cr.UpdatedDate))
+                                         .Sum(la => la.AccessTime)
                                      select new CourseCompletionTopStudentModel
                                      {
                                          StudentId = x.cr.StudentId,
@@ -107,8 +115,10 @@ namespace Fsel.Master.Application.Queries.StudentDashboard
                                          CompletedLessons = x.cr.CompletedLessons,
                                          TargetLessons = x.cr.TotalLessons,
                                          Percent = x.cr.Percent,
-                                         CompletedDate = x.cr.CompletionDate
+                                         CompletedDate = x.cr.CompletionDate,
+                                         TotalAccessTime = totalAccessTime
                                      })
+                                     .OrderBy(x => x.TotalAccessTime)
                                      .ApplyPaging(request)
                                      .ToListAsync(cancellationToken);
 

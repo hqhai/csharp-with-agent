@@ -69,6 +69,10 @@ namespace Fsel.Master.Infrastructure
                         .Property(x => x.WorkingStatus)
                         .HasConversion<string>();
 
+            modelBuilder.Entity<LearningActivity>()
+                        .Property(x => x.Feature)
+                        .HasConversion<string>();
+
             base.OnModelCreating(modelBuilder);
         }
 
@@ -83,6 +87,7 @@ namespace Fsel.Master.Infrastructure
         public DbSet<Level> Levels { get; set; }
         public DbSet<CourseResult> CourseResults { get; set; }
         public DbSet<Course> Courses { get; set; }
+        public DbSet<LearningActivity> LearningActivities { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
