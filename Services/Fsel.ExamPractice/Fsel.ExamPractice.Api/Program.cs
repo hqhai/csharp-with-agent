@@ -6,6 +6,8 @@ using Fsel.ExamPractice.Domain.IRepositories;
 using Fsel.ExamPractice.Infrastructure;
 using Fsel.ExamPractice.Infrastructure.Common;
 using Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers;
+using Fsel.ExamPractice.Infrastructure.Common.Processors;
+using Fsel.ExamPractice.Infrastructure.Common.Validators;
 using Fsel.ExamPractice.Infrastructure.Repositories;
 using Fsel.ExamPractice.Infrastructure.ValueSettings;
 
@@ -18,6 +20,7 @@ builder.AddOpenIdSwaggerGens(appSetting);
 builder.AddOpenIdAuthenticationJwtBearers(appSetting);
 builder.AddDbContexts<ExamPracticesDBContext, ExamPracticesReadDBContext>();
 
+// Register repositories
 builder.Services.AddScoped<IExamPracticeAnswerRepository, ExamPracticeAnswerRepository>();
 builder.Services.AddScoped<IExamPracticeRepository, ExamPracticeRepository>();
 builder.Services.AddScoped<IExamPracticeResultRepository, ExamPracticeResultRepository>();
@@ -28,11 +31,25 @@ builder.Services.AddScoped<IExamPracticeAISettingRepository, ExamPracticeAISetti
 builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
 builder.Services.AddScoped<IExamPracticeAICriteriaSettingRepository, ExamPracticeAICriteriaSettingRepository>();
 
+// Register ExamPracticeHelper
 builder.Services.AddScoped<ExamPracticeHelper>();
-builder.Services.AddScoped<ExamPracticeConverter>();
-builder.Services.AddScoped<ExamPracticeCommon>();
 
+// Register ExamPracticeCommon - transient vì mỗi request cần instance mới
+builder.Services.AddTransient<ExamPracticeCommon>();
+
+// Register Validators by type
+builder.Services.AddScoped<IUpdateExamPracticeValidator, ExamPracticeTypeValidator>();
+builder.Services.AddScoped<IUpdateExamPracticeValidator, IeltsTypeValidator>();
+builder.Services.AddScoped<IUpdateExamPracticeValidator, VstepTypeValidator>();
+
+// Register Processors by type
+builder.Services.AddScoped<IUpdateExamPracticeProcessor, ExamPracticeTypeProcessor>();
+builder.Services.AddScoped<IUpdateExamPracticeProcessor, IeltsTypeProcessor>();
+builder.Services.AddScoped<IUpdateExamPracticeProcessor, VstepTypeProcessor>();
+
+// Register Refit clients
 builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
+
 var app = builder.Build();
 app.UseServices();
 app.Run();

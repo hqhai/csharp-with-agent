@@ -225,6 +225,20 @@
           "Port": 80
         }
       ]
+    },
+    // Master Service
+    {
+      "SwaggerKey": "master",
+      "UpstreamPathTemplate": "/master-gateway/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "DownstreamPathTemplate": "/api/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "master-production.fsel-prod.svc",
+          "Port": 80
+        }
+      ]
     }
   ],
   "SwaggerEndPoints": [
@@ -505,6 +519,26 @@
           "Name": "ExamPracticeLms API",
           "Version": "v1.2",
           "Url": "http://exam-practice-lms-production.fsel-prod.svc/swagger/v1.2/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "master",
+      "Config": [
+        {
+          "Name": "Master API",
+          "Version": "v1",
+          "Url": "http://master-production.fsel-prod.svc/swagger/v1/swagger.json"
+        },
+        {
+          "Name": "Master API",
+          "Version": "v1.1",
+          "Url": "http://master-production.fsel-prod.svc/swagger/v1.1/swagger.json"
+        },
+        {
+          "Name": "Master API",
+          "Version": "v1.2",
+          "Url": "http://master-production.fsel-prod.svc/swagger/v1.2/swagger.json"
         }
       ]
     }

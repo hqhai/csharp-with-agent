@@ -1,0 +1,24 @@
+version: '3.5'
+services:
+    master.service:
+        container_name: master.service
+        hostname: MasterService
+        image: ${DOCKER_REGISTRY-}master-microservice:v1
+        build:
+            context: ./../../
+            dockerfile: Environments/Testing/Master.Testing.Dockerfile
+        environment:
+            - ASPNETCORE_ENVIRONMENT=Testing
+            - CONNECTIONSTRINGS__DEFAULTCONNECTION=Data Source=10.0.0.28;Initial Catalog=env-multi-subject.dev.report-master;User Id=sa;Password=Fsela@2023!@#$;TrustServerCertificate=true;
+            - SERVICENAME=Master
+            - SentryConfig__Dsn=https://5e94b84938f9a003ed95d995cfa31e98@sentry.fsel.edu.vn/7
+            - JWT__SECRETKEY=JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore
+            - JWT__ISSUER=baseWebApiIssuer
+            - JWT__AUDIENCE=baseWebApiAudience
+            - JWT__SUBJECT=baseWebApiSubject
+            - JWT__TOKENVALIDITYINMINUTES=1440
+            - JWT__REFRESHTOKENVALIDITYINDAYS=7
+            - SERVICES_SystemApiUrl=http://system-testing.fsel-testing.svc/api/v1
+        ports:
+            - 5211:80
+            - 7211:443
