@@ -186,13 +186,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fsel.Course.Lms.Application
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Fsel.Master", "Fsel.Master", "{397494E7-C420-4800-ADE8-B14E0B9239ED}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fsel.Master.Api", "Services\Fssel.Master\Fsel.Master.Api\Fsel.Master.Api.csproj", "{2184E1DA-AADD-877F-28FC-E2CF5AA3BB47}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fsel.Master.Api", "Services\Fsel.Master\Fsel.Master.Api\Fsel.Master.Api.csproj", "{2184E1DA-AADD-877F-28FC-E2CF5AA3BB47}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fsel.Master.Application", "Services\Fssel.Master\Fsel.Master.Application\Fsel.Master.Application.csproj", "{39D273CD-B4E9-B54C-7193-F7B599D9CC4F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fsel.Master.Application", "Services\Fsel.Master\Fsel.Master.Application\Fsel.Master.Application.csproj", "{39D273CD-B4E9-B54C-7193-F7B599D9CC4F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fsel.Master.Domain", "Services\Fssel.Master\Fsel.Master.Domain\Fsel.Master.Domain.csproj", "{4E113C78-505E-9560-8460-2047D52E2534}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fsel.Master.Domain", "Services\Fsel.Master\Fsel.Master.Domain\Fsel.Master.Domain.csproj", "{4E113C78-505E-9560-8460-2047D52E2534}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fsel.Master.Infrastructure", "Services\Fssel.Master\Fsel.Master.Infrastructure\Fsel.Master.Infrastructure.csproj", "{D5DBB2AA-170B-03E5-89D0-1CFBE0FA6FC6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fsel.Master.Infrastructure", "Services\Fsel.Master\Fsel.Master.Infrastructure\Fsel.Master.Infrastructure.csproj", "{D5DBB2AA-170B-03E5-89D0-1CFBE0FA6FC6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
