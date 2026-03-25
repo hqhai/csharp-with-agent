@@ -1,13 +1,13 @@
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Fsel.Shared.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Master.Domain.Entities
 {
+    [Keyless]
     [Table("StudentProfile_Report", Schema = "dbo")]
     public class StudentProfileReport
     {
-        [Key]
         public Guid StudentId { get; set; }
 
         public Guid UserId { get; set; }

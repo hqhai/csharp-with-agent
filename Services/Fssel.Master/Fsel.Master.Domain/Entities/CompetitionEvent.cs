@@ -3,6 +3,7 @@
 namespace Fsel.Master.Domain.Entities
 {
     using System.ComponentModel.DataAnnotations.Schema;
+    using System.Text.Json;
     using Microsoft.EntityFrameworkCore;
 
     [Keyless]
@@ -24,5 +25,16 @@ namespace Fsel.Master.Domain.Entities
         public DateTime? StartDate { get; set; }
 
         public DateTime? EndDate { get; set; }
+
+        public string? SchoolIdsJson { get; set; }
+
+        [NotMapped]
+        public IList<Guid>? SchoolIds
+        {
+            get
+            {
+                return !string.IsNullOrEmpty(SchoolIdsJson) ? JsonSerializer.Deserialize<IList<Guid>>(SchoolIdsJson) : null;
+            }
+        }
     }
 }

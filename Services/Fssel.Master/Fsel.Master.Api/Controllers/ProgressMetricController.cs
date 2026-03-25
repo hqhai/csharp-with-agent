@@ -6,6 +6,7 @@ namespace Fsel.Master.Api.Controllers
     using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Master.Application.Queries.ProgressMetrics;
     using Fsel.Master.Domain.Models.EntityModels;
     using Fsel.Shared.Constants;
@@ -38,6 +39,15 @@ namespace Fsel.Master.Api.Controllers
         [ProducesResponseType(typeof(MethodResult<ProvinceLevelResponse>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetProvinceLevelDistribution([FromQuery] GetProvinceLevelDistributionQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        [HttpGet("get-placement-test-student-detail")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<PlacementTestStudentDetail>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetPlacementTestStudentDetail([FromQuery] GetPlacementTestStudentDetailQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
