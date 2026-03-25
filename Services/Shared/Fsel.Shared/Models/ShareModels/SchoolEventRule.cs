@@ -39,6 +39,7 @@ namespace Fsel.Shared.Models.ShareModels
 
         public string? InstructionalVideo { get; set; }
         public string? InstructionalTitle { get; set; }
+        public IList<InstructionalItem>? Instructional { get; set; }
 
         public string? FormDescription { get; set; }
         public string? AwardPromotional { get; set; }
@@ -203,6 +204,12 @@ namespace Fsel.Shared.Models.ShareModels
     {
         public string? TextDisplay { get; set; }
         public string? Link { get; set; }
+    }
+
+    public class InstructionalItem
+    {
+        public string? Content { get; set; }
+        public IList<string>? Path { get; set; }
     }
 
     #endregion Prize
