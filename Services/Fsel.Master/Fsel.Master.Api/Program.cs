@@ -21,6 +21,8 @@ builder.AddAuthenticationJwtBearers(appSetting);
 builder.Services.AddDataProtection();
 
 builder.Services.AddScoped(typeof(IMasterBaseRepository<>), typeof(MasterBaseRepository<>));
+builder.Services.AddScoped<ICompetitionEventRepository, CompetitionEventRepository>();
+
 builder.Services.AddScoped<IProgressMetricsQueryProvider, ProgressMetricsQueryProvider>();
 
 // Publisher

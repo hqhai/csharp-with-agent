@@ -48,7 +48,7 @@ namespace Fsel.Master.Application.Queries.ProgressMetrics
 
             var methodResult = new MethodResult<ProvinceLevelResponse>();
 
-            var baseQuery = _progressMetricsQueryProvider.JoinStudentWithCompetitionEvent();
+            var baseQuery = await _progressMetricsQueryProvider.QueryableStudentWithEventAsync().ConfigureAwait(false);
 
             baseQuery = baseQuery.Where(x =>
                 x.S.ProvinceId != null && x.S.ProvinceId != default

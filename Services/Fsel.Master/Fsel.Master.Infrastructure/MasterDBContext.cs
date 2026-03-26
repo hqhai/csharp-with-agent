@@ -44,11 +44,11 @@ namespace Fsel.Master.Infrastructure
         {
         }
 
-        protected override void OnModelCreating(ModelBuilder builder)
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            ArgumentNullException.ThrowIfNull(builder);
+            ArgumentNullException.ThrowIfNull(modelBuilder);
 
-            base.OnModelCreating(builder);
+            base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<PlacementTestGroup>()
                         .Property(x => x.Status)
