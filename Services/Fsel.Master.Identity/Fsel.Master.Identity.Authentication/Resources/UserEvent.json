@@ -1,0 +1,18 @@
+[
+  {
+    "id": "8fcaae15-9c16-43e5-9a84-0abcb6afc353",
+    "userId": "a0280eb2-9b2f-4eeb-baf9-d3ddfe7081df",
+    "eventCode": "EVT_ADMIN_01",
+    "schoolIdsStr": null,
+    "createdDate": "2024-01-01T00:00:00",
+    "createdFullName": ""
+  },
+  {
+    "id": "1fde20e0-4786-4447-aa72-88baec834af4",
+    "userId": "cf7a86ad-acdc-4f6c-8bed-a1aa8c8cb5f4",
+    "eventCode": "EVT_SCHOOL_02",
+    "schoolIdsStr": "[\"d942c4b8-f078-4ea7-86c2-1d5ea4aa1c85\", \"e089d80d-85fa-4c4c-befb-d98c39e262bb\"]",
+    "createdDate": "2024-01-01T00:00:00",
+    "createdFullName": ""
+  }
+]

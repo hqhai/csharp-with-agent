@@ -18,6 +18,7 @@ builder.AddAuthenticationJwtBearers(appSetting);
 builder.AddDbContexts<UserMasterDBContext, UserMasterReadDbContext, MasterUser, MasterRole, MasterUserClaim, MasterUserRole, MasterUserLogin, MasterUserToken, MasterRoleClaim>();
 
 builder.Services.AddScoped<IMasterUserTokenRepository, MasterUserTokenRepository>();
+builder.Services.AddScoped<IUserEventRepository, UserEventRepository>();
 
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>

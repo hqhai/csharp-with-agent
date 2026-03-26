@@ -30,6 +30,11 @@ namespace Fsel.Shared.Constants
         public const string UserFileName = "Resources//User.json";
         public const string UserRoleFileName = "Resources//UserRole.json";
 
+        public const string MasterRoleFileName = "Resources//MasterRole.json";
+        public const string MasterUserFileName = "Resources//MasterUser.json";
+        public const string MasterUserRoleFileName = "Resources//MasterUserRole.json";
+        public const string UserEventFileName = "Resources//UserEvent.json";
+
         public const string PackageFileName = "Resources//Packages.json";
         public const string TechieActionFileName = "Resources//TechieAction.json";
         public const string TechieFileName = "Resources//Techie.json";

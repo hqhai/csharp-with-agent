@@ -1,0 +1,22 @@
+[
+  {
+    "id": "5b2931aa-ec59-4d6d-9d41-ccadddeecb3e",
+    "name": "Admin",
+    "normalizedName": "ADMIN",
+    "description": "Admin",
+    "isActive": true,
+    "isDefault": false,
+    "createdDate": "2024-01-01T00:00:00",
+    "createdFullName": ""
+  },
+  {
+    "id": "45c50c05-b829-4e08-99ee-fe33ee5d9c7d",
+    "name": "AdminSchool",
+    "normalizedName": "ADMINSCHOOL",
+    "description": "School Admin",
+    "isActive": true,
+    "isDefault": false,
+    "createdDate": "2024-01-01T00:00:00",
+    "createdFullName": ""
+  }
+]
