@@ -339,7 +339,7 @@ build-multi-subject-testing-master:
   extends: ".build-image-gitlab-registry"
   only:
     changes:
-    - Services/Fsel.Course/**/*
+    - Services/Fsel.Master/**/*
     - Services/Shared/**/*
     refs:
     - testing-multiple-subject
