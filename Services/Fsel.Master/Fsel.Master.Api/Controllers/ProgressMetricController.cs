@@ -44,10 +44,19 @@ namespace Fsel.Master.Api.Controllers
             return queryResult.GetActionResult();
         }
 
-        [HttpGet("get-placement-test-student-detail")]
-        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<PlacementTestStudentDetail>>), (int)HttpStatusCode.OK)]
+        [HttpGet("get-placement-test-student")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<PlacementTestStudentModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetPlacementTestStudentDetail([FromQuery] GetPlacementTestStudentDetailQuery query)
+        public async Task<IActionResult> GetPlacementTestStudentDetail([FromQuery] GetPlacementTestStudentQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        [HttpGet("get-placement-test-detail")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<PlacementTestDetailModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetPlacementTestDetail([FromQuery] GetPlacementTestDetailQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();

@@ -87,7 +87,7 @@ namespace Fsel.Master.Application.Queries.StudentDashboard
             var totalStudents = await studentIdQuery.Distinct().CountAsync(cancellationToken);
 
             // === Placement exam counts - database GROUP BY ===
-            var placementCounts = await (from p in _dbContext.PlacementTestReports
+            var placementCounts = await (from p in _dbContext.PlacementTestGroups
                                          where studentIdQuery.Any(sid => sid == p.StudentId)
                                          group p by p.Status into g
                                          select new

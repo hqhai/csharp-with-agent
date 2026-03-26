@@ -84,7 +84,7 @@ namespace Fsel.Master.Application.Queries.StudentDashboard
             // === 3. Placement exam stats - TAT CA database aggregation ===
             // 3a. Completed
             var completedExam = await studentQuery
-                .Join(_dbContext.PlacementTestReports,
+                .Join(_dbContext.PlacementTestGroups,
                     s => s.StudentId, p => p.StudentId, (s, p) => p)
                 .Where(p => p.Status == EnumResultStatus.Done)
                 .Select(p => p.StudentId)
@@ -93,7 +93,7 @@ namespace Fsel.Master.Application.Queries.StudentDashboard
 
             // 3b. InProgress
             var inProgressExam = await studentQuery
-                .Join(_dbContext.PlacementTestReports,
+                .Join(_dbContext.PlacementTestGroups,
                     s => s.StudentId, p => p.StudentId, (s, p) => p)
                 .Where(p => p.Status == EnumResultStatus.Process)
                 .Select(p => p.StudentId)
@@ -102,7 +102,7 @@ namespace Fsel.Master.Application.Queries.StudentDashboard
 
             // 3c. NotRegistered = hoc vien chua co placement record
             var studentsWithPlacementRecord = await studentQuery
-                .Join(_dbContext.PlacementTestReports,
+                .Join(_dbContext.PlacementTestGroups,
                     s => s.StudentId, p => p.StudentId, (s, p) => p)
                 .Select(p => p.StudentId)
                 .Distinct()

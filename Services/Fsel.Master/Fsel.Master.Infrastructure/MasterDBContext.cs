@@ -46,7 +46,7 @@ namespace Fsel.Master.Infrastructure
         {
             ArgumentNullException.ThrowIfNull(modelBuilder);
 
-            modelBuilder.Entity<PlacementTestGroupReport>()
+            modelBuilder.Entity<PlacementTestGroup>()
                         .Property(x => x.Status)
                         .HasConversion<string>();
 
@@ -89,13 +89,17 @@ namespace Fsel.Master.Infrastructure
                         .Property(x => x.Feature)
                         .HasConversion<string>();
 
+            modelBuilder.Entity<PlacementTest>()
+                        .Property(x => x.Status)
+                        .HasConversion<string>();
+
             base.OnModelCreating(modelBuilder);
         }
 
         public DbSet<StudentLearningProgress> StudentLearningProgresses { get; set; }
         public DbSet<StudentWeeklyLearningProgress> StudentWeeklyLearningProgresses { get; set; }
         public DbSet<StudentProfileReport> StudentProfileReports { get; set; }
-        public DbSet<PlacementTestGroupReport> PlacementTestReports { get; set; }
+        public DbSet<PlacementTestGroup> PlacementTestGroups { get; set; }
         public DbSet<StudentCompetitionEvent> StudentCompetitionEvents { get; set; }
         public DbSet<CompetitionEvent> CompetitionEvents { get; set; }
         public DbSet<Program> Programs { get; set; }
@@ -106,6 +110,8 @@ namespace Fsel.Master.Infrastructure
         public DbSet<Course> Courses { get; set; }
         public DbSet<UnitResult> UnitResults { get; set; }
         public DbSet<LearningActivity> LearningActivities { get; set; }
+        public DbSet<PlacementTest> PlacementTests { get; set; }
+        public DbSet<Skill> Skills { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

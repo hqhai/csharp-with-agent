@@ -16,7 +16,7 @@ namespace Fsel.Master.Application.Queries.ProgressMetrics
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class PlacementTestStudentDetail
+    public class PlacementTestStudentModel
     {
         public Guid StudentId { get; set; }
         public string? FullName { get; set; }
@@ -41,7 +41,7 @@ namespace Fsel.Master.Application.Queries.ProgressMetrics
         public string? LevelName { get; set; }
     }
 
-    public class GetPlacementTestStudentDetailQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<PlacementTestStudentDetail>>>
+    public class GetPlacementTestStudentQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<PlacementTestStudentModel>>>
     {
         public IList<Guid>? ProvinceIds { get; set; }
         public IList<Guid>? DistrictIds { get; set; }
@@ -51,20 +51,20 @@ namespace Fsel.Master.Application.Queries.ProgressMetrics
         public IList<Guid>? ProgramIds { get; set; }
     }
 
-    public class GetPlacementTestStudentDetailQueryHandler : IRequestHandler<GetPlacementTestStudentDetailQuery, MethodResult<PagingItemsModel<PlacementTestStudentDetail>>>
+    public class GetPlacementTestStudentQueryHandler : IRequestHandler<GetPlacementTestStudentQuery, MethodResult<PagingItemsModel<PlacementTestStudentModel>>>
     {
         private readonly IMasterBaseRepository<StudentProfileReport> _studentRepository;
-        private readonly IMasterBaseRepository<PlacementTestGroupReport> _placementTestRepository;
+        private readonly IMasterBaseRepository<PlacementTestGroup> _placementTestGroupRepository;
         private readonly IMasterBaseRepository<StudentCompetitionEvent> _studentCompetitionEventRepository;
         private readonly IMasterBaseRepository<CompetitionEvent> _competitionEventRepository;
         private readonly IMasterBaseRepository<Program> _programRepository;
         private readonly IMasterBaseRepository<Subject> _subjectRepository;
         private readonly IMasterBaseRepository<Level> _levelRepository;
 
-        public GetPlacementTestStudentDetailQueryHandler(IMasterBaseRepository<StudentProfileReport> studentRepository, IMasterBaseRepository<PlacementTestGroupReport> placementTestRepository, IMasterBaseRepository<StudentCompetitionEvent> studentCompetitionEventRepository, IMasterBaseRepository<CompetitionEvent> competitionEventRepository, IMasterBaseRepository<Program> programRepository, IMasterBaseRepository<Subject> subjectRepository, IMasterBaseRepository<Level> levelRepository)
+        public GetPlacementTestStudentQueryHandler(IMasterBaseRepository<StudentProfileReport> studentRepository, IMasterBaseRepository<PlacementTestGroup> placementTestGroupRepository, IMasterBaseRepository<StudentCompetitionEvent> studentCompetitionEventRepository, IMasterBaseRepository<CompetitionEvent> competitionEventRepository, IMasterBaseRepository<Program> programRepository, IMasterBaseRepository<Subject> subjectRepository, IMasterBaseRepository<Level> levelRepository)
         {
             _studentRepository = studentRepository;
-            _placementTestRepository = placementTestRepository;
+            _placementTestGroupRepository = placementTestGroupRepository;
             _studentCompetitionEventRepository = studentCompetitionEventRepository;
             _competitionEventRepository = competitionEventRepository;
             _programRepository = programRepository;
@@ -72,10 +72,10 @@ namespace Fsel.Master.Application.Queries.ProgressMetrics
             _levelRepository = levelRepository;
         }
 
-        public async Task<MethodResult<PagingItemsModel<PlacementTestStudentDetail>>> Handle(GetPlacementTestStudentDetailQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<PlacementTestStudentModel>>> Handle(GetPlacementTestStudentQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<PagingItemsModel<PlacementTestStudentDetail>>();
+            var methodResult = new MethodResult<PagingItemsModel<PlacementTestStudentModel>>();
 
             var baseQuery = from s in _studentRepository.Queryable
                             join sce in _studentCompetitionEventRepository.Queryable
@@ -87,7 +87,7 @@ namespace Fsel.Master.Application.Queries.ProgressMetrics
                               && s.ProvinceId != default
                               && s.DistrictId != default
                               && s.SchoolId != default
-                            select new PlacementTestStudentDetail
+                            select new PlacementTestStudentModel
                             {
                                 StudentId = s.StudentId,
                                 CompetitionEventId = sce.CompetitionEventId,
@@ -128,11 +128,11 @@ namespace Fsel.Master.Application.Queries.ProgressMetrics
             }
 
             var placementQuery = from b in baseQuery
-                                 join p in _placementTestRepository.Queryable
+                                 join p in _placementTestGroupRepository.Queryable
                                     on b.StudentId equals p.StudentId
                                  join l in _levelRepository.Queryable on p.LevelId equals l.LevelId
                                  where p.Status == EnumResultStatus.Done
-                                 select new PlacementTestStudentDetail
+                                 select new PlacementTestStudentModel
                                  {
                                      StudentId = b.StudentId,
                                      CompetitionEventId = b.CompetitionEventId,
@@ -171,7 +171,7 @@ namespace Fsel.Master.Application.Queries.ProgressMetrics
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            methodResult.Result = new PagingItemsModel<PlacementTestStudentDetail>(lists, request, totalItem);
+            methodResult.Result = new PagingItemsModel<PlacementTestStudentModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

@@ -25,12 +25,12 @@ namespace Fsel.Master.Application.Queries.FilterQuery
 
     public class GetSubjectsQueryHandler : IRequestHandler<GetSubjectsQuery, MethodResult<IList<SubjectFilterItem>>>
     {
-        private readonly IMasterBaseRepository<PlacementTestGroupReport> _placementTestRepository;
+        private readonly IMasterBaseRepository<PlacementTestGroup> _placementTestRepository;
         private readonly IMasterBaseRepository<Subject> _subjectRepository;
         private readonly IMasterBaseRepository<Program> _programRepository;
         private readonly IMasterBaseRepository<Level> _levelRepository;
 
-        public GetSubjectsQueryHandler(IMasterBaseRepository<PlacementTestGroupReport> placementTestRepository, IMasterBaseRepository<Subject> subjectRepository, IMasterBaseRepository<Program> programRepository, IMasterBaseRepository<Level> levelRepository)
+        public GetSubjectsQueryHandler(IMasterBaseRepository<PlacementTestGroup> placementTestRepository, IMasterBaseRepository<Subject> subjectRepository, IMasterBaseRepository<Program> programRepository, IMasterBaseRepository<Level> levelRepository)
         {
             _placementTestRepository = placementTestRepository;
             _subjectRepository = subjectRepository;

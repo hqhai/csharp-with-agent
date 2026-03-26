@@ -87,7 +87,7 @@ namespace Fsel.Master.Application.Queries.StudentDashboard
             // === Database-level GROUP BY theo Province + Placement Status ===
             // Lay TotalStudents + Completed/InProgress/NotStarted count theo province trong 1 query
             var provinceData = await (from ps in provinceStudentQuery
-                                      join p in _dbContext.PlacementTestReports on ps.StudentId equals p.StudentId into gj
+                                      join p in _dbContext.PlacementTestGroups on ps.StudentId equals p.StudentId into gj
                                       from p in gj.DefaultIfEmpty()
                                       select new
                                       {

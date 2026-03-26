@@ -20,17 +20,17 @@ namespace Fsel.Master.Application.Queries.ProgressMetrics
     public class GetPlacementTestOverviewQueryHandler : IRequestHandler<GetPlacementTestOverviewQuery, MethodResult<PlacementTestDashboardModel>>
     {
         private readonly IMasterBaseRepository<StudentProfileReport> _studentRepository;
-        private readonly IMasterBaseRepository<PlacementTestGroupReport> _placementTestRepository;
+        private readonly IMasterBaseRepository<PlacementTestGroup> _placementTestGroupRepository;
         private readonly IMasterBaseRepository<StudentCompetitionEvent> _studentCompetitionEventRepository;
         private readonly IMasterBaseRepository<CompetitionEvent> _competitionEventRepository;
         private readonly IMasterBaseRepository<Program> _programRepository;
         private readonly IMasterBaseRepository<Subject> _subjectRepository;
         private readonly IMasterBaseRepository<Level> _levelRepository;
 
-        public GetPlacementTestOverviewQueryHandler(IMasterBaseRepository<StudentProfileReport> studentRepository, IMasterBaseRepository<PlacementTestGroupReport> placementTestRepository, IMasterBaseRepository<StudentCompetitionEvent> studentCompetitionEventRepository, IMasterBaseRepository<CompetitionEvent> competitionEventRepository, IMasterBaseRepository<Program> programRepository, IMasterBaseRepository<Subject> subjectRepository, IMasterBaseRepository<Level> levelRepository)
+        public GetPlacementTestOverviewQueryHandler(IMasterBaseRepository<StudentProfileReport> studentRepository, IMasterBaseRepository<PlacementTestGroup> placementTestGroupRepository, IMasterBaseRepository<StudentCompetitionEvent> studentCompetitionEventRepository, IMasterBaseRepository<CompetitionEvent> competitionEventRepository, IMasterBaseRepository<Program> programRepository, IMasterBaseRepository<Subject> subjectRepository, IMasterBaseRepository<Level> levelRepository)
         {
             _studentRepository = studentRepository;
-            _placementTestRepository = placementTestRepository;
+            _placementTestGroupRepository = placementTestGroupRepository;
             _studentCompetitionEventRepository = studentCompetitionEventRepository;
             _competitionEventRepository = competitionEventRepository;
             _programRepository = programRepository;
@@ -79,7 +79,7 @@ namespace Fsel.Master.Application.Queries.ProgressMetrics
             var totalRegistered = await baseQuery.Select(x => x.StudentId).Distinct().CountAsync(cancellationToken);
 
             var placementQuery = from b in baseQuery
-                                 join p in _placementTestRepository.Queryable
+                                 join p in _placementTestGroupRepository.Queryable
                                     on b.StudentId equals p.StudentId into gj
                                  from p in gj.DefaultIfEmpty()
                                  select new
