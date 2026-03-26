@@ -8,6 +8,7 @@ using Fsel.Common.Helpers;
 using Fsel.Shared.Constants;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Fsel.Master.Identity.Infrastructure.Configs;
 
 namespace Fsel.Master.Identity.Infrastructure
 {
@@ -55,6 +56,8 @@ namespace Fsel.Master.Identity.Infrastructure
             builder.Entity<MasterUser>().HasQueryFilter(e => !e.IsDeleted);
             builder.Entity<MasterUserToken>().HasQueryFilter(e => !e.IsDeleted);
             builder.Entity<MasterUserToken>().HasIndex(x => new { x.IsDeleted, x.RefreshToken });
+
+            builder.ApplyConfiguration(new MasterUserEntityTypeConfiguration());
 
             SeedMasterRoles(builder);
             SeedMasterUsers(builder);

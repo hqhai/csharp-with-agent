@@ -4,7 +4,6 @@ using Fsel.Master.Identity.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -12,11 +11,9 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Master.Identity.Infrastructure.Migrations
 {
     [DbContext(typeof(UserMasterDBContext))]
-    [Migration("20260326090930_Add_Data_User")]
-    partial class Add_Data_User
+    partial class UserMasterDBContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -192,7 +189,7 @@ namespace Fsel.Master.Identity.Infrastructure.Migrations
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
@@ -239,10 +236,12 @@ namespace Fsel.Master.Identity.Infrastructure.Migrations
 
                     b.Property<string>("FullName")
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasComputedColumnSql("CONCAT_WS(' ', [LastName], [FirstName])", true);
 
-                    b.Property<int?>("Gender")
-                        .HasColumnType("int");
+                    b.Property<string>("Gender")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
@@ -279,8 +278,9 @@ namespace Fsel.Master.Identity.Infrastructure.Migrations
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("Status")
-                        .HasColumnType("int");
+                    b.Property<string>("Status")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
@@ -312,6 +312,16 @@ namespace Fsel.Master.Identity.Infrastructure.Migrations
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
+                    b.HasIndex("Id", "ConcurrencyStamp");
+
+                    b.HasIndex("IsDeleted", "Email");
+
+                    b.HasIndex("IsDeleted", "PhoneNumber");
+
+                    b.HasIndex("IsDeleted", "UserName");
+
+                    b.HasIndex("IsDeleted", "Id", "UserName", "Email");
+
                     b.ToTable("AspNetUsers", (string)null);
 
                     b.HasData(
@@ -334,7 +344,7 @@ namespace Fsel.Master.Identity.Infrastructure.Migrations
                             PasswordHash = "AQAAAAIAAYagAAAAEN83Sc3QsvUH8lVUlz81plwrfPu5gnMLM16gxOrs31HfkTkb5PKqDyBNf70RIA4EQg==",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "ASDFGHJKLQWERTYUIOPZXCVBNM123456",
-                            Status = 1,
+                            Status = "Active",
                             TwoFactorEnabled = false,
                             UserName = "admin"
                         },
@@ -357,7 +367,7 @@ namespace Fsel.Master.Identity.Infrastructure.Migrations
                             PasswordHash = "AQAAAAIAAYagAAAAEN83Sc3QsvUH8lVUlz81plwrfPu5gnMLM16gxOrs31HfkTkb5PKqDyBNf70RIA4EQg==",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "ASDFGHJKLQWERTYUIOPZXCVBNM123456",
-                            Status = 1,
+                            Status = "Active",
                             TwoFactorEnabled = false,
                             UserName = "adminschool"
                         });

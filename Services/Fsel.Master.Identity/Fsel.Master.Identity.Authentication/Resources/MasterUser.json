@@ -11,7 +11,7 @@
     "concurrencyStamp": "34567890-1234-5678-9012-345678901234",
     "firstName": "System",
     "lastName": "Admin",
-    "status": 1,
+    "status": "Active",
     "createdDate": "2024-01-01T00:00:00",
     "createdFullName": ""
   },
@@ -27,7 +27,7 @@
     "concurrencyStamp": "34567890-1234-5678-9012-345678901234",
     "firstName": "School",
     "lastName": "Admin",
-    "status": 1,
+    "status": "Active",
     "createdDate": "2024-01-01T00:00:00",
     "createdFullName": ""
   }
