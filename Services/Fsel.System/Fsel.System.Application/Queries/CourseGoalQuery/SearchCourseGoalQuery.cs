@@ -13,6 +13,7 @@ namespace Fsel.System.Application.Queries.CourseGoalQuery
     using Domain.Models.QueryModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Fsel.System.Application.Services.CourseServices;
 
     public class SearchCourseGoalQuery : SearchCourseGoalQueryModel, IRequest<MethodResult<PagingItemsModel<CourseGoalModel>>>
     {
@@ -23,20 +24,24 @@ namespace Fsel.System.Application.Queries.CourseGoalQuery
         private readonly ICourseGoalRepository _courseGoalRepository;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
+        private readonly ICourseService _courseService;
 
         public SearchCourseGoalQueryHandler(ICourseGoalRepository courseGoalRepository,
             AuthContext authContext,
-            IUserService userService)
+            IUserService userService,
+            ICourseService courseService)
         {
             _courseGoalRepository = courseGoalRepository;
             _authContext = authContext;
             _userService = userService;
+            _courseService = courseService;
         }
 
         public async Task<MethodResult<PagingItemsModel<CourseGoalModel>>> Handle(SearchCourseGoalQuery request, CancellationToken cancellationToken)
         {
             var methodResult = new MethodResult<PagingItemsModel<CourseGoalModel>>();
             ArgumentNullException.ThrowIfNull(request);
+
             var courseTypeByLevelIds = request.CourseTypeStr.ToList<Guid>();
             var schoolIds = request.SchoolIdStr.ToList<Guid>();
             var classIds = request.ClassIdStr.ToList<Guid>();
@@ -82,7 +87,18 @@ namespace Fsel.System.Application.Queries.CourseGoalQuery
                 query = query.Where(x => x.ClassId != null).WhereBulkContains(classIds, x => x.ClassId);
             }
 
-            return await _courseGoalRepository.GetListByPageResultAsync<CourseGoalModel>(query, request, cancellationToken);
+            var courseGoals = await _courseGoalRepository.GetListByPageResultAsync<CourseGoalModel>(query, request, cancellationToken);
+            var levelIds = courseGoals?.Result?.Items?.Where(x => x != null).Select(x => x.LevelId.Value);
+            if (levelIds != null && levelIds.Any())
+            {
+                var levels = await _courseService.GetLevels(levelIds.ToList());
+                foreach (var courseGoal in courseGoals.Result.Items)
+                {
+                    courseGoal.LevelName = levels?.Content?.Result?.FirstOrDefault(x => x.Id == courseGoal.LevelId)?.Name;
+                }
+            }
+
+            return courseGoals;
         }
     }
 }

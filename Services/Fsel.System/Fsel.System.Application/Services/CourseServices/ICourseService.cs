@@ -60,5 +60,8 @@ namespace Fsel.System.Application.Services.CourseServices
 
         [Post("/v1.1/ai-criteria-configs/by-ids")]
         Task<IApiResponse<MethodResult<IList<AICriteriaConfigsModel>>>> GetConfigByIdsAsync([FromBody] GetAICriteriaConfigsQueryModel query);
+
+        [Get("/v1/level/get-by-ids")]
+        Task<IApiResponse<MethodResult<List<LevelModel>>>> GetLevels([Query(CollectionFormat.Multi)] List<Guid> levelIds);
     }
 }
