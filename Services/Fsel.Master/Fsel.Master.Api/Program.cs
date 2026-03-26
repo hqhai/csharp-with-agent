@@ -1,6 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Core.Extensions;
+using Fsel.Master.Application.Providers;
 using Fsel.Master.Domain.IRepositories;
 using Fsel.Master.Infrastructure;
 using Fsel.Master.Infrastructure.Repositories;
@@ -20,6 +21,7 @@ builder.AddAuthenticationJwtBearers(appSetting);
 builder.Services.AddDataProtection();
 
 builder.Services.AddScoped(typeof(IMasterBaseRepository<>), typeof(MasterBaseRepository<>));
+builder.Services.AddScoped<IProgressMetricsQueryProvider, ProgressMetricsQueryProvider>();
 
 // Publisher
 //builder.Services.AddScoped<CreateTokenHistoryPublisher>();

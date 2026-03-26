@@ -5,6 +5,7 @@ namespace Fsel.Master.Application.Queries.ProgressMetrics
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Master.Application.Providers;
     using Fsel.Master.Domain.Entities;
     using Fsel.Master.Domain.IRepositories;
     using Fsel.Master.Domain.Models.EntityModels;
@@ -27,8 +28,9 @@ namespace Fsel.Master.Application.Queries.ProgressMetrics
         private readonly IMasterBaseRepository<Program> _programRepository;
         private readonly IMasterBaseRepository<Subject> _subjectRepository;
         private readonly IMasterBaseRepository<Level> _levelRepository;
+        private readonly IProgressMetricsQueryProvider _progressMetricsQueryProvider;
 
-        public GetProvinceLevelDistributionQueryHandler(IMasterBaseRepository<StudentProfileReport> studentRepository, IMasterBaseRepository<PlacementTestGroup> placementTestGroupRepository, IMasterBaseRepository<StudentCompetitionEvent> studentCompetitionEventRepository, IMasterBaseRepository<CompetitionEvent> competitionEventRepository, IMasterBaseRepository<Program> programRepository, IMasterBaseRepository<Subject> subjectRepository, IMasterBaseRepository<Level> levelRepository)
+        public GetProvinceLevelDistributionQueryHandler(IMasterBaseRepository<StudentProfileReport> studentRepository, IMasterBaseRepository<PlacementTestGroup> placementTestGroupRepository, IMasterBaseRepository<StudentCompetitionEvent> studentCompetitionEventRepository, IMasterBaseRepository<CompetitionEvent> competitionEventRepository, IMasterBaseRepository<Program> programRepository, IMasterBaseRepository<Subject> subjectRepository, IMasterBaseRepository<Level> levelRepository, IProgressMetricsQueryProvider progressMetricsQueryProvider)
         {
             _studentRepository = studentRepository;
             _placementTestGroupRepository = placementTestGroupRepository;
@@ -37,6 +39,7 @@ namespace Fsel.Master.Application.Queries.ProgressMetrics
             _programRepository = programRepository;
             _subjectRepository = subjectRepository;
             _levelRepository = levelRepository;
+            _progressMetricsQueryProvider = progressMetricsQueryProvider;
         }
 
         public async Task<MethodResult<ProvinceLevelResponse>> Handle(GetProvinceLevelDistributionQuery request, CancellationToken cancellationToken)
@@ -45,67 +48,47 @@ namespace Fsel.Master.Application.Queries.ProgressMetrics
 
             var methodResult = new MethodResult<ProvinceLevelResponse>();
 
-            var baseQuery = from s in _studentRepository.Queryable
-                            join sce in _studentCompetitionEventRepository.Queryable
-                                on s.StudentId equals sce.StudentId
-                            where s.ProvinceId != null
-                                  && s.DistrictId != null
-                                  && s.SchoolId != null
-                                  && s.ProvinceId != default
-                                  && s.DistrictId != default
-                                  && s.SchoolId != default
-                            select new
-                            {
-                                s.StudentId,
-                                s.ProvinceId,
-                                s.ProvinceName,
-                                s.DistrictId,
-                                s.DistrictName,
-                                s.SchoolId,
-                                s.SchoolName
-                            };
+            var baseQuery = _progressMetricsQueryProvider.JoinStudentWithCompetitionEvent();
+
+            baseQuery = baseQuery.Where(x =>
+                x.S.ProvinceId != null && x.S.ProvinceId != default
+                && x.S.DistrictId != null && x.S.DistrictId != default
+                && x.S.SchoolId != null && x.S.SchoolId != default);
 
             if (request.ProvinceIds?.Any() == true)
             {
-                baseQuery = baseQuery.Where(x =>
-                    x.ProvinceId.HasValue &&
-                    request.ProvinceIds.Contains(x.ProvinceId.Value));
+                baseQuery = baseQuery.Where(x => x.S.ProvinceId.HasValue && request.ProvinceIds.Contains(x.S.ProvinceId.Value));
             }
 
             if (request.DistrictIds?.Any() == true)
             {
-                baseQuery = baseQuery.Where(x =>
-                    x.DistrictId.HasValue &&
-                    request.DistrictIds.Contains(x.DistrictId.Value));
+                baseQuery = baseQuery.Where(x => x.S.DistrictId.HasValue && request.DistrictIds.Contains(x.S.DistrictId.Value));
             }
 
             if (request.SchoolIds?.Any() == true)
             {
-                baseQuery = baseQuery.Where(x =>
-                    x.SchoolId.HasValue &&
-                    request.SchoolIds.Contains(x.SchoolId.Value));
+                baseQuery = baseQuery.Where(x => x.S.SchoolId.HasValue && request.SchoolIds.Contains(x.S.SchoolId.Value));
             }
 
             var unitQuery = baseQuery.Select(x => new
             {
-                x.StudentId,
-
-                UnitId =
-                            request.UnitLevel == EnumUnitLevelType.Province ? x.ProvinceId :
-                            request.UnitLevel == EnumUnitLevelType.District ? x.DistrictId :
-                            x.SchoolId,
-
-                UnitName =
-                            request.UnitLevel == EnumUnitLevelType.Province ? x.ProvinceName :
-                            request.UnitLevel == EnumUnitLevelType.District ? x.DistrictName :
-                            x.SchoolName
+                x.S.StudentId,
+                UnitId = request.UnitLevel == EnumUnitLevelType.Province ? x.S.ProvinceId :
+                         request.UnitLevel == EnumUnitLevelType.District ? x.S.DistrictId :
+                         x.S.SchoolId,
+                UnitName = request.UnitLevel == EnumUnitLevelType.Province ? x.S.ProvinceName :
+                           request.UnitLevel == EnumUnitLevelType.District ? x.S.DistrictName :
+                           x.S.SchoolName
             });
 
             var placementQuery = from u in unitQuery
                                  join p in _placementTestGroupRepository.Queryable
                                     on u.StudentId equals p.StudentId
+                                 join prog in _programRepository.Queryable
+                                    on p.ProgramId equals prog.ProgramId
                                  where p.Status == EnumResultStatus.Done
                                        && p.LevelId != null
+                                       && prog.SubjectId == request.SubjectId
                                  select new
                                  {
                                      u.UnitId,
@@ -113,13 +96,6 @@ namespace Fsel.Master.Application.Queries.ProgressMetrics
                                      p.LevelId,
                                      p.ProgramId
                                  };
-
-            placementQuery =
-           from p in placementQuery
-           join prog in _programRepository.Queryable
-               on p.ProgramId equals prog.ProgramId
-           where request.SubjectId == prog.SubjectId
-           select p;
 
             if (request.ProgramIds != null && request.ProgramIds.Count > 0)
             {
