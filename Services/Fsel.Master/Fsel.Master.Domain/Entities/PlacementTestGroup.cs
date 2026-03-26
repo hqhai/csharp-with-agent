@@ -11,7 +11,7 @@ namespace Fsel.Master.Domain.Entities
 
     [Keyless]
     [Table("PlacementTestGroup_Report", Schema = "dbo")]
-    public class PlacementTestGroupReport
+    public class PlacementTestGroup
     {
         public Guid? TestGroupResultId { get; set; }
 
