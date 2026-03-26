@@ -204,7 +204,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
         Guid programId,
         Guid levelId)
         {
-            if (!lookup.TryGetValue((levelId, programId), out var goals))
+            if (!lookup.TryGetValue((programId, levelId), out var goals))
             {
                 return null;
             }
@@ -344,9 +344,11 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             List<(Guid StudentId, Guid CourseId)> pairs,
             CancellationToken ct)
         {
-            var agg = _aggregateRepo.Queryable.WhereBulkContains(pairs, new[] { "StudentId", "CourseId" });
+            var studentCourseKeys = pairs.Select(x => new { x.StudentId, x.CourseId }).ToList();
+
+            var agg = _aggregateRepo.Queryable.WhereBulkContains(studentCourseKeys, new[] { "StudentId", "CourseId" });
             var query = from baseQ in agg
-                        join cr in _courseResultRepository.ReadQueryable on baseQ.CourseResultId equals cr.Id
+                        join cr in _courseResultRepository.Queryable on baseQ.CourseResultId equals cr.Id
                         select new
                         {
                             StudentId = cr.StudentId,

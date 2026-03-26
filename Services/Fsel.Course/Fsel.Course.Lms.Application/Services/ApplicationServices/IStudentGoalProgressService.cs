@@ -14,10 +14,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
 
     public interface IStudentGoalProgressService
     {
-        Task RecalculateStudentGoalProgressAsync(
-            DateTime referenceUtc,
-            IList<CourseGoalModel> allCourseGoals,
-            CancellationToken cancellationToken);
+        Task RecalculateStudentGoalProgressAsync(DateTime referenceUtc, IList<CourseGoalModel> allCourseGoals, CancellationToken cancellationToken);
     }
 
     public sealed class StudentGoalProgressService : IStudentGoalProgressService
@@ -372,18 +369,18 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             DateRange dateRange,
             CancellationToken ct)
         {
-            var rows = await (
-                from cr in QueryWorkingCourseResults()
-                join lr in _lessonResultRepository.ReadQueryable
-                    on cr.Id equals lr.CourseResultId
-                where lr.Status == EnumResultStatus.Done && (lr.CompletionDate ?? lr.UpdatedDate ?? lr.CreatedDate).Date <= dateRange.WeekEnd
-                select new
-                {
-                    lr.StudentId,
-                    lr.CourseId,
-                    lr.CourseResultId,
-                    CompletedAt = lr.CompletionDate ?? lr.UpdatedDate
-                }).ToListAsync(ct);
+            var query = from cr in QueryWorkingCourseResults()
+                        join lr in _lessonResultRepository.Queryable on cr.Id equals lr.CourseResultId
+                        where lr.Status == EnumResultStatus.Done && (lr.CompletionDate ?? lr.UpdatedDate ?? lr.CreatedDate).Date <= dateRange.WeekEnd
+                        select new
+                        {
+                            lr.StudentId,
+                            lr.CourseId,
+                            lr.CourseResultId,
+                            CompletedAt = lr.CompletionDate ?? lr.UpdatedDate
+                        };
+
+            var rows = await query.ToListAsync(ct);
 
             return rows.GroupBy(x => new { x.StudentId, x.CourseId, x.CourseResultId })
                        .ToDictionary(
@@ -398,8 +395,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
 
         private IQueryable<CourseResult> QueryWorkingCourseResults()
         {
-            return from agg in _aggregateRepository.ReadQueryable
-                   join cr in _resultRepository.ReadQueryable
+            return from agg in _aggregateRepository.Queryable
+                   join cr in _resultRepository.Queryable
                        on agg.CourseResultId equals cr.Id
                    where agg.TotalCompletedLessons != agg.TotalTargetLessons
                       && cr.WorkingStatus != EnumWorkingStatus.NotWorking
