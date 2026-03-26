@@ -4,7 +4,7 @@ namespace Fsel.Master.Domain.Entities
 {
     using System;
     using System.ComponentModel.DataAnnotations.Schema;
-    using Fsel.Master.Domain.Models.Enums;
+    using Fsel.Shared.Enums;
     using Microsoft.EntityFrameworkCore;
 
     [Keyless]

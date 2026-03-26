@@ -7,10 +7,12 @@ namespace Fsel.Master.Domain.Models.QueryModels
 
     public class BaseProgressMetricsQueryModel
     {
-        public IList<Guid>? SubjectIds { get; set; }
+        public IList<Guid>? ProgramIds { get; set; }
+        public IList<Guid>? LevelIds { get; set; }
         public IList<Guid>? ProvinceIds { get; set; }
         public IList<Guid>? DistrictIds { get; set; }
         public IList<Guid>? SchoolIds { get; set; }
+        public Guid SubjectId { get; set; }
     }
 
     public enum EnumUnitLevelType

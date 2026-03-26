@@ -10,8 +10,8 @@ namespace Fsel.Master.Domain.Entities
     using Microsoft.EntityFrameworkCore;
 
     [Keyless]
-    [Table("PlacementTest_Report", Schema = "dbo")]
-    public class PlacementTestReport
+    [Table("PlacementTestGroup_Report", Schema = "dbo")]
+    public class PlacementTestGroupReport
     {
         public Guid? TestGroupResultId { get; set; }
 

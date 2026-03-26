@@ -46,7 +46,23 @@ namespace Fsel.Master.Infrastructure
         {
             ArgumentNullException.ThrowIfNull(modelBuilder);
 
-            modelBuilder.Entity<PlacementTestReport>()
+            modelBuilder.Entity<PlacementTestGroupReport>()
+                        .Property(x => x.Status)
+                        .HasConversion<string>();
+
+            modelBuilder.Entity<CourseResult>()
+                        .Property(x => x.Status)
+                        .HasConversion<string>();
+
+            modelBuilder.Entity<CourseResult>()
+                        .Property(x => x.WorkingStatus)
+                        .HasConversion<string>();
+
+            modelBuilder.Entity<LessonResult>()
+                        .Property(x => x.Status)
+                        .HasConversion<string>();
+
+            modelBuilder.Entity<UnitResult>()
                         .Property(x => x.Status)
                         .HasConversion<string>();
 
@@ -79,14 +95,16 @@ namespace Fsel.Master.Infrastructure
         public DbSet<StudentLearningProgress> StudentLearningProgresses { get; set; }
         public DbSet<StudentWeeklyLearningProgress> StudentWeeklyLearningProgresses { get; set; }
         public DbSet<StudentProfileReport> StudentProfileReports { get; set; }
-        public DbSet<PlacementTestReport> PlacementTestReports { get; set; }
+        public DbSet<PlacementTestGroupReport> PlacementTestReports { get; set; }
         public DbSet<StudentCompetitionEvent> StudentCompetitionEvents { get; set; }
         public DbSet<CompetitionEvent> CompetitionEvents { get; set; }
         public DbSet<Program> Programs { get; set; }
         public DbSet<Subject> Subjects { get; set; }
         public DbSet<Level> Levels { get; set; }
+        public DbSet<LessonResult> LessonResults { get; set; }
         public DbSet<CourseResult> CourseResults { get; set; }
         public DbSet<Course> Courses { get; set; }
+        public DbSet<UnitResult> UnitResults { get; set; }
         public DbSet<LearningActivity> LearningActivities { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

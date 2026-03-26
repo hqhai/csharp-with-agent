@@ -21,14 +21,14 @@ namespace Fsel.Master.Application.Queries.ProgressMetrics
     public class GetProvinceLevelDistributionQueryHandler : IRequestHandler<GetProvinceLevelDistributionQuery, MethodResult<ProvinceLevelResponse>>
     {
         private readonly IMasterBaseRepository<StudentProfileReport> _studentRepository;
-        private readonly IMasterBaseRepository<PlacementTestReport> _placementTestRepository;
+        private readonly IMasterBaseRepository<PlacementTestGroupReport> _placementTestRepository;
         private readonly IMasterBaseRepository<StudentCompetitionEvent> _studentCompetitionEventRepository;
         private readonly IMasterBaseRepository<CompetitionEvent> _competitionEventRepository;
         private readonly IMasterBaseRepository<Program> _programRepository;
         private readonly IMasterBaseRepository<Subject> _subjectRepository;
         private readonly IMasterBaseRepository<Level> _levelRepository;
 
-        public GetProvinceLevelDistributionQueryHandler(IMasterBaseRepository<StudentProfileReport> studentRepository, IMasterBaseRepository<PlacementTestReport> placementTestRepository, IMasterBaseRepository<StudentCompetitionEvent> studentCompetitionEventRepository, IMasterBaseRepository<CompetitionEvent> competitionEventRepository, IMasterBaseRepository<Program> programRepository, IMasterBaseRepository<Subject> subjectRepository, IMasterBaseRepository<Level> levelRepository)
+        public GetProvinceLevelDistributionQueryHandler(IMasterBaseRepository<StudentProfileReport> studentRepository, IMasterBaseRepository<PlacementTestGroupReport> placementTestRepository, IMasterBaseRepository<StudentCompetitionEvent> studentCompetitionEventRepository, IMasterBaseRepository<CompetitionEvent> competitionEventRepository, IMasterBaseRepository<Program> programRepository, IMasterBaseRepository<Subject> subjectRepository, IMasterBaseRepository<Level> levelRepository)
         {
             _studentRepository = studentRepository;
             _placementTestRepository = placementTestRepository;
@@ -114,14 +114,21 @@ namespace Fsel.Master.Application.Queries.ProgressMetrics
                                      p.ProgramId
                                  };
 
-            if (request.SubjectIds?.Any() == true)
+            placementQuery =
+           from p in placementQuery
+           join prog in _programRepository.Queryable
+               on p.ProgramId equals prog.ProgramId
+           where request.SubjectId == prog.SubjectId
+           select p;
+
+            if (request.ProgramIds != null && request.ProgramIds.Count > 0)
             {
-                placementQuery =
-                    from p in placementQuery
-                    join prog in _programRepository.Queryable
-                        on p.ProgramId equals prog.ProgramId
-                    where request.SubjectIds.Contains(prog.SubjectId)
-                    select p;
+                placementQuery = placementQuery.Where(p => p.ProgramId.HasValue && request.ProgramIds.Contains(p.ProgramId.Value));
+            }
+
+            if (request.LevelIds != null && request.LevelIds.Count > 0)
+            {
+                placementQuery = placementQuery.Where(p => p.LevelId.HasValue && request.LevelIds.Contains(p.LevelId.Value));
             }
 
             var rawData = await (from p in placementQuery
@@ -155,6 +162,9 @@ namespace Fsel.Master.Application.Queries.ProgressMetrics
                                  })
                                  .ToListAsync(cancellationToken);
 
+            var levelEntities = await _levelRepository.Queryable.ToListAsync(cancellationToken);
+            var programEntities = await _programRepository.Queryable.ToListAsync(cancellationToken);
+
             var allLevels = rawData
                           .GroupBy(x => new { x.LevelId, x.LevelName, x.LevelOrder })
                           .Select(g => new
@@ -164,11 +174,18 @@ namespace Fsel.Master.Application.Queries.ProgressMetrics
                               g.Key.LevelOrder
                           })
                           .OrderBy(x => x.LevelOrder)
-                          .Select(x => new ProvinceLevelModels
+                          .Select(x =>
                           {
-                              LevelId = x.LevelId,
-                              LevelName = x.LevelName,
-                              CountStudent = 0
+                              var level = levelEntities.FirstOrDefault(p => p.LevelId == x.LevelId);
+                              var program = programEntities.FirstOrDefault(p => p.ProgramId == level?.ProgramId);
+                              return new ProvinceLevelModels
+                              {
+                                  LevelId = x.LevelId,
+                                  LevelName = x.LevelName,
+                                  DisplayOrder = level?.LevelOrder,
+                                  ProgramName = program?.ProgramName,
+                                  CountStudent = 0
+                              };
                           })
                           .ToList();
 
@@ -207,7 +224,7 @@ namespace Fsel.Master.Application.Queries.ProgressMetrics
             methodResult.Result = new ProvinceLevelResponse
             {
                 Data = result,
-                AllLevels = allLevels
+                AllLevels = allLevels.OrderBy(p => p.ProgramName).ThenBy(p => p.DisplayOrder).ToList()
             };
 
             return methodResult;

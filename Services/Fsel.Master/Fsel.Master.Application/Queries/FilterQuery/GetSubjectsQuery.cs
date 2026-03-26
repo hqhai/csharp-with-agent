@@ -5,58 +5,95 @@ namespace Fsel.Master.Application.Queries.FilterQuery
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Core.Base.BaseModels;
     using Fsel.Master.Domain.Entities;
     using Fsel.Master.Domain.IRepositories;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
-    public class SubjectModel
+    public class SubjectFilterItem
     {
-        public Guid SubjectId { get; set; }
+        public Guid Id { get; set; }
+        public string? Code { get; set; }
+        public string? Name { get; set; }
 
-        public string? SubjectCode { get; set; }
-
-        public string? SubjectName { get; set; }
-
-        public bool IsHasValue { get; set; }
+        public IList<SubjectFilterItem>? Children { get; set; }
     }
 
-    public class GetSubjectsQuery : IRequest<MethodResult<IList<SubjectModel>>>
+    public class GetSubjectsQuery : IRequest<MethodResult<IList<SubjectFilterItem>>>
     {
     }
 
-    public class GetSubjectsQueryHandler : IRequestHandler<GetSubjectsQuery, MethodResult<IList<SubjectModel>>>
+    public class GetSubjectsQueryHandler : IRequestHandler<GetSubjectsQuery, MethodResult<IList<SubjectFilterItem>>>
     {
-        private readonly IMasterBaseRepository<PlacementTestReport> _placementTestRepository;
+        private readonly IMasterBaseRepository<PlacementTestGroupReport> _placementTestRepository;
         private readonly IMasterBaseRepository<Subject> _subjectRepository;
         private readonly IMasterBaseRepository<Program> _programRepository;
+        private readonly IMasterBaseRepository<Level> _levelRepository;
 
-        public GetSubjectsQueryHandler(IMasterBaseRepository<PlacementTestReport> placementTestRepository, IMasterBaseRepository<Subject> subjectRepository, IMasterBaseRepository<Program> programRepository)
+        public GetSubjectsQueryHandler(IMasterBaseRepository<PlacementTestGroupReport> placementTestRepository, IMasterBaseRepository<Subject> subjectRepository, IMasterBaseRepository<Program> programRepository, IMasterBaseRepository<Level> levelRepository)
         {
             _placementTestRepository = placementTestRepository;
             _subjectRepository = subjectRepository;
             _programRepository = programRepository;
+            _levelRepository = levelRepository;
         }
 
-        public async Task<MethodResult<IList<SubjectModel>>> Handle(GetSubjectsQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<SubjectFilterItem>>> Handle(GetSubjectsQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<IList<SubjectModel>>();
+            var methodResult = new MethodResult<IList<SubjectFilterItem>>();
 
-            var subjectIds = await (from pt in _placementTestRepository.Queryable
-                                    join p in _programRepository.Queryable on pt.ProgramId equals p.ProgramId
-                                    select p.SubjectId).Distinct().ToListAsync(cancellationToken);
+            var allSubjects = await _subjectRepository.Queryable.AsNoTracking()
+                .Select(s => new { s.SubjectId, s.SubjectCode, s.SubjectName })
+                .ToListAsync(cancellationToken);
 
-            var subjects = await _subjectRepository.Queryable.Select(p => new SubjectModel()
-            {
-                SubjectId = p.SubjectId,
-                SubjectCode = p.SubjectCode,
-                SubjectName = p.SubjectName,
-                IsHasValue = subjectIds.Contains(p.SubjectId)
-            }).ToListAsync(cancellationToken);
+            var allPrograms = await _programRepository.Queryable.AsNoTracking()
+                .Select(p => new { p.ProgramId, p.ProgramCode, p.ProgramName, p.SubjectId })
+                .ToListAsync(cancellationToken);
 
-            methodResult.Result = subjects;
+            var allLevels = await _levelRepository.Queryable.AsNoTracking()
+                .Select(l => new { l.LevelId, l.LevelCode, l.LevelName, l.ProgramId, l.LevelOrder })
+                .ToListAsync(cancellationToken);
+
+            var levelsByProgram = allLevels
+                .GroupBy(l => l.ProgramId)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.OrderBy(lv => lv.LevelOrder)
+                          .Select(lv => new SubjectFilterItem
+                          {
+                              Id = lv.LevelId,
+                              Code = lv.LevelCode,
+                              Name = lv.LevelName
+                          }).ToList()
+                );
+
+            var programsBySubject = allPrograms
+                .GroupBy(p => p.SubjectId)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.OrderBy(p => p.ProgramCode)
+                          .Select(p => new SubjectFilterItem
+                          {
+                              Id = p.ProgramId,
+                              Code = p.ProgramCode,
+                              Name = p.ProgramName,
+                              Children = levelsByProgram.GetValueOrDefault(p.ProgramId)
+                          }).ToList()
+                );
+
+            var result = allSubjects
+                .OrderByDescending(s => s.SubjectName == "SubjectENG")
+                .ThenBy(s => s.SubjectName)
+                .Select(s => new SubjectFilterItem
+                {
+                    Id = s.SubjectId,
+                    Code = s.SubjectCode,
+                    Name = s.SubjectName,
+                    Children = programsBySubject.GetValueOrDefault(s.SubjectId)
+                }).ToList();
+
+            methodResult.Result = result;
             return methodResult;
         }
     }

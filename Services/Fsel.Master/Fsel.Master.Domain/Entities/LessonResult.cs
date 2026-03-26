@@ -2,36 +2,37 @@
 
 namespace Fsel.Master.Domain.Entities
 {
-    using System;
-    using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Text.Json;
     using Fsel.Master.Domain.Models.Enums;
-    using Fsel.Shared.Enums;
     using Microsoft.EntityFrameworkCore;
 
     [Keyless]
-    [Table("CourseResult_Report", Schema = "dbo")]
-    public class CourseResult
+    [Table("LessonResult_Report", Schema = "dbo")]
+    public class LessonResult
     {
-        public Guid CourseResultId { get; set; }
+        public Guid LessonResultId { get; set; }
         public Guid StudentId { get; set; }
-        public Guid CourseId { get; set; }
+        public Guid LessonId { get; set; }
+        public Guid ProgramId { get; set; }
+        public Guid SubjectId { get; set; }
+        public Guid CourseResultId { get; set; }
+        public Guid UnitResultId { get; set; }
         public EnumResultStatus? Status { get; set; }
-        public EnumWorkingStatus? WorkingStatus { get; set; }
-        public decimal? Percent { get; set; }
-        public string? SkillScoresJson { get; set; }
-        public int TotalUnits { get; set; }
-        public int CompletedUnits { get; set; }
-        public int TotalLessons { get; set; }
-        public int CompletedLessons { get; set; }
-        public int TotalTests { get; set; }
-        public int CompletedTests { get; set; }
-        public DateTime? NewDate { get; set; }
-        public DateTime? ProcessDate { get; set; }
+        public double? Percent { get; set; }
+        public int? TotalVideos { get; set; }
+        public int? CompletedVideos { get; set; }
+
+        [Column("TotalHomeworks")]
+        public int? TotalHomeWork { get; set; }
+
+        [Column("CompletedHomeworks")]
+        public int? CompletedHomeWork { get; set; }
+
         public DateTime? CompletionDate { get; set; }
         public DateTime? CreatedDate { get; set; }
         public DateTime? UpdatedDate { get; set; }
+        public string? SkillScoresJson { get; set; }
 
         [NotMapped]
         public IList<SkillScore>? SkillScores

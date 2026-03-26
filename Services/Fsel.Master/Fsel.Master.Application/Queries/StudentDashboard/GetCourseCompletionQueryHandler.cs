@@ -14,6 +14,7 @@ namespace Fsel.Master.Application.Queries.StudentDashboard
     using Fsel.Master.Domain.Models.Enums;
     using Fsel.Master.Domain.Models.QueryModels.StudentDashboard;
     using Fsel.Master.Infrastructure;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 

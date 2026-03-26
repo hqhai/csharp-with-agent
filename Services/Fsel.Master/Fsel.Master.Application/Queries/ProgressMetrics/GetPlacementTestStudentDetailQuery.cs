@@ -43,23 +43,25 @@ namespace Fsel.Master.Application.Queries.ProgressMetrics
 
     public class GetPlacementTestStudentDetailQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<PlacementTestStudentDetail>>>
     {
-        public IList<Guid>? SubjectIds { get; set; }
         public IList<Guid>? ProvinceIds { get; set; }
         public IList<Guid>? DistrictIds { get; set; }
         public IList<Guid>? SchoolIds { get; set; }
+        public Guid SubjectId { get; set; }
+        public IList<Guid>? LevelIds { get; set; }
+        public IList<Guid>? ProgramIds { get; set; }
     }
 
     public class GetPlacementTestStudentDetailQueryHandler : IRequestHandler<GetPlacementTestStudentDetailQuery, MethodResult<PagingItemsModel<PlacementTestStudentDetail>>>
     {
         private readonly IMasterBaseRepository<StudentProfileReport> _studentRepository;
-        private readonly IMasterBaseRepository<PlacementTestReport> _placementTestRepository;
+        private readonly IMasterBaseRepository<PlacementTestGroupReport> _placementTestRepository;
         private readonly IMasterBaseRepository<StudentCompetitionEvent> _studentCompetitionEventRepository;
         private readonly IMasterBaseRepository<CompetitionEvent> _competitionEventRepository;
         private readonly IMasterBaseRepository<Program> _programRepository;
         private readonly IMasterBaseRepository<Subject> _subjectRepository;
         private readonly IMasterBaseRepository<Level> _levelRepository;
 
-        public GetPlacementTestStudentDetailQueryHandler(IMasterBaseRepository<StudentProfileReport> studentRepository, IMasterBaseRepository<PlacementTestReport> placementTestRepository, IMasterBaseRepository<StudentCompetitionEvent> studentCompetitionEventRepository, IMasterBaseRepository<CompetitionEvent> competitionEventRepository, IMasterBaseRepository<Program> programRepository, IMasterBaseRepository<Subject> subjectRepository, IMasterBaseRepository<Level> levelRepository)
+        public GetPlacementTestStudentDetailQueryHandler(IMasterBaseRepository<StudentProfileReport> studentRepository, IMasterBaseRepository<PlacementTestGroupReport> placementTestRepository, IMasterBaseRepository<StudentCompetitionEvent> studentCompetitionEventRepository, IMasterBaseRepository<CompetitionEvent> competitionEventRepository, IMasterBaseRepository<Program> programRepository, IMasterBaseRepository<Subject> subjectRepository, IMasterBaseRepository<Level> levelRepository)
         {
             _studentRepository = studentRepository;
             _placementTestRepository = placementTestRepository;
@@ -146,13 +148,20 @@ namespace Fsel.Master.Application.Queries.ProgressMetrics
                                      LevelName = l.LevelName,
                                  };
 
-            if (request.SubjectIds?.Any() == true)
+            placementQuery = from p in placementQuery
+                             join prog in _programRepository.Queryable
+                                 on p.ProgramId equals prog.ProgramId
+                             where prog.SubjectId == request.SubjectId
+                             select p;
+
+            if (request.ProgramIds != null && request.ProgramIds.Count > 0)
             {
-                placementQuery = from p in placementQuery
-                                 join prog in _programRepository.Queryable
-                                     on p.ProgramId equals prog.ProgramId
-                                 where request.SubjectIds.Contains(prog.SubjectId)
-                                 select p;
+                placementQuery = placementQuery.Where(p => p.ProgramId.HasValue && request.ProgramIds.Contains(p.ProgramId.Value));
+            }
+
+            if (request.LevelIds != null && request.LevelIds.Count > 0)
+            {
+                placementQuery = placementQuery.Where(p => p.LevelId.HasValue && request.LevelIds.Contains(p.LevelId.Value));
             }
 
             int totalItem = await placementQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
