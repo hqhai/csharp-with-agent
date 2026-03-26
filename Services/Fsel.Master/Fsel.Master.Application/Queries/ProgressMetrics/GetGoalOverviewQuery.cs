@@ -95,19 +95,16 @@ namespace Fsel.Master.Application.Queries.ProgressMetrics
 
             if (request.ProgramIds != null && request.ProgramIds.Count > 0)
             {
-                courseQuery = courseQuery.Where(p => p.ProgramId.HasValue && request.ProgramIds.Contains(p.ProgramId.Value));
+                courseQuery = courseQuery.Where(p => request.ProgramIds.Contains(p.ProgramId));
             }
 
             if (request.LevelIds != null && request.LevelIds.Count > 0)
             {
-                courseQuery = courseQuery.Where(p => p.LevelId.HasValue && request.LevelIds.Contains(p.LevelId.Value));
+                courseQuery = courseQuery.Where(p => request.LevelIds.Contains(p.LevelId));
             }
 
-            // 2. Tạo tập ID để làm Subquery (vẫn là IQueryable, chưa tải về RAM)
             var validCourseIds = courseQuery.Select(x => x.CourseResultId).Distinct();
 
-            // 3. Thực thi tuần tự từng câu lệnh COUNT/SUM
-            // Lưu ý: SQL Server tối ưu Subquery "WHERE ID IN (SELECT...)" rất tốt
             var totalStats = await courseQuery
                 .GroupBy(x => 1)
                 .Select(g => new
