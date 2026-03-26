@@ -334,6 +334,7 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new LongAnswerSettingTypeConfiguration());
             modelBuilder.ApplyConfiguration(new TestScoreEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CourseChangingHistoryEntityTypeConfiguration());
+            modelBuilder.Entity<ExportStudentEventModelV2>().HasNoKey();
 
             //modelBuilder.Ignore<TotalEvaluateInputResultModel>();
             //modelBuilder.Ignore<TotalDetailEvaluateInputResultModel>();
