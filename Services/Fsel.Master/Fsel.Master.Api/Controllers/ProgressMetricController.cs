@@ -52,5 +52,41 @@ namespace Fsel.Master.Api.Controllers
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        [HttpGet("get-goal-progress")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<IList<GoalProgressModel>>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetGoalProgress([FromQuery] GetGoalProgressQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        [HttpGet("get-learning-goal-result")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<IList<GoalProgressModel>>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetLearningGoalResult([FromQuery] GetLearningGoalResultQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        [HttpGet("get-goal-overall")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<IList<GoalProgressModel>>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetGoalOverview([FromQuery] GetGoalOverallQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        [HttpGet("get-goal-overview")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<GoalOverviewModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetGoalOverview([FromQuery] GetGoalOverviewQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }

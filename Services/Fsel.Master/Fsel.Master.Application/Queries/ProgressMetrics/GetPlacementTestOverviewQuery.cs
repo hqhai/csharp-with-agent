@@ -20,14 +20,14 @@ namespace Fsel.Master.Application.Queries.ProgressMetrics
     public class GetPlacementTestOverviewQueryHandler : IRequestHandler<GetPlacementTestOverviewQuery, MethodResult<PlacementTestDashboardModel>>
     {
         private readonly IMasterBaseRepository<StudentProfileReport> _studentRepository;
-        private readonly IMasterBaseRepository<PlacementTestReport> _placementTestRepository;
+        private readonly IMasterBaseRepository<PlacementTestGroupReport> _placementTestRepository;
         private readonly IMasterBaseRepository<StudentCompetitionEvent> _studentCompetitionEventRepository;
         private readonly IMasterBaseRepository<CompetitionEvent> _competitionEventRepository;
         private readonly IMasterBaseRepository<Program> _programRepository;
         private readonly IMasterBaseRepository<Subject> _subjectRepository;
         private readonly IMasterBaseRepository<Level> _levelRepository;
 
-        public GetPlacementTestOverviewQueryHandler(IMasterBaseRepository<StudentProfileReport> studentRepository, IMasterBaseRepository<PlacementTestReport> placementTestRepository, IMasterBaseRepository<StudentCompetitionEvent> studentCompetitionEventRepository, IMasterBaseRepository<CompetitionEvent> competitionEventRepository, IMasterBaseRepository<Program> programRepository, IMasterBaseRepository<Subject> subjectRepository, IMasterBaseRepository<Level> levelRepository)
+        public GetPlacementTestOverviewQueryHandler(IMasterBaseRepository<StudentProfileReport> studentRepository, IMasterBaseRepository<PlacementTestGroupReport> placementTestRepository, IMasterBaseRepository<StudentCompetitionEvent> studentCompetitionEventRepository, IMasterBaseRepository<CompetitionEvent> competitionEventRepository, IMasterBaseRepository<Program> programRepository, IMasterBaseRepository<Subject> subjectRepository, IMasterBaseRepository<Level> levelRepository)
         {
             _studentRepository = studentRepository;
             _placementTestRepository = placementTestRepository;
@@ -61,11 +61,6 @@ namespace Fsel.Master.Application.Queries.ProgressMetrics
                                 SchoolId = s.SchoolId
                             };
 
-            if (request.SubjectIds != null && request.SubjectIds.Count > 0)
-            {
-                baseQuery = baseQuery.Where(x => x.SubjectId.HasValue && request.SubjectIds.Contains(x.SubjectId.Value));
-            }
-
             if (request.ProvinceIds != null && request.ProvinceIds.Count > 0)
             {
                 baseQuery = baseQuery.Where(x => x.ProvinceId.HasValue && request.ProvinceIds.Contains(x.ProvinceId.Value));
@@ -95,13 +90,19 @@ namespace Fsel.Master.Application.Queries.ProgressMetrics
                                      p.ProgramId
                                  };
 
-            if (request.SubjectIds?.Any() == true)
+            placementQuery = from p in placementQuery
+                             join prog in _programRepository.Queryable on p.ProgramId equals prog.ProgramId
+                             where prog.SubjectId == request.SubjectId
+                             select p;
+
+            if (request.ProgramIds != null && request.ProgramIds.Count > 0)
             {
-                placementQuery = from p in placementQuery
-                                 join prog in _programRepository.Queryable
-                                     on p.ProgramId equals prog.ProgramId
-                                 where request.SubjectIds.Contains(prog.SubjectId)
-                                 select p;
+                placementQuery = placementQuery.Where(p => p.ProgramId.HasValue && request.ProgramIds.Contains(p.ProgramId.Value));
+            }
+
+            if (request.LevelIds != null && request.LevelIds.Count > 0)
+            {
+                placementQuery = placementQuery.Where(p => p.LevelId.HasValue && request.LevelIds.Contains(p.LevelId.Value));
             }
 
             var totalStarted = await placementQuery.Where(x => x.Status == EnumResultStatus.Process || x.Status == EnumResultStatus.Done)
@@ -119,19 +120,23 @@ namespace Fsel.Master.Application.Queries.ProgressMetrics
                                          on p.LevelId equals lvl.LevelId
                                    where p.Status == EnumResultStatus.Done &&
                                          p.LevelId.HasValue
-                                   group lvl by new { lvl.LevelId, lvl.LevelName, lvl.LevelOrder } into g
+                                   group lvl by new { lvl.LevelId, lvl.LevelName, lvl.LevelOrder, lvl.ProgramId } into g
                                    select new LevelDistributionModel
                                    {
                                        LevelId = g.Key.LevelId,
                                        LevelName = g.Key.LevelName,
-                                       LevelOrder = g.Key.LevelOrder,
+                                       DisplayOrder = g.Key.LevelOrder,
+                                       ProgramId = g.Key.ProgramId,
                                        StudentCount = g.Count()
                                    }
-                                  ).OrderBy(p => p.LevelOrder).ToListAsync(cancellationToken);
+                                  ).OrderBy(p => p.DisplayOrder).ToListAsync(cancellationToken);
+
+            var programs = await _programRepository.Queryable.ToListAsync(cancellationToken);
 
             foreach (var item in levelData)
             {
                 item.Percentage = totalCompleted == 0 ? 0 : (double)item.StudentCount / totalCompleted * 100;
+                item.ProgramName = programs.FirstOrDefault(p => p.ProgramId == item.ProgramId)?.ProgramName;
             }
 
             var dashboardModel = new PlacementTestDashboardModel
@@ -142,7 +147,7 @@ namespace Fsel.Master.Application.Queries.ProgressMetrics
                     TotalStarted = totalStarted,
                     TotalCompleted = totalCompleted
                 },
-                LevelDistributions = levelData
+                LevelDistributions = levelData.OrderBy(p => p.ProgramName).ThenBy(p => p.DisplayOrder).ToList()
             };
 
             methodResult.Result = dashboardModel;

@@ -25,11 +25,11 @@ namespace Fsel.Master.Api.Controllers
         }
 
         [HttpGet("get-subjects")]
-        [ProducesResponseType(typeof(MethodResult<IList<SubjectModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<IList<SubjectFilterItem>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetSubjects([FromQuery] GetSubjectsQuery query)
+        public async Task<IActionResult> GetSubjects()
         {
-            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            var queryResult = await _mediator.Send(new GetSubjectsQuery()).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

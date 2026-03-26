@@ -27,9 +27,13 @@ namespace Fsel.Master.Domain.Models.EntityModels
 
         public string? LevelName { get; set; }
 
+        public Guid ProgramId { get; set; }
+
+        public string? ProgramName { get; set; }
+
         public int StudentCount { get; set; }
 
-        public int? LevelOrder { get; set; }
+        public int? DisplayOrder { get; set; }
 
         public double Percentage { get; set; }
     }

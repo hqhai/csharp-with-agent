@@ -262,5 +262,19 @@ namespace Fsel.Shared.Helpers
             var offset = day == 0 ? -6 : 1 - day; // về thứ 2
             return date.AddDays(offset);
         }
+
+        public static (DateTime MondayStart, DateTime SundayEnd) GetWeekBoundaries(DateTime anyDate)
+        {
+            int dayOfWeek = (int)anyDate.DayOfWeek;
+
+            // Tính ngày thứ Hai
+            DateTime monday = anyDate.AddDays(dayOfWeek == 0 ? -6 : 1 - dayOfWeek)
+                                     .Date; // 00:00:00
+
+            // Tính ngày Chủ Nhật
+            DateTime sunday = monday.AddDays(6).Date.AddHours(23).AddMinutes(59).AddSeconds(59);
+
+            return (monday, sunday);
+        }
     }
 }
