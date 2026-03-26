@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base;
@@ -42,9 +44,11 @@ namespace Fsel.Master.Infrastructure
         {
         }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected override void OnModelCreating(ModelBuilder builder)
         {
-            ArgumentNullException.ThrowIfNull(modelBuilder);
+            ArgumentNullException.ThrowIfNull(builder);
+
+            base.OnModelCreating(builder);
 
             modelBuilder.Entity<PlacementTestGroup>()
                         .Property(x => x.Status)
@@ -92,8 +96,6 @@ namespace Fsel.Master.Infrastructure
             modelBuilder.Entity<PlacementTest>()
                         .Property(x => x.Status)
                         .HasConversion<string>();
-
-            base.OnModelCreating(modelBuilder);
         }
 
         public DbSet<StudentLearningProgress> StudentLearningProgresses { get; set; }

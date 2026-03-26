@@ -13,9 +13,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 var appSetting = builder.AddAppSettings<AppSetting>();
 builder.AddServices(appSetting);
-builder.AddOpenIdSwaggerGens(appSetting);
-builder.AddOpenIdAuthenticationJwtBearers(appSetting);
+builder.AddSwaggerGens(appSetting);
 builder.AddDbContexts<MasterDBContext, MasterReadDbContext>();
+builder.AddAuthenticationJwtBearers(appSetting);
 
 builder.Services.AddDataProtection();
 

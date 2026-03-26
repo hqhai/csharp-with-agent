@@ -18,4 +18,9 @@
     <ProjectReference Include="..\..\Shared\Fsel.Shared\Fsel.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Enums\ErrorCodes\" />
+    <Folder Include="Models\CommandModels\" />
+  </ItemGroup>
+
 </Project>

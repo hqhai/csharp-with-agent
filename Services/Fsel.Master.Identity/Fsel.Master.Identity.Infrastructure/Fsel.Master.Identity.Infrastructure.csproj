@@ -8,12 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Commands\" />
-    <Folder Include="Services\" />
+    <Folder Include="Configs\" />
+    <Folder Include="Maps\" />
+    <Folder Include="Migrations\" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Fsel.Master.Infrastructure\Fsel.Master.Infrastructure.csproj" />
+    <ProjectReference Include="..\Fsel.Master.Identity.Domain\Fsel.Master.Identity.Domain.csproj" />
   </ItemGroup>
 
 </Project>

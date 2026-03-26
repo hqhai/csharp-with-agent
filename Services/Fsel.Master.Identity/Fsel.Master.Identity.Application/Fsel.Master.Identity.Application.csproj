@@ -8,12 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Commands\" />
     <Folder Include="Services\" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Fsel.Master.Infrastructure\Fsel.Master.Infrastructure.csproj" />
+    <ProjectReference Include="..\Fsel.Master.Identity.Infrastructure\Fsel.Master.Identity.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
