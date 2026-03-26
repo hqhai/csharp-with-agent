@@ -111,6 +111,18 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
                     return methodResult;
                 }
             }
+            if (!string.IsNullOrEmpty(request.LevelIdStr))
+            {
+                var levelIds = request.LevelIdStr.ToList<Guid>();
+                if (levelIds != null && levelIds.Any())
+                {
+                    query = query.WhereBulkContains(levelIds, x => x.LevelId);
+                }
+                else
+                {
+                    return methodResult;
+                }
+            }
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
