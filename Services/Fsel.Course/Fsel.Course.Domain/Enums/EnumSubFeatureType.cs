@@ -63,5 +63,11 @@ namespace Fsel.Course.Domain.Enums
 
         [Description("Vstep")]
         Vstep,
+
+        [Description("Video Lesson Long Answer"), Display(Name = "Video Lesson Long Answer")]
+        VideoLessonLongAnswer,
+
+        [Description("HomeWork Long Answer"), Display(Name = "HomeWork Long Answer")]
+        HomeWorkLongAnswer,
     }
 }

@@ -22,21 +22,15 @@ namespace Fsel.Course.Application.Commands.AiCriteriaConfigCmd
     {
         private readonly IAiCriteriaConfigRepository _aiCriteriaConfigRepository;
         private readonly IAiPromptManagerRepository _aiPromptManagerRepository;
-        private readonly IClassForumRepository _classForumRepository;
         private readonly IMapper _mapper;
-        private readonly IMediator _mediator;
 
         public CreateAiCriteriaConfigHasSubFeatureCommandHandler(IAiCriteriaConfigRepository aiCriteriaConfigRepository,
             IMapper mapper,
-            IAiPromptManagerRepository aiPromptManagerRepository,
-            IClassForumRepository classForumRepository,
-            IMediator mediator)
+            IAiPromptManagerRepository aiPromptManagerRepository)
         {
             _aiCriteriaConfigRepository = aiCriteriaConfigRepository;
             _mapper = mapper;
             _aiPromptManagerRepository = aiPromptManagerRepository;
-            _classForumRepository = classForumRepository;
-            _mediator = mediator;
         }
 
         public async Task<MethodResult<AICriteriaConfigsModel>> Handle(CreateAiCriteriaConfigCommand request, CancellationToken cancellationToken)
