@@ -2,7 +2,6 @@
 
 namespace Fsel.Master.Application.Queries.ProgressMetrics
 {
-    using System.Text.Json;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -11,44 +10,15 @@ namespace Fsel.Master.Application.Queries.ProgressMetrics
     using Fsel.Core.Extensions;
     using Fsel.Master.Domain.Entities;
     using Fsel.Master.Domain.IRepositories;
+    using Fsel.Master.Domain.Models.EntityModels;
     using Fsel.Master.Domain.Models.Enums;
+    using Fsel.Master.Domain.Models.QueryModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class PlacementTestStudentModel
+    public class GetPlacementTestStudentQuery : GetPlacementTestStudentQueryModel, IRequest<MethodResult<PagingItemsModel<PlacementTestStudentModel>>>
     {
-        public Guid StudentId { get; set; }
-        public string? FullName { get; set; }
-        public string? Email { get; set; }
-        public string? PhoneNumber { get; set; }
-        public string? SkillScoresJson { get; set; }
-
-        public IList<SkillScore>? SkillScores
-        {
-            get
-            {
-                return !string.IsNullOrEmpty(SkillScoresJson) ? JsonSerializer.Deserialize<IList<SkillScore>>(SkillScoresJson) : null;
-            }
-        }
-
-        public Guid? ProgramId { get; set; }
-        public Guid? ProvinceId { get; set; }
-        public Guid? DistrictId { get; set; }
-        public Guid? SchoolId { get; set; }
-        public Guid? CompetitionEventId { get; set; }
-        public Guid? LevelId { get; set; }
-        public string? LevelName { get; set; }
-    }
-
-    public class GetPlacementTestStudentQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<PlacementTestStudentModel>>>
-    {
-        public IList<Guid>? ProvinceIds { get; set; }
-        public IList<Guid>? DistrictIds { get; set; }
-        public IList<Guid>? SchoolIds { get; set; }
-        public Guid SubjectId { get; set; }
-        public IList<Guid>? LevelIds { get; set; }
-        public IList<Guid>? ProgramIds { get; set; }
     }
 
     public class GetPlacementTestStudentQueryHandler : IRequestHandler<GetPlacementTestStudentQuery, MethodResult<PagingItemsModel<PlacementTestStudentModel>>>
@@ -89,11 +59,17 @@ namespace Fsel.Master.Application.Queries.ProgressMetrics
                               && s.SchoolId != default
                             select new PlacementTestStudentModel
                             {
+                                FullName = s.FullName,
+                                Email = s.Email,
+                                PhoneNumber = s.Phone,
                                 StudentId = s.StudentId,
                                 CompetitionEventId = sce.CompetitionEventId,
                                 ProvinceId = s.ProvinceId,
+                                Province = s.ProvinceName,
                                 DistrictId = s.DistrictId,
-                                SchoolId = s.SchoolId
+                                District = s.DistrictName,
+                                SchoolId = s.SchoolId,
+                                School = s.SchoolName,
                             };
 
             if (!string.IsNullOrEmpty(request.Keyword))
@@ -137,8 +113,11 @@ namespace Fsel.Master.Application.Queries.ProgressMetrics
                                      StudentId = b.StudentId,
                                      CompetitionEventId = b.CompetitionEventId,
                                      ProvinceId = b.ProvinceId,
+                                     Province = b.Province,
                                      DistrictId = b.DistrictId,
+                                     District = b.District,
                                      SchoolId = b.SchoolId,
+                                     School = b.School,
                                      FullName = b.FullName,
                                      Email = b.Email,
                                      PhoneNumber = b.PhoneNumber,

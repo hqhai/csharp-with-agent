@@ -5,7 +5,9 @@ namespace Fsel.Master.Api.Controllers
     using System.Net;
     using Asp.Versioning;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Master.Application.Queries.ProgressMetrics;
     using Fsel.Master.Domain.Models.EntityModels;
@@ -51,6 +53,20 @@ namespace Fsel.Master.Api.Controllers
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
+        }
+
+        [HttpPost("export-placement-test")]
+        [ProducesResponseType(typeof(MethodResult<byte[]>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ExportFile([FromQuery] ExportPlacementTestQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            if (!queryResult.IsOK || queryResult.Result == null)
+            {
+                return queryResult.GetActionResult();
+            }
+            var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+            return File(queryResult.Result, Settings.Excels.ContentType, $"export_placement_test_{currentDate.Day}_{currentDate.Month}.xlsx");
         }
 
         [HttpGet("get-placement-test-detail")]
