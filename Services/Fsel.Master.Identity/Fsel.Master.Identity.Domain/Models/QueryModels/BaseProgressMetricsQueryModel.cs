@@ -1,0 +1,22 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Master.Identity.Domain.Models.QueryModels
+{
+    using System;
+    using System.Collections.Generic;
+
+    public class BaseProgressMetricsQueryModel
+    {
+        public IList<Guid>? SubjectIds { get; set; }
+        public IList<Guid>? ProvinceIds { get; set; }
+        public IList<Guid>? DistrictIds { get; set; }
+        public IList<Guid>? SchoolIds { get; set; }
+    }
+
+    public enum EnumUnitLevelType
+    {
+        Province,
+        District,
+        School
+    }
+}

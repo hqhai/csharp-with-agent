@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base;
@@ -46,6 +48,8 @@ namespace Fsel.Master.Infrastructure
         {
             ArgumentNullException.ThrowIfNull(modelBuilder);
 
+            base.OnModelCreating(modelBuilder);
+
             modelBuilder.Entity<PlacementTestGroup>()
                         .Property(x => x.Status)
                         .HasConversion<string>();
@@ -92,8 +96,6 @@ namespace Fsel.Master.Infrastructure
             modelBuilder.Entity<PlacementTest>()
                         .Property(x => x.Status)
                         .HasConversion<string>();
-
-            base.OnModelCreating(modelBuilder);
         }
 
         public DbSet<StudentLearningProgress> StudentLearningProgresses { get; set; }

@@ -211,6 +211,20 @@
           "Port": 5504
         }
       ]
+    },
+    // MasterAuth Service
+    {
+      "SwaggerKey": "master-auth",
+      "UpstreamPathTemplate": "/master-auth-gateway/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "DownstreamPathTemplate": "/api/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "master-auth-dev.fsel-developer.svc",
+          "Port": 5506
+        }
+      ]
     }
   ],
   "SwaggerEndPoints": [
@@ -491,6 +505,41 @@
           "Name": "ExamPracticeLms API",
           "Version": "v1.2",
           "Url": "http://localhost:5504/swagger/v1.2/swagger.json"
+        }
+      ]
+    },
+    // Master Service
+    {
+      "SwaggerKey": "master",
+      "UpstreamPathTemplate": "/master-gateway/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "DownstreamPathTemplate": "/api/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "master-dev.fsel-dev.svc",
+          "Port": 5505
+        }
+      ]
+    },
+    // MasterAuth Service
+    {
+      "Key": "master-auth",
+      "Config": [
+        {
+          "Name": "MasterAuth API",
+          "Version": "v1",
+          "Url": "http://master-auth-dev.fsel-developer.svc/swagger/v1/swagger.json"
+        },
+        {
+          "Name": "MasterAuth API",
+          "Version": "v1.1",
+          "Url": "http://localhost:52020/swagger/v1.1/swagger.json"
+        },
+        {
+          "Name": "MasterAuth API",
+          "Version": "v1.2",
+          "Url": "http://localhost:52020/swagger/v1.2/swagger.json"
         }
       ]
     }

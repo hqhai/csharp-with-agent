@@ -239,6 +239,20 @@
           "Port": 80
         }
       ]
+    },
+    // MasterAuth Service
+    {
+      "SwaggerKey": "master-auth",
+      "UpstreamPathTemplate": "/master-auth-gateway/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "DownstreamPathTemplate": "/api/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "master-auth-multi-subject-production.fsel-multi-subject-prod-n.svc",
+          "Port": 80
+        }
+      ]
     }
   ],
   "SwaggerEndPoints": [
@@ -559,6 +573,26 @@
           "Name": "Master API",
           "Version": "v1.2",
           "Url": "http://master-multi-subject-production.fsel-multi-subject-prod-n.svc/swagger/v1.2/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "master-auth",
+      "Config": [
+        {
+          "Name": "MasterAuth API",
+          "Version": "v1",
+          "Url": "http://master-auth-multi-subject-production.fsel-multi-subject-prod-n.svc/swagger/v1/swagger.json"
+        },
+        {
+          "Name": "MasterAuth API",
+          "Version": "v1.1",
+          "Url": "http://master-auth-multi-subject-production.fsel-multi-subject-prod-n.svc/swagger/v1.1/swagger.json"
+        },
+        {
+          "Name": "MasterAuth API",
+          "Version": "v1.2",
+          "Url": "http://master-auth-multi-subject-production.fsel-multi-subject-prod-n.svc/swagger/v1.2/swagger.json"
         }
       ]
     }
