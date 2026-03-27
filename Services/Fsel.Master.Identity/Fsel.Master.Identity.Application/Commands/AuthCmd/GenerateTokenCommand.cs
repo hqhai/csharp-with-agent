@@ -123,6 +123,7 @@ namespace Fsel.Master.Identity.Application.Commands.AuthCmd
                 FullName = user.FullName,
                 Roles = userRoles.ToList(),
                 Code = user.Code,
+                Status = user.Status,
             };
 
             methodResult.Result = tokenLogin;
