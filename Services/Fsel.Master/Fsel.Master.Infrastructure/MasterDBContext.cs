@@ -93,6 +93,13 @@ namespace Fsel.Master.Infrastructure
                         .Property(x => x.Feature)
                         .HasConversion<string>();
 
+            modelBuilder.Entity<DimLocation>(entity =>
+            {
+                entity.ToTable("Dim_Location");
+                entity.ToTable(tb => tb.ExcludeFromMigrations());
+            });
+
+            base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<PlacementTest>()
                         .Property(x => x.Status)
                         .HasConversion<string>();
@@ -112,8 +119,7 @@ namespace Fsel.Master.Infrastructure
         public DbSet<Course> Courses { get; set; }
         public DbSet<UnitResult> UnitResults { get; set; }
         public DbSet<LearningActivity> LearningActivities { get; set; }
-        public DbSet<PlacementTest> PlacementTests { get; set; }
-        public DbSet<Skill> Skills { get; set; }
+        public DbSet<DimLocation> DimLocations { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
