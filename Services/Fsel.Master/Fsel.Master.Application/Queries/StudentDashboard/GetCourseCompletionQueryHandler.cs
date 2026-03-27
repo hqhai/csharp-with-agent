@@ -108,6 +108,8 @@ namespace Fsel.Master.Application.Queries.StudentDashboard
                                      {
                                          StudentId = x.cr.StudentId,
                                          FullName = x.s.FullName,
+                                         Email = x.s.Email,
+                                         PhoneNumber = x.s.Phone,
                                          SchoolName = x.s.SchoolName,
                                          ProvinceName = x.s.ProvinceName,
                                          CourseName = x.course != null ? x.course.CourseName : null,
