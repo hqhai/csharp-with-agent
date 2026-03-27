@@ -344,6 +344,28 @@ build-multi-subject-testing-master:
     refs:
     - testing-multiple-subject
 
+build-multi-subject-testing-masterauth:
+  stage: build-multi-subject-testing
+  tags:
+  - docker-runner
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u $DOCKER_USER -p $DOCKER_PASS
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/masterauth
+    DOCKERFILE: "./Environments/Testing/MasterAuth.Testing.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.Master.Identity/**/*
+    - Services/Shared/**/*
+    refs:
+    - testing-multiple-subject
+
 build-multi-subject-testing-notification:
   stage: build-multi-subject-testing
   tags:
@@ -828,24 +850,3 @@ build-multi-subject-prod-exam-practice-lms:
     refs:
     - main-multiple-subject
 
-build-multi-subject-testing-masterauth:
-  stage: build-multi-subject-testing
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
-    - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/masterauth
-    DOCKERFILE: "./Environments/Testing/MasterAuth.Testing.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Master.Identity/**/*
-    - Services/Shared/**/*
-    refs:
-    - testing-multiple-subject
