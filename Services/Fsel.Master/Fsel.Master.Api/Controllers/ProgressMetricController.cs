@@ -113,5 +113,19 @@ namespace Fsel.Master.Api.Controllers
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        [HttpPost("export-goal-overall")]
+        [ProducesResponseType(typeof(MethodResult<byte[]>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ExportGoalOverall([FromQuery] ExportGoalOverallQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            if (!queryResult.IsOK || queryResult.Result == null)
+            {
+                return queryResult.GetActionResult();
+            }
+            var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+            return File(queryResult.Result, Settings.Excels.ContentType, $"export_goal_overall_{currentDate.Day}_{currentDate.Month}.xlsx");
+        }
     }
 }
