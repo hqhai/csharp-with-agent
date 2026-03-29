@@ -1,0 +1,7 @@
+{
+  "model": "claude-3-5-sonnet",
+  "effortLevel": "high",
+  "permissions": {
+    "allow": ["read", "write", "exec", "git", "list"]
+  }
+}
