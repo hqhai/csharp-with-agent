@@ -29,3 +29,6 @@
 3) Implement
 4) Test
 5) Report results + risks
+
+# Local Skills
+- skills/dotnet-design-patterns (use for pattern selection + structure)
