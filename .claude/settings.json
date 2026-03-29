@@ -3,5 +3,18 @@
   "effortLevel": "high",
   "permissions": {
     "allow": ["read", "write", "exec", "git", "list"]
+  },
+  "hooks": {
+    "TaskCompleted": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "dotnet test Tests/Fsel.Course/Fsel.Course.Lms.Application.Test/Fsel.Course.Lms.Application.Test.csproj"
+          }
+        ]
+      }
+    ]
   }
 }
