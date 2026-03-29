@@ -32,3 +32,6 @@
 
 # Local Skills
 - skills/dotnet-design-patterns (use for pattern selection + structure)
+
+# Subagents
+Project subagents live in .claude/agents for API, backend, C#, architecture, performance, security, and debugging.
