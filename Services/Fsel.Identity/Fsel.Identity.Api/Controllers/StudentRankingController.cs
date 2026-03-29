@@ -164,7 +164,7 @@ namespace Fsel.Identity.Api.Controllers
         /// <summary>
         /// Form Register Student For Event
         /// </summary>
-        [HttpPost("form-register-student-for-event")]
+        [HttpPost("landing-page/register")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> FormRegisterStudentForEvent([FromBody] FormRegisterStudentForEventCommand command)

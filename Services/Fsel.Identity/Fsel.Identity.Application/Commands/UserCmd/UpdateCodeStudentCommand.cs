@@ -90,11 +90,11 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             user.Student.SchoolId = request.SchoolId;
             if (request.SchoolId.HasValue)
             {
-                var schoolResults = await _systemService.GetSchoolByIds(new List<Guid> { request.SchoolId.Value });
-                if (schoolResults.IsSuccessStatusCode)
-                {
-                    user.Student.School = schoolResults.Content?.Result?.FirstOrDefault()?.Name;
-                }
+                //var schoolResults = await _systemService.GetSchoolByIds(new List<Guid> { request.SchoolId.Value });
+                //if (schoolResults.IsSuccessStatusCode)
+                //{
+                //    user.Student.School = schoolResults.Content?.Result?.FirstOrDefault()?.Name;
+                //}
             }
             else if (!string.IsNullOrEmpty(request.SchoolName))
             {
