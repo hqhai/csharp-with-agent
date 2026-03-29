@@ -120,6 +120,8 @@ namespace Fsel.Master.Infrastructure
         public DbSet<UnitResult> UnitResults { get; set; }
         public DbSet<LearningActivity> LearningActivities { get; set; }
         public DbSet<DimLocation> DimLocations { get; set; }
+        public DbSet<PlacementTest> PlacementTests { get; set; }
+        public DbSet<Skill> Skills { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
