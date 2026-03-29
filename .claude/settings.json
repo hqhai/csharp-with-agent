@@ -5,13 +5,24 @@
     "allow": ["read", "write", "exec", "git", "list"]
   },
   "hooks": {
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -Command \"Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.MessageBox]::Show('Claude Code needs your input','Claude Code')\""
+          }
+        ]
+      }
+    ],
     "TaskCompleted": [
       {
         "matcher": "",
         "hooks": [
           {
             "type": "command",
-            "command": "dotnet test Tests/Fsel.Course/Fsel.Course.Lms.Application.Test/Fsel.Course.Lms.Application.Test.csproj"
+            "command": "powershell -Command \"try { dotnet format } catch {}\""
           }
         ]
       }
