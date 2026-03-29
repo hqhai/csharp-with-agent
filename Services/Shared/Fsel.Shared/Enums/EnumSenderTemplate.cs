@@ -34,6 +34,7 @@ namespace Fsel.Shared.Enums
         MailRegisterForEventPhenikaa,
         MailRegisterForEventThaiNguyen,
         CreateAccountFromCRM,
+        MailRegisterFromLandingPage,
 
         #region event
 
